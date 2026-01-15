@@ -1,0 +1,7 @@
+{
+  "name": "God Cares 365",
+  "description": "A comprehensive spiritual growth platform taking users from discovery to missionary leadership using AI-guided biblical insights.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}
