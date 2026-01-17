@@ -29,16 +29,31 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p ~/.ssh
-          echo "${{ secrets.VPS_SSH_KEY_B64 }}" | base64 -d > ~/.ssh/id_ed25519
+          chmod 700 ~/.ssh
+
+          # Decode base64 SSH private key safely (handles Windows CRLF)
+          printf '%s' "${{ secrets.VPS_SSH_KEY_B64 }}" | tr -d '\r' | base64 -d > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
+
+          # Add host key to known_hosts (avoid interactive prompt)
           ssh-keyscan -H "${{ secrets.VPS_HOST }}" >> ~/.ssh/known_hosts
+
+      - name: SSH smoke test
+        shell: bash
+        run: |
+          set -euo pipefail
+          ssh -i ~/.ssh/id_ed25519 \
+            -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes \
+            "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" \
+            "whoami && hostname"
 
       - name: Upload build to VPS (rsync)
         shell: bash
         run: |
           set -euo pipefail
           rsync -az --delete \
-            -e "ssh -i ~/.ssh/id_ed25519" \
+            -e "ssh -i ~/.ssh/id_ed25519 -o BatchMode=yes -o StrictHostKeyChecking=yes" \
             dist/ \
             "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/var/www/godcares365/"
 
@@ -46,6 +61,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          ssh -i ~/.ssh/id_ed25519 "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" '
-            sudo nginx -t && sudo systemctl reload nginx
-          '
+          ssh -i ~/.ssh/id_ed25519 \
+            -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes \
+            "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" \
+            "nginx -t && systemctl reload nginx"
