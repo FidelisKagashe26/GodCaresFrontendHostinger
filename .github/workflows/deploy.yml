@@ -31,12 +31,13 @@ jobs:
           mkdir -p ~/.ssh
           chmod 700 ~/.ssh
 
-          # Decode base64 SSH private key safely (handles Windows CRLF)
+          # Decode base64 SSH private key (handles Windows CRLF)
           printf '%s' "${{ secrets.VPS_SSH_KEY_B64 }}" | tr -d '\r' | base64 -d > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
 
-          # Add host key to known_hosts (avoid interactive prompt)
+          # Add host key to known_hosts
           ssh-keyscan -H "${{ secrets.VPS_HOST }}" >> ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/known_hosts
 
       - name: SSH smoke test
         shell: bash
@@ -48,14 +49,45 @@ jobs:
             "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" \
             "whoami && hostname"
 
-      - name: Upload build to VPS (rsync)
+      - name: Package build (dist)
         shell: bash
         run: |
           set -euo pipefail
-          rsync -az --delete \
-            -e "ssh -i ~/.ssh/id_ed25519 -o BatchMode=yes -o StrictHostKeyChecking=yes" \
-            dist/ \
-            "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/var/www/godcares365/"
+          test -d dist
+          tar -C dist -czf dist.tar.gz .
+
+      - name: Upload build to VPS (scp + tar)
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          # Upload tarball to /tmp
+          scp -i ~/.ssh/id_ed25519 \
+            -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes \
+            dist.tar.gz \
+            "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/tmp/dist.tar.gz"
+
+          # Extract into web root (clean deploy)
+          ssh -i ~/.ssh/id_ed25519 \
+            -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes \
+            "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" \
+            'set -euo pipefail
+             mkdir -p /var/www/godcares365
+
+             # extract to temp folder first
+             rm -rf /var/www/godcares365/.deploy_tmp
+             mkdir -p /var/www/godcares365/.deploy_tmp
+             tar -xzf /tmp/dist.tar.gz -C /var/www/godcares365/.deploy_tmp
+             rm -f /tmp/dist.tar.gz
+
+             # replace contents
+             rm -rf /var/www/godcares365/*
+             shopt -s dotglob
+             mv /var/www/godcares365/.deploy_tmp/* /var/www/godcares365/
+             rm -rf /var/www/godcares365/.deploy_tmp
+            '
 
       - name: Reload Nginx
         shell: bash
