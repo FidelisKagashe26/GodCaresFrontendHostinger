@@ -191,21 +191,18 @@ const App: React.FC = () => {
       <div className="relative z-10 flex h-screen overflow-hidden">
         <main className="flex-1 flex flex-col relative w-full h-full bg-white/30 dark:bg-slate-900/30 backdrop-blur-xl">
           {!isImmersive && (
-            <header className="fixed top-0 left-0 right-0 h-24 px-8 flex items-center justify-between z-[50] bg-white/80 dark:bg-[#020617]/80 backdrop-blur-xl border-b border-slate-200 dark:border-white/5">
+            <header className="fixed top-0 left-0 right-0 h-20 px-8 flex items-center justify-between z-[50] bg-white/80 dark:bg-[#020617]/80 backdrop-blur-xl border-b border-slate-200 dark:border-white/5">
               <div className="flex items-center gap-4">
                 <button onClick={() => setIsMenuOpen(true)} className="p-3.5 text-slate-900 dark:text-white bg-white/90 dark:bg-black/40 hover:bg-white dark:hover:bg-black/60 backdrop-blur-md rounded-full transition-all border border-slate-200 dark:border-white/10 shadow-xl group">
                   <Menu size={22} className="group-hover:text-gold-500 transition-colors" />
                 </button>
-                <div onClick={() => handleStageChange(StageId.HOME)} className="hidden md:flex items-center gap-3 bg-white/90 dark:bg-black/40 backdrop-blur-md px-5 py-2.5 rounded-full border border-slate-200 dark:border-white/10 shadow-lg cursor-pointer group hover:scale-105 transition-all">
-                  <div className="w-7 h-7 bg-gold-500 rounded-lg flex items-center justify-center text-primary-950">
-                    <Cross size={16} />
-                  </div>
-                  <span className="text-sm font-black text-slate-900 dark:text-white tracking-tight uppercase">God Cares 365</span>
+                <div onClick={() => handleStageChange(StageId.HOME)} className="hidden md:flex items-center cursor-pointer group hover:scale-105 transition-all">
+                  <img src="/Logo.png" alt="God Cares 365" className="h-24 w-auto" />
                 </div>
               </div>
 
               <div className="flex items-center gap-3">
-                 <button onClick={() => setIsLanguageOpen(!isLanguageOpen)} className="p-3.5 rounded-full bg-white/90 dark:bg-black/40 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-white transition-all shadow-xl hover:bg-gold-400/10"><Languages size={18} /></button>
+                 {/* <button onClick={() => setIsLanguageOpen(!isLanguageOpen)} className="p-3.5 rounded-full bg-white/90 dark:bg-black/40 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-white transition-all shadow-xl hover:bg-gold-400/10"><Languages size={18} /></button> */}
                  <button onClick={() => setIsThemeOpen(!isThemeOpen)} className="p-3.5 rounded-full bg-white/90 dark:bg-black/40 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-white transition-all shadow-xl hover:bg-gold-400/10">{theme === 'light' ? <Sun size={18} /> : theme === 'dark' ? <Moon size={18} /> : <Monitor size={18} />}</button>
                  <button onClick={() => setIsNotificationOpen(!isNotificationOpen)} className={`relative p-3.5 rounded-full backdrop-blur-md border transition-all shadow-xl ${isNotificationOpen ? 'bg-gold-500 text-slate-900 border-gold-400' : 'bg-white/90 dark:bg-black/40 border-slate-200 dark:border-white/10 text-slate-700 dark:text-white'}`}><Bell size={18} />{unreadCount > 0 && <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-red-500 rounded-full"></span>}</button>
                  {!user && (
@@ -217,7 +214,7 @@ const App: React.FC = () => {
 
           <div 
             ref={mainContentRef}
-            className="flex-1 overflow-y-auto scroll-smooth scrollbar-hide pt-24"
+            className="flex-1 overflow-y-auto scroll-smooth scrollbar-hide pt-20"
           >
             {renderContent()}
             {!isImmersive && <Footer onNavigate={handleStageChange} />}

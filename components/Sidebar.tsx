@@ -336,16 +336,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   return (
     <div className={`fixed inset-0 z-[200] bg-slate-50/80 dark:bg-[#020617]/70 backdrop-blur-2xl flex flex-col transition-all duration-700 ease-in-out ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
-      <div className="relative z-10 flex items-center justify-between p-6 md:p-8 border-b border-slate-200/20 dark:border-white/5 bg-white/20 dark:bg-black/10 backdrop-blur-md">
-        <div onClick={() => { onStageChange(StageId.HOME); onClose(); }} className="flex items-center gap-4 cursor-pointer group">
-           <div className="w-10 h-10 bg-gold-500 rounded-xl flex items-center justify-center text-primary-950 shadow-lg group-hover:scale-105 transition-transform">
-              <Cross size={22} />
-           </div>
-           <div>
-             <h2 className="text-xl font-black text-slate-900 dark:text-white tracking-tighter uppercase leading-none">
-               GOD CARES <span className="text-gold-500">365</span>
-             </h2>
-           </div>
+      <div className="relative z-10 flex items-center justify-between p-4 md:p-6 border-b border-slate-200/20 dark:border-white/5 bg-white/20 dark:bg-black/10 backdrop-blur-md h-20">
+        <div onClick={() => { onStageChange(StageId.HOME); onClose(); }} className="flex items-center cursor-pointer group">
+           <img src="/Logo.png" alt="God Cares 365" className="h-24 w-auto group-hover:scale-105 transition-transform" />
         </div>
         <button onClick={onClose} className="p-3 bg-white/10 hover:bg-red-500/20 dark:hover:bg-red-500/30 text-slate-600 dark:text-slate-400 hover:text-red-500 transition-all rounded-xl border border-transparent hover:border-red-500/20">
           <X size={24} />
