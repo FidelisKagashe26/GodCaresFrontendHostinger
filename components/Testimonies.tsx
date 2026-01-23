@@ -1,11 +1,12 @@
 
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { 
   MessageSquareQuote, CheckCircle, User, Star, Plus, Send, 
   Heart, Sparkles, PlayCircle, Share2, ThumbsUp, Flame, 
   MapPin, Quote, ShieldCheck, X, Camera, Video, Users,
   ListVideo, FileText, ChevronRight, Play
 } from 'lucide-react';
+import { getTestimonies, submitTestimony } from '../services/testimonyService';
 
 interface Testimony {
   id: number;
@@ -67,20 +68,70 @@ export const Testimonies: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'All' | 'Video' | 'Text'>('All');
   const [showForm, setShowForm] = useState(false);
   const [isSent, setIsSent] = useState(false);
-  const [formData, setFormData] = useState({ name: '', story: '', location: '', type: 'text' as 'text' | 'video' });
+  const [formData, setFormData] = useState({ name: '', story: '', location: '', type: 'text' as 'text' | 'video', videoUrl: '', category: 'Conversion' as 'Miracle' | 'Conversion' | 'Healing' });
+  const [testimonies, setTestimonies] = useState<Testimony[]>(INITIAL_TESTIMONIES);
+  const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
-  const filtered = INITIAL_TESTIMONIES.filter(t => 
-    activeTab === 'All' ? true : t.type.toLowerCase() === activeTab.toLowerCase()
-  );
+  const filtered = useMemo(() => (
+    testimonies.filter(t =>
+      activeTab === 'All' ? true : t.type.toLowerCase() === activeTab.toLowerCase()
+    )
+  ), [testimonies, activeTab]);
 
-  const handleSendToTeam = (e: React.FormEvent) => {
+  useEffect(() => {
+    const loadTestimonies = async () => {
+      setLoading(true);
+      setErrorMessage('');
+      try {
+        const data = await getTestimonies();
+        if (data.length) {
+          const mapped: Testimony[] = data.map(item => ({
+            id: item.id,
+            name: item.name,
+            location: item.location,
+            story: item.story,
+            verified: item.verified,
+            stars: item.stars,
+            date: new Date(item.created_at).toLocaleDateString(),
+            type: item.testimony_type,
+            category: item.category,
+            thumbnail: item.thumbnail,
+            videoUrl: item.video_url,
+            reactions: item.reactions,
+          }));
+          setTestimonies(mapped);
+        }
+      } catch (error) {
+        setErrorMessage('Imeshindikana kupakua shuhuda.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadTestimonies();
+  }, []);
+
+  const handleSendToTeam = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSent(true);
-    setTimeout(() => {
-      setIsSent(false);
-      setShowForm(false);
-      setFormData({ name: '', story: '', location: '', type: 'text' });
-    }, 3000);
+    try {
+      await submitTestimony({
+        name: formData.name,
+        location: formData.location,
+        story: formData.story,
+        testimony_type: formData.type,
+        video_url: formData.type === 'video' ? formData.videoUrl : undefined,
+        category: formData.category,
+      });
+      setIsSent(true);
+      setTimeout(() => {
+        setIsSent(false);
+        setShowForm(false);
+        setFormData({ name: '', story: '', location: '', type: 'text', videoUrl: '', category: 'Conversion' });
+      }, 3000);
+    } catch (error) {
+      setErrorMessage('Imeshindikana kutuma shuhuda.');
+    }
   };
 
   return (
@@ -132,6 +183,14 @@ export const Testimonies: React.FC = () => {
       </div>
 
       {/* 3. CONTENT FEED */}
+      {errorMessage && (
+        <div className="bg-red-500/10 border border-red-500/20 text-red-500 text-[10px] font-bold uppercase tracking-widest px-4 py-2 rounded-lg">
+          {errorMessage}
+        </div>
+      )}
+      {loading && (
+        <div className="text-xs uppercase tracking-widest text-slate-400 font-black">Inapakia shuhuda...</div>
+      )}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
         {filtered.map((t) => (
           <div key={t.id} className="group bg-white dark:bg-slate-900 rounded-xl border border-slate-100 dark:border-white/5 overflow-hidden transition-all duration-500 hover:shadow-2xl flex flex-col h-full">
@@ -255,6 +314,22 @@ export const Testimonies: React.FC = () => {
                             <Video size={16}/> Video Link
                          </button>
                       </div>
+                   </div>
+
+                   {formData.type === 'video' && (
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Link ya Video</label>
+                      <input type="url" value={formData.videoUrl} onChange={e => setFormData({...formData, videoUrl: e.target.value})} className="w-full px-5 py-4 bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl outline-none text-sm font-bold text-slate-900 dark:text-white focus:border-gold-500 transition-all" placeholder="https://youtube.com/..." />
+                    </div>
+                   )}
+
+                   <div className="space-y-2">
+                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Kategoria</label>
+                     <select value={formData.category} onChange={e => setFormData({...formData, category: e.target.value as any})} className="w-full px-5 py-4 bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl outline-none text-sm font-bold text-slate-900 dark:text-white focus:border-gold-500 transition-all">
+                      <option value="Conversion">Mabadiliko ya Maisha</option>
+                      <option value="Miracle">Muujiza</option>
+                      <option value="Healing">Uponyaji</option>
+                     </select>
                    </div>
 
                    <div className="space-y-2">

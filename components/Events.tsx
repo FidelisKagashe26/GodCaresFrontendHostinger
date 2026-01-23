@@ -1,11 +1,12 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { 
   Calendar, MapPin, CheckCircle, Clock, 
   Users, Filter, Sparkles, ChevronRight, 
   X, Download, Bell, Share2, AlertCircle,
   FileText, Play, User, ArrowRight, Info, Star
 } from 'lucide-react';
+import { EventApi, getEvents, registerForEvent } from '../services/eventService';
 
 interface EventResource {
   name: string;
@@ -35,56 +36,7 @@ interface Event {
   resources: EventResource[];
 }
 
-const INITIAL_EVENTS: Event[] = [
-  {
-    id: '1',
-    title: 'Global Mission Summit 2025',
-    date: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000 + 43200000),
-    location: 'Dar es Salaam / Live Stream',
-    image: 'https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&q=80&w=1200',
-    description: 'Mkutano mkuu wa wamisionari wa kidijitali Afrika Mashariki. Lengo ni kuwapa vifaa na mbinu za kisasa vijana na wahubiri kutumia mitandao ya kijamii kufikisha injili ya milele kwa kila lugha na kabila.',
-    type: 'Virtual',
-    category: 'Summit',
-    attendees: 1240,
-    maxAttendees: 5000,
-    speakers: [
-      { name: 'Pr. John Mark', role: 'Mkurugenzi wa Misheni', img: 'https://i.pravatar.cc/150?u=1', bio: 'Mtaalamu wa teolojia na uongozi wa misheni kwa miaka 20.' },
-      { name: 'Sarah J.', role: 'Digital Strategist', img: 'https://i.pravatar.cc/150?u=2', bio: 'Mtaalamu wa mawasiliano ya digitali na uinjilisti wa mitandao.' }
-    ],
-    resources: [
-      { name: 'Mkakati wa Digitali 2025', type: 'PDF', url: '#' },
-      { name: 'Intro Video', type: 'Video', url: '#' }
-    ]
-  },
-  {
-    id: '2',
-    title: 'Unabii: Danieli na Ufunuo',
-    date: new Date(Date.now() + 12 * 24 * 60 * 60 * 1000),
-    location: 'Arusha Convention Centre',
-    image: 'https://images.unsplash.com/photo-1478737270239-2f02b77fc618?auto=format&fit=crop&q=80&w=1200',
-    description: 'Uchambuzi wa kina wa unabii wa Biblia kwa kutumia ushahidi wa kihistoria na akiolojia. Somo hili litaangazia sanamu ya Danieli 2 na wanyama wanne wa Danieli 7 kuelekea marejeo ya mara ya pili ya Kristo.',
-    type: 'Physical',
-    category: 'Seminar',
-    attendees: 450,
-    maxAttendees: 500,
-    speakers: [{ name: 'Dr. David E.', role: 'Mtaalamu wa Akiolojia', img: 'https://i.pravatar.cc/150?u=3', bio: 'Mchunguzi wa mabaki ya kale ya Biblia Mashariki ya Kati.' }],
-    resources: [{ name: 'Ramani ya Unabii', type: 'PDF', url: '#' }]
-  },
-  {
-    id: '3',
-    title: 'Mwanza Revival Week',
-    date: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000),
-    location: 'Rock City Grounds',
-    image: 'https://images.unsplash.com/photo-1504052434569-70ad5836ab65?auto=format&fit=crop&q=80&w=1200',
-    description: 'Wiki ya uamsho wa kiroho na ubatizo mkubwa. Tutakuwa na vipindi vya maombi, nyimbo za sifa, na mafundisho ya neno la Mungu yanayolenga kurejesha upendo wa kwanza kwa Kristo.',
-    type: 'Physical',
-    category: 'Revival',
-    attendees: 1950,
-    maxAttendees: 2000,
-    speakers: [{ name: 'Ev. Peter Malisa', role: 'Mwinjilisti wa Kimataifa', img: 'https://i.pravatar.cc/150?u=4', bio: 'Amezunguka nchi nyingi akitangaza ujumbe wa malaika watatu.' }],
-    resources: [{ name: 'Nyimbo za Sifa', type: 'Link', url: '#' }]
-  }
-];
+const INITIAL_EVENTS: Event[] = [];
 
 const CountdownTimer: React.FC<{ targetDate: Date }> = ({ targetDate }) => {
   const [timeLeft, setTimeLeft] = useState({ d: 0, h: 0, m: 0, s: 0 });
@@ -125,31 +77,79 @@ export const Events: React.FC = () => {
   const [registeredIds, setRegisteredIds] = useState<string[]>([]);
   const [filter, setFilter] = useState<'All' | 'Virtual' | 'Physical'>('All');
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
+  const [events, setEvents] = useState<Event[]>(INITIAL_EVENTS);
+  const [eventsError, setEventsError] = useState('');
+  const [loadingEvents, setLoadingEvents] = useState(false);
 
-  const upcomingEvent = INITIAL_EVENTS.reduce((prev, curr) => 
-    (curr.date.getTime() < prev.date.getTime() && curr.date.getTime() > Date.now()) ? curr : prev
-  , INITIAL_EVENTS[0]);
+  useEffect(() => {
+    const loadEvents = async () => {
+      setLoadingEvents(true);
+      setEventsError('');
+      try {
+        const data = await getEvents();
+        const mapped = data.map((item): Event => ({
+          id: String(item.id),
+          title: item.title,
+          date: new Date(item.starts_at),
+          location: item.location,
+          image: item.image,
+          description: item.description,
+          type: item.event_type,
+          category: item.category,
+          attendees: item.attendees,
+          maxAttendees: item.max_attendees,
+          speakers: item.speakers || [],
+          resources: item.resources || [],
+        }));
+        setEvents(mapped);
+      } catch (error) {
+        setEventsError('Imeshindikana kupata matukio.');
+      } finally {
+        setLoadingEvents(false);
+      }
+    };
 
-  const filtered = INITIAL_EVENTS.filter(e => filter === 'All' || e.type === filter);
+    loadEvents();
+  }, []);
 
-  const handleRegister = (e: React.MouseEvent, id: string) => {
+  const upcomingEvent = useMemo(() => {
+    if (!events.length) return null;
+    return events.reduce((prev, curr) =>
+      (curr.date.getTime() < prev.date.getTime() && curr.date.getTime() > Date.now()) ? curr : prev
+    , events[0]);
+  }, [events]);
+
+  const filtered = events.filter(e => filter === 'All' || e.type === filter);
+
+  const handleRegister = async (e: React.MouseEvent, id: string) => {
     e.stopPropagation();
     if (!registeredIds.includes(id)) {
-      setRegisteredIds([...registeredIds, id]);
-      // Link to notification system simulation
-      const ev = INITIAL_EVENTS.find(event => event.id === id);
-      alert(`Imekamilika! Tukio la "${ev?.title}" limeongezwa kwenye ratiba yako na utapata taarifa (Notification) saa 24 kabla.`);
+      const ev = events.find(event => event.id === id);
+      if (!ev) return;
+      try {
+        await registerForEvent(Number(id), { name: 'Mgeni', email: 'guest@local' });
+        setRegisteredIds([...registeredIds, id]);
+        alert(`Imekamilika! Tukio la "${ev?.title}" limeongezwa kwenye ratiba yako na utapata taarifa (Notification) saa 24 kabla.`);
+      } catch (error) {
+        alert('Imeshindikana kusajili.');
+      }
     }
   };
 
   return (
     <div className="max-w-7xl mx-auto space-y-12 animate-fade-in pb-32">
+      {eventsError && (
+        <div className="bg-red-500/10 border border-red-500/20 text-red-500 text-[10px] font-bold uppercase tracking-widest px-4 py-2 rounded-lg">
+          {eventsError}
+        </div>
+      )}
       
       {/* 1. UPCOMING HIGHLIGHT - Minimum Bevel */}
-      <section 
-        onClick={() => setSelectedEvent(upcomingEvent)}
-        className="relative bg-slate-900 rounded-sm p-8 md:p-12 text-white overflow-hidden border border-white/5 cursor-pointer group hover:border-gold-500/30 transition-all shadow-xl"
-      >
+      {upcomingEvent && (
+        <section 
+          onClick={() => setSelectedEvent(upcomingEvent)}
+          className="relative bg-slate-900 rounded-sm p-8 md:p-12 text-white overflow-hidden border border-white/5 cursor-pointer group hover:border-gold-500/30 transition-all shadow-xl"
+        >
         <div className="absolute top-0 right-0 w-full h-full">
            <img src={upcomingEvent.image} className="w-full h-full object-cover opacity-20 grayscale group-hover:grayscale-0 transition-all duration-1000" alt="" />
            <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/60 to-transparent"></div>
@@ -160,20 +160,21 @@ export const Events: React.FC = () => {
               <div className="inline-flex items-center gap-2 px-3 py-1 bg-gold-500 text-primary-950 rounded-sm text-[9px] font-black uppercase tracking-widest">
                  <Star size={12} fill="currentColor" /> UPCOMING_EVENT_URGENT
               </div>
-              <h2 className="text-3xl md:text-5xl font-black tracking-tighter uppercase leading-tight">{upcomingEvent.title}</h2>
+                <h2 className="text-3xl md:text-5xl font-black tracking-tighter uppercase leading-tight">{upcomingEvent.title}</h2>
               <div className="flex items-center gap-4 text-slate-400 text-xs font-bold uppercase tracking-widest">
-                 <div className="flex items-center gap-2 text-gold-400"><Calendar size={14}/> {upcomingEvent.date.toLocaleDateString()}</div>
+                  <div className="flex items-center gap-2 text-gold-400"><Calendar size={14}/> {upcomingEvent.date.toLocaleDateString()}</div>
                  <div className="flex items-center gap-2"><MapPin size={14}/> {upcomingEvent.location}</div>
               </div>
            </div>
            
            <div className="bg-white/5 backdrop-blur-md p-6 rounded-sm border border-white/10 space-y-4">
               <p className="text-[9px] font-black text-slate-500 uppercase tracking-[0.3em] text-center">Countdown kwa Event</p>
-              <CountdownTimer targetDate={upcomingEvent.date} />
+                <CountdownTimer targetDate={upcomingEvent.date} />
               <button className="w-full py-3 bg-white text-primary-950 rounded-sm font-black text-[10px] uppercase tracking-widest hover:bg-gold-500 transition-all shadow-lg">Maelezo Kamili</button>
            </div>
         </div>
-      </section>
+          </section>
+          )}
 
       {/* 2. FILTERS */}
       <div className="flex items-center justify-between border-b border-slate-200 dark:border-white/5 pb-4">
@@ -196,6 +197,9 @@ export const Events: React.FC = () => {
 
       {/* 3. EVENTS GRID - Minimum Bevel */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {loadingEvents && (
+          <div className="col-span-full bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-50 dark:border-white/5 text-slate-400 text-xs uppercase tracking-widest font-black">Inapakia matukio...</div>
+        )}
         {filtered.map(event => (
           <div 
             key={event.id}

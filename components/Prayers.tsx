@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { 
   Heart, Send, BookOpen, Users, CheckCircle2, Clock, 
   Share2, X, Lock, ShieldCheck, MessageSquare, 
@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { GoogleGenAI } from "@google/genai";
 import { LanguageCode } from '../types';
+import { getPublicPrayers, submitPrayer } from '../services/prayerService';
 
 interface PrayerRequest {
   id: string;
@@ -40,6 +41,49 @@ export const Prayers: React.FC<Props> = ({ aiLanguage = 'en' }) => {
   const [showAiModal, setShowAiModal] = useState(false);
   const [aiPrayer, setAiPrayer] = useState('');
   const [submitted, setSubmitted] = useState(false);
+   const [publicRequests, setPublicRequests] = useState<PrayerRequest[]>(PUBLIC_REQUESTS);
+   const [isLoadingWall, setIsLoadingWall] = useState(false);
+   const [wallError, setWallError] = useState('');
+
+   const formatTimeAgo = (isoDate: string) => {
+      const created = new Date(isoDate).getTime();
+      const diff = Math.max(0, Date.now() - created);
+      const minutes = Math.floor(diff / 60000);
+      if (minutes < 1) return 'Hivi punde';
+      if (minutes < 60) return `${minutes} dk`; 
+      const hours = Math.floor(minutes / 60);
+      if (hours < 24) return `${hours} saa`; 
+      const days = Math.floor(hours / 24);
+      return `${days} siku`;
+   };
+
+   const mappedWall = useMemo(() => publicRequests, [publicRequests]);
+
+   useEffect(() => {
+      const loadWall = async () => {
+         setIsLoadingWall(true);
+         setWallError('');
+         try {
+            const data = await getPublicPrayers();
+            const mapped = data.map((item) => ({
+               id: String(item.id),
+               name: item.name || 'Mgeni',
+               category: item.category || 'Maombi',
+               request: item.request,
+               prayingCount: item.praying_count,
+               timeAgo: formatTimeAgo(item.created_at),
+            }));
+            setPublicRequests(mapped.length ? mapped : PUBLIC_REQUESTS);
+         } catch (error) {
+            setWallError('Imeshindikana kupakua maombi ya umma.');
+            setPublicRequests(PUBLIC_REQUESTS);
+         } finally {
+            setIsLoadingWall(false);
+         }
+      };
+
+      loadWall();
+   }, []);
 
   const handleGeneratePrayer = async () => {
     if (!request.trim()) return;
@@ -60,14 +104,36 @@ export const Prayers: React.FC<Props> = ({ aiLanguage = 'en' }) => {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitted(true);
-    setTimeout(() => {
-      setSubmitted(false);
-      setRequest('');
-      setIsPublic(false);
-    }, 4000);
+      try {
+         setSubmitted(true);
+         const created = await submitPrayer({
+            name: 'Mgeni',
+            request,
+            is_public: isPublic,
+            category: 'Maombi',
+         });
+         if (isPublic) {
+            const newEntry: PrayerRequest = {
+               id: String(created.id),
+               name: created.name || 'Mgeni',
+               category: created.category || 'Maombi',
+               request: created.request,
+               prayingCount: created.praying_count,
+               timeAgo: formatTimeAgo(created.created_at),
+            };
+            setPublicRequests((prev) => [newEntry, ...prev]);
+         }
+         setTimeout(() => {
+            setSubmitted(false);
+            setRequest('');
+            setIsPublic(false);
+         }, 3500);
+      } catch (error) {
+         setSubmitted(false);
+         setWallError('Imeshindikana kutuma ombi. Jaribu tena.');
+      }
   };
 
   return (
@@ -183,9 +249,18 @@ export const Prayers: React.FC<Props> = ({ aiLanguage = 'en' }) => {
               </button>
            </div>
 
-           <div className="space-y-4">
-              {activeTab === 'wall' ? (
-                PUBLIC_REQUESTS.map((req) => (
+                <div className="space-y-4">
+                     {activeTab === 'wall' ? (
+                        <>
+                           {isLoadingWall && (
+                              <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-50 dark:border-white/5 text-slate-400 text-xs uppercase tracking-widest font-black">Inapakia...</div>
+                           )}
+                           {wallError && (
+                              <div className="bg-red-500/10 border border-red-500/20 text-red-500 text-[10px] font-bold uppercase tracking-widest px-4 py-2 rounded-lg">
+                                 {wallError}
+                              </div>
+                           )}
+                           {mappedWall.map((req) => (
                   <div key={req.id} className="bg-white dark:bg-slate-900 p-8 rounded-2xl border border-slate-50 dark:border-white/5 shadow-sm group hover:border-gold-500/20 transition-all">
                      <div className="flex justify-between items-start mb-6">
                         <div className="flex items-center gap-4">
@@ -199,7 +274,8 @@ export const Prayers: React.FC<Props> = ({ aiLanguage = 'en' }) => {
                      </div>
                      <p className="text-slate-600 dark:text-slate-300 text-sm leading-relaxed italic font-medium">"{req.request}"</p>
                   </div>
-                ))
+                           ))}
+                        </>
               ) : (
                 ANSWERED_PRAYERS.map((ans) => (
                   <div key={ans.id} className="bg-green-500/5 dark:bg-green-500/10 p-8 rounded-2xl border border-green-500/20 shadow-sm relative overflow-hidden group">

@@ -1,10 +1,11 @@
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { 
   ShoppingCart, Star, Truck, CheckCircle2, ChevronRight, Search, 
   Filter, ShoppingBag, Heart, ArrowUpRight, X, Minus, Plus, 
   CreditCard, Smartphone, ShieldCheck, MapPin, Package, Clock, Eye
 } from 'lucide-react';
+import { getShopProducts, trackShopOrder } from '../services/shopService';
 
 interface Product {
   id: number;
@@ -98,6 +99,11 @@ export const Shop: React.FC = () => {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [orderStep, setOrderStep] = useState<'Detail' | 'Checkout' | 'Success'>('Detail');
   const [trackingId, setTrackingId] = useState('');
+  const [trackingResult, setTrackingResult] = useState<any | null>(null);
+  const [trackingError, setTrackingError] = useState<string | null>(null);
+  const [products, setProducts] = useState<Product[]>(PRODUCTS);
+  const [loadingProducts, setLoadingProducts] = useState(false);
+  const [productsError, setProductsError] = useState<string | null>(null);
   const [orderQuantity, setOrderQuantity] = useState(1);
   const [selectedColor, setSelectedColor] = useState('');
 
@@ -124,6 +130,53 @@ export const Shop: React.FC = () => {
     setOrderStep('Success');
   };
 
+  useEffect(() => {
+    const loadProducts = async () => {
+      setLoadingProducts(true);
+      setProductsError(null);
+      try {
+        const data = await getShopProducts();
+        const mapped = data.map((item) => ({
+          id: item.id,
+          title: item.title,
+          price: item.price,
+          originalPrice: item.original_price,
+          image: item.image || 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&q=80&w=800',
+          category: item.category || 'Zote',
+          rating: Number(item.rating || 5),
+          reviews: item.reviews || 0,
+          sold: item.sold || 0,
+          isChoice: item.is_choice,
+          freeShipping: item.free_shipping,
+          description: item.description || '',
+          colors: item.colors?.length ? item.colors : ['Standard'],
+          specs: item.specs?.length ? item.specs : [],
+        }));
+        if (mapped.length > 0) {
+          setProducts(mapped);
+        }
+      } catch (err: any) {
+        setProductsError(err?.message || 'Imeshindikana kupata bidhaa.');
+      } finally {
+        setLoadingProducts(false);
+      }
+    };
+
+    loadProducts();
+  }, []);
+
+  const handleTrackOrder = async () => {
+    if (!trackingId) return;
+    setTrackingError(null);
+    setTrackingResult(null);
+    try {
+      const result = await trackShopOrder(trackingId.trim());
+      setTrackingResult(result);
+    } catch (err: any) {
+      setTrackingError(err?.message || 'Imeshindikana kupata oda.');
+    }
+  };
+
   const OrderTrackingView = () => (
     <div className="max-w-2xl mx-auto space-y-8 py-12 animate-fade-in">
       <div className="bg-white dark:bg-slate-900 p-8 rounded-2xl border border-slate-200 dark:border-white/10 shadow-xl space-y-6">
@@ -140,38 +193,36 @@ export const Shop: React.FC = () => {
              placeholder="Mfano: GC-99238-TZ"
              className="flex-1 px-4 py-4 bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl outline-none font-mono text-sm focus:border-gold-500"
            />
-           <button className="bg-primary-950 text-gold-400 px-8 py-4 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-gold-500 hover:text-primary-950 transition-all">Tafuta</button>
+            <button onClick={handleTrackOrder} className="bg-primary-950 text-gold-400 px-8 py-4 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-gold-500 hover:text-primary-950 transition-all">Tafuta</button>
         </div>
       </div>
 
-      {trackingId === 'GC-TEST' && (
+        {trackingError && (
+          <div className="text-center text-xs font-black uppercase tracking-widest text-red-500">{trackingError}</div>
+        )}
+
+        {trackingResult && (
         <div className="space-y-4 animate-slide-up">
            <div className="p-6 bg-green-500/10 border border-green-500/20 rounded-xl flex items-center justify-between">
               <div className="flex items-center gap-3">
                  <div className="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center text-white"><CheckCircle2 size={20}/></div>
                  <div>
                     <p className="text-[10px] font-black uppercase text-green-600">Hali ya Sasa</p>
-                    <p className="font-bold text-slate-800 dark:text-white">Mzigo uko njiani (In Transit)</p>
+                  <p className="font-bold text-slate-800 dark:text-white">{trackingResult.status}</p>
                  </div>
               </div>
-              <p className="text-xs font-bold text-slate-400">Oda: #GC-TEST</p>
+              <p className="text-xs font-bold text-slate-400">Oda: #{trackingResult.tracking_code}</p>
            </div>
            
            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 rounded-2xl p-8 shadow-sm">
-              {[
-                { label: 'Oda Imepokelewa', date: 'Okt 24, 10:00 AM', done: true },
-                { label: 'Imethibitishwa na Kuratibiwa', date: 'Okt 24, 02:30 PM', done: true },
-                { label: 'Mzigo Umetoka Stoo', date: 'Okt 25, 09:15 AM', done: true },
-                { label: 'Inaletwa Kwako', date: 'Inatabiriwa: Leo', done: false },
-              ].map((step, i) => (
+              {trackingResult.items.map((step: any, i: number) => (
                 <div key={i} className="flex gap-4 relative pb-8 last:pb-0">
-                  {i < 3 && <div className="absolute left-[11px] top-6 bottom-0 w-[2px] bg-slate-100 dark:bg-white/5"></div>}
-                  <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 z-10 ${step.done ? 'bg-gold-500 border-gold-500 text-primary-950' : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-white/10'}`}>
-                    {step.done ? <CheckCircle2 size={12} /> : <Clock size={10} />}
+                  <div className="w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 z-10 bg-gold-500 border-gold-500 text-primary-950">
+                    <CheckCircle2 size={12} />
                   </div>
                   <div>
-                    <p className={`text-sm font-black uppercase ${step.done ? 'text-slate-800 dark:text-white' : 'text-slate-400'}`}>{step.label}</p>
-                    <p className="text-[10px] text-slate-500">{step.date}</p>
+                    <p className="text-sm font-black uppercase text-slate-800 dark:text-white">{step.title}</p>
+                    <p className="text-[10px] text-slate-500">Kiasi: {formatPrice(step.line_total)}</p>
                   </div>
                 </div>
               ))}
@@ -231,8 +282,14 @@ export const Shop: React.FC = () => {
           </div>
 
           {/* Product Discovery Grid - Compact sizes */}
+          {loadingProducts && (
+            <div className="py-4 text-center text-xs font-black uppercase tracking-widest text-slate-400">Inapakia bidhaa...</div>
+          )}
+          {productsError && (
+            <div className="py-2 text-center text-xs font-black uppercase tracking-widest text-red-500">{productsError}</div>
+          )}
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-8 pt-8">
-            {PRODUCTS.filter(p => activeCategory === 'Zote' || p.category === activeCategory).map((product) => (
+            {products.filter(p => activeCategory === 'Zote' || p.category === activeCategory).map((product) => (
               <div 
                 key={product.id}
                 onClick={() => { setSelectedProduct(product); setOrderStep('Detail'); setOrderQuantity(1); setSelectedColor(product.colors[0]); }}

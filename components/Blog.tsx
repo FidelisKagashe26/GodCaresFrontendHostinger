@@ -1,6 +1,7 @@
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Heart, MessageCircle, Share2, User, Clock, Bookmark, Search } from 'lucide-react';
+import { getBlogPost, getBlogPosts } from '../services/blogService';
 
 interface BlogPost {
   id: number;
@@ -68,17 +69,74 @@ const BLOG_POSTS: BlogPost[] = [
 
 export const Blog: React.FC = () => {
   const [activePost, setActivePost] = useState<number | null>(null);
-  const [likes, setLikes] = useState<Record<number, number>>(
-    BLOG_POSTS.reduce((acc, post) => ({ ...acc, [post.id]: post.likes }), {})
-  );
+   const [posts, setPosts] = useState<BlogPost[]>(BLOG_POSTS);
+   const [likes, setLikes] = useState<Record<number, number>>(
+      BLOG_POSTS.reduce((acc, post) => ({ ...acc, [post.id]: post.likes }), {})
+   );
+   const [loading, setLoading] = useState(false);
+   const [errorMessage, setErrorMessage] = useState('');
+   const [detail, setDetail] = useState<string | null>(null);
+
+   const mapPost = (post: any): BlogPost => ({
+      id: post.id,
+      title: post.title,
+      excerpt: post.excerpt,
+      author: post.author,
+      date: new Date(post.published_at).toLocaleDateString(),
+      readTime: post.read_time || '5 min read',
+      likes: post.likes || 0,
+      comments: post.comments || 0,
+      image: post.image,
+      tags: post.tags || [],
+   });
+
+   useEffect(() => {
+      const loadPosts = async () => {
+         setLoading(true);
+         setErrorMessage('');
+         try {
+            const data = await getBlogPosts();
+            if (data.length) {
+               const mapped = data.map(mapPost);
+               setPosts(mapped);
+               setLikes(mapped.reduce((acc, post) => ({ ...acc, [post.id]: post.likes }), {}));
+            }
+         } catch (error) {
+            setErrorMessage('Imeshindikana kupakua makala.');
+         } finally {
+            setLoading(false);
+         }
+      };
+
+      loadPosts();
+   }, []);
 
   const handleLike = (id: number) => {
     setLikes(prev => ({ ...prev, [id]: prev[id] + 1 }));
   };
 
-  if (activePost) {
-    const post = BLOG_POSTS.find(p => p.id === activePost);
-    if (!post) return null;
+   useEffect(() => {
+      const loadDetail = async () => {
+         if (!activePost) {
+            setDetail(null);
+            return;
+         }
+         const post = posts.find(p => p.id === activePost);
+         if (!post) return;
+         try {
+            const data = await getBlogPost(post.id);
+            setDetail(data.content || data.excerpt);
+         } catch (error) {
+            setDetail(post.excerpt);
+         }
+      };
+
+      loadDetail();
+   }, [activePost, posts]);
+
+   if (activePost) {
+      const post = posts.find(p => p.id === activePost);
+      if (!post) return null;
 
     return (
       <div className="max-w-3xl mx-auto bg-white min-h-screen text-slate-900 pb-20 animate-fade-in">
@@ -107,20 +165,11 @@ export const Blog: React.FC = () => {
 
           <img src={post.image} className="w-full h-96 object-cover rounded-xl mb-10" alt={post.title} />
 
-          <div className="prose prose-lg prose-slate max-w-none">
-             <p className="font-serif text-xl leading-relaxed text-slate-700">
-               {post.excerpt} {post.excerpt} {post.excerpt}
-             </p>
-             <p>
-               Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. 
-               Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-             </p>
-             <h3>Umuhimu wa Jambo Hili</h3>
-             <p>
-               Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. 
-               Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-             </p>
-          </div>
+               <div className="prose prose-lg prose-slate max-w-none">
+                   <p className="font-serif text-xl leading-relaxed text-slate-700">
+                      {detail || post.excerpt}
+                   </p>
+               </div>
 
           <div className="mt-12 pt-8 border-t border-slate-100 flex items-center gap-8">
              <button onClick={() => handleLike(post.id)} className="flex items-center gap-2 text-slate-500 hover:text-red-500 transition-colors">
@@ -154,7 +203,15 @@ export const Blog: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-12 p-8 md:p-12">
          {/* Main Feed */}
          <div className="md:col-span-2 space-y-12">
-            {BLOG_POSTS.map(post => (
+                  {loading && (
+                     <div className="text-xs uppercase tracking-widest text-slate-400 font-black">Inapakia makala...</div>
+                  )}
+                  {errorMessage && (
+                     <div className="bg-red-500/10 border border-red-500/20 text-red-500 text-[10px] font-bold uppercase tracking-widest px-4 py-2 rounded-lg">
+                        {errorMessage}
+                     </div>
+                  )}
+                  {posts.map(post => (
                <div key={post.id} className="flex flex-col md:flex-row gap-6 group cursor-pointer" onClick={() => setActivePost(post.id)}>
                   <div className="flex-1 space-y-3">
                      <div className="flex items-center gap-2 text-xs font-bold text-slate-500">
@@ -171,7 +228,9 @@ export const Blog: React.FC = () => {
                            <span>{post.date}</span>
                            <span>·</span>
                            <span>{post.readTime}</span>
-                           <span className="px-2 py-1 bg-slate-100 rounded-full text-slate-600">{post.tags[0]}</span>
+                                        {post.tags?.[0] && (
+                                           <span className="px-2 py-1 bg-slate-100 rounded-full text-slate-600">{post.tags[0]}</span>
+                                        )}
                         </div>
                         <Bookmark size={16} className="text-slate-400 hover:text-slate-800" />
                      </div>

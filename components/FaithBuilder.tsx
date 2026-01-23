@@ -1,10 +1,11 @@
 
-import React, { useState, useMemo, useRef } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { 
   ArrowRight, BookOpen, ShieldCheck, Quote, 
   ChevronRight, ChevronLeft, Sparkles, Sword, 
   Play, GraduationCap, X, Video, Monitor, PlayCircle, Shield, Share2
 } from 'lucide-react';
+import { getFaithHeroes } from '../services/faithService';
 
 interface HeroProfile {
   id: string;
@@ -92,10 +93,47 @@ export const FaithBuilder: React.FC = () => {
   const [activeCategory, setActiveCategory] = useState('Zote');
   const [showVideoInModal, setShowVideoInModal] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [heroes, setHeroes] = useState<HeroProfile[]>(HEROES);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    const loadHeroes = async () => {
+      setLoading(true);
+      setError('');
+      try {
+        const data = await getFaithHeroes();
+        const mapped: HeroProfile[] = data.map((hero) => ({
+          id: String(hero.id),
+          name: hero.name,
+          title: hero.title,
+          challenge: hero.challenge,
+          faithAction: hero.faith_action,
+          swahiliQuote: hero.swahili_quote,
+          verse: hero.verse,
+          image: hero.image || 'https://images.unsplash.com/photo-1509248961158-e54f6934749c?auto=format&fit=crop&q=80&w=800',
+          story: hero.story,
+          lesson: hero.lesson,
+          period: hero.period,
+          category: hero.category,
+          videoUrl: hero.video_url || 'https://www.youtube.com/embed/dQw4w9WgXcQ',
+        }));
+        if (mapped.length > 0) {
+          setHeroes(mapped);
+        }
+      } catch (err: any) {
+        setError(err?.message || 'Imeshindikana kupata mashujaa wa imani.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadHeroes();
+  }, []);
 
   const filteredHeroes = useMemo(() => {
-    return HEROES.filter(h => activeCategory === 'Zote' || h.category === activeCategory);
-  }, [activeCategory]);
+    return heroes.filter(h => activeCategory === 'Zote' || h.category === activeCategory);
+  }, [activeCategory, heroes]);
 
   const scroll = (direction: 'left' | 'right') => {
     if (scrollRef.current) {
@@ -129,7 +167,7 @@ export const FaithBuilder: React.FC = () => {
     }
   };
 
-  const currentHero = HEROES.find(h => h.id === activeHero);
+  const currentHero = heroes.find(h => h.id === activeHero);
 
   return (
     <div className="animate-fade-in pb-40 max-w-full mx-auto space-y-8 overflow-hidden">
@@ -173,6 +211,13 @@ export const FaithBuilder: React.FC = () => {
             ))}
          </div>
       </section>
+
+      {loading && (
+        <div className="text-center text-xs font-black uppercase tracking-widest text-slate-400">Inapakia mashujaa...</div>
+      )}
+      {error && (
+        <div className="text-center text-xs font-black uppercase tracking-widest text-red-500">{error}</div>
+      )}
 
       {/* 3. HORIZONTAL SCROLL SECTION */}
       <section className="relative px-4 md:px-20 group min-h-[350px]">

@@ -1,11 +1,12 @@
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { 
   Play, Globe, Users, ArrowRight, Film, Mic2, Tv, 
   Clock, Star, PlayCircle, MoreVertical, Share2, 
   ThumbsUp, MessageSquare, Bell, Search, Filter, X, 
   ListVideo, ChevronLeft, Layout
 } from 'lucide-react';
+import { getMediaPlaylists } from '../services/mediaService';
 
 interface Video {
   id: string;
@@ -14,6 +15,7 @@ interface Video {
   duration: string;
   views: string;
   postedAt: string;
+  embedUrl: string;
 }
 
 interface Playlist {
@@ -70,10 +72,49 @@ export const MediaProjects: React.FC = () => {
   const [activeCategory, setActiveCategory] = useState('Zote');
   const [selectedPlaylist, setSelectedPlaylist] = useState<Playlist | null>(null);
   const [playingVideo, setPlayingVideo] = useState<Video | null>(null);
+  const [playlists, setPlaylists] = useState<Playlist[]>(PLAYLISTS);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const categories = ['Zote', 'Unabii', 'Afya', 'Shuhuda', 'Elimu'];
 
-  const filteredPlaylists = PLAYLISTS.filter(p => activeCategory === 'Zote' || p.category === activeCategory);
+  useEffect(() => {
+    const loadPlaylists = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const data = await getMediaPlaylists();
+        const mapped: Playlist[] = data.map((playlist) => ({
+          id: String(playlist.id),
+          title: playlist.title,
+          category: playlist.category || 'General',
+          description: playlist.description || '',
+          thumbnail: playlist.thumbnail || 'https://images.unsplash.com/photo-1478737270239-2f02b77fc618?q=80&w=800',
+          videoCount: playlist.video_count ?? playlist.videos.length,
+          videos: playlist.videos.map((video) => ({
+            id: String(video.id),
+            title: video.title,
+            thumbnail: video.thumbnail || 'https://images.unsplash.com/photo-1478737270239-2f02b77fc618?q=80&w=800',
+            duration: video.duration || '00:00',
+            views: video.views || '0',
+            postedAt: video.posted_at || '',
+            embedUrl: video.embed_url,
+          })),
+        }));
+        if (mapped.length > 0) {
+          setPlaylists(mapped);
+        }
+      } catch (err: any) {
+        setError(err?.message || 'Imeshindikana kupata playlists.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadPlaylists();
+  }, []);
+
+  const filteredPlaylists = playlists.filter(p => activeCategory === 'Zote' || p.category === activeCategory);
 
   if (selectedPlaylist) {
     return (
@@ -90,7 +131,7 @@ export const MediaProjects: React.FC = () => {
               {playingVideo ? (
                 <div className="space-y-6 animate-fade-in">
                    <div className="aspect-video bg-black rounded-2xl overflow-hidden shadow-2xl relative">
-                      <iframe src={`https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1`} className="w-full h-full border-none" allowFullScreen></iframe>
+                     <iframe src={`${playingVideo.embedUrl}?autoplay=1`} className="w-full h-full border-none" allowFullScreen></iframe>
                    </div>
                    <div className="space-y-2">
                       <h1 className="text-2xl font-black leading-tight text-slate-900 dark:text-white">{playingVideo.title}</h1>
@@ -165,6 +206,13 @@ export const MediaProjects: React.FC = () => {
               ))}
            </div>
         </section>
+
+        {loading && (
+          <div className="py-4 text-center text-xs font-black uppercase tracking-widest text-slate-400">Inapakia playlists...</div>
+        )}
+        {error && (
+          <div className="py-2 text-center text-xs font-black uppercase tracking-widest text-red-500">{error}</div>
+        )}
         
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
           {filteredPlaylists.map((playlist) => (

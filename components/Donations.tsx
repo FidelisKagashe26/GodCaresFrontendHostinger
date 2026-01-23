@@ -1,11 +1,12 @@
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { 
   Heart, CreditCard, Gift, ShieldCheck, Cross, 
   Smartphone, Globe, BookOpen, Radio, Users, 
   ArrowRight, CheckCircle2, PieChart, TrendingUp, Info, X, 
   Sparkles, Shield, LayoutGrid, CircleDollarSign
 } from 'lucide-react';
+import { getDonationProjects, submitDonation } from '../services/donationService';
 
 interface Project {
   id: string;
@@ -17,35 +18,7 @@ interface Project {
   icon: React.ReactNode;
 }
 
-const PROJECTS: Project[] = [
-  {
-    id: 'p1',
-    title: 'Tafsiri ya Pambano Kuu',
-    description: 'Kutafsiri na kuchapa nakala 5,000 za kitabu cha Pambano Kuu kwa lugha ya Kiswahili fasaha.',
-    image: 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&q=80&w=800',
-    goal: 15000000,
-    raised: 4500000,
-    icon: <BookOpen size={18} />
-  },
-  {
-    id: 'p2',
-    title: 'Digital Missionary Hub',
-    description: 'Kununua vifaa vya kurekodia (Kamera na Mic) kwa ajili ya vijana 20 wanaojitolea kuhubiri mitandaoni.',
-    image: 'https://images.unsplash.com/photo-1478737270239-2f02b77fc618?auto=format&fit=crop&q=80&w=800',
-    goal: 8000000,
-    raised: 6200000,
-    icon: <Radio size={18} />
-  },
-  {
-    id: 'p3',
-    title: 'Msaada wa Jamii & Afya',
-    description: 'Kutoa huduma za afya ya asili na chakula kwa familia duni zinazohitaji msaada wakati wa uinjilisti.',
-    image: 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&q=80&w=800',
-    goal: 5000000,
-    raised: 1200000,
-    icon: <Users size={18} />
-  }
-];
+const PROJECTS: Project[] = [];
 
 export const Donations: React.FC = () => {
   const [donationType, setDonationType] = useState<'general' | 'project'>('general');
@@ -54,6 +27,10 @@ export const Donations: React.FC = () => {
   const [paymentMethod, setPaymentMethod] = useState<'mobile' | 'card'>('mobile');
   const [isProcessing, setIsProcessing] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [projects, setProjects] = useState<Project[]>(PROJECTS);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [donorName, setDonorName] = useState('');
+  const [donorEmail, setDonorEmail] = useState('');
 
   const formatTZS = (val: number) => {
     return new Intl.NumberFormat('en-TZ', {
@@ -63,12 +40,53 @@ export const Donations: React.FC = () => {
     }).format(val).replace('TZS', 'TSh');
   };
 
-  const handleDonate = () => {
+  useEffect(() => {
+    const loadProjects = async () => {
+      try {
+        const data = await getDonationProjects();
+        const mapped: Project[] = data.map((project, index) => ({
+          id: String(project.id),
+          title: project.title,
+          description: project.description,
+          image: project.image,
+          goal: project.goal,
+          raised: project.raised,
+          icon: index % 3 === 0 ? <BookOpen size={18} /> : index % 3 === 1 ? <Radio size={18} /> : <Users size={18} />,
+        }));
+        setProjects(mapped);
+        if (!selectedProject && mapped.length) {
+          setSelectedProject(mapped[0].id);
+        }
+      } catch (error) {
+        setErrorMessage('Imeshindikana kupata miradi.');
+      }
+    };
+
+    loadProjects();
+  }, []);
+
+  const handleDonate = async () => {
     setIsProcessing(true);
-    setTimeout(() => {
-      setIsProcessing(false);
+    setErrorMessage('');
+    try {
+      await submitDonation({
+        project: donationType === 'project' && selectedProject ? Number(selectedProject) : null,
+        donor_name: donorName || undefined,
+        donor_email: donorEmail || undefined,
+        amount,
+        payment_method: paymentMethod,
+      });
       setShowSuccess(true);
-    }, 2000);
+      if (donationType === 'project' && selectedProject) {
+        setProjects(prev => prev.map(p => p.id === selectedProject ? { ...p, raised: p.raised + amount } : p));
+      }
+      setDonorName('');
+      setDonorEmail('');
+    } catch (error) {
+      setErrorMessage('Imeshindikana kutuma sadaka.');
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   const handleProjectSelect = (id: string) => {
@@ -109,7 +127,7 @@ export const Donations: React.FC = () => {
           </div>
 
           <div className={`space-y-4 transition-all duration-500 ${donationType === 'general' ? 'opacity-60 grayscale' : 'opacity-100'}`}>
-             {PROJECTS.map((project) => (
+             {projects.map((project) => (
                <div 
                  key={project.id}
                  onClick={() => handleProjectSelect(project.id)}
@@ -174,7 +192,7 @@ export const Donations: React.FC = () => {
                     <CircleDollarSign size={14} /> Sadaka ya Kawaida
                  </button>
                  <button 
-                   onClick={() => { setDonationType('project'); if(!selectedProject) setSelectedProject(PROJECTS[0].id); }}
+                   onClick={() => { setDonationType('project'); if(!selectedProject && projects.length) setSelectedProject(projects[0].id); }}
                    className={`flex-1 py-3 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2 ${donationType === 'project' ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-md' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
                  >
                     <LayoutGrid size={14} /> Kupitia Mradi
@@ -183,13 +201,30 @@ export const Donations: React.FC = () => {
 
               <div className="space-y-2 text-center">
                  <h3 className="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">
-                    {donationType === 'general' ? 'Mfuko wa Huduma' : selectedProject ? PROJECTS.find(p => p.id === selectedProject)?.title : 'Chagua Mradi'}
+                    {donationType === 'general' ? 'Mfuko wa Huduma' : selectedProject ? projects.find(p => p.id === selectedProject)?.title : 'Chagua Mradi'}
                  </h3>
                  <div className="h-0.5 w-12 bg-gold-500 mx-auto"></div>
-                 <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 pt-2">
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 pt-2">
                     {donationType === 'general' ? 'Sadaka yako inasaidia uendeshaji wa huduma kwa ujumla.' : 'Sadaka yako itaenda moja kwa moja kwenye mradi huu.'}
-                 </p>
+                  </p>
               </div>
+
+                {errorMessage && (
+                 <div className="bg-red-500/10 border border-red-500/20 text-red-500 text-[10px] font-bold uppercase tracking-widest px-4 py-2 rounded-lg">
+                  {errorMessage}
+                 </div>
+                )}
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Jina (Hiari)</label>
+                    <input value={donorName} onChange={(e) => setDonorName(e.target.value)} className="w-full px-4 py-3 bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl outline-none text-sm font-bold text-slate-900 dark:text-white focus:border-gold-500 transition-all" placeholder="Mtoa Sadaka" />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Email (Hiari)</label>
+                    <input type="email" value={donorEmail} onChange={(e) => setDonorEmail(e.target.value)} className="w-full px-4 py-3 bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl outline-none text-sm font-bold text-slate-900 dark:text-white focus:border-gold-500 transition-all" placeholder="email@mfano.com" />
+                  </div>
+                </div>
 
               {/* Amount Selection */}
               <div className="space-y-4">

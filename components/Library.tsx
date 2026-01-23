@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { 
   FileText, Download, PlayCircle, BookOpen, Headphones, 
   Video, Search, Filter, Sparkles, ChevronRight, 
@@ -7,9 +7,10 @@ import {
   ExternalLink, Play, Eye, FileDigit, X, ArrowLeft, Maximize2,
   Volume2, Music, Pause, ChevronLeft, Share2, FolderHeart, LayoutGrid
 } from 'lucide-react';
+import { getLibraryItems } from '../services/libraryService';
 
 interface LibraryItem {
-  id: string;
+  id: number | string;
   type: 'PDF' | 'Audio' | 'Video' | 'Image';
   title: string;
   swahiliTitle: string;
@@ -37,8 +38,42 @@ export const Library: React.FC = () => {
   const [search, setSearch] = useState('');
   const [viewingItem, setViewingItem] = useState<LibraryItem | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [items, setItems] = useState<LibraryItem[]>(LIBRARY_DATA);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const filteredItems = LIBRARY_DATA.filter(item => {
+  useEffect(() => {
+    const loadItems = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const data = await getLibraryItems();
+        const mapped = data.map((item) => ({
+          id: item.id,
+          type: item.type,
+          title: item.title,
+          swahiliTitle: item.swahili_title || item.title,
+          description: item.description || '',
+          sizeOrDuration: item.size_or_duration || '',
+          image: item.image || 'https://images.unsplash.com/photo-1504052434569-70ad5836ab65?auto=format&fit=crop&q=80&w=800',
+          category: item.category || 'General',
+          contentUrl: item.content_url || undefined,
+          albumName: item.album_name || undefined,
+        }));
+        if (mapped.length > 0) {
+          setItems(mapped);
+        }
+      } catch (err: any) {
+        setError(err?.message || 'Imeshindikana kupata maktaba.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadItems();
+  }, []);
+
+  const filteredItems = items.filter(item => {
     const matchesTab = activeTab === 'Zote' || item.type === activeTab;
     const matchesSearch = item.title.toLowerCase().includes(search.toLowerCase()) || 
                           item.swahiliTitle.toLowerCase().includes(search.toLowerCase());
@@ -59,6 +94,25 @@ export const Library: React.FC = () => {
           <div className="flex gap-2">
             <button onClick={() => setViewingItem(item)} className="flex items-center gap-2 px-4 py-2 bg-primary-900 text-gold-400 rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-gold-500 hover:text-primary-950 transition-all"><BookOpen size={14} /> Soma</button>
             <button className="p-2 bg-slate-50 dark:bg-white/5 text-slate-400 rounded-lg hover:text-slate-900 dark:hover:text-white transition-all"><Download size={14} /></button>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+
+  const renderAudioList = (items: LibraryItem[]) => (
+    <div className="space-y-3">
+      {items.map(item => (
+        <div key={item.id} className="flex items-center gap-4 bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-100 dark:border-white/5 hover:border-gold-500/50 transition-all group">
+          <div className="w-12 h-12 rounded-lg bg-blue-50 dark:bg-blue-500/10 flex items-center justify-center text-blue-500 shrink-0">
+            <Headphones size={24} />
+          </div>
+          <div className="flex-1 min-w-0">
+            <h4 className="text-sm font-bold text-slate-900 dark:text-white truncate">{item.title}</h4>
+            <p className="text-[10px] text-slate-500 font-medium uppercase tracking-widest">{item.swahiliTitle} • {item.sizeOrDuration || 'Audio'}</p>
+          </div>
+          <div className="flex gap-2">
+            <button onClick={() => setViewingItem(item)} className="flex items-center gap-2 px-4 py-2 bg-primary-900 text-gold-400 rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-gold-500 hover:text-primary-950 transition-all"><Play size={14} /> Sikiliza</button>
           </div>
         </div>
       ))}
@@ -162,6 +216,12 @@ export const Library: React.FC = () => {
 
       {/* Main Content Area */}
       <div className="space-y-12">
+        {loading && (
+          <div className="py-10 text-center text-xs font-black uppercase tracking-widest text-slate-400">Inapakia maktaba...</div>
+        )}
+        {error && (
+          <div className="py-4 text-center text-xs font-black uppercase tracking-widest text-red-500">{error}</div>
+        )}
         {(activeTab === 'Zote' || activeTab === 'PDF') && filteredItems.filter(i => i.type === 'PDF').length > 0 && (
           <section className="space-y-6">
             <div className="flex items-center gap-2 px-1 text-red-500"><FileDigit size={20}/><h3 className="text-xs font-black uppercase tracking-[0.3em]">Nyaraka na Vitabu (PDF)</h3></div>
@@ -176,6 +236,13 @@ export const Library: React.FC = () => {
           </section>
         )}
 
+        {(activeTab === 'Zote' || activeTab === 'Audio') && filteredItems.filter(i => i.type === 'Audio').length > 0 && (
+          <section className="space-y-6">
+            <div className="flex items-center gap-2 px-1 text-blue-500"><Headphones size={20}/><h3 className="text-xs font-black uppercase tracking-[0.3em]">Sauti na Masomo</h3></div>
+            {renderAudioList(filteredItems.filter(i => i.type === 'Audio'))}
+          </section>
+        )}
+
         {(activeTab === 'Zote' || activeTab === 'Image') && filteredItems.filter(i => i.type === 'Image').length > 0 && (
           <section className="space-y-6">
             <div className="flex items-center gap-2 px-1 text-emerald-500"><LayoutGrid size={20}/><h3 className="text-xs font-black uppercase tracking-[0.3em]">Gallery ya Picha na Albamu</h3></div>
@@ -183,7 +250,7 @@ export const Library: React.FC = () => {
           </section>
         )}
 
-        {filteredItems.length === 0 && (
+        {!loading && filteredItems.length === 0 && (
           <div className="py-24 text-center space-y-4 opacity-30"><Search size={48} className="mx-auto"/><p className="font-black uppercase tracking-widest text-xs">Hakuna faili iliyopatikana</p></div>
         )}
       </div>
@@ -200,8 +267,13 @@ export const Library: React.FC = () => {
                 <button onClick={() => { setViewingItem(null); setIsPlaying(false); }} className="p-3 bg-white/5 hover:bg-red-500 text-white rounded-xl transition-all"><X size={20}/></button>
              </div>
              <div className="flex-1 overflow-hidden relative bg-black flex items-center justify-center">
-                {viewingItem.type === 'PDF' && <iframe src={`${viewingItem.contentUrl}#toolbar=0`} className="w-full h-full border-none" title={viewingItem.title}></iframe>}
-                {viewingItem.type === 'Video' && <iframe src={`${viewingItem.contentUrl}?autoplay=1`} className="w-full max-w-4xl aspect-video rounded-xl" allow="autoplay; encrypted-media" allowFullScreen></iframe>}
+                {viewingItem.type === 'PDF' && viewingItem.contentUrl && <iframe src={`${viewingItem.contentUrl}#toolbar=0`} className="w-full h-full border-none" title={viewingItem.title}></iframe>}
+                {viewingItem.type === 'Video' && viewingItem.contentUrl && <iframe src={`${viewingItem.contentUrl}?autoplay=1`} className="w-full max-w-4xl aspect-video rounded-xl" allow="autoplay; encrypted-media" allowFullScreen></iframe>}
+                {viewingItem.type === 'Audio' && (
+                  <div className="w-full max-w-3xl bg-slate-900/60 p-6 rounded-2xl border border-white/10">
+                    <audio controls className="w-full" src={viewingItem.contentUrl}></audio>
+                  </div>
+                )}
                 {viewingItem.type === 'Image' && <img src={viewingItem.image} className="max-w-full max-h-full object-contain shadow-2xl" alt={viewingItem.title}/>}
              </div>
              <div className="p-6 bg-slate-900 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4">

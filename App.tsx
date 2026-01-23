@@ -30,6 +30,8 @@ import { NotificationCenter } from './components/NotificationCenter';
 import { LanguageCenter } from './components/LanguageCenter';
 import { ThemeCenter } from './components/ThemeCenter';
 import { LogOut, Sun, Moon, Languages, Menu, Bell, User, Monitor, Cross, BookOpen } from 'lucide-react';
+import { clearTokens, getCurrentUser } from './services/authService';
+import { getSystemMessages } from './services/systemMessageService';
 
 const stages: StageConfig[] = [
   { id: StageId.HOME, title: 'Nyumbani', description: 'Karibu katika mafundisho.', icon: 'home' },
@@ -71,6 +73,8 @@ const App: React.FC = () => {
     { id: '2', title: 'Mkutano Unakuja', message: 'Mwanza Revival Week inaanza hivi punde. Gusa hapa kuona ratiba.', type: 'event' as any, timestamp: '10m ago', read: false }
   ]);
 
+  const [resetParams, setResetParams] = useState<{ uid: string; token: string } | null>(null);
+
   const [aiLanguage, setAiLanguage] = useState<LanguageCode>('en');
   const [theme, setTheme] = useState<ThemePreference>('dark');
 
@@ -79,6 +83,53 @@ const App: React.FC = () => {
     if (savedUser) setUser(JSON.parse(savedUser));
     const savedTheme = localStorage.getItem('gc365_theme') as ThemePreference;
     setTheme(savedTheme || 'dark');
+
+    const bootstrapUser = async () => {
+      try {
+        const currentUser = await getCurrentUser();
+        setUser(currentUser);
+        localStorage.setItem('gc365_user', JSON.stringify(currentUser));
+      } catch (error) {
+        clearTokens();
+        localStorage.removeItem('gc365_user');
+      }
+    };
+
+    if (localStorage.getItem('gc365_access_token')) {
+      bootstrapUser();
+    }
+  }, []);
+
+  useEffect(() => {
+    const loadMessages = async () => {
+      try {
+        const messages = await getSystemMessages();
+        if (messages.length === 0) return;
+        const mapped: ToastNotification[] = messages.map((msg) => ({
+          id: String(msg.id),
+          title: msg.title,
+          message: msg.body,
+          type: msg.level === 'success' ? 'success' : msg.level === 'warning' ? 'error' : 'info',
+          timestamp: new Date(msg.created_at).toLocaleDateString(),
+          read: false,
+        }));
+        setCenterNotifications(mapped);
+      } catch (error) {
+        // Keep default notifications when API is unavailable.
+      }
+    };
+
+    loadMessages();
+  }, []);
+
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    const uid = url.searchParams.get('uid');
+    const token = url.searchParams.get('token');
+    if (url.pathname.includes('/reset-password') && uid && token) {
+      setResetParams({ uid, token });
+      setShowAuthModal(true);
+    }
   }, []);
 
   useEffect(() => {
@@ -105,6 +156,7 @@ const App: React.FC = () => {
   const handleLogout = () => {
     setUser(null);
     localStorage.removeItem('gc365_user');
+    clearTokens();
     setCurrentStage(StageId.HOME);
     setIsMenuOpen(false);
     setShowProfileModal(false);
@@ -178,7 +230,23 @@ const App: React.FC = () => {
         <EvidenceTool onGoToVault={() => handleStageChange(StageId.EVIDENCE)} />
       </div>
 
-      {showAuthModal && <Auth onLogin={handleLogin} onClose={() => setShowAuthModal(false)} />}
+      {showAuthModal && (
+        <Auth
+          onLogin={handleLogin}
+          onClose={() => {
+            setShowAuthModal(false);
+            if (resetParams) {
+              setResetParams(null);
+              window.history.replaceState({}, '', '/');
+            }
+          }}
+          resetParams={resetParams}
+          onResetComplete={() => {
+            setResetParams(null);
+            window.history.replaceState({}, '', '/');
+          }}
+        />
+      )}
       {showProfileModal && user && <ProfileModal user={user} onLogout={handleLogout} onClose={() => setShowProfileModal(false)} />}
 
       <Sidebar 

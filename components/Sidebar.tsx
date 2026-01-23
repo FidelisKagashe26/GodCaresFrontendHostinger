@@ -436,7 +436,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
         }
         .animate-morph-in { 
           animation: morphIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; 
-          opacity: 0; 
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .animate-morph-in { animation: none; }
         }
       `}</style>
     </div>

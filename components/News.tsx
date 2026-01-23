@@ -1,6 +1,8 @@
 
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Calendar, Tag, ChevronRight, Globe, AlertTriangle, Church, Clock, Newspaper, ArrowRight, X, Share2, Bookmark } from 'lucide-react';
+import { getNewsItems } from '../services/newsService';
+import { subscribeNewsletter } from '../services/newsletterService';
 
 interface NewsItem {
   id: number;
@@ -99,12 +101,51 @@ const NEWS_ITEMS: NewsItem[] = [
 export const News: React.FC = () => {
   const [activeCategory, setActiveCategory] = useState('All');
   const [selectedNews, setSelectedNews] = useState<NewsItem | null>(null);
-  
-  const filteredNews = activeCategory === 'All' 
-    ? NEWS_ITEMS 
-    : NEWS_ITEMS.filter(n => n.category === activeCategory);
+   const [items, setItems] = useState<NewsItem[]>(NEWS_ITEMS);
+   const [loading, setLoading] = useState(false);
+   const [errorMessage, setErrorMessage] = useState('');
+   const [email, setEmail] = useState('');
+   const [newsletterMessage, setNewsletterMessage] = useState('');
+   const categories = useMemo(() => {
+      const unique = new Set(items.map(item => item.category));
+      return ['All', ...Array.from(unique)];
+   }, [items]);
 
-  const featuredNews = NEWS_ITEMS.filter(n => n.featured);
+   useEffect(() => {
+      const loadNews = async () => {
+         setLoading(true);
+         setErrorMessage('');
+         try {
+            const data = await getNewsItems();
+            if (data.length) {
+               const mapped: NewsItem[] = data.map(item => ({
+                  id: item.id,
+                  title: item.title,
+                  date: new Date(item.published_at).toLocaleDateString(),
+                  category: item.category,
+                  image: item.image,
+                  excerpt: item.excerpt,
+                  content: item.content,
+                  author: item.author,
+                  featured: item.featured,
+               }));
+               setItems(mapped);
+            }
+         } catch (error) {
+            setErrorMessage('Imeshindikana kupakua habari.');
+         } finally {
+            setLoading(false);
+         }
+      };
+
+      loadNews();
+   }, []);
+  
+   const filteredNews = activeCategory === 'All' 
+      ? items 
+      : items.filter(n => n.category === activeCategory);
+
+   const featuredNews = items.filter(n => n.featured);
 
   return (
     <div className="space-y-12 animate-fade-in pb-20 max-w-7xl mx-auto px-4 md:px-0">
@@ -138,7 +179,7 @@ export const News: React.FC = () => {
         </div>
 
         {/* Featured Stories Carousel Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
            {featuredNews.map((news) => (
              <div 
                 key={news.id} 
@@ -173,14 +214,14 @@ export const News: React.FC = () => {
 
       {/* Main Feed Section */}
       <section className="space-y-8">
-        <div className="flex flex-wrap gap-2 border-b border-slate-200 pb-4">
+            <div className="flex flex-wrap gap-2 border-b border-slate-200 pb-4">
            <button 
              onClick={() => setActiveCategory('All')}
              className={`px-6 py-2 rounded-full font-black text-[10px] uppercase tracking-widest transition-all ${activeCategory === 'All' ? 'bg-primary-900 text-white shadow-lg' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}
            >
              All News
            </button>
-           {CATEGORIES.map(cat => (
+                {categories.filter(cat => cat !== 'All').map(cat => (
              <button 
                key={cat}
                onClick={() => setActiveCategory(cat)}
@@ -190,6 +231,15 @@ export const News: React.FC = () => {
              </button>
            ))}
         </div>
+
+            {loading && (
+               <div className="text-xs uppercase tracking-widest text-slate-400 font-black">Inapakia habari...</div>
+            )}
+            {errorMessage && (
+               <div className="bg-red-500/10 border border-red-500/20 text-red-500 text-[10px] font-bold uppercase tracking-widest px-4 py-2 rounded-lg">
+                  {errorMessage}
+               </div>
+            )}
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
            {filteredNews.map((item) => (
@@ -230,9 +280,26 @@ export const News: React.FC = () => {
                Get weekly prophetic updates and mission reports directly to your inbox. No spam, just truth.
             </p>
             <div className="flex gap-2 p-1 bg-white/10 rounded-xl border border-white/10">
-               <input type="email" placeholder="Enter your email..." className="flex-1 bg-transparent px-4 py-3 text-white text-sm outline-none placeholder:text-slate-400" />
-               <button className="bg-gold-500 text-primary-900 px-6 py-3 rounded-lg font-black text-xs uppercase tracking-widest hover:bg-white transition-all shadow-lg">Subscribe</button>
+                      <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Enter your email..." className="flex-1 bg-transparent px-4 py-3 text-white text-sm outline-none placeholder:text-slate-400" />
+                      <button
+                         onClick={async () => {
+                            setNewsletterMessage('');
+                            try {
+                               await subscribeNewsletter(email);
+                               setNewsletterMessage('Asante! Umejiunga kikamilifu.');
+                               setEmail('');
+                            } catch (error) {
+                               setNewsletterMessage('Imeshindikana kujiunga.');
+                            }
+                         }}
+                         className="bg-gold-500 text-primary-900 px-6 py-3 rounded-lg font-black text-xs uppercase tracking-widest hover:bg-white transition-all shadow-lg"
+                      >
+                         Subscribe
+                      </button>
             </div>
+                  {newsletterMessage && (
+                     <p className="text-xs font-bold uppercase tracking-widest text-gold-400">{newsletterMessage}</p>
+                  )}
          </div>
       </section>
 
