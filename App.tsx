@@ -259,7 +259,7 @@ const App: React.FC = () => {
       <div className="relative z-10 flex h-screen overflow-hidden">
         <main className="flex-1 flex flex-col relative w-full h-full bg-white/30 dark:bg-slate-900/30 backdrop-blur-xl">
           {!isImmersive && (
-            <header className="fixed top-0 left-0 right-0 h-20 px-8 flex items-center justify-between z-[50] bg-white/80 dark:bg-[#020617]/80 backdrop-blur-xl border-b border-slate-200 dark:border-white/5">
+            <header className="fixed top-0 left-0 right-0 h-20 px-6 md:px-10 flex items-center justify-between z-[50] bg-white dark:bg-slate-950 border-b border-slate-200 dark:border-white/10">
               <div className="flex items-center gap-4">
                 <button onClick={() => setIsMenuOpen(true)} className="p-3.5 text-slate-900 dark:text-white bg-white/90 dark:bg-black/40 hover:bg-white dark:hover:bg-black/60 backdrop-blur-md rounded-full transition-all border border-slate-200 dark:border-white/10 shadow-xl group">
                   <Menu size={22} className="group-hover:text-gold-500 transition-colors" />

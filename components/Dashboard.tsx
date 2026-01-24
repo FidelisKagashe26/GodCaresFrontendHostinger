@@ -48,6 +48,20 @@ const HERO_CARDS = [
   }
 ];
 
+const buildSparklinePath = (data: number[], width: number, height: number) => {
+  const max = Math.max(...data);
+  const min = Math.min(...data);
+  const range = Math.max(1, max - min);
+  const step = width / (data.length - 1);
+  return data
+    .map((value, index) => {
+      const x = index * step;
+      const y = height - ((value - min) / range) * height;
+      return `${index === 0 ? "M" : "L"} ${x.toFixed(2)} ${y.toFixed(2)}`;
+    })
+    .join(" ");
+};
+
 export const Dashboard: React.FC<DashboardProps> = ({ 
   userName = "Seeker", 
   completedStages, 
@@ -102,6 +116,15 @@ export const Dashboard: React.FC<DashboardProps> = ({
   }, []);
 
   const zoomScale = Math.max(1, 1.1 - scrollY / 5000);
+
+  const weeklyEngagement = [24, 32, 28, 46, 52, 41, 60];
+  const prayerTrend = [12, 18, 15, 21, 19, 26, 30];
+  const contentMix = [
+    { label: "Maktaba", value: 68 },
+    { label: "Video", value: 52 },
+    { label: "Mafundisho", value: 74 },
+    { label: "Habari", value: 38 }
+  ];
 
   return (
     <div className="animate-fade-in pb-20 overflow-x-hidden">
@@ -159,6 +182,141 @@ export const Dashboard: React.FC<DashboardProps> = ({
             </div>
           ))}
         </div>
+
+        <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xl p-8">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 dark:text-slate-500">Mwenendo wa Wiki</p>
+                <h3 className="text-2xl font-black text-primary-900 dark:text-white">Ushiriki wa Wanafunzi</h3>
+              </div>
+              <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-gold-500">
+                Live <span className="w-2 h-2 rounded-full bg-gold-500 animate-pulse"></span>
+              </div>
+            </div>
+            <div className="relative h-48">
+              <svg viewBox="0 0 600 200" className="w-full h-full">
+                <defs>
+                  <linearGradient id="engagementGradient" x1="0" x2="0" y1="0" y2="1">
+                    <stop offset="0%" stopColor="#f59e0b" stopOpacity="0.5" />
+                    <stop offset="100%" stopColor="#f59e0b" stopOpacity="0" />
+                  </linearGradient>
+                </defs>
+                <path
+                  d={`${buildSparklinePath(weeklyEngagement, 600, 160)} L 600 200 L 0 200 Z`}
+                  fill="url(#engagementGradient)"
+                />
+                <path
+                  d={buildSparklinePath(weeklyEngagement, 600, 160)}
+                  stroke="#f59e0b"
+                  strokeWidth="4"
+                  fill="none"
+                  strokeLinecap="round"
+                />
+              </svg>
+              <div className="absolute bottom-4 left-4 text-xs text-slate-400 dark:text-slate-500">Jumatatu - Jumapili</div>
+            </div>
+          </div>
+
+          <div className="bg-primary-900 dark:bg-slate-950 rounded-2xl border border-primary-800 dark:border-slate-800 shadow-xl p-8 text-white">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-gold-300/80">Kipimo Cha Roho</p>
+                <h3 className="text-2xl font-black">Maombi & Habari</h3>
+              </div>
+              <Shield size={18} className="text-gold-400" />
+            </div>
+            <div className="h-36">
+              <svg viewBox="0 0 300 160" className="w-full h-full">
+                <defs>
+                  <linearGradient id="prayerGradient" x1="0" x2="0" y1="0" y2="1">
+                    <stop offset="0%" stopColor="#38bdf8" stopOpacity="0.5" />
+                    <stop offset="100%" stopColor="#38bdf8" stopOpacity="0" />
+                  </linearGradient>
+                </defs>
+                <path
+                  d={`${buildSparklinePath(prayerTrend, 300, 120)} L 300 160 L 0 160 Z`}
+                  fill="url(#prayerGradient)"
+                />
+                <path
+                  d={buildSparklinePath(prayerTrend, 300, 120)}
+                  stroke="#38bdf8"
+                  strokeWidth="3"
+                  fill="none"
+                  strokeLinecap="round"
+                />
+              </svg>
+            </div>
+            <div className="grid grid-cols-2 gap-4 mt-4 text-xs uppercase tracking-widest text-slate-300">
+              <div>
+                <p className="text-[10px] text-slate-400">Maombi mapya</p>
+                <p className="text-lg font-black text-white">+38%</p>
+              </div>
+              <div>
+                <p className="text-[10px] text-slate-400">Habari leo</p>
+                <p className="text-lg font-black text-white">12</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xl p-8">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 dark:text-slate-500">Muhtasari wa Vyanzo</p>
+                <h3 className="text-2xl font-black text-primary-900 dark:text-white">Maktaba dhidi ya Media</h3>
+              </div>
+              <BookOpen size={18} className="text-gold-500" />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              {contentMix.map((item) => (
+                <div key={item.label} className="rounded-xl border border-slate-200 dark:border-slate-800 p-4">
+                  <div className="flex items-center justify-between mb-2 text-xs uppercase tracking-widest text-slate-400 dark:text-slate-500">
+                    <span>{item.label}</span>
+                    <span className="text-slate-900 dark:text-white font-black">{item.value}%</span>
+                  </div>
+                  <div className="h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-gradient-to-r from-gold-400 to-gold-600"
+                      style={{ width: `${item.value}%` }}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xl p-8">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 dark:text-slate-500">Akaunti</p>
+                <h3 className="text-2xl font-black text-primary-900 dark:text-white">Hali ya Safari</h3>
+              </div>
+              <Church size={18} className="text-gold-500" />
+            </div>
+            <div className="space-y-4">
+              {[
+                { label: "Hatua Zilizofunguliwa", value: unlockedStages.length, total: stages.length - 1 },
+                { label: "Safari Yako", value: completedStages.length, total: stages.length - 1 },
+                { label: "Tuzo Zilizopatikana", value: awards.length, total: 12 }
+              ].map((item) => (
+                <div key={item.label}>
+                  <div className="flex items-center justify-between text-xs uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-2">
+                    <span>{item.label}</span>
+                    <span className="text-slate-900 dark:text-white font-black">{item.value}/{item.total}</span>
+                  </div>
+                  <div className="h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-gradient-to-r from-primary-900 to-gold-500"
+                      style={{ width: `${Math.min(100, (item.value / item.total) * 100)}%` }}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
 
         <section className="space-y-16 text-center">
           <div className="space-y-4">
