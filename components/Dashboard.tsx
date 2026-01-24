@@ -165,11 +165,12 @@ export const Dashboard: React.FC<DashboardProps> = ({
       </section>
 
       <div className="max-w-7xl mx-auto px-6 space-y-24">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 -mt-12 relative z-30">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6 -mt-12 relative z-30">
           {[
             { icon: <Trophy size={20} />, label: "Tuzo Zako", value: awards.length },
             { icon: <CheckCircle2 size={20} />, label: "Hatua Zilizokamilika", value: completedStages.length },
-            { icon: <Activity size={20} />, label: "Lengo la Sasa", value: nextStage.title, isFull: true }
+            { icon: <Activity size={20} />, label: "Ushiriki Wiki", value: "1,284" },
+            { icon: <Shield size={20} />, label: "Maombi Leo", value: "86" }
           ].map((stat, i) => (
             <div key={i} className="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-100 dark:border-slate-800 shadow-lg flex items-center gap-6 hover:shadow-xl transition-all duration-300 group">
                <div className="text-gold-500 group-hover:scale-110 transition-transform">
@@ -177,14 +178,14 @@ export const Dashboard: React.FC<DashboardProps> = ({
                </div>
                <div>
                   <p className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-0.5">{stat.label}</p>
-                  <p className={`text-lg font-black text-primary-900 dark:text-white ${stat.isFull ? 'truncate max-w-[150px]' : ''}`}>{stat.value}</p>
+                  <p className="text-lg font-black text-primary-900 dark:text-white">{stat.value}</p>
                </div>
             </div>
           ))}
         </div>
 
-        <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xl p-8">
+        <section className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+          <div className="xl:col-span-2 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xl p-8">
             <div className="flex items-center justify-between mb-6">
               <div>
                 <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 dark:text-slate-500">Mwenendo wa Wiki</p>
@@ -218,50 +219,42 @@ export const Dashboard: React.FC<DashboardProps> = ({
             </div>
           </div>
 
-          <div className="bg-primary-900 dark:bg-slate-950 rounded-2xl border border-primary-800 dark:border-slate-800 shadow-xl p-8 text-white">
-            <div className="flex items-center justify-between mb-6">
+          <div className="bg-primary-900 dark:bg-slate-950 rounded-2xl border border-primary-800 dark:border-slate-800 shadow-xl p-8 text-white flex flex-col gap-6">
+            <div className="flex items-center justify-between">
               <div>
-                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-gold-300/80">Kipimo Cha Roho</p>
-                <h3 className="text-2xl font-black">Maombi & Habari</h3>
+                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-gold-300/80">Ramani ya Wanafunzi</p>
+                <h3 className="text-2xl font-black">Ulimwengu</h3>
               </div>
               <Shield size={18} className="text-gold-400" />
             </div>
-            <div className="h-36">
-              <svg viewBox="0 0 300 160" className="w-full h-full">
-                <defs>
-                  <linearGradient id="prayerGradient" x1="0" x2="0" y1="0" y2="1">
-                    <stop offset="0%" stopColor="#38bdf8" stopOpacity="0.5" />
-                    <stop offset="100%" stopColor="#38bdf8" stopOpacity="0" />
-                  </linearGradient>
-                </defs>
-                <path
-                  d={`${buildSparklinePath(prayerTrend, 300, 120)} L 300 160 L 0 160 Z`}
-                  fill="url(#prayerGradient)"
-                />
-                <path
-                  d={buildSparklinePath(prayerTrend, 300, 120)}
-                  stroke="#38bdf8"
-                  strokeWidth="3"
-                  fill="none"
-                  strokeLinecap="round"
-                />
+            <div className="flex-1 rounded-xl border border-white/10 bg-white/5 p-4">
+              <svg viewBox="0 0 320 160" className="w-full h-full">
+                <rect x="10" y="20" width="300" height="120" rx="14" fill="rgba(255,255,255,0.06)" />
+                <circle cx="86" cy="78" r="18" fill="rgba(234,179,8,0.45)" />
+                <circle cx="160" cy="68" r="22" fill="rgba(59,130,246,0.45)" />
+                <circle cx="240" cy="92" r="16" fill="rgba(20,184,166,0.45)" />
+                <path d="M20 120 L120 80 L200 108 L300 70" stroke="rgba(255,255,255,0.5)" strokeWidth="2" fill="none" />
               </svg>
             </div>
-            <div className="grid grid-cols-2 gap-4 mt-4 text-xs uppercase tracking-widest text-slate-300">
-              <div>
-                <p className="text-[10px] text-slate-400">Maombi mapya</p>
-                <p className="text-lg font-black text-white">+38%</p>
+            <div className="grid grid-cols-3 gap-3 text-[10px] uppercase tracking-widest text-slate-200">
+              <div className="rounded-lg border border-white/10 px-3 py-2">
+                <p className="text-slate-400">Watumiaji</p>
+                <p className="text-base font-black">2,410</p>
               </div>
-              <div>
-                <p className="text-[10px] text-slate-400">Habari leo</p>
-                <p className="text-lg font-black text-white">12</p>
+              <div className="rounded-lg border border-white/10 px-3 py-2">
+                <p className="text-slate-400">Live</p>
+                <p className="text-base font-black">128</p>
+              </div>
+              <div className="rounded-lg border border-white/10 px-3 py-2">
+                <p className="text-slate-400">Mikoa</p>
+                <p className="text-base font-black">36</p>
               </div>
             </div>
           </div>
         </section>
 
-        <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xl p-8">
+        <section className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+          <div className="xl:col-span-2 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xl p-8">
             <div className="flex items-center justify-between mb-6">
               <div>
                 <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 dark:text-slate-500">Muhtasari wa Vyanzo</p>
