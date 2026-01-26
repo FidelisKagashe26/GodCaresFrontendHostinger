@@ -12,15 +12,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>God Cares 365 - Ultimate Truth</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@300;400;500;600;700;800&family=Source+Serif+4:ital,wght@0,400;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700;800;900&family=Source+Sans+3:wght@300;400;500;600;700;800;900&family=Source+Serif+4:ital,wght@0,400;0,600;0,700;0,800;0,900;1,400;1,600&display=swap" rel="stylesheet">
     <script>
       tailwind.config = {
         darkMode: 'class',
         theme: {
           extend: {
             fontFamily: {
-              sans: ['Source Sans 3', 'sans-serif'],
-              serif: ['Source Serif 4', 'serif'],
+              sans: ['Source Sans 3', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+              serif: ['Source Serif 4', 'ui-serif', 'Georgia', 'serif'],
+              display: ['Cinzel', 'Source Serif 4', 'serif'],
             },
             colors: {
               gold: {
@@ -94,11 +95,78 @@
       .goog-te-banner-frame.skiptranslate {
           display: none !important;
       } 
+      :root {
+        --page-bg: #f8fafc;
+        --page-bg-strong: #ffffff;
+        --page-surface: rgba(255, 255, 255, 0.7);
+        --page-border: rgba(15, 23, 42, 0.08);
+        --text-primary: #0f172a;
+        --text-muted: #475569;
+        --glow-gold: rgba(234, 179, 8, 0.18);
+        --glow-blue: rgba(56, 189, 248, 0.16);
+        --glow-emerald: rgba(16, 185, 129, 0.12);
+        --scrollbar-thumb: #94a3b8;
+        --scrollbar-thumb-hover: #64748b;
+      }
+      .dark {
+        --page-bg: #050a14;
+        --page-bg-strong: #0b1220;
+        --page-surface: rgba(15, 23, 42, 0.6);
+        --page-border: rgba(148, 163, 184, 0.12);
+        --text-primary: #e2e8f0;
+        --text-muted: #94a3b8;
+        --glow-gold: rgba(234, 179, 8, 0.08);
+        --glow-blue: rgba(56, 189, 248, 0.08);
+        --glow-emerald: rgba(16, 185, 129, 0.07);
+        --scrollbar-thumb: #475569;
+        --scrollbar-thumb-hover: #64748b;
+      }
       html {
-        font-size: clamp(16px, 1vw + 12px, 18px);
+        font-size: clamp(16px, 0.75vw + 12px, 18px);
       }
       body {
-          top: 0px !important; 
+        background-color: var(--page-bg);
+        background-image:
+          radial-gradient(50rem 50rem at -10% -20%, var(--glow-gold), transparent 60%),
+          radial-gradient(45rem 45rem at 110% -10%, var(--glow-blue), transparent 55%),
+          radial-gradient(40rem 40rem at 50% 120%, var(--glow-emerald), transparent 55%);
+        background-attachment: fixed;
+        color: var(--text-primary);
+        font-family: "Source Sans 3", ui-sans-serif, system-ui, sans-serif;
+        line-height: 1.65;
+        letter-spacing: 0.005em;
+        text-rendering: optimizeLegibility;
+        top: 0px !important;
+      }
+      @media (max-width: 768px) {
+        body {
+          background-attachment: scroll;
+        }
+      }
+      h1, h2, h3 {
+        font-family: "Cinzel", "Source Serif 4", serif;
+        letter-spacing: -0.01em;
+      }
+      h4, h5, h6 {
+        font-family: "Source Serif 4", serif;
+        letter-spacing: -0.005em;
+      }
+      .text-\[7px\],
+      .text-\[8px\],
+      .text-\[9px\] {
+        font-size: clamp(0.6rem, 0.55rem + 0.25vw, 0.72rem);
+        line-height: 1.3;
+      }
+      .text-\[10px\],
+      .text-\[11px\] {
+        font-size: clamp(0.68rem, 0.62rem + 0.25vw, 0.8rem);
+        line-height: 1.35;
+      }
+      .text-\[12px\],
+      .text-\[13px\],
+      .text-\[14px\] {
+        font-size: clamp(0.78rem, 0.7rem + 0.3vw, 0.88rem);
+        line-height: 1.4;
       }
       /* Hide the Google Translate widget itself but keep it in DOM */
       #google_translate_element {
@@ -127,11 +195,11 @@
         background: transparent;
       }
       ::-webkit-scrollbar-thumb {
-        background: #334155;
+        background: var(--scrollbar-thumb);
         border-radius: 4px;
       }
       ::-webkit-scrollbar-thumb:hover {
-        background: #475569;
+        background: var(--scrollbar-thumb-hover);
       }
       .scrollbar-hide::-webkit-scrollbar {
           display: none;
@@ -161,7 +229,7 @@
 }
 </script>
 </head>
-  <body class="bg-slate-50 text-slate-900 dark:bg-[#020617] dark:text-slate-200 antialiased overflow-x-hidden transition-colors duration-500">
+  <body class="bg-[var(--page-bg)] text-[color:var(--text-primary)] antialiased overflow-x-hidden transition-colors duration-500">
     <div id="root"></div>
     
     <!-- Google Translate Element -->
@@ -179,6 +247,6 @@
     </script>
     <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
     
-    <script type="module" src="/index.tsx"></script>
+    <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

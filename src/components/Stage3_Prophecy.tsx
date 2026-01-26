@@ -19,7 +19,7 @@ interface Lesson {
 }
 
 const PROPHECY_DATA: Lesson[] = [
-  { id: 'p-1', title: "Sanamu ya Danieli 2", heroImage: "https://images.unsplash.com/photo-1599596378252-474026337f71?q=80&w=1600", abstract: "Historia ya dunia kuanzia Babeli mpaka marejeo ya Yesu.", coreAnalysis: "Dhahabu (Babeli), Fedha (Umedi/Uajemi), Shaba (Ugiriki), Chuma (Roma). Mawe yanayopiga miguu ni ufalme wa Mungu.", symbols: [{icon: "🥇", name: "Dhahabu", meaning: "Babeli"}, {icon: "🥈", name: "Fedha", meaning: "Uajemi"}], reference: "Danieli 2", quiz: [
+  { id: 'p-1', title: "Sanamu ya Danieli 2", heroImage: "https://images.unsplash.com/photo-1599596378252-474026337f71?q=80&w=1600", abstract: "Historia ya dunia kuanzia Babeli mpaka marejeo ya Yesu.", coreAnalysis: "Dhahabu (Babeli), Fedha (Umedi/Uajemi), Shaba (Ugiriki), Chuma (Roma). Mawe yanayopiga miguu ni ufalme wa Mungu.", symbols: [{icon: "Gold", name: "Dhahabu", meaning: "Babeli"}, {icon: "Silver", name: "Fedha", meaning: "Uajemi"}], reference: "Danieli 2", quiz: [
     {question: "Kichwa cha dhahabu ni nani?", options: ["Roma", "Ugiriki", "Babeli", "Misri"], correct: 2},
     {question: "Fedha inawakilisha nini?", options: ["Umedi na Uajemi", "Ugiriki", "Roma", "Ufaransa"], correct: 0},
     {question: "Jiwe lililopiga miguu lilichongwa na?", options: ["Wafalme", "Musa", "Bila kazi ya mikono", "Shetani"], correct: 2},
@@ -28,7 +28,7 @@ const PROPHECY_DATA: Lesson[] = [
     {question: "Mfalme aliyeshindwa kukumbuka ndoto ni?", options: ["Koreshi", "Dario", "Nebukadreza", "Farao"], correct: 2},
     {question: "Ufalme wa milele ni upi?", options: ["Ugiriki", "Dunia mpya ya Mungu", "Marekani", "Roma iliyohuishwa"], correct: 1}
   ], resources: [] },
-  { id: 'p-2', title: "Danieli 7: Wanyama Wanne", heroImage: "https://images.unsplash.com/photo-1543165731-0d29792694b8?q=80&w=1600", abstract: "Upanuzi wa Danieli 2 kupitia ishara za wanyama.", coreAnalysis: "Simba, Dubu, Chui, na mnyama wa kutisha. Pembe ndogo inachomoza kumpinga Mungu.", symbols: [{icon: "🦁", name: "Simba", meaning: "Babeli"}], reference: "Danieli 7", quiz: [
+  { id: 'p-2', title: "Danieli 7: Wanyama Wanne", heroImage: "https://images.unsplash.com/photo-1543165731-0d29792694b8?q=80&w=1600", abstract: "Upanuzi wa Danieli 2 kupitia ishara za wanyama.", coreAnalysis: "Simba, Dubu, Chui, na mnyama wa kutisha. Pembe ndogo inachomoza kumpinga Mungu.", symbols: [{icon: "Lion", name: "Simba", meaning: "Babeli"}], reference: "Danieli 7", quiz: [
     {question: "Chui anawakilisha nini?", options: ["Babeli", "Ugiriki", "Roma", "Uajemi"], correct: 1},
     {question: "Simba mwenye mabawa ni ufalme gani?", options: ["Babeli", "Misri", "Asiria", "Uajemi"], correct: 0},
     {question: "Dubu anawakilisha nini?", options: ["Ugiriki", "Umedi na Uajemi", "Rumi", "Ujerumani"], correct: 1},
