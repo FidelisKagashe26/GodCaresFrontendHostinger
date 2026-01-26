@@ -76,13 +76,13 @@ const App: React.FC = () => {
   const [resetParams, setResetParams] = useState<{ uid: string; token: string } | null>(null);
 
   const [aiLanguage, setAiLanguage] = useState<LanguageCode>('en');
-  const [theme, setTheme] = useState<ThemePreference>('dark');
+  const [theme, setTheme] = useState<ThemePreference>('system');
 
   useEffect(() => {
     const savedUser = localStorage.getItem('gc365_user');
     if (savedUser) setUser(JSON.parse(savedUser));
     const savedTheme = localStorage.getItem('gc365_theme') as ThemePreference;
-    setTheme(savedTheme || 'dark');
+    setTheme(savedTheme || 'system');
 
     const bootstrapUser = async () => {
       try {
