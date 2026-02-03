@@ -61,10 +61,10 @@ export const Home: React.FC<HomeProps> = ({ onNavigate }) => {
     <div className="relative w-full bg-slate-50 text-slate-900 dark:bg-[#020617] dark:text-slate-200 overflow-x-hidden font-sans selection:bg-gold-500/30">
       
       {/* --- HERO --- */}
-      <section className="relative min-h-[90vh] md:h-screen flex flex-col items-center justify-center overflow-hidden">
+      <section className="relative min-h-[75vh] md:min-h-[82vh] flex flex-col items-center justify-center overflow-hidden">
         <div className="absolute inset-0 z-0">
-           <img src="https://images.unsplash.com/photo-1462331940025-496dfbfc7564?q=80&w=2500" className="w-full h-full object-cover opacity-25 dark:opacity-40 animate-ken-burns" alt="Cosmos" />
-           <div className="absolute inset-0 bg-gradient-to-b from-white/90 via-white/50 to-white/90 dark:from-[#020617] dark:via-transparent dark:to-[#020617]"></div>
+           <img src="https://images.unsplash.com/photo-1462331940025-496dfbfc7564?q=80&w=2500" className="w-full h-full object-cover opacity-55 dark:opacity-45 animate-ken-burns" alt="Cosmos" />
+           <div className="absolute inset-0 bg-gradient-to-b from-white/55 via-white/15 to-white/55 dark:from-[#020617] dark:via-transparent dark:to-[#020617]"></div>
         </div>
         <div className="relative z-10 text-center px-4 sm:px-6 max-w-5xl space-y-6">
            <ScrollReveal>
@@ -72,7 +72,7 @@ export const Home: React.FC<HomeProps> = ({ onNavigate }) => {
                 <span className="w-2 h-2 bg-gold-500 rounded-full animate-pulse"></span>
                 <span className="text-[10px] font-black tracking-[0.4em] uppercase text-gold-400">Yohana 8:32</span>
              </div>
-             <h1 className="text-4xl sm:text-6xl md:text-8xl lg:text-9xl font-black text-slate-900 dark:text-white tracking-tighter leading-[0.9] drop-shadow-2xl uppercase">GOD CARES <br/> <span className="text-transparent bg-clip-text bg-gradient-to-r from-gold-400 via-gold-500 to-gold-400">365</span></h1>
+             <h1 className="text-3xl sm:text-5xl md:text-7xl lg:text-8xl font-black text-slate-900 dark:text-white tracking-tighter leading-[0.95] drop-shadow-2xl uppercase">GOD CARES <br/> <span className="text-transparent bg-clip-text bg-gradient-to-r from-gold-400 via-gold-500 to-gold-400">365</span></h1>
              <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 pt-8 sm:pt-12">
                 <button onClick={() => onNavigate(StageId.BIBLE_STUDY)} className="group relative px-8 py-4 sm:px-12 sm:py-5 bg-slate-900 text-white dark:bg-white dark:text-black font-black text-xs sm:text-sm uppercase tracking-[0.2em] hover:bg-gold-500 hover:-translate-y-1 transition-all shadow-[0_20px_40px_rgba(0,0,0,0.2)] rounded-md overflow-hidden w-full sm:w-auto">
                   <span className="relative z-10">Anza Safari <ArrowRight size={16} className="inline ml-2 group-hover:translate-x-1 transition-transform"/></span>
@@ -86,8 +86,8 @@ export const Home: React.FC<HomeProps> = ({ onNavigate }) => {
       </section>
 
       {/* --- Hitaji letu la Ukweli --- */}
-      <section className="relative pt-16 sm:pt-24 pb-10 sm:pb-12">
-         <div className="max-w-7xl mx-auto px-4 sm:px-6 mb-12 sm:mb-16 text-center">
+      <section className="relative pt-12 sm:pt-16 pb-8 sm:pb-10">
+         <div className="max-w-7xl mx-auto px-4 sm:px-6 mb-8 sm:mb-12 text-center">
             <h3 className="text-gold-500 font-black text-xs uppercase tracking-[0.5em] mb-4 italic">Hitaji letu la Ukweli</h3>
             <div className="h-1 w-20 bg-gold-500 mx-auto mt-4 rounded-full"></div>
          </div>
@@ -97,9 +97,9 @@ export const Home: React.FC<HomeProps> = ({ onNavigate }) => {
           { id: 2, tag: "Jibu la Mfalme", h2: "Yesu Anamjibu Pilato.", h3: "NIMEKUJA NIISHUHUDIE KWELI.", p: <>"Mimi nimezaliwa kwa ajili ya haya, na kwa ajili ya haya mimi nalikuja ulimwenguni, ili niishuhudie kweli. Kila aliye wa hiyo kweli hunisikia sauti yangu." — <span className="text-gold-400 font-black">Yohana 18:37</span></>, img: "https://images.unsplash.com/photo-1512117187123-f365d9c227ba?q=80&w=2000" },
           { id: 3, tag: "Dhana Moja", h2: "Kweli zipo Ngapi?", h3: "UKWELI UPO MMOJA TU.", p: <>"Yesu akamwambia, Mimi ndimi njia, na kweli, na uzima; mtu haji kwa Baba, ila kwa njia ya mimi." — <span className="text-gold-400 font-black">Yohana 14:6</span> <br/><br/> <span className="text-gold-400 font-medium">kwa vile ukweli ni msingi wa kile tunachoamini lazima uwe mmoja.</span></>, img: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2000" }
         ].map((step, i) => (
-          <div key={i} className="relative min-h-[85vh] md:h-screen flex items-center overflow-hidden border-b border-slate-200 dark:border-white/5">
-            <img src={step.img} className="absolute inset-0 w-full h-full object-cover opacity-15 dark:opacity-20 transition-transform duration-[8s] ease-out hover:scale-110" alt="" />
-            <div className="absolute inset-0 bg-gradient-to-r from-white via-white/90 to-transparent dark:from-[#020617] dark:via-[#020617]/90"></div>
+          <div key={i} className="relative min-h-[70vh] md:min-h-[75vh] flex items-center overflow-hidden border-b border-slate-200 dark:border-white/5">
+            <img src={step.img} className="absolute inset-0 w-full h-full object-cover opacity-25 dark:opacity-20 transition-transform duration-[8s] ease-out hover:scale-110" alt="" />
+            <div className="absolute inset-0 bg-gradient-to-r from-white/80 via-white/60 to-transparent dark:from-[#020617] dark:via-[#020617]/90"></div>
             <div className="max-w-6xl mx-auto px-4 sm:px-6 relative z-10 w-full">
               <ScrollReveal className={i % 2 === 1 ? "text-right ml-auto" : ""}>
                 <div className={`inline-flex items-center gap-3 mb-6 ${i % 2 === 1 ? 'flex-row-reverse' : ''}`}>
@@ -118,8 +118,8 @@ export const Home: React.FC<HomeProps> = ({ onNavigate }) => {
       </section>
 
       {/* --- Changamoto ya Kudanganywa --- */}
-      <section className="relative pt-16 sm:pt-24 pb-10 sm:pb-12 bg-slate-50 dark:bg-[#050b1d]">
-         <div className="max-w-7xl mx-auto px-4 sm:px-6 mb-12 sm:mb-16 text-center">
+      <section className="relative pt-12 sm:pt-16 pb-8 sm:pb-10 bg-slate-50 dark:bg-[#050b1d]">
+         <div className="max-w-7xl mx-auto px-4 sm:px-6 mb-8 sm:mb-12 text-center">
             <h3 className="text-red-500 font-black text-xs uppercase tracking-[0.5em] mb-4 italic">Changamoto ya Kudanganywa</h3>
             <div className="h-1 w-20 bg-red-600 mx-auto mt-4 rounded-full"></div>
          </div>
@@ -129,9 +129,9 @@ export const Home: React.FC<HomeProps> = ({ onNavigate }) => {
           { id: 2, tag: "Asili ya Uongo", h2: "Shetani ndie Muongo.", h3: "YESU ALISEMA.", p: <>"Ninyi ni wa baba yenu, Ibilisi, na tamaa za baba yenu ndizo mpendazo kuzitenda. Yeye alikuwa mwuaji tangu mwanzo; wala hakusimama katika kweli, kwa kuwa hamna hiyo kweli ndani yake. Asemapo uongo, husema yaliyo yake mwenyewe; kwa sababu yeye ni mwongo, na baba wa huo." — <span className="text-red-500 font-black">Yohana 8:44</span></>, img: "https://images.unsplash.com/photo-1519074069444-1ba4fff66d16?q=80&w=2000" },
           { id: 3, tag: "Kilele cha Udanganyifu", h2: "Shetani ameudanganya ulimwengu wote.", h3: "KILA MTU AMEDANGANYWA.", p: <>"Yule joka akatupwa, yule mkubwa, nyoka wa zamani, aitwaye Ibilisi na Shetani, audanganyaye ulimwengu wote; akatupwa hata nchi, na malaika zake wakatupwa pamoja naye." — <span className="text-red-500 font-black">Ufunuo 12:9</span></>, img: "https://images.unsplash.com/photo-1533105079780-92b9be482077?q=80&w=2000" }
         ].map((step, i) => (
-          <div key={i} className="relative min-h-[85vh] md:h-screen flex items-center overflow-hidden border-b border-slate-200 dark:border-white/5">
-            <img src={step.img} className="absolute inset-0 w-full h-full object-cover opacity-15 dark:opacity-20" alt="" />
-            <div className="absolute inset-0 bg-gradient-to-r from-white via-white/90 to-transparent dark:from-[#050b1d] dark:via-[#050b1d]/90"></div>
+          <div key={i} className="relative min-h-[70vh] md:min-h-[75vh] flex items-center overflow-hidden border-b border-slate-200 dark:border-white/5">
+            <img src={step.img} className="absolute inset-0 w-full h-full object-cover opacity-25 dark:opacity-20" alt="" />
+            <div className="absolute inset-0 bg-gradient-to-r from-white/80 via-white/60 to-transparent dark:from-[#050b1d] dark:via-[#050b1d]/90"></div>
             <div className="max-w-6xl mx-auto px-4 sm:px-6 relative z-10 w-full">
               <ScrollReveal className={i % 2 === 0 ? "text-right ml-auto" : ""}>
                 <div className={`inline-flex items-center gap-3 mb-6 ${i % 2 === 0 ? 'flex-row-reverse' : ''}`}>
@@ -150,8 +150,8 @@ export const Home: React.FC<HomeProps> = ({ onNavigate }) => {
       </section>
 
       {/* --- Ukweli upo. --- */}
-      <section className="relative pt-16 sm:pt-24 pb-10 sm:pb-12 bg-white dark:bg-[#020617]">
-         <div className="max-w-7xl mx-auto px-4 sm:px-6 mb-12 sm:mb-16 text-center">
+      <section className="relative pt-12 sm:pt-16 pb-8 sm:pb-10 bg-white dark:bg-[#020617]">
+         <div className="max-w-7xl mx-auto px-4 sm:px-6 mb-8 sm:mb-12 text-center">
             <h3 className="text-emerald-500 font-black text-xs uppercase tracking-[0.5em] mb-4 italic">Ukweli upo.</h3>
             <div className="h-1 w-20 bg-emerald-500 mx-auto mt-4 rounded-full"></div>
          </div>
@@ -160,9 +160,9 @@ export const Home: React.FC<HomeProps> = ({ onNavigate }) => {
           { id: 1, tag: "Tumaini Limerejea", h2: "Tunalo Tumaini", h3: "TUNAWEZA KUUJUA UKWELI", p: <>"tena mtaifahamu kweli, nayo hiyo kweli itawaweka huru." — <span className="text-emerald-400 font-black">Yohana 8:32</span> <br/><br/> <span className="text-emerald-400 font-medium italic">Ukweli unaweza kufichwa lakini hauwezi kufichwa milele.</span></>, img: "https://images.unsplash.com/photo-1491466424936-e304919aada7?q=80&w=2000" },
           { id: 2, tag: "Njia ya Mafanikio", h2: "Kuutafuta Ukweli", h3: "UKWELI UNAPATIKANA", p: <>"tafuteni, nanyi mtaona;" — <span className="text-emerald-400 font-black">Mathayo 7:7</span> <br/> "Mtafuteni Bwana, maadamu anapatikana, Mwiteni, maadamu yu karibu;" — <span className="text-emerald-400 font-black">Isaya 55:6</span> <br/><br/> <span className="text-emerald-400 font-medium italic">Tukiutafuta ukweli tutaupata. hili ni jukumu letu kulifanya yaani kutafuta Ukweli</span></>, img: "https://images.unsplash.com/photo-1454165833767-02638a5996bc?q=80&w=2000" },
         ].map((step, i) => (
-          <div key={i} className="relative min-h-[85vh] md:h-screen flex items-center overflow-hidden border-b border-slate-200 dark:border-white/5">
-            <img src={step.img} className="absolute inset-0 w-full h-full object-cover opacity-15 dark:opacity-20" alt="" />
-            <div className="absolute inset-0 bg-gradient-to-r from-white via-white/90 to-transparent dark:from-[#020617] dark:via-[#020617]/90"></div>
+          <div key={i} className="relative min-h-[70vh] md:min-h-[75vh] flex items-center overflow-hidden border-b border-slate-200 dark:border-white/5">
+            <img src={step.img} className="absolute inset-0 w-full h-full object-cover opacity-25 dark:opacity-20" alt="" />
+            <div className="absolute inset-0 bg-gradient-to-r from-white/80 via-white/60 to-transparent dark:from-[#020617] dark:via-[#020617]/90"></div>
             <div className="max-w-6xl mx-auto px-4 sm:px-6 relative z-10 w-full">
               <ScrollReveal className={i % 2 === 1 ? "text-right ml-auto" : ""}>
                 <div className={`inline-flex items-center gap-3 mb-6 ${i % 2 === 1 ? 'flex-row-reverse' : ''}`}>
@@ -181,8 +181,8 @@ export const Home: React.FC<HomeProps> = ({ onNavigate }) => {
       </section>
 
       {/* --- Mgongano wa Mawazo --- */}
-      <section className="py-16 sm:py-24 px-4 sm:px-6 bg-white dark:bg-[#020617]">
-         <div className="max-w-7xl mx-auto space-y-16 sm:space-y-24">
+      <section className="py-12 sm:py-16 px-4 sm:px-6 bg-white dark:bg-[#020617]">
+         <div className="max-w-7xl mx-auto space-y-10 sm:space-y-14">
             <ScrollReveal className="text-center space-y-6 sm:space-y-8">
                <h3 className="text-gold-500 font-black text-xs uppercase tracking-[0.5em] mb-4 italic">Mgongano wa Mawazo</h3>
                <div className="h-1 w-20 bg-slate-200 dark:bg-white/20 mx-auto rounded-full"></div>
@@ -190,7 +190,7 @@ export const Home: React.FC<HomeProps> = ({ onNavigate }) => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
                <ScrollReveal className="bg-white dark:bg-white/[0.02] border border-slate-200 dark:border-white/5 p-6 sm:p-12 rounded-xl shadow-inner group hover:bg-slate-50 dark:hover:bg-white/[0.04] transition-all">
-                  <h3 className="text-2xl sm:text-4xl font-black text-slate-900 dark:text-white uppercase tracking-tight mb-6 sm:mb-8">Dilema ya Leo.</h3>
+                  <h3 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white uppercase tracking-tight mb-6 sm:mb-8">Dilema ya Leo.</h3>
                   <p className="text-slate-600 dark:text-slate-400 text-base sm:text-lg leading-relaxed mb-8 sm:mb-10 font-light">
                     <span className="text-gold-400 font-medium italic">wakristo wengi wanapenda Neema ya Mungu lakini wanakata ukweli aliomtuma Yesu kushuhudia, wansahau huwezi kutenganisha neema na kweli maan yesu amejaa vyote viwii</span>
                   </p>
@@ -205,7 +205,7 @@ export const Home: React.FC<HomeProps> = ({ onNavigate }) => {
                </ScrollReveal>
 
                <ScrollReveal className="bg-white dark:bg-white/[0.02] border border-slate-200 dark:border-white/5 p-6 sm:p-12 rounded-xl shadow-inner group hover:bg-slate-50 dark:hover:bg-white/[0.04] transition-all">
-                  <h3 className="text-2xl sm:text-4xl font-black text-slate-900 dark:text-white uppercase tracking-tight mb-6 sm:mb-8">Ukweli Unapatikana Wapi?</h3>
+                  <h3 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white uppercase tracking-tight mb-6 sm:mb-8">Ukweli Unapatikana Wapi?</h3>
                   <div className="p-6 sm:p-12 bg-primary-50 dark:bg-primary-950/20 border border-primary-200 dark:border-primary-500/20 rounded-lg text-center space-y-6 mb-8 sm:mb-10">
                      <div className="w-14 h-14 sm:w-16 sm:h-16 bg-primary-100 dark:bg-primary-500/20 rounded-full flex items-center justify-center mx-auto text-primary-700 dark:text-primary-400 mb-4"><Search size={28}/></div>
                      <h5 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white uppercase tracking-widest">KWENYE NENO LA MUNGU</h5>
@@ -254,9 +254,9 @@ export const Home: React.FC<HomeProps> = ({ onNavigate }) => {
             </ScrollReveal>
 
             {/* Questions Section - Moved below CTAs */}
-            <div className="pt-16 sm:pt-24 space-y-12 sm:space-y-16">
+            <div className="pt-10 sm:pt-14 space-y-8 sm:space-y-12">
                <ScrollReveal className="text-center space-y-4 sm:space-y-6">
-                  <h2 className="text-2xl sm:text-3xl md:text-5xl font-medium text-gold-500 tracking-tight leading-none lowercase">
+                  <h2 className="text-2xl sm:text-3xl md:text-4xl font-medium text-gold-500 tracking-tight leading-none lowercase">
                     Bila ukweli ni vigumu kuyajibu maswali makuu matano ya maisha.
                   </h2>
                </ScrollReveal>
@@ -286,8 +286,8 @@ export const Home: React.FC<HomeProps> = ({ onNavigate }) => {
       </section>
 
       {/* --- ZANA ZA UKWELI (TOOLS) - Compact & Staggered --- */}
-      <section className="py-16 sm:py-24 px-4 sm:px-6 bg-slate-50 dark:bg-[#050b1d] border-t border-slate-200 dark:border-white/5">
-         <div className="max-w-5xl mx-auto space-y-12 sm:space-y-16">
+      <section className="py-12 sm:py-16 px-4 sm:px-6 bg-slate-50 dark:bg-[#050b1d] border-t border-slate-200 dark:border-white/5">
+         <div className="max-w-5xl mx-auto space-y-8 sm:space-y-12">
             <ScrollReveal className="text-center space-y-4">
                <h3 className="text-gold-500 font-black text-xs uppercase tracking-[0.5em] mb-4 italic">Zana za Ukweli</h3>
                <div className="h-1 w-20 bg-gold-500 mx-auto mt-4 rounded-full"></div>

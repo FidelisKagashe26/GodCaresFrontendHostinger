@@ -209,7 +209,7 @@ const App: React.FC = () => {
   const isImmersive = currentStage === StageId.TIMELINE && user;
   
   return (
-    <div className="relative min-h-screen bg-transparent text-[color:var(--text-primary)] font-sans transition-colors duration-500 overflow-hidden">
+    <div className="relative min-h-screen bg-[color:var(--page-bg)] text-[color:var(--text-primary)] font-sans transition-colors duration-500 overflow-hidden">
       <ToastContainer notifications={notifications} onDismiss={(id) => setNotifications(prev => prev.filter(n => n.id !== id))} />
       
       <NotificationCenter 
@@ -223,11 +223,13 @@ const App: React.FC = () => {
       <ThemeCenter isOpen={isThemeOpen} onClose={() => setIsThemeOpen(false)} currentTheme={theme} onThemeChange={setTheme} />
 
       {/* Floating Tools - Available for everyone now to increase engagement on Homepage */}
-      <div className="fixed bottom-6 right-6 z-[90] flex flex-col gap-3 pointer-events-auto">
-        <HistoryTool aiLanguage={aiLanguage} onGoToTimeline={() => handleStageChange(StageId.TIMELINE)} />
-        <QuestionTool onGoToVault={() => handleStageChange(StageId.QUESTION_VAULT)} />
-        <DeceptionTool onGoToVault={() => handleStageChange(StageId.DECEPTION_VAULT)} />
-        <EvidenceTool onGoToVault={() => handleStageChange(StageId.EVIDENCE)} />
+      <div className="fixed bottom-6 right-6 z-[90] pointer-events-auto">
+        <div className="gc-floating-tools flex flex-col gap-3 saturate-75">
+          <HistoryTool aiLanguage={aiLanguage} onGoToTimeline={() => handleStageChange(StageId.TIMELINE)} />
+          <QuestionTool onGoToVault={() => handleStageChange(StageId.QUESTION_VAULT)} />
+          <DeceptionTool onGoToVault={() => handleStageChange(StageId.DECEPTION_VAULT)} />
+          <EvidenceTool onGoToVault={() => handleStageChange(StageId.EVIDENCE)} />
+        </div>
       </div>
 
       {showAuthModal && (
@@ -257,24 +259,52 @@ const App: React.FC = () => {
       />
 
       <div className="relative z-10 flex h-screen overflow-hidden">
-        <main className="flex-1 flex flex-col relative w-full h-full bg-[var(--page-surface)] backdrop-blur-xl">
+        <main className="flex-1 flex flex-col relative w-full h-full bg-[color:var(--page-surface)] backdrop-blur-md">
           {!isImmersive && (
-            <header className="fixed top-0 left-0 right-0 h-20 px-6 md:px-10 flex items-center justify-between z-[50] bg-[var(--page-bg-strong)] border-b border-[color:var(--page-border)]">
+            <header className="fixed top-0 left-0 right-0 h-20 px-5 md:px-10 flex items-center justify-between z-[50] gc-header">
               <div className="flex items-center gap-4">
-                <button onClick={() => setIsMenuOpen(true)} className="p-3.5 text-slate-900 dark:text-white bg-white/90 dark:bg-black/40 hover:bg-white dark:hover:bg-black/60 backdrop-blur-md rounded-full transition-all border border-slate-200 dark:border-white/10 shadow-xl group">
-                  <Menu size={22} className="group-hover:text-gold-500 transition-colors" />
+                <button
+                  onClick={() => setIsMenuOpen(true)}
+                  className="gc-icon-button p-3.5 rounded-full group"
+                  aria-label="Open menu"
+                >
+                  <Menu size={22} className="group-hover:text-[color:var(--accent)] transition-colors" />
                 </button>
-                <div onClick={() => handleStageChange(StageId.HOME)} className="hidden md:flex items-center cursor-pointer group hover:scale-105 transition-all">
-                  <img src="/Logo.png" alt="God Cares 365" className="h-24 w-auto" />
+                <div onClick={() => handleStageChange(StageId.HOME)} className="hidden md:flex items-center gap-3 cursor-pointer group">
+                  <img src="/Logo.png" alt="God Cares 365" className="h-12 md:h-14 w-auto" />
+                  <div className="flex flex-col leading-tight">
+                    <span className="text-sm font-display tracking-[0.2em] text-[color:var(--text-primary)]">GOD CARES 365</span>
+                    <span className="text-[10px] uppercase tracking-[0.32em] text-[color:var(--text-muted)]">Hope / Prayer / Scripture</span>
+                  </div>
                 </div>
               </div>
 
               <div className="flex items-center gap-3">
                  {/* <button onClick={() => setIsLanguageOpen(!isLanguageOpen)} className="p-3.5 rounded-full bg-white/90 dark:bg-black/40 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-white transition-all shadow-xl hover:bg-gold-400/10"><Languages size={18} /></button> */}
-                 <button onClick={() => setIsThemeOpen(!isThemeOpen)} className="p-3.5 rounded-full bg-white/90 dark:bg-black/40 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-white transition-all shadow-xl hover:bg-gold-400/10">{theme === 'light' ? <Sun size={18} /> : theme === 'dark' ? <Moon size={18} /> : <Monitor size={18} />}</button>
-                 <button onClick={() => setIsNotificationOpen(!isNotificationOpen)} className={`relative p-3.5 rounded-full backdrop-blur-md border transition-all shadow-xl ${isNotificationOpen ? 'bg-gold-500 text-slate-900 border-gold-400' : 'bg-white/90 dark:bg-black/40 border-slate-200 dark:border-white/10 text-slate-700 dark:text-white'}`}><Bell size={18} />{unreadCount > 0 && <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-red-500 rounded-full"></span>}</button>
+                 <button
+                   onClick={() => setIsThemeOpen(!isThemeOpen)}
+                   className="gc-icon-button p-3.5 rounded-full"
+                   aria-label="Theme"
+                 >
+                   {theme === 'light' ? <Sun size={18} /> : theme === 'dark' ? <Moon size={18} /> : <Monitor size={18} />}
+                 </button>
+                 <button
+                   onClick={() => setIsNotificationOpen(!isNotificationOpen)}
+                   className={`relative gc-icon-button p-3.5 rounded-full ${isNotificationOpen ? 'is-active' : ''}`}
+                   aria-label="Notifications"
+                 >
+                   <Bell size={18} />
+                   {unreadCount > 0 && (
+                     <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-[color:var(--accent)] rounded-full"></span>
+                   )}
+                 </button>
                  {!user && (
-                   <button onClick={() => setShowAuthModal(true)} className="hidden md:flex px-8 py-3 bg-gold-500 text-slate-900 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-900 hover:text-white transition-all shadow-xl">Ingia</button>
+                   <button
+                     onClick={() => setShowAuthModal(true)}
+                     className="hidden md:flex items-center px-6 py-2.5 gc-button-primary rounded-full text-[10px] font-semibold uppercase tracking-[0.3em]"
+                   >
+                     Ingia
+                   </button>
                  )}
               </div>
             </header>
@@ -282,7 +312,7 @@ const App: React.FC = () => {
 
           <div 
             ref={mainContentRef}
-            className="flex-1 overflow-y-auto scroll-smooth scrollbar-hide pt-20"
+            className="flex-1 overflow-y-auto scroll-smooth scrollbar-hide pt-20 pb-16"
           >
             {renderContent()}
             {!isImmersive && <Footer onNavigate={handleStageChange} />}
