@@ -17,6 +17,14 @@ export const getPublicPrayers = async (): Promise<PrayerRequestPublic[]> => {
   return (await response.json()) as PrayerRequestPublic[];
 };
 
+export const getAnsweredPrayers = async (): Promise<PrayerRequestPublic[]> => {
+  const response = await fetch(`${API_BASE_URL}/api/prayers/answered/`);
+  if (!response.ok) {
+    throw new Error("Imeshindikana kupata maombi yaliyojibiwa.");
+  }
+  return (await response.json()) as PrayerRequestPublic[];
+};
+
 export const submitPrayer = async (payload: {
   name?: string;
   email?: string;

@@ -1,5 +1,5 @@
 
-import React, { useState, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { 
   ShieldAlert, Search, BookOpen, CheckCircle2, 
   X, ShieldCheck, Zap, AlertTriangle,
@@ -8,6 +8,7 @@ import {
   ArrowRight, Shield as ShieldIcon, Info, History as HistoryIcon,
   User, ExternalLink, ArrowLeft, PlayCircle, Youtube, Link, Play
 } from 'lucide-react';
+import { DeceptionCaseApi, getDeceptionCases } from '../services/vaultService';
 
 interface CaseStudy {
   id: string;
@@ -91,12 +92,47 @@ const CASES: CaseStudy[] = [
 export const DeceptionVault: React.FC = () => {
   const [activeCaseId, setActiveCaseId] = useState<string | null>(null);
   const [search, setSearch] = useState('');
+  const [cases, setCases] = useState<CaseStudy[]>([]);
+  const [loadingCases, setLoadingCases] = useState(false);
+  const [casesError, setCasesError] = useState('');
+
+  useEffect(() => {
+    const loadCases = async () => {
+      setLoadingCases(true);
+      setCasesError('');
+      try {
+        const data: DeceptionCaseApi[] = await getDeceptionCases();
+        setCases(data.map((item) => ({
+          id: item.id,
+          topic: item.topic,
+          category: item.category || 'Hakuna taarifa',
+          threatLevel: item.threatLevel,
+          tradition: item.tradition || 'Hakuna taarifa',
+          traditionSource: item.traditionSource || 'Hakuna taarifa',
+          scripture: item.scripture || 'Hakuna taarifa',
+          reference: item.reference || 'Hakuna taarifa',
+          logic: item.logic || 'Hakuna taarifa',
+          history: item.history || 'Hakuna taarifa',
+          videoUrl: item.videoUrl || '',
+          shareText: item.shareText || `Nimejifunza kuhusu ${item.topic}.`,
+          detailedDescription: item.detailedDescription || 'Hakuna taarifa.',
+        })));
+      } catch (error: any) {
+        setCases([]);
+        setCasesError(error?.message || 'Imeshindikana kupakua deception cases.');
+      } finally {
+        setLoadingCases(false);
+      }
+    };
+
+    loadCases();
+  }, []);
 
   const activeCase = useMemo(() => 
-    CASES.find(c => c.id === activeCaseId), 
-  [activeCaseId]);
+    cases.find(c => c.id === activeCaseId), 
+  [activeCaseId, cases]);
 
-  const filteredCases = CASES.filter(c => 
+  const filteredCases = cases.filter(c => 
     c.topic.toLowerCase().includes(search.toLowerCase()) || 
     c.id.toLowerCase().includes(search.toLowerCase())
   );
@@ -137,6 +173,22 @@ export const DeceptionVault: React.FC = () => {
               />
            </div>
         </div>
+
+        {casesError && (
+          <div className="bg-red-500/10 border border-red-500/20 text-red-500 text-[10px] font-bold uppercase tracking-widest px-4 py-2 rounded-lg">
+            {casesError}
+          </div>
+        )}
+        {loadingCases && (
+          <div className="py-6 text-center text-xs font-black uppercase tracking-widest text-slate-500">
+            Inapakia data...
+          </div>
+        )}
+        {!loadingCases && filteredCases.length === 0 && (
+          <div className="py-6 text-center text-xs font-black uppercase tracking-widest text-slate-500">
+            Hakuna taarifa kwa sasa.
+          </div>
+        )}
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 pb-32">
            {filteredCases.map(c => (
@@ -255,14 +307,22 @@ export const DeceptionVault: React.FC = () => {
                              <span className="text-[8px] font-bold text-slate-600 uppercase">Analysis Portal v2</span>
                           </div>
                           <div className="aspect-video bg-black rounded-xl overflow-hidden relative border border-white/5">
-                             <iframe 
-                               src={`${activeCase.videoUrl}?autoplay=0`} 
-                               className="w-full h-full border-none opacity-80 group-hover:opacity-100 transition-opacity" 
-                               allowFullScreen
-                             ></iframe>
-                             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none opacity-40 group-hover:opacity-10 transition-opacity">
-                                <Play size={48} className="text-white" fill="currentColor" />
-                             </div>
+                             {activeCase.videoUrl ? (
+                               <>
+                                 <iframe 
+                                   src={`${activeCase.videoUrl}?autoplay=0`} 
+                                   className="w-full h-full border-none opacity-80 group-hover:opacity-100 transition-opacity" 
+                                   allowFullScreen
+                                 ></iframe>
+                                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none opacity-40 group-hover:opacity-10 transition-opacity">
+                                    <Play size={48} className="text-white" fill="currentColor" />
+                                 </div>
+                               </>
+                             ) : (
+                               <div className="w-full h-full flex items-center justify-center text-xs font-black uppercase tracking-widest text-slate-500">
+                                 Hakuna video kwa sasa
+                               </div>
+                             )}
                           </div>
                        </div>
                        

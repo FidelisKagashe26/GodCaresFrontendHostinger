@@ -75,6 +75,7 @@ const CountdownTimer: React.FC<{ targetDate: Date }> = ({ targetDate }) => {
 
 export const Events: React.FC = () => {
   const [registeredIds, setRegisteredIds] = useState<string[]>([]);
+  const [registeringId, setRegisteringId] = useState<string | null>(null);
   const [filter, setFilter] = useState<'All' | 'Virtual' | 'Physical'>('All');
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [events, setEvents] = useState<Event[]>(INITIAL_EVENTS);
@@ -121,18 +122,54 @@ export const Events: React.FC = () => {
 
   const filtered = events.filter(e => filter === 'All' || e.type === filter);
 
+  const isValidEmail = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+
+  const resolveRegistrant = (): { name: string; email: string } | null => {
+    try {
+      const raw = localStorage.getItem('gc365_user');
+      const parsed = raw ? JSON.parse(raw) : null;
+      const name = (parsed?.name || '').toString().trim();
+      const email = (parsed?.email || '').toString().trim();
+      if (name && email && isValidEmail(email)) {
+        return { name, email };
+      }
+    } catch {
+      // Fall back to prompt.
+    }
+
+    const name = window.prompt('Weka jina lako kamili kwa usajili wa tukio:');
+    if (!name || !name.trim()) {
+      return null;
+    }
+
+    const email = window.prompt('Weka barua pepe yako (email):');
+    if (!email || !isValidEmail(email.trim())) {
+      alert('Email uliyoingiza si sahihi.');
+      return null;
+    }
+
+    return { name: name.trim(), email: email.trim() };
+  };
+
   const handleRegister = async (e: React.MouseEvent, id: string) => {
     e.stopPropagation();
-    if (!registeredIds.includes(id)) {
-      const ev = events.find(event => event.id === id);
-      if (!ev) return;
-      try {
-        await registerForEvent(Number(id), { name: 'Mgeni', email: 'guest@local' });
-        setRegisteredIds([...registeredIds, id]);
-        alert(`Imekamilika! Tukio la "${ev?.title}" limeongezwa kwenye ratiba yako na utapata taarifa (Notification) saa 24 kabla.`);
-      } catch (error) {
-        alert('Imeshindikana kusajili.');
-      }
+    if (registeredIds.includes(id) || registeringId === id) return;
+
+    const ev = events.find(event => event.id === id);
+    if (!ev) return;
+
+    const registrant = resolveRegistrant();
+    if (!registrant) return;
+
+    setRegisteringId(id);
+    try {
+      await registerForEvent(Number(id), registrant);
+      setRegisteredIds((prev) => prev.includes(id) ? prev : [...prev, id]);
+      alert(`Usajili umekamilika kwa "${ev.title}". Utaarifiwa kabla ya tukio.`);
+    } catch (error: any) {
+      alert(error?.message || 'Imeshindikana kusajili.');
+    } finally {
+      setRegisteringId(null);
     }
   };
 
@@ -250,9 +287,10 @@ export const Events: React.FC = () => {
                   </div>
                   <button 
                     onClick={(e) => handleRegister(e, event.id)}
+                    disabled={registeringId === event.id}
                     className={`px-6 py-2.5 rounded-sm text-[10px] font-black uppercase tracking-widest transition-all ${registeredIds.includes(event.id) ? 'bg-green-600 text-white' : 'bg-primary-950 text-gold-400 hover:bg-gold-500 hover:text-primary-950'}`}
                   >
-                    {registeredIds.includes(event.id) ? 'Registered' : 'Join Now'}
+                    {registeredIds.includes(event.id) ? 'Registered' : registeringId === event.id ? 'Inasajili...' : 'Join Now'}
                   </button>
                </div>
             </div>
@@ -365,9 +403,10 @@ export const Events: React.FC = () => {
 
                           <button 
                             onClick={(e) => handleRegister(e, selectedEvent.id)}
+                            disabled={registeringId === selectedEvent.id}
                             className={`w-full py-5 rounded-sm font-black text-xs uppercase tracking-[0.2em] transition-all shadow-md ${registeredIds.includes(selectedEvent.id) ? 'bg-green-600 text-white' : 'bg-primary-950 text-gold-400 hover:bg-gold-500 hover:text-primary-950'}`}
                           >
-                             {registeredIds.includes(selectedEvent.id) ? 'Already Registered' : 'Secure My Seat'}
+                             {registeredIds.includes(selectedEvent.id) ? 'Already Registered' : registeringId === selectedEvent.id ? 'Inasajili...' : 'Secure My Seat'}
                           </button>
                        </div>
 

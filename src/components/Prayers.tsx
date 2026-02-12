@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 import { GoogleGenAI } from "@google/genai";
 import { LanguageCode } from '../types';
-import { getPublicPrayers, submitPrayer } from '../services/prayerService';
+import { getAnsweredPrayers, getPublicPrayers, submitPrayer } from '../services/prayerService';
 
 interface PrayerRequest {
   id: string;
@@ -23,8 +23,6 @@ interface Props {
   aiLanguage?: LanguageCode;
 }
 
-const ANSWERED_PRAYERS: PrayerRequest[] = [];
-
 export const Prayers: React.FC<Props> = ({ aiLanguage = 'en' }) => {
   const [request, setRequest] = useState('');
   const [activeTab, setActiveTab] = useState<'wall' | 'answered'>('wall');
@@ -36,6 +34,9 @@ export const Prayers: React.FC<Props> = ({ aiLanguage = 'en' }) => {
    const [publicRequests, setPublicRequests] = useState<PrayerRequest[]>([]);
    const [isLoadingWall, setIsLoadingWall] = useState(false);
    const [wallError, setWallError] = useState('');
+   const [answeredRequests, setAnsweredRequests] = useState<PrayerRequest[]>([]);
+   const [isLoadingAnswered, setIsLoadingAnswered] = useState(false);
+   const [answeredError, setAnsweredError] = useState('');
 
    const formatTimeAgo = (isoDate: string) => {
       const created = new Date(isoDate).getTime();
@@ -49,6 +50,15 @@ export const Prayers: React.FC<Props> = ({ aiLanguage = 'en' }) => {
       return `${days} siku`;
    };
 
+   const mapPrayerItem = (item: any): PrayerRequest => ({
+      id: String(item.id),
+      name: item.name || 'Mgeni',
+      category: item.category || 'Maombi',
+      request: item.request,
+      prayingCount: item.praying_count || 0,
+      timeAgo: formatTimeAgo(item.created_at),
+   });
+
    const mappedWall = useMemo(() => publicRequests, [publicRequests]);
 
    useEffect(() => {
@@ -57,15 +67,7 @@ export const Prayers: React.FC<Props> = ({ aiLanguage = 'en' }) => {
          setWallError('');
          try {
             const data = await getPublicPrayers();
-            const mapped = data.map((item) => ({
-               id: String(item.id),
-               name: item.name || 'Mgeni',
-               category: item.category || 'Maombi',
-               request: item.request,
-               prayingCount: item.praying_count,
-               timeAgo: formatTimeAgo(item.created_at),
-            }));
-            setPublicRequests(mapped);
+            setPublicRequests(data.map(mapPrayerItem));
          } catch (error) {
             setWallError('Imeshindikana kupakua maombi ya umma.');
             setPublicRequests([]);
@@ -74,7 +76,22 @@ export const Prayers: React.FC<Props> = ({ aiLanguage = 'en' }) => {
          }
       };
 
+      const loadAnswered = async () => {
+         setIsLoadingAnswered(true);
+         setAnsweredError('');
+         try {
+            const data = await getAnsweredPrayers();
+            setAnsweredRequests(data.map(mapPrayerItem));
+         } catch (error) {
+            setAnsweredError('Imeshindikana kupakua maombi yaliyojibiwa.');
+            setAnsweredRequests([]);
+         } finally {
+            setIsLoadingAnswered(false);
+         }
+      };
+
       loadWall();
+      loadAnswered();
    }, []);
 
   const handleGeneratePrayer = async () => {
@@ -106,14 +123,7 @@ export const Prayers: React.FC<Props> = ({ aiLanguage = 'en' }) => {
             category: 'Maombi',
          });
          if (isPublic) {
-            const newEntry: PrayerRequest = {
-               id: String(created.id),
-               name: created.name || 'Mgeni',
-               category: created.category || 'Maombi',
-               request: created.request,
-               prayingCount: created.praying_count,
-               timeAgo: formatTimeAgo(created.created_at),
-            };
+            const newEntry = mapPrayerItem(created);
             setPublicRequests((prev) => [newEntry, ...prev]);
          }
          setTimeout(() => {
@@ -273,12 +283,20 @@ export const Prayers: React.FC<Props> = ({ aiLanguage = 'en' }) => {
                            ))}
                         </>
               ) : (
-                ANSWERED_PRAYERS.length === 0 ? (
+                isLoadingAnswered ? (
+                  <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-50 dark:border-white/5 text-slate-400 text-xs uppercase tracking-widest font-black">
+                    Inapakia...
+                  </div>
+                ) : answeredError ? (
+                  <div className="bg-red-500/10 border border-red-500/20 text-red-500 text-[10px] font-bold uppercase tracking-widest px-4 py-2 rounded-lg">
+                    {answeredError}
+                  </div>
+                ) : answeredRequests.length === 0 ? (
                   <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-50 dark:border-white/5 text-slate-400 text-xs uppercase tracking-widest font-black">
                     Hakuna taarifa za maombi yaliyojibiwa kwa sasa.
                   </div>
                 ) : (
-                ANSWERED_PRAYERS.map((ans) => (
+                answeredRequests.map((ans) => (
                   <div key={ans.id} className="bg-green-500/5 dark:bg-green-500/10 p-8 rounded-2xl border border-green-500/20 shadow-sm relative overflow-hidden group">
                      <div className="absolute top-0 right-0 p-6 text-green-500/10 rotate-12 group-hover:scale-110 transition-transform"><CheckCircle2 size={100} /></div>
                      <div className="relative z-10 space-y-4">

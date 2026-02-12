@@ -31,6 +31,20 @@ export interface ShopOrderTrackApi {
   items: ShopOrderItemApi[];
 }
 
+export interface ShopOrderCreatePayload {
+  full_name: string;
+  email: string;
+  phone?: string;
+  address?: string;
+  city?: string;
+  country?: string;
+  items: Array<{
+    product_id: number;
+    quantity: number;
+    title?: string;
+  }>;
+}
+
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || window.location.origin).replace(/\/$/, "");
 
 export const getShopProducts = async (): Promise<ShopProductApi[]> => {
@@ -47,6 +61,21 @@ export const trackShopOrder = async (code: string): Promise<ShopOrderTrackApi> =
     const error = await response.json().catch(() => ({}));
     throw new Error(error?.detail || "Imeshindikana kupata oda.");
   }
+  return (await response.json()) as ShopOrderTrackApi;
+};
+
+export const createShopOrder = async (payload: ShopOrderCreatePayload): Promise<ShopOrderTrackApi> => {
+  const response = await fetch(`${API_BASE_URL}/api/shop/orders/`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}));
+    throw new Error(error?.detail || "Imeshindikana kutuma oda.");
+  }
+
   return (await response.json()) as ShopOrderTrackApi;
 };
 

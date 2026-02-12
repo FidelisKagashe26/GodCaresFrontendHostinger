@@ -1,10 +1,11 @@
 
-import React, { useState, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { 
   MessageSquare, Search, BookOpen, ChevronRight, HelpCircle, 
   X, Info, Book, Send, Clock, ShieldCheck, PlusCircle, 
   ArrowLeft, RefreshCw, PlayCircle, Youtube, Share2, FileText, Check
 } from 'lucide-react';
+import { getQuestionVaultItems, QuestionVaultItemApi } from '../services/vaultService';
 
 interface QuestionItem {
   id: number;
@@ -57,8 +58,6 @@ const ARCHIVED_QUESTIONS: QuestionItem[] = [
   }
 ];
 
-const CATEGORIES = ["Zote", "Unabii", "Sabato", "Hali ya Wafu", "Wokovu", "Uumbaji"];
-
 export const QuestionVault: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [activeCategory, setActiveCategory] = useState('Zote');
@@ -66,14 +65,57 @@ export const QuestionVault: React.FC = () => {
   const [activeView, setActiveView] = useState<'text' | 'video'>('text');
   const [showAskForm, setShowAskForm] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
+  const [questions, setQuestions] = useState<QuestionItem[]>([]);
+  const [loadingQuestions, setLoadingQuestions] = useState(false);
+  const [questionsError, setQuestionsError] = useState('');
+
+  useEffect(() => {
+    const loadQuestions = async () => {
+      setLoadingQuestions(true);
+      setQuestionsError('');
+      try {
+        const data: QuestionVaultItemApi[] = await getQuestionVaultItems();
+        setQuestions(data.map((item) => ({
+          id: item.id,
+          category: item.category || 'Hakuna taarifa',
+          q: item.q,
+          a: item.a,
+          detailedResponse: item.detailedResponse || '',
+          ref: item.ref || 'Hakuna taarifa',
+          tags: item.tags || [],
+          isPopular: item.isPopular,
+          videoUrl: item.videoUrl || '',
+          videoThumbnail: item.videoThumbnail || '',
+        })));
+      } catch (error: any) {
+        setQuestions([]);
+        setQuestionsError(error?.message || 'Imeshindikana kupakua maswali.');
+      } finally {
+        setLoadingQuestions(false);
+      }
+    };
+
+    loadQuestions();
+  }, []);
+
+  const categories = useMemo(
+    () => ['Zote', ...Array.from(new Set(questions.map((item) => item.category).filter(Boolean)))],
+    [questions]
+  );
+
+  useEffect(() => {
+    if (activeCategory !== 'Zote' && !categories.includes(activeCategory)) {
+      setActiveCategory('Zote');
+    }
+  }, [activeCategory, categories]);
 
   const filteredQuestions = useMemo(() => {
-    return ARCHIVED_QUESTIONS.filter(q => {
+    return questions.filter(q => {
       const matchesSearch = q.q.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesCategory = activeCategory === 'Zote' || q.category === activeCategory;
       return matchesSearch && matchesCategory;
     });
-  }, [searchTerm, activeCategory]);
+  }, [searchTerm, activeCategory, questions]);
 
   const handleShare = async (item: QuestionItem) => {
     const shareData = {
@@ -107,7 +149,7 @@ export const QuestionVault: React.FC = () => {
             />
           </div>
           <div className="lg:col-span-8 flex gap-1.5 overflow-x-auto scrollbar-hide py-1">
-            {CATEGORIES.map(cat => (
+            {categories.map(cat => (
               <button 
                 key={cat}
                 onClick={() => setActiveCategory(cat)}
@@ -127,6 +169,16 @@ export const QuestionVault: React.FC = () => {
       {/* Grid Results */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         <div className="lg:col-span-8 space-y-4">
+           {questionsError && (
+             <div className="bg-red-500/10 border border-red-500/20 text-red-500 text-[10px] font-bold uppercase tracking-widest px-4 py-2 rounded-lg">
+               {questionsError}
+             </div>
+           )}
+           {loadingQuestions && (
+             <div className="py-6 text-center text-xs font-black uppercase tracking-widest text-slate-500">
+               Inapakia maswali...
+             </div>
+           )}
            {filteredQuestions.map((item) => (
              <div 
                key={item.id} 
@@ -151,7 +203,7 @@ export const QuestionVault: React.FC = () => {
                </div>
              </div>
            ))}
-           {filteredQuestions.length === 0 && (
+           {!loadingQuestions && filteredQuestions.length === 0 && (
              <div className="py-20 text-center space-y-4 opacity-30">
                <Search size={48} className="mx-auto" />
                <p className="font-black uppercase tracking-widest text-xs">Hakuna swali lililopatikana</p>

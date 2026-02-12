@@ -5,7 +5,7 @@ import {
   Filter, ShoppingBag, Heart, ArrowUpRight, X, Minus, Plus, 
   CreditCard, Smartphone, ShieldCheck, MapPin, Package, Clock, Eye
 } from 'lucide-react';
-import { getShopProducts, trackShopOrder } from '../services/shopService';
+import { createShopOrder, getShopProducts, ShopOrderTrackApi, trackShopOrder } from '../services/shopService';
 
 interface Product {
   id: number;
@@ -24,6 +24,39 @@ interface Product {
   specs: string[];
 }
 
+interface CheckoutFormState {
+  fullName: string;
+  email: string;
+  phone: string;
+  address: string;
+  city: string;
+  country: string;
+}
+
+const getInitialCheckoutForm = (): CheckoutFormState => {
+  try {
+    const raw = localStorage.getItem('gc365_user');
+    const parsed = raw ? JSON.parse(raw) : null;
+    return {
+      fullName: typeof parsed?.name === 'string' ? parsed.name : '',
+      email: typeof parsed?.email === 'string' ? parsed.email : '',
+      phone: '',
+      address: '',
+      city: '',
+      country: 'Tanzania',
+    };
+  } catch {
+    return {
+      fullName: '',
+      email: '',
+      phone: '',
+      address: '',
+      city: '',
+      country: 'Tanzania',
+    };
+  }
+};
+
 export const Shop: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'Browse' | 'Tracking'>('Browse');
   const [cartCount, setCartCount] = useState(0);
@@ -32,13 +65,17 @@ export const Shop: React.FC = () => {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [orderStep, setOrderStep] = useState<'Detail' | 'Checkout' | 'Success'>('Detail');
   const [trackingId, setTrackingId] = useState('');
-  const [trackingResult, setTrackingResult] = useState<any | null>(null);
+  const [trackingResult, setTrackingResult] = useState<ShopOrderTrackApi | null>(null);
   const [trackingError, setTrackingError] = useState<string | null>(null);
   const [products, setProducts] = useState<Product[]>([]);
   const [loadingProducts, setLoadingProducts] = useState(false);
   const [productsError, setProductsError] = useState<string | null>(null);
   const [orderQuantity, setOrderQuantity] = useState(1);
   const [selectedColor, setSelectedColor] = useState('');
+  const [checkoutForm, setCheckoutForm] = useState<CheckoutFormState>(() => getInitialCheckoutForm());
+  const [isPlacingOrder, setIsPlacingOrder] = useState(false);
+  const [orderSubmitError, setOrderSubmitError] = useState<string | null>(null);
+  const [lastTrackingCode, setLastTrackingCode] = useState('');
   const categories = useMemo(() => {
     const unique = new Set(products.map((product) => product.category).filter(Boolean));
     return ['Zote', ...Array.from(unique)];
@@ -67,8 +104,51 @@ export const Shop: React.FC = () => {
     setCartCount(prev => prev + 1);
   };
 
-  const handlePlaceOrder = () => {
-    setOrderStep('Success');
+  const openProduct = (product: Product) => {
+    setSelectedProduct(product);
+    setOrderStep('Detail');
+    setOrderQuantity(1);
+    setSelectedColor(product.colors[0] || '');
+    setOrderSubmitError(null);
+    setLastTrackingCode('');
+  };
+
+  const handlePlaceOrder = async () => {
+    if (!selectedProduct || isPlacingOrder) return;
+
+    if (!checkoutForm.fullName.trim() || !checkoutForm.email.trim() || !checkoutForm.phone.trim() || !checkoutForm.address.trim()) {
+      setOrderSubmitError('Jaza jina, email, simu na anwani kabla ya kulipa.');
+      return;
+    }
+
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailPattern.test(checkoutForm.email.trim())) {
+      setOrderSubmitError('Tafadhali weka email sahihi.');
+      return;
+    }
+
+    setIsPlacingOrder(true);
+    setOrderSubmitError(null);
+
+    try {
+      const created = await createShopOrder({
+        full_name: checkoutForm.fullName.trim(),
+        email: checkoutForm.email.trim(),
+        phone: checkoutForm.phone.trim(),
+        address: checkoutForm.address.trim(),
+        city: checkoutForm.city.trim(),
+        country: checkoutForm.country.trim(),
+        items: [{ product_id: selectedProduct.id, quantity: orderQuantity, title: selectedProduct.title }],
+      });
+      setLastTrackingCode(created.tracking_code);
+      setTrackingId(created.tracking_code);
+      setTrackingResult(created);
+      setOrderStep('Success');
+    } catch (err: any) {
+      setOrderSubmitError(err?.message || 'Imeshindikana kutuma oda.');
+    } finally {
+      setIsPlacingOrder(false);
+    }
   };
 
   useEffect(() => {
@@ -242,7 +322,7 @@ export const Shop: React.FC = () => {
             {filteredProducts.map((product) => (
               <div 
                 key={product.id}
-                onClick={() => { setSelectedProduct(product); setOrderStep('Detail'); setOrderQuantity(1); setSelectedColor(product.colors[0] || ''); }}
+                onClick={() => openProduct(product)}
                 className="group relative flex flex-col bg-white dark:bg-slate-900 border border-slate-100 dark:border-white/5 rounded-xl overflow-hidden transition-all duration-500 hover:shadow-xl hover:border-gold-500/30 cursor-pointer"
               >
                 {/* Image Section - Compact */}
@@ -378,7 +458,7 @@ export const Shop: React.FC = () => {
                             <span className="text-slate-500 text-[10px] ml-auto">2-5 Siku za Kazi</span>
                          </div>
                          <button 
-                           onClick={() => setOrderStep('Checkout')}
+                           onClick={() => { setOrderSubmitError(null); setOrderStep('Checkout'); }}
                            className="w-full py-4 bg-primary-950 text-gold-400 rounded-xl font-black text-xs uppercase tracking-[0.2em] hover:bg-gold-500 hover:text-primary-950 transition-all shadow-xl active:scale-[0.98]"
                          >Endelea na Malipo</button>
                       </div>
@@ -412,12 +492,60 @@ export const Shop: React.FC = () => {
                             <h4 className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">Taarifa za Kutuma</h4>
                             <div className="space-y-3">
                                <div className="flex gap-3 p-3 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl focus-within:border-gold-500 transition-all">
+                                  <input
+                                    type="text"
+                                    value={checkoutForm.fullName}
+                                    onChange={(e) => setCheckoutForm((prev) => ({ ...prev, fullName: e.target.value }))}
+                                    placeholder="Jina kamili"
+                                    className="bg-transparent border-none outline-none text-xs font-bold w-full text-slate-900 dark:text-white"
+                                  />
+                               </div>
+                               <div className="flex gap-3 p-3 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl focus-within:border-gold-500 transition-all">
+                                  <input
+                                    type="email"
+                                    value={checkoutForm.email}
+                                    onChange={(e) => setCheckoutForm((prev) => ({ ...prev, email: e.target.value }))}
+                                    placeholder="barua pepe (email)"
+                                    className="bg-transparent border-none outline-none text-xs font-bold w-full text-slate-900 dark:text-white"
+                                  />
+                               </div>
+                               <div className="flex gap-3 p-3 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl focus-within:border-gold-500 transition-all">
                                   <MapPin size={16} className="text-primary-950 dark:text-gold-500 shrink-0" />
-                                  <input type="text" placeholder="Mkoa, Wilaya, Mtaa" className="bg-transparent border-none outline-none text-xs font-bold w-full text-slate-900 dark:text-white" />
+                                  <input
+                                    type="text"
+                                    value={checkoutForm.address}
+                                    onChange={(e) => setCheckoutForm((prev) => ({ ...prev, address: e.target.value }))}
+                                    placeholder="Mtaa, nyumba, maelekezo"
+                                    className="bg-transparent border-none outline-none text-xs font-bold w-full text-slate-900 dark:text-white"
+                                  />
+                               </div>
+                               <div className="flex gap-3 p-3 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl focus-within:border-gold-500 transition-all">
+                                  <input
+                                    type="text"
+                                    value={checkoutForm.city}
+                                    onChange={(e) => setCheckoutForm((prev) => ({ ...prev, city: e.target.value }))}
+                                    placeholder="Mkoa / Wilaya"
+                                    className="bg-transparent border-none outline-none text-xs font-bold w-full text-slate-900 dark:text-white"
+                                  />
+                               </div>
+                               <div className="flex gap-3 p-3 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl focus-within:border-gold-500 transition-all">
+                                  <input
+                                    type="text"
+                                    value={checkoutForm.country}
+                                    onChange={(e) => setCheckoutForm((prev) => ({ ...prev, country: e.target.value }))}
+                                    placeholder="Nchi"
+                                    className="bg-transparent border-none outline-none text-xs font-bold w-full text-slate-900 dark:text-white"
+                                  />
                                </div>
                                <div className="flex gap-3 p-3 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl focus-within:border-gold-500 transition-all">
                                   <Smartphone size={16} className="text-primary-950 dark:text-gold-500 shrink-0" />
-                                  <input type="tel" placeholder="+255 7XX XXX XXX" className="bg-transparent border-none outline-none text-xs font-bold w-full text-slate-900 dark:text-white" />
+                                  <input
+                                    type="tel"
+                                    value={checkoutForm.phone}
+                                    onChange={(e) => setCheckoutForm((prev) => ({ ...prev, phone: e.target.value }))}
+                                    placeholder="+255 7XX XXX XXX"
+                                    className="bg-transparent border-none outline-none text-xs font-bold w-full text-slate-900 dark:text-white"
+                                  />
                                </div>
                             </div>
                          </section>
@@ -437,10 +565,15 @@ export const Shop: React.FC = () => {
                          </section>
                       </div>
 
+                      {orderSubmitError && (
+                        <div className="text-center text-[10px] font-black uppercase tracking-widest text-red-500">{orderSubmitError}</div>
+                      )}
+
                       <button 
                         onClick={handlePlaceOrder}
-                        className="w-full py-4 bg-gold-500 text-primary-950 rounded-xl font-black text-xs uppercase tracking-[0.3em] hover:bg-slate-900 hover:text-white transition-all shadow-xl shadow-gold-500/20 active:scale-[0.98] mt-auto"
-                      >Lipa Sasa</button>
+                        disabled={isPlacingOrder}
+                        className="w-full py-4 bg-gold-500 text-primary-950 rounded-xl font-black text-xs uppercase tracking-[0.3em] hover:bg-slate-900 hover:text-white transition-all shadow-xl shadow-gold-500/20 active:scale-[0.98] mt-auto disabled:opacity-60 disabled:cursor-not-allowed"
+                      >{isPlacingOrder ? 'Inatuma Oda...' : 'Lipa Sasa'}</button>
                    </div>
                  )}
 
@@ -455,11 +588,11 @@ export const Shop: React.FC = () => {
                       </div>
                       <div className="p-6 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl w-full max-w-xs shadow-inner">
                          <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1">Tracking ID</p>
-                         <p className="text-2xl font-black text-primary-950 dark:text-gold-500 font-mono tracking-tight">GC-20492-TZ</p>
+                         <p className="text-2xl font-black text-primary-950 dark:text-gold-500 font-mono tracking-tight">{lastTrackingCode || trackingId || 'Hakuna'}</p>
                          <p className="text-[9px] text-slate-500 mt-2 italic font-bold">Tumia namba hii kufuatilia.</p>
                       </div>
                       <button 
-                        onClick={() => { setSelectedProduct(null); setActiveTab('Tracking'); setTrackingId('GC-TEST'); }}
+                        onClick={() => { setSelectedProduct(null); setActiveTab('Tracking'); if (lastTrackingCode) setTrackingId(lastTrackingCode); }}
                         className="px-10 py-4 bg-primary-950 text-gold-400 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-gold-500 hover:text-primary-950 transition-all shadow-xl"
                       >Fuatilia Oda</button>
                    </div>

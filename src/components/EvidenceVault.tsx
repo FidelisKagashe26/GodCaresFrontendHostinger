@@ -9,6 +9,7 @@ import {
   Move, Minimize, Maximize, UserCheck, Quote, User, Crosshair,
   Folder, FolderOpen, ChevronLeft, Play, Pause, Grid, Layers, PlayCircle
 } from 'lucide-react';
+import { EvidenceItemApi, getEvidenceItems } from '../services/vaultService';
 
 // --- TYPES ---
 
@@ -44,7 +45,7 @@ interface AuthorProfile {
 
 interface EvidenceItem {
   id: string;
-  category: 'Sabato' | 'Upagani wa Ukatoliki' | 'Makufuru ya Papa' | 'Historia ya Kanisa' | 'Unabii';
+  category: string;
   subCategory: string; // Grouping within the folder
   hint: string; // Teaser text shown on hover
   type: MediaType;
@@ -745,12 +746,78 @@ export const EvidenceVault: React.FC = () => {
   const [activeFolder, setActiveFolder] = useState<string | null>(null);
   const [selectedItem, setSelectedItem] = useState<EvidenceItem | null>(null);
   const [viewMode, setViewMode] = useState<'summary' | 'document' | 'authority'>('summary');
+  const [vaultItems, setVaultItems] = useState<EvidenceItem[]>([]);
+  const [loadingVault, setLoadingVault] = useState(false);
+  const [vaultError, setVaultError] = useState('');
+
+  useEffect(() => {
+    const loadVault = async () => {
+      setLoadingVault(true);
+      setVaultError('');
+      try {
+        const data: EvidenceItemApi[] = await getEvidenceItems();
+        const mapped = data.map((item) => ({
+          id: item.id,
+          category: item.category || 'Hakuna taarifa',
+          subCategory: item.subCategory || 'Hakuna taarifa',
+          hint: item.hint || '',
+          type: item.type || 'PDF',
+          title: item.title || 'Hakuna taarifa',
+          swahiliTitle: item.swahiliTitle || '',
+          description: item.description || '',
+          fact: item.fact || '',
+          sourceBook: item.sourceBook || '',
+          publisher: item.publisher || '',
+          author: {
+            name: item.author?.name || 'Hakuna taarifa',
+            role: item.author?.role || '',
+            authority: item.author?.authority || '',
+            organization: item.author?.organization || '',
+            image: item.author?.image || '',
+            bio: item.author?.bio || '',
+          },
+          yearPublished: item.yearPublished || '',
+          translations: {
+            original: item.translations?.original || '',
+            en: item.translations?.en || '',
+            sw: item.translations?.sw || '',
+          },
+          heroImage: item.heroImage || '',
+          videoUrl: item.videoUrl || '',
+          evidenceData: {
+            page: Number(item.evidenceData?.page || 0),
+            totalPages: Number(item.evidenceData?.totalPages || 0),
+            annotations: Array.isArray(item.evidenceData?.annotations) ? item.evidenceData.annotations : [],
+            confidence: Number(item.evidenceData?.confidence || 0),
+            extractionMethod: item.evidenceData?.extractionMethod || '',
+            sourceHash: item.evidenceData?.sourceHash || '',
+            scanDate: item.evidenceData?.scanDate || '',
+            originalLanguage: item.evidenceData?.originalLanguage || '',
+          },
+        }));
+        setVaultItems(mapped);
+      } catch (error: any) {
+        setVaultItems([]);
+        setVaultError(error?.message || 'Imeshindikana kupakua evidence vault.');
+      } finally {
+        setLoadingVault(false);
+      }
+    };
+
+    loadVault();
+  }, []);
   
   // Extract unique categories for folders
-  const folders = Array.from(new Set(VAULT_ITEMS.map(i => i.category)));
+  const folders = Array.from(new Set(vaultItems.map(i => i.category)));
 
   // Filter items based on active folder
-  const folderItems = activeFolder ? VAULT_ITEMS.filter(i => i.category === activeFolder) : [];
+  const folderItems = activeFolder ? vaultItems.filter(i => i.category === activeFolder) : [];
+
+  useEffect(() => {
+    if (activeFolder && !folders.includes(activeFolder)) {
+      setActiveFolder(null);
+    }
+  }, [activeFolder, folders]);
 
   const handleClose = () => {
     setSelectedItem(null);
@@ -807,8 +874,23 @@ export const EvidenceVault: React.FC = () => {
       {/* NAVIGATION / FOLDERS VIEW */}
       {!activeFolder && (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+           {vaultError && (
+             <div className="col-span-full bg-red-500/10 border border-red-500/20 text-red-500 text-[10px] font-bold uppercase tracking-widest px-4 py-2 rounded-lg">
+               {vaultError}
+             </div>
+           )}
+           {loadingVault && (
+             <div className="col-span-full py-6 text-center text-xs font-black uppercase tracking-widest text-slate-400">
+               Inapakia evidence...
+             </div>
+           )}
+           {!loadingVault && folders.length === 0 && (
+             <div className="col-span-full py-6 text-center text-xs font-black uppercase tracking-widest text-slate-400">
+               Hakuna taarifa za evidence kwa sasa.
+             </div>
+           )}
            {folders.map(folder => {
-             const count = VAULT_ITEMS.filter(i => i.category === folder).length;
+             const count = vaultItems.filter(i => i.category === folder).length;
              return (
                <button 
                  key={folder}
