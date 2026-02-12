@@ -31,7 +31,7 @@ export interface ShopOrderTrackApi {
   items: ShopOrderItemApi[];
 }
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || window.location.origin).replace(/\/$/, "");
 
 export const getShopProducts = async (): Promise<ShopProductApi[]> => {
   const response = await fetch(`${API_BASE_URL}/api/shop/products/`);
@@ -49,3 +49,4 @@ export const trackShopOrder = async (code: string): Promise<ShopOrderTrackApi> =
   }
   return (await response.json()) as ShopOrderTrackApi;
 };
+

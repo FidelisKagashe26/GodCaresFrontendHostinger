@@ -10,7 +10,7 @@ export interface NewsItemApi {
   published_at: string;
 }
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || window.location.origin).replace(/\/$/, "");
 
 export const getNewsItems = async (): Promise<NewsItemApi[]> => {
   const response = await fetch(`${API_BASE_URL}/api/news/`);
@@ -19,3 +19,4 @@ export const getNewsItems = async (): Promise<NewsItemApi[]> => {
   }
   return (await response.json()) as NewsItemApi[];
 };
+

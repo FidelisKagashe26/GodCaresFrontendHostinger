@@ -14,7 +14,7 @@ export interface LibraryItemApi {
   created_at: string;
 }
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || window.location.origin).replace(/\/$/, "");
 
 export const getLibraryItems = async (): Promise<LibraryItemApi[]> => {
   const response = await fetch(`${API_BASE_URL}/api/library/`);
@@ -23,3 +23,4 @@ export const getLibraryItems = async (): Promise<LibraryItemApi[]> => {
   }
   return (await response.json()) as LibraryItemApi[];
 };
+

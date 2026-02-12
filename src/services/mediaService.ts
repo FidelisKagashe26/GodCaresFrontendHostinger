@@ -18,7 +18,7 @@ export interface MediaPlaylistApi {
   videos: MediaVideoApi[];
 }
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || window.location.origin).replace(/\/$/, "");
 
 export const getMediaPlaylists = async (): Promise<MediaPlaylistApi[]> => {
   const response = await fetch(`${API_BASE_URL}/api/media/playlists/`);
@@ -27,3 +27,4 @@ export const getMediaPlaylists = async (): Promise<MediaPlaylistApi[]> => {
   }
   return (await response.json()) as MediaPlaylistApi[];
 };
+

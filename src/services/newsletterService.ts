@@ -1,4 +1,4 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || window.location.origin).replace(/\/$/, "");
 
 export const subscribeNewsletter = async (email: string) => {
   const response = await fetch(`${API_BASE_URL}/api/newsletter/`, {
@@ -14,3 +14,4 @@ export const subscribeNewsletter = async (email: string) => {
 
   return response.json().catch(() => ({}));
 };
+

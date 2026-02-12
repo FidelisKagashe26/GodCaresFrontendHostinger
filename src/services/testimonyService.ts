@@ -13,7 +13,7 @@ export interface TestimonyApi {
   created_at: string;
 }
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || window.location.origin).replace(/\/$/, "");
 
 export const getTestimonies = async (): Promise<TestimonyApi[]> => {
   const response = await fetch(`${API_BASE_URL}/api/testimonies/`);
@@ -44,3 +44,4 @@ export const submitTestimony = async (payload: {
 
   return (await response.json()) as TestimonyApi;
 };
+

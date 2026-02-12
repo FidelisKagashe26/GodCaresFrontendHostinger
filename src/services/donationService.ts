@@ -7,7 +7,7 @@ export interface DonationProjectApi {
   raised: number;
 }
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || window.location.origin).replace(/\/$/, "");
 
 export const getDonationProjects = async (): Promise<DonationProjectApi[]> => {
   const response = await fetch(`${API_BASE_URL}/api/donations/projects/`);
@@ -37,3 +37,4 @@ export const submitDonation = async (payload: {
 
   return response.json().catch(() => ({}));
 };
+

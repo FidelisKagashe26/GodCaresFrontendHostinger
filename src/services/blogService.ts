@@ -12,7 +12,7 @@ export interface BlogPostApi {
   published_at: string;
 }
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || window.location.origin).replace(/\/$/, "");
 
 export const getBlogPosts = async (): Promise<BlogPostApi[]> => {
   const response = await fetch(`${API_BASE_URL}/api/blog/`);
@@ -29,3 +29,4 @@ export const getBlogPost = async (id: number): Promise<BlogPostApi> => {
   }
   return (await response.json()) as BlogPostApi;
 };
+

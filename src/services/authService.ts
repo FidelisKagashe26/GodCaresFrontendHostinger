@@ -16,7 +16,7 @@ interface TokenPair {
   refresh: string;
 }
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || window.location.origin).replace(/\/$/, "");
 const ACCESS_TOKEN_KEY = "gc365_access_token";
 const REFRESH_TOKEN_KEY = "gc365_refresh_token";
 
@@ -207,3 +207,4 @@ export const resetPassword = async (payload: {
     throw new Error(message);
   }
 };
+

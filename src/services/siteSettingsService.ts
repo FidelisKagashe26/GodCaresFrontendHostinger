@@ -1,4 +1,4 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || window.location.origin).replace(/\/$/, "");
 
 export interface SiteSettings {
   site_name: string;
@@ -60,3 +60,4 @@ export const getSiteSettings = async (): Promise<SiteSettings> => {
   const data = (await response.json()) as Partial<SiteSettings>;
   return normalizeSettings(data);
 };
+

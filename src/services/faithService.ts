@@ -14,7 +14,7 @@ export interface FaithHeroApi {
   video_url: string;
 }
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || window.location.origin).replace(/\/$/, "");
 
 export const getFaithHeroes = async (): Promise<FaithHeroApi[]> => {
   const response = await fetch(`${API_BASE_URL}/api/faith/heroes/`);
@@ -23,3 +23,4 @@ export const getFaithHeroes = async (): Promise<FaithHeroApi[]> => {
   }
   return (await response.json()) as FaithHeroApi[];
 };
+

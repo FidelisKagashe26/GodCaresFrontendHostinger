@@ -26,7 +26,7 @@ export interface EventApi {
   resources: EventResource[];
 }
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || window.location.origin).replace(/\/$/, "");
 
 export const getEvents = async (): Promise<EventApi[]> => {
   const response = await fetch(`${API_BASE_URL}/api/events/`);
@@ -50,3 +50,4 @@ export const registerForEvent = async (eventId: number, payload: { name: string;
 
   return response.json().catch(() => ({}));
 };
+
