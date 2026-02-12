@@ -5,7 +5,7 @@ import {
   X, Info, Book, Send, Clock, ShieldCheck, PlusCircle, 
   ArrowLeft, RefreshCw, PlayCircle, Youtube, Share2, FileText, Check
 } from 'lucide-react';
-import { getQuestionVaultItems, QuestionVaultItemApi } from '../services/vaultService';
+import { getQuestionVaultItems, QuestionVaultItemApi, submitQuestionVaultQuestion } from '../services/vaultService';
 
 interface QuestionItem {
   id: number;
@@ -65,6 +65,12 @@ export const QuestionVault: React.FC = () => {
   const [activeView, setActiveView] = useState<'text' | 'video'>('text');
   const [showAskForm, setShowAskForm] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
+  const [askName, setAskName] = useState('');
+  const [askEmail, setAskEmail] = useState('');
+  const [askQuestion, setAskQuestion] = useState('');
+  const [askSubmitting, setAskSubmitting] = useState(false);
+  const [askError, setAskError] = useState('');
+  const [askSuccess, setAskSuccess] = useState('');
   const [questions, setQuestions] = useState<QuestionItem[]>([]);
   const [loadingQuestions, setLoadingQuestions] = useState(false);
   const [questionsError, setQuestionsError] = useState('');
@@ -129,6 +135,52 @@ export const QuestionVault: React.FC = () => {
       navigator.clipboard.writeText(`${shareData.text}\n${shareData.url}`);
       setIsCopied(true);
       setTimeout(() => setIsCopied(false), 2000);
+    }
+  };
+
+  useEffect(() => {
+    if (!showAskForm) return;
+    setAskError('');
+    setAskSuccess('');
+    try {
+      const raw = localStorage.getItem('gc365_user');
+      const parsed = raw ? JSON.parse(raw) : null;
+      if (!askName && typeof parsed?.name === 'string') setAskName(parsed.name);
+      if (!askEmail && typeof parsed?.email === 'string') setAskEmail(parsed.email);
+    } catch {
+      // ignore parse errors
+    }
+  }, [showAskForm]);
+
+  const handleAskSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!askQuestion.trim()) {
+      setAskError('Andika swali kabla ya kutuma.');
+      return;
+    }
+    if (askEmail.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(askEmail.trim())) {
+      setAskError('Barua pepe si sahihi.');
+      return;
+    }
+
+    setAskSubmitting(true);
+    setAskError('');
+    try {
+      await submitQuestionVaultQuestion({
+        name: askName.trim(),
+        email: askEmail.trim(),
+        question: askQuestion.trim(),
+      });
+      setAskSuccess('Swali lako limetumwa kwa timu ya uhariri.');
+      setAskQuestion('');
+      setTimeout(() => {
+        setShowAskForm(false);
+        setAskSuccess('');
+      }, 1200);
+    } catch (error: any) {
+      setAskError(error?.message || 'Imeshindikana kutuma swali.');
+    } finally {
+      setAskSubmitting(false);
     }
   };
 
@@ -346,10 +398,32 @@ export const QuestionVault: React.FC = () => {
              <div className="bg-primary-950 p-10 text-white">
                 <h3 className="text-2xl font-black tracking-tighter uppercase italic">Uliza <span className="text-gold-500">Biblia</span></h3>
              </div>
-             <form onSubmit={(e) => { e.preventDefault(); setShowAskForm(false); alert("Swali lako limetumwa kwa Timu ya Uhariri."); }} className="p-8 space-y-6">
-                <textarea required placeholder="Andika swali lako hapa kwa kina..." className="w-full h-40 p-5 bg-black/40 border border-slate-800 rounded-xl outline-none focus:border-gold-500 transition-all text-sm font-medium text-white" />
-                <button type="submit" className="w-full py-4 bg-gold-500 text-primary-950 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-slate-800 hover:text-white transition-all shadow-lg flex items-center justify-center gap-2">
-                   <Send size={16} /> Tuma Swali
+             <form onSubmit={handleAskSubmit} className="p-8 space-y-4">
+                <input
+                  type="text"
+                  value={askName}
+                  onChange={(e) => setAskName(e.target.value)}
+                  placeholder="Jina (hiari)"
+                  className="w-full p-4 bg-black/40 border border-slate-800 rounded-xl outline-none focus:border-gold-500 transition-all text-sm font-medium text-white"
+                />
+                <input
+                  type="email"
+                  value={askEmail}
+                  onChange={(e) => setAskEmail(e.target.value)}
+                  placeholder="Barua pepe (hiari)"
+                  className="w-full p-4 bg-black/40 border border-slate-800 rounded-xl outline-none focus:border-gold-500 transition-all text-sm font-medium text-white"
+                />
+                <textarea
+                  required
+                  value={askQuestion}
+                  onChange={(e) => setAskQuestion(e.target.value)}
+                  placeholder="Andika swali lako hapa kwa kina..."
+                  className="w-full h-40 p-5 bg-black/40 border border-slate-800 rounded-xl outline-none focus:border-gold-500 transition-all text-sm font-medium text-white"
+                />
+                {askError && <div className="text-[10px] font-black uppercase tracking-widest text-red-500">{askError}</div>}
+                {askSuccess && <div className="text-[10px] font-black uppercase tracking-widest text-green-500">{askSuccess}</div>}
+                <button type="submit" disabled={askSubmitting} className="w-full py-4 bg-gold-500 text-primary-950 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-slate-800 hover:text-white transition-all shadow-lg flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed">
+                   <Send size={16} /> {askSubmitting ? 'Inatuma...' : 'Tuma Swali'}
                 </button>
              </form>
           </div>

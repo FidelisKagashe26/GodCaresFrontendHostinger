@@ -79,6 +79,21 @@ export interface QuestionVaultItemApi {
   videoThumbnail?: string;
 }
 
+export interface QuestionVaultSubmissionPayload {
+  name?: string;
+  email?: string;
+  question: string;
+}
+
+export interface QuestionVaultSubmissionApi {
+  id: number;
+  name: string;
+  email: string;
+  question: string;
+  is_reviewed: boolean;
+  created_at: string;
+}
+
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || window.location.origin).replace(/\/$/, "");
 
 export const getEvidenceItems = async (): Promise<EvidenceItemApi[]> => {
@@ -103,4 +118,19 @@ export const getQuestionVaultItems = async (): Promise<QuestionVaultItemApi[]> =
     throw new Error("Imeshindikana kupata question vault.");
   }
   return (await response.json()) as QuestionVaultItemApi[];
+};
+
+export const submitQuestionVaultQuestion = async (
+  payload: QuestionVaultSubmissionPayload
+): Promise<QuestionVaultSubmissionApi> => {
+  const response = await fetch(`${API_BASE_URL}/api/question-vault/submit/`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}));
+    throw new Error(error?.detail || "Imeshindikana kutuma swali.");
+  }
+  return (await response.json()) as QuestionVaultSubmissionApi;
 };
