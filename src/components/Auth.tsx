@@ -65,7 +65,7 @@ export const Auth: React.FC<AuthProps> = ({ onLogin, onClose, resetParams, onRes
         onLogin(user);
       } else {
         await registerUser({ name, email, password });
-        setInfoMessage('Tumetuma link ya uthibitisho kwenye email yako. Tafadhali thibitisha akaunti kabla ya kuingia.');
+        setInfoMessage('Usajili umefanikiwa. Sasa ingia kwa email na nenosiri lako.');
         setIsLogin(true);
         setPassword('');
       }

@@ -58,26 +58,26 @@ export const Home: React.FC<HomeProps> = ({ onNavigate }) => {
   ];
 
   return (
-    <div className="relative w-full bg-slate-50 text-slate-900 dark:bg-[#020617] dark:text-slate-200 overflow-x-hidden font-sans selection:bg-gold-500/30">
+    <div className="relative w-full bg-[color:var(--surface-0)] text-slate-900 dark:bg-[#020617] dark:text-slate-200 overflow-x-hidden font-sans selection:bg-gold-500/30">
       
       {/* --- HERO --- */}
       <section className="relative min-h-[75vh] md:min-h-[82vh] flex flex-col items-center justify-center overflow-hidden">
         <div className="absolute inset-0 z-0">
            <img src="https://images.unsplash.com/photo-1462331940025-496dfbfc7564?q=80&w=2500" className="w-full h-full object-cover opacity-55 dark:opacity-45 animate-ken-burns" alt="Cosmos" />
-           <div className="absolute inset-0 bg-gradient-to-b from-white/55 via-white/15 to-white/55 dark:from-[#020617] dark:via-transparent dark:to-[#020617]"></div>
+           <div className="absolute inset-0 bg-gradient-to-b from-emerald-100/70 via-emerald-100/20 to-emerald-100/70 dark:from-[#020617] dark:via-transparent dark:to-[#020617]"></div>
         </div>
         <div className="relative z-10 text-center px-4 sm:px-6 max-w-5xl space-y-6">
            <ScrollReveal>
-             <div className="inline-flex items-center gap-3 px-4 sm:px-6 py-2 rounded-md border border-slate-200/80 dark:border-white/10 bg-white/80 dark:bg-white/5 backdrop-blur-md mb-4 shadow-[0_0_20px_rgba(234,179,8,0.1)]">
+             <div className="inline-flex items-center gap-3 px-4 sm:px-6 py-2 rounded-md border border-slate-200/80 dark:border-white/10 bg-[color:var(--surface-2)] dark:bg-white/5 backdrop-blur-md mb-4 shadow-[0_0_20px_rgba(234,179,8,0.1)]">
                 <span className="w-2 h-2 bg-gold-500 rounded-full animate-pulse"></span>
                 <span className="text-[10px] font-black tracking-[0.4em] uppercase text-gold-400">Yohana 8:32</span>
              </div>
              <h1 className="text-3xl sm:text-5xl md:text-7xl lg:text-8xl font-black text-slate-900 dark:text-white tracking-tighter leading-[0.95] drop-shadow-2xl uppercase">GOD CARES <br/> <span className="text-transparent bg-clip-text bg-gradient-to-r from-gold-400 via-gold-500 to-gold-400">365</span></h1>
              <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 pt-8 sm:pt-12">
-                <button onClick={() => onNavigate(StageId.BIBLE_STUDY)} className="group relative px-8 py-4 sm:px-12 sm:py-5 bg-slate-900 text-white dark:bg-white dark:text-black font-black text-xs sm:text-sm uppercase tracking-[0.2em] hover:bg-gold-500 hover:-translate-y-1 transition-all shadow-[0_20px_40px_rgba(0,0,0,0.2)] rounded-md overflow-hidden w-full sm:w-auto">
+                <button onClick={() => onNavigate(StageId.BIBLE_STUDY)} className="group relative px-8 py-4 sm:px-12 sm:py-5 bg-emerald-700 text-emerald-50 dark:bg-gold-500 dark:text-slate-900 font-black text-xs sm:text-sm uppercase tracking-[0.2em] hover:bg-gold-500 hover:text-slate-900 hover:-translate-y-1 transition-all shadow-[0_20px_40px_rgba(0,0,0,0.2)] rounded-md overflow-hidden w-full sm:w-auto">
                   <span className="relative z-10">Anza Safari <ArrowRight size={16} className="inline ml-2 group-hover:translate-x-1 transition-transform"/></span>
                 </button>
-                <button onClick={() => onNavigate(StageId.MEDIA)} className="group relative px-8 py-4 sm:px-12 sm:py-5 border border-slate-300 text-slate-900 dark:border-white/20 dark:text-white font-black text-xs sm:text-sm uppercase tracking-[0.2em] hover:bg-slate-200/70 dark:hover:bg-white/10 hover:-translate-y-1 transition-all rounded-md overflow-hidden w-full sm:w-auto">
+                <button onClick={() => onNavigate(StageId.MEDIA)} className="group relative px-8 py-4 sm:px-12 sm:py-5 border border-emerald-300 text-emerald-900 dark:border-white/20 dark:text-white font-black text-xs sm:text-sm uppercase tracking-[0.2em] hover:bg-emerald-100 dark:hover:bg-white/10 hover:-translate-y-1 transition-all rounded-md overflow-hidden w-full sm:w-auto">
                   <span className="relative z-10">Tazama Video <Play size={16} className="inline ml-2 group-hover:scale-110 transition-transform" fill="currentColor"/></span>
                 </button>
              </div>
@@ -99,15 +99,15 @@ export const Home: React.FC<HomeProps> = ({ onNavigate }) => {
         ].map((step, i) => (
           <div key={i} className="relative min-h-[70vh] md:min-h-[75vh] flex items-center overflow-hidden border-b border-slate-200 dark:border-white/5">
             <img src={step.img} className="absolute inset-0 w-full h-full object-cover opacity-25 dark:opacity-20 transition-transform duration-[8s] ease-out hover:scale-110" alt="" />
-            <div className="absolute inset-0 bg-gradient-to-r from-white/80 via-white/60 to-transparent dark:from-[#020617] dark:via-[#020617]/90"></div>
+            <div className="absolute inset-0 bg-gradient-to-r from-emerald-100/85 via-emerald-100/60 to-transparent dark:from-[#020617] dark:via-[#020617]/90"></div>
             <div className="max-w-6xl mx-auto px-4 sm:px-6 relative z-10 w-full">
               <ScrollReveal className={i % 2 === 1 ? "text-right ml-auto" : ""}>
                 <div className={`inline-flex items-center gap-3 mb-6 ${i % 2 === 1 ? 'flex-row-reverse' : ''}`}>
-                    <div className="w-12 h-12 bg-white/90 dark:bg-white/5 backdrop-blur-xl border border-slate-200 dark:border-white/10 rounded-full flex items-center justify-center text-gold-600 dark:text-gold-500 font-black text-xl">0{step.id}</div>
+                    <div className="w-12 h-12 bg-[color:var(--surface-3)] dark:bg-white/5 backdrop-blur-xl border border-slate-200 dark:border-white/10 rounded-full flex items-center justify-center text-gold-600 dark:text-gold-500 font-black text-xl">0{step.id}</div>
                     <span className="text-gold-500 font-black text-xs uppercase tracking-[0.4em]">{step.tag}</span>
                 </div>
                 <h2 className="text-2xl sm:text-4xl md:text-6xl font-serif text-slate-900 dark:text-white italic opacity-90 dark:opacity-80 mb-6 leading-tight">{step.h2}</h2>
-                <div className={`bg-white/90 dark:bg-white/5 p-6 sm:p-10 md:p-14 border-l-4 ${i % 2 === 1 ? 'border-r-4 border-l-0 text-right' : 'border-l-4'} border-gold-500/50 backdrop-blur-md shadow-2xl max-w-3xl ${i % 2 === 1 ? 'ml-auto' : ''} rounded-sm transition-all hover:bg-white dark:hover:bg-white/[0.08]`}>
+                <div className={`bg-[color:var(--surface-2)] dark:bg-white/5 p-6 sm:p-10 md:p-14 border-l-4 ${i % 2 === 1 ? 'border-r-4 border-l-0 text-right' : 'border-l-4'} border-gold-500/50 backdrop-blur-md shadow-2xl max-w-3xl ${i % 2 === 1 ? 'ml-auto' : ''} rounded-sm transition-all hover:bg-[color:var(--surface-3)] dark:hover:bg-white/[0.08]`}>
                   <h3 className="text-2xl sm:text-3xl md:text-5xl font-black text-slate-900 dark:text-white uppercase tracking-tighter mb-6">{step.h3}</h3>
                   <div className="text-slate-700 dark:text-slate-300 font-serif italic text-base sm:text-lg md:text-xl leading-relaxed">{step.p}</div>
                 </div>
@@ -118,7 +118,7 @@ export const Home: React.FC<HomeProps> = ({ onNavigate }) => {
       </section>
 
       {/* --- Changamoto ya Kudanganywa --- */}
-      <section className="relative pt-12 sm:pt-16 pb-8 sm:pb-10 bg-slate-50 dark:bg-[#050b1d]">
+      <section className="relative pt-12 sm:pt-16 pb-8 sm:pb-10 bg-[color:var(--surface-0)] dark:bg-[#050b1d]">
          <div className="max-w-7xl mx-auto px-4 sm:px-6 mb-8 sm:mb-12 text-center">
             <h3 className="text-red-500 font-black text-xs uppercase tracking-[0.5em] mb-4 italic">Changamoto ya Kudanganywa</h3>
             <div className="h-1 w-20 bg-red-600 mx-auto mt-4 rounded-full"></div>
@@ -131,7 +131,7 @@ export const Home: React.FC<HomeProps> = ({ onNavigate }) => {
         ].map((step, i) => (
           <div key={i} className="relative min-h-[70vh] md:min-h-[75vh] flex items-center overflow-hidden border-b border-slate-200 dark:border-white/5">
             <img src={step.img} className="absolute inset-0 w-full h-full object-cover opacity-25 dark:opacity-20" alt="" />
-            <div className="absolute inset-0 bg-gradient-to-r from-white/80 via-white/60 to-transparent dark:from-[#050b1d] dark:via-[#050b1d]/90"></div>
+            <div className="absolute inset-0 bg-gradient-to-r from-emerald-100/85 via-emerald-100/60 to-transparent dark:from-[#050b1d] dark:via-[#050b1d]/90"></div>
             <div className="max-w-6xl mx-auto px-4 sm:px-6 relative z-10 w-full">
               <ScrollReveal className={i % 2 === 0 ? "text-right ml-auto" : ""}>
                 <div className={`inline-flex items-center gap-3 mb-6 ${i % 2 === 0 ? 'flex-row-reverse' : ''}`}>
@@ -150,7 +150,7 @@ export const Home: React.FC<HomeProps> = ({ onNavigate }) => {
       </section>
 
       {/* --- Ukweli upo. --- */}
-      <section className="relative pt-12 sm:pt-16 pb-8 sm:pb-10 bg-white dark:bg-[#020617]">
+      <section className="relative pt-12 sm:pt-16 pb-8 sm:pb-10 bg-[color:var(--surface-1)] dark:bg-[#020617]">
          <div className="max-w-7xl mx-auto px-4 sm:px-6 mb-8 sm:mb-12 text-center">
             <h3 className="text-emerald-500 font-black text-xs uppercase tracking-[0.5em] mb-4 italic">Ukweli upo.</h3>
             <div className="h-1 w-20 bg-emerald-500 mx-auto mt-4 rounded-full"></div>
@@ -162,7 +162,7 @@ export const Home: React.FC<HomeProps> = ({ onNavigate }) => {
         ].map((step, i) => (
           <div key={i} className="relative min-h-[70vh] md:min-h-[75vh] flex items-center overflow-hidden border-b border-slate-200 dark:border-white/5">
             <img src={step.img} className="absolute inset-0 w-full h-full object-cover opacity-25 dark:opacity-20" alt="" />
-            <div className="absolute inset-0 bg-gradient-to-r from-white/80 via-white/60 to-transparent dark:from-[#020617] dark:via-[#020617]/90"></div>
+            <div className="absolute inset-0 bg-gradient-to-r from-emerald-100/85 via-emerald-100/60 to-transparent dark:from-[#020617] dark:via-[#020617]/90"></div>
             <div className="max-w-6xl mx-auto px-4 sm:px-6 relative z-10 w-full">
               <ScrollReveal className={i % 2 === 1 ? "text-right ml-auto" : ""}>
                 <div className={`inline-flex items-center gap-3 mb-6 ${i % 2 === 1 ? 'flex-row-reverse' : ''}`}>
@@ -181,30 +181,30 @@ export const Home: React.FC<HomeProps> = ({ onNavigate }) => {
       </section>
 
       {/* --- Mgongano wa Mawazo --- */}
-      <section className="py-12 sm:py-16 px-4 sm:px-6 bg-white dark:bg-[#020617]">
+      <section className="py-12 sm:py-16 px-4 sm:px-6 bg-[color:var(--surface-1)] dark:bg-[#020617]">
          <div className="max-w-7xl mx-auto space-y-10 sm:space-y-14">
             <ScrollReveal className="text-center space-y-6 sm:space-y-8">
                <h3 className="text-gold-500 font-black text-xs uppercase tracking-[0.5em] mb-4 italic">Mgongano wa Mawazo</h3>
-               <div className="h-1 w-20 bg-slate-200 dark:bg-white/20 mx-auto rounded-full"></div>
+               <div className="h-1 w-20 bg-emerald-200 dark:bg-white/20 mx-auto rounded-full"></div>
             </ScrollReveal>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-               <ScrollReveal className="bg-white dark:bg-white/[0.02] border border-slate-200 dark:border-white/5 p-6 sm:p-12 rounded-xl shadow-inner group hover:bg-slate-50 dark:hover:bg-white/[0.04] transition-all">
+               <ScrollReveal className="bg-[color:var(--surface-2)] dark:bg-white/[0.02] border border-slate-200 dark:border-white/5 p-6 sm:p-12 rounded-xl shadow-inner group hover:bg-[color:var(--surface-3)] dark:hover:bg-white/[0.04] transition-all">
                   <h3 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white uppercase tracking-tight mb-6 sm:mb-8">Dilema ya Leo.</h3>
                   <p className="text-slate-600 dark:text-slate-400 text-base sm:text-lg leading-relaxed mb-8 sm:mb-10 font-light">
                     <span className="text-gold-400 font-medium italic">wakristo wengi wanapenda Neema ya Mungu lakini wanakata ukweli aliomtuma Yesu kushuhudia, wansahau huwezi kutenganisha neema na kweli maan yesu amejaa vyote viwii</span>
                   </p>
                   <div className="space-y-6">
-                     <div className="p-6 bg-slate-50 dark:bg-white/5 border-l-2 border-gold-500 italic text-sm text-slate-700 dark:text-slate-300">
+                     <div className="p-6 bg-[color:var(--surface-1)] dark:bg-white/5 border-l-2 border-gold-500 italic text-sm text-slate-700 dark:text-slate-300">
                         "Kwa kuwa torati ilitolewa kwa mkono wa Musa; neema na kweli zilikuja kwa mkono wa Yesu Kristo." — <span className="text-gold-500 font-black">Yohana 1:17</span>
                      </div>
-                     <div className="p-6 bg-slate-50 dark:bg-white/5 border-l-2 border-gold-500 italic text-sm text-slate-700 dark:text-slate-300">
+                     <div className="p-6 bg-[color:var(--surface-1)] dark:bg-white/5 border-l-2 border-gold-500 italic text-sm text-slate-700 dark:text-slate-300">
                         "Naye Neno alifanyika mwili, akakaa kwetu; nasi tukauona utukufu wake, utukufu kama wa Mwana pekee atokaye kwa Baba; amejaa neema na kweli." — <span className="text-gold-500 font-black">Yohana 1:14</span>
                      </div>
                   </div>
                </ScrollReveal>
 
-               <ScrollReveal className="bg-white dark:bg-white/[0.02] border border-slate-200 dark:border-white/5 p-6 sm:p-12 rounded-xl shadow-inner group hover:bg-slate-50 dark:hover:bg-white/[0.04] transition-all">
+               <ScrollReveal className="bg-[color:var(--surface-2)] dark:bg-white/[0.02] border border-slate-200 dark:border-white/5 p-6 sm:p-12 rounded-xl shadow-inner group hover:bg-[color:var(--surface-3)] dark:hover:bg-white/[0.04] transition-all">
                   <h3 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white uppercase tracking-tight mb-6 sm:mb-8">Ukweli Unapatikana Wapi?</h3>
                   <div className="p-6 sm:p-12 bg-primary-50 dark:bg-primary-950/20 border border-primary-200 dark:border-primary-500/20 rounded-lg text-center space-y-6 mb-8 sm:mb-10">
                      <div className="w-14 h-14 sm:w-16 sm:h-16 bg-primary-100 dark:bg-primary-500/20 rounded-full flex items-center justify-center mx-auto text-primary-700 dark:text-primary-400 mb-4"><Search size={28}/></div>
@@ -221,7 +221,7 @@ export const Home: React.FC<HomeProps> = ({ onNavigate }) => {
             <ScrollReveal className="max-w-4xl mx-auto space-y-6">
                <h3 className="text-center text-gold-500 font-black text-xs uppercase tracking-[0.5em] mb-8 italic">Kupambanua Misingi</h3>
                <div className="space-y-3">
-                  <div className={`rounded-lg border transition-all duration-500 overflow-hidden ${activeDef === 'ukweli' ? 'bg-white dark:bg-white/5 border-gold-500/50 shadow-2xl' : 'bg-white dark:bg-transparent border-slate-200 dark:border-white/5'}`}>
+                  <div className={`rounded-lg border transition-all duration-500 overflow-hidden ${activeDef === 'ukweli' ? 'bg-[color:var(--surface-3)] dark:bg-white/5 border-gold-500/50 shadow-2xl' : 'bg-[color:var(--surface-2)] dark:bg-transparent border-slate-200 dark:border-white/5'}`}>
                      <button onClick={() => setActiveDef(activeDef === 'ukweli' ? null : 'ukweli')} className="w-full p-5 sm:p-8 flex items-center justify-between text-left">
                         <h3 className={`text-lg sm:text-xl font-black uppercase tracking-widest ${activeDef === 'ukweli' ? 'text-gold-600 dark:text-gold-500' : 'text-slate-700 dark:text-slate-400'}`}>Ukweli ni nini?</h3>
                         <ChevronDown className={`transition-transform duration-500 ${activeDef === 'ukweli' ? 'rotate-180 text-gold-500' : 'text-slate-500 dark:text-slate-600'}`} />
@@ -233,7 +233,7 @@ export const Home: React.FC<HomeProps> = ({ onNavigate }) => {
                      </div>
                   </div>
 
-                  <div className={`rounded-lg border transition-all duration-500 overflow-hidden ${activeDef === 'uongo' ? 'bg-white dark:bg-white/5 border-red-500/50 shadow-2xl' : 'bg-white dark:bg-transparent border-slate-200 dark:border-white/5'}`}>
+                  <div className={`rounded-lg border transition-all duration-500 overflow-hidden ${activeDef === 'uongo' ? 'bg-[color:var(--surface-3)] dark:bg-white/5 border-red-500/50 shadow-2xl' : 'bg-[color:var(--surface-2)] dark:bg-transparent border-slate-200 dark:border-white/5'}`}>
                      <button onClick={() => setActiveDef(activeDef === 'uongo' ? null : 'uongo')} className="w-full p-5 sm:p-8 flex items-center justify-between text-left">
                         <h3 className={`text-lg sm:text-xl font-black uppercase tracking-widest ${activeDef === 'uongo' ? 'text-red-600 dark:text-red-500' : 'text-slate-700 dark:text-slate-400'}`}>Uongo ni nini?</h3>
                         <ChevronDown className={`transition-transform duration-500 ${activeDef === 'uongo' ? 'rotate-180 text-red-500' : 'text-slate-500 dark:text-slate-600'}`} />
@@ -263,7 +263,7 @@ export const Home: React.FC<HomeProps> = ({ onNavigate }) => {
 
                <ScrollReveal className="max-w-4xl mx-auto space-y-4">
                   {QUESTIONS.map((item, idx) => (
-                     <div key={idx} onClick={() => setActiveQuestion(activeQuestion === idx ? null : idx)} className={`group cursor-pointer rounded-xl transition-all duration-500 overflow-hidden border ${activeQuestion === idx ? 'bg-white dark:bg-white/5 border-slate-200 dark:border-white/20 shadow-2xl scale-[1.02]' : 'bg-white dark:bg-transparent border-slate-200/80 dark:border-white/5 hover:bg-slate-50 dark:hover:bg-white/[0.02]'}`}>
+                     <div key={idx} onClick={() => setActiveQuestion(activeQuestion === idx ? null : idx)} className={`group cursor-pointer rounded-xl transition-all duration-500 overflow-hidden border ${activeQuestion === idx ? 'bg-[color:var(--surface-3)] dark:bg-white/5 border-slate-200 dark:border-white/20 shadow-2xl scale-[1.02]' : 'bg-[color:var(--surface-2)] dark:bg-transparent border-slate-200/80 dark:border-white/5 hover:bg-[color:var(--surface-3)] dark:hover:bg-white/[0.02]'}`}>
                         <div className="p-5 sm:p-6 flex items-center justify-between">
                            <div className="flex items-center gap-4">
                               <div className={`w-10 h-10 rounded-lg flex items-center justify-center transition-colors ${activeQuestion === idx ? 'bg-gold-500 text-slate-950' : 'bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-500'}`}>
@@ -286,7 +286,7 @@ export const Home: React.FC<HomeProps> = ({ onNavigate }) => {
       </section>
 
       {/* --- ZANA ZA UKWELI (TOOLS) - Compact & Staggered --- */}
-      <section className="py-12 sm:py-16 px-4 sm:px-6 bg-slate-50 dark:bg-[#050b1d] border-t border-slate-200 dark:border-white/5">
+      <section className="py-12 sm:py-16 px-4 sm:px-6 bg-[color:var(--surface-0)] dark:bg-[#050b1d] border-t border-slate-200 dark:border-white/5">
          <div className="max-w-5xl mx-auto space-y-8 sm:space-y-12">
             <ScrollReveal className="text-center space-y-4">
                <h3 className="text-gold-500 font-black text-xs uppercase tracking-[0.5em] mb-4 italic">Zana za Ukweli</h3>
@@ -302,7 +302,7 @@ export const Home: React.FC<HomeProps> = ({ onNavigate }) => {
                   >
                     <div 
                       onClick={() => onNavigate(tool.id)} 
-                      className="group relative bg-white dark:bg-white/[0.03] border border-slate-200 dark:border-white/5 rounded-2xl p-5 sm:p-6 cursor-pointer hover:bg-slate-50 dark:hover:bg-white/[0.08] hover:border-gold-500/40 transition-all duration-500 flex flex-col items-center text-center space-y-4 shadow-sm"
+                      className="group relative bg-[color:var(--surface-2)] dark:bg-white/[0.03] border border-slate-200 dark:border-white/5 rounded-2xl p-5 sm:p-6 cursor-pointer hover:bg-[color:var(--surface-3)] dark:hover:bg-white/[0.08] hover:border-gold-500/40 transition-all duration-500 flex flex-col items-center text-center space-y-4 shadow-sm"
                     >
                        <div className={`w-12 h-12 bg-slate-100 dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-xl flex items-center justify-center ${tool.color} group-hover:bg-gold-500 group-hover:text-black transition-all duration-500 shadow-xl`}>
                           {tool.icon}

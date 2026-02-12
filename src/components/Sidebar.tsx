@@ -343,12 +343,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
   ].filter((web) => Boolean(web.url && web.url.trim()));
 
   return (
-    <div className={`fixed inset-0 z-[200] bg-slate-50/80 dark:bg-[#020617]/70 backdrop-blur-2xl flex flex-col transition-all duration-700 ease-in-out ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
-      <div className="relative z-10 flex items-center justify-between p-4 md:p-6 border-b border-slate-200/20 dark:border-white/5 bg-white/20 dark:bg-black/10 backdrop-blur-md h-20">
+    <div className={`fixed inset-0 z-[200] bg-[color:var(--surface-1)] dark:bg-[#020617]/72 backdrop-blur-2xl flex flex-col transition-all duration-700 ease-in-out ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+      <div className="relative z-10 flex items-center justify-between p-4 md:p-6 border-b border-slate-200/20 dark:border-white/5 bg-[color:var(--surface-2)] dark:bg-black/20 backdrop-blur-md h-20">
         <div onClick={() => { onStageChange(StageId.HOME); onClose(); }} className="flex items-center cursor-pointer group">
            <img src={resolvedLogoSrc} alt={resolvedSettings.site_name} className="h-24 w-auto group-hover:scale-105 transition-transform" />
         </div>
-        <button onClick={onClose} className="p-3 bg-white/10 hover:bg-red-500/20 dark:hover:bg-red-500/30 text-slate-600 dark:text-slate-400 hover:text-red-500 transition-all rounded-xl border border-transparent hover:border-red-500/20">
+        <button onClick={onClose} className="p-3 bg-[color:var(--surface-3)] hover:bg-red-500/20 dark:hover:bg-red-500/30 text-slate-600 dark:text-slate-400 hover:text-red-500 transition-all rounded-xl border border-transparent hover:border-red-500/20">
           <X size={24} />
         </button>
       </div>
@@ -387,7 +387,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     href={web.url} 
                     target="_blank" 
                     rel="noopener noreferrer"
-                    className="group relative flex items-center gap-4 p-4 bg-white/10 dark:bg-white/5 border border-slate-200/20 dark:border-white/5 rounded-2xl hover:border-gold-500/50 hover:shadow-xl backdrop-blur-md transition-all duration-300"
+                    className="group relative flex items-center gap-4 p-4 bg-[color:var(--surface-2)] dark:bg-white/5 border border-slate-200/20 dark:border-white/5 rounded-2xl hover:border-gold-500/50 hover:shadow-xl backdrop-blur-md transition-all duration-300"
                   >
                     <div className="p-3 bg-slate-100/50 dark:bg-black/20 rounded-xl text-slate-600 dark:text-slate-400 group-hover:text-gold-500 group-hover:bg-gold-500/10 transition-all shrink-0">
                        {web.icon}
@@ -410,9 +410,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </div>
       </div>
 
-      <div className="p-6 md:px-12 border-t border-slate-200/20 dark:border-white/5 bg-white/20 dark:bg-black/20 backdrop-blur-md flex justify-end items-center relative z-10 shrink-0">
+      <div className="p-6 md:px-12 border-t border-slate-200/20 dark:border-white/5 bg-[color:var(--surface-2)] dark:bg-black/20 backdrop-blur-md flex justify-end items-center relative z-10 shrink-0">
         {user ? (
-          <button onClick={onShowProfile} className="group flex items-center gap-3 bg-white/10 dark:bg-white/5 p-1 pr-4 rounded-full border border-slate-200/20 dark:border-white/10 hover:border-gold-500 transition-all shadow-xl backdrop-blur-md">
+          <button onClick={onShowProfile} className="group flex items-center gap-3 bg-[color:var(--surface-3)] dark:bg-white/5 p-1 pr-4 rounded-full border border-slate-200/20 dark:border-white/10 hover:border-gold-500 transition-all shadow-xl backdrop-blur-md">
              <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-gold-500 to-gold-700 flex items-center justify-center text-[#020617] shadow-lg group-hover:scale-105 transition-transform overflow-hidden">
                 <img src={profilePic || `https://ui-avatars.com/api/?name=${user.name}&background=eab308&color=020617&bold=true`} className="w-full h-full object-cover" alt="" />
              </div>
@@ -424,7 +424,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         ) : (
           <button 
             onClick={onShowAuth}
-            className="group flex items-center gap-3 bg-white/10 dark:bg-white/5 p-1 pr-4 rounded-full border border-slate-200/20 dark:border-white/10 hover:border-gold-500 transition-all shadow-xl backdrop-blur-md"
+            className="group flex items-center gap-3 bg-[color:var(--surface-3)] dark:bg-white/5 p-1 pr-4 rounded-full border border-slate-200/20 dark:border-white/10 hover:border-gold-500 transition-all shadow-xl backdrop-blur-md"
           >
              <div className="w-10 h-10 rounded-full bg-slate-200/50 dark:bg-slate-800/50 flex items-center justify-center text-slate-600 dark:text-slate-400 group-hover:text-gold-500 transition-colors shadow-lg">
                 <User size={20} />

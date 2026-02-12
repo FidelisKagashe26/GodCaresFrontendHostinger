@@ -14,9 +14,9 @@ export const ThemeCenter: React.FC<Props> = ({ isOpen, onClose, currentTheme, on
   if (!isOpen) return null;
 
   const themes: { id: ThemePreference; name: string; icon: React.ReactNode }[] = [
-    { id: 'light', name: 'Light Mode', icon: <Sun size={20} className="text-gold-500" /> },
-    { id: 'dark', name: 'Dark Mode', icon: <Moon size={20} className="text-blue-400" /> },
-    { id: 'system', name: 'System Default', icon: <Monitor size={20} className="text-slate-400" /> }
+    { id: 'light', name: 'Mwanga', icon: <Sun size={20} className="text-gold-500" /> },
+    { id: 'dark', name: 'Giza', icon: <Moon size={20} className="text-blue-400" /> },
+    { id: 'system', name: 'Fuata Mfumo', icon: <Monitor size={20} className="text-slate-400" /> }
   ];
 
   return (
@@ -27,7 +27,7 @@ export const ThemeCenter: React.FC<Props> = ({ isOpen, onClose, currentTheme, on
          <div className="p-4 border-b border-slate-100 dark:border-white/10 flex justify-between items-center bg-slate-50/80 dark:bg-black/40">
            <div className="flex items-center gap-2">
              <Palette size={16} className="text-gold-500" />
-             <h3 className="font-bold text-slate-900 dark:text-white text-sm uppercase tracking-wider">Appearance</h3>
+             <h3 className="font-bold text-slate-900 dark:text-white text-sm uppercase tracking-wider">Muonekano</h3>
            </div>
            <button onClick={onClose} className="p-2 hover:bg-slate-200 dark:hover:bg-white/10 rounded-lg text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"><X size={14}/></button>
          </div>
@@ -61,7 +61,7 @@ export const ThemeCenter: React.FC<Props> = ({ isOpen, onClose, currentTheme, on
          
          <div className="p-3 text-center border-t border-slate-100 dark:border-white/5">
             <p className="text-[10px] text-slate-400 dark:text-slate-500">
-                Adjusts the app's visual appearance.
+                Chagua rangi ya mfumo wako.
             </p>
          </div>
       </div>

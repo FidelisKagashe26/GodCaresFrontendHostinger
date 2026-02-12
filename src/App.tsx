@@ -152,17 +152,30 @@ const App: React.FC = () => {
 
   useEffect(() => {
     const root = document.documentElement;
+    const media = window.matchMedia('(prefers-color-scheme: dark)');
+
     const applyTheme = (targetTheme: 'light' | 'dark') => {
-      if (targetTheme === 'dark') root.classList.add('dark');
-      else root.classList.remove('dark');
+      root.classList.remove('light', 'dark');
+      root.classList.add(targetTheme);
     };
+
+    const resolveTheme = () =>
+      theme === 'system' ? (media.matches ? 'dark' : 'light') : theme;
+
+    const syncTheme = () => {
+      applyTheme(resolveTheme());
+    };
+
+    syncTheme();
     if (theme === 'system') {
-      const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-      applyTheme(systemTheme);
-    } else {
-      applyTheme(theme);
+      media.addEventListener('change', syncTheme);
     }
+
     localStorage.setItem('gc365_theme', theme);
+
+    return () => {
+      media.removeEventListener('change', syncTheme);
+    };
   }, [theme]);
 
   const handleLogin = (userData: { name: string; email: string }) => {
@@ -340,7 +353,7 @@ const App: React.FC = () => {
 
           <div 
             ref={mainContentRef}
-            className="flex-1 overflow-y-auto scroll-smooth scrollbar-hide pt-20 pb-16"
+            className="gc-content-scroll flex-1 overflow-y-auto scroll-smooth pt-20 pb-16"
           >
             {renderContent()}
             {!isImmersive && <Footer onNavigate={handleStageChange} siteSettings={siteSettings} />}

@@ -36,6 +36,30 @@ const setTokens = (tokens: TokenPair) => {
   localStorage.setItem(REFRESH_TOKEN_KEY, tokens.refresh);
 };
 
+const safeFetch = async (input: RequestInfo | URL, init?: RequestInit) => {
+  try {
+    return await fetch(input, init);
+  } catch {
+    throw new Error("Imeshindikana kuwasiliana na seva. Hakikisha internet na API zipo sawa.");
+  }
+};
+
+const readErrorMessage = async (response: Response, fallback: string) => {
+  const payload = await response.json().catch(() => ({} as any));
+  const detail = payload?.detail;
+  if (typeof detail === "string" && detail.trim()) return detail;
+
+  const keys = Object.keys(payload || {});
+  if (keys.length) {
+    const first = payload[keys[0]];
+    if (Array.isArray(first) && first.length && typeof first[0] === "string") {
+      return first[0];
+    }
+    if (typeof first === "string") return first;
+  }
+  return fallback;
+};
+
 export const clearTokens = () => {
   localStorage.removeItem(ACCESS_TOKEN_KEY);
   localStorage.removeItem(REFRESH_TOKEN_KEY);
@@ -54,7 +78,7 @@ const request = async (path: string, options: RequestInit = {}, retry = true) =>
     headers.set("Authorization", `Bearer ${accessToken}`);
   }
 
-  const response = await fetch(url, { ...options, headers });
+  const response = await safeFetch(url, { ...options, headers });
 
   if (response.status === 401 && retry) {
     const refreshed = await refreshAccessToken();
@@ -70,7 +94,7 @@ const refreshAccessToken = async () => {
   const refresh = getRefreshToken();
   if (!refresh) return false;
 
-  const response = await fetch(`${API_BASE_URL}/api/auth/token/refresh/`, {
+  const response = await safeFetch(`${API_BASE_URL}/api/auth/token/refresh/`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ refresh }),
@@ -111,8 +135,8 @@ export const registerUser = async (payload: {
   });
 
   if (!response.ok) {
-    const error = await response.json().catch(() => ({}));
-    throw new Error(error?.detail || "Imeshindikana kusajili.");
+    const message = await readErrorMessage(response, "Imeshindikana kusajili.");
+    throw new Error(message);
   }
 
   const user = (await response.json()) as ApiUser;
@@ -123,15 +147,19 @@ export const loginUser = async (payload: {
   email: string;
   password: string;
 }): Promise<void> => {
-  const response = await fetch(`${API_BASE_URL}/api/auth/token/`, {
+  const response = await safeFetch(`${API_BASE_URL}/api/auth/token/`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ username: payload.email, password: payload.password }),
   });
 
   if (!response.ok) {
-    const error = await response.json().catch(() => ({}));
-    throw new Error(error?.detail || "Imeshindikana kuingia.");
+    const message = await readErrorMessage(response, "Imeshindikana kuingia.");
+    const detail = String(message).toLowerCase();
+    if (detail.includes("no active account")) {
+      throw new Error("Akaunti haijathibitishwa au taarifa za kuingia si sahihi.");
+    }
+    throw new Error(message);
   }
 
   const data = (await response.json()) as TokenPair;
@@ -142,8 +170,8 @@ export const getCurrentUser = async (): Promise<AuthUser> => {
   const response = await request("/api/auth/me/");
 
   if (!response.ok) {
-    const error = await response.json().catch(() => ({}));
-    throw new Error(error?.detail || "Imeshindikana kupata taarifa za mtumiaji.");
+    const message = await readErrorMessage(response, "Imeshindikana kupata taarifa za mtumiaji.");
+    throw new Error(message);
   }
 
   const user = (await response.json()) as ApiUser;
@@ -151,15 +179,15 @@ export const getCurrentUser = async (): Promise<AuthUser> => {
 };
 
 export const forgotPassword = async (email: string): Promise<void> => {
-  const response = await fetch(`${API_BASE_URL}/api/auth/forgot-password/`, {
+  const response = await safeFetch(`${API_BASE_URL}/api/auth/forgot-password/`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email }),
   });
 
   if (!response.ok) {
-    const error = await response.json().catch(() => ({}));
-    throw new Error(error?.detail || "Imeshindikana kutuma link.");
+    const message = await readErrorMessage(response, "Imeshindikana kutuma link.");
+    throw new Error(message);
   }
 };
 
@@ -168,14 +196,14 @@ export const resetPassword = async (payload: {
   token: string;
   password: string;
 }): Promise<void> => {
-  const response = await fetch(`${API_BASE_URL}/api/auth/reset-password/`, {
+  const response = await safeFetch(`${API_BASE_URL}/api/auth/reset-password/`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
   });
 
   if (!response.ok) {
-    const error = await response.json().catch(() => ({}));
-    throw new Error(error?.detail || "Imeshindikana kubadili nenosiri.");
+    const message = await readErrorMessage(response, "Imeshindikana kubadili nenosiri.");
+    throw new Error(message);
   }
 };
