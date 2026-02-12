@@ -29,7 +29,7 @@ import { ToastContainer } from './components/ui/Toast';
 import { NotificationCenter } from './components/NotificationCenter';
 import { LanguageCenter } from './components/LanguageCenter';
 import { ThemeCenter } from './components/ThemeCenter';
-import { LogOut, Sun, Moon, Languages, Menu, Bell, User, Monitor, Cross, BookOpen } from 'lucide-react';
+import { Sun, Moon, Menu, Bell, User, Monitor, ChevronDown, LogOut } from 'lucide-react';
 import { clearTokens, getCurrentUser } from './services/authService';
 import { getSystemMessages } from './services/systemMessageService';
 import { DEFAULT_SITE_SETTINGS, getSiteSettings, SiteSettings } from './services/siteSettingsService';
@@ -66,13 +66,13 @@ const App: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
+  const [authEntryMode, setAuthEntryMode] = useState<'login' | 'register'>('login');
+  const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false);
   
   const mainContentRef = useRef<HTMLDivElement>(null);
+  const accountMenuRef = useRef<HTMLDivElement>(null);
 
-  const [centerNotifications, setCenterNotifications] = useState<ToastNotification[]>([
-    { id: '1', title: 'Mfumo uko Hewani', message: 'Karibu God Cares 365. Mfumo upo tayari kwa matumizi.', type: 'success', timestamp: 'Hivi punde', read: false },
-    { id: '2', title: 'Mkutano Unakuja', message: 'Mwanza Revival Week inaanza hivi punde. Gusa hapa kuona ratiba.', type: 'event' as any, timestamp: '10m ago', read: false }
-  ]);
+  const [centerNotifications, setCenterNotifications] = useState<ToastNotification[]>([]);
 
   const [resetParams, setResetParams] = useState<{ uid: string; token: string } | null>(null);
 
@@ -109,7 +109,6 @@ const App: React.FC = () => {
     const loadMessages = async () => {
       try {
         const messages = await getSystemMessages();
-        if (messages.length === 0) return;
         const mapped: ToastNotification[] = messages.map((msg) => ({
           id: String(msg.id),
           title: msg.title,
@@ -120,7 +119,7 @@ const App: React.FC = () => {
         }));
         setCenterNotifications(mapped);
       } catch (error) {
-        // Keep default notifications when API is unavailable.
+        setCenterNotifications([]);
       }
     };
 
@@ -178,10 +177,30 @@ const App: React.FC = () => {
     };
   }, [theme]);
 
+  useEffect(() => {
+    const handleOutsideClick = (event: MouseEvent) => {
+      if (accountMenuRef.current && !accountMenuRef.current.contains(event.target as Node)) {
+        setIsAccountMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleOutsideClick);
+    return () => {
+      document.removeEventListener('mousedown', handleOutsideClick);
+    };
+  }, []);
+
+  const openAuthModal = (mode: 'login' | 'register' = 'login') => {
+    setAuthEntryMode(mode);
+    setShowAuthModal(true);
+    setIsAccountMenuOpen(false);
+  };
+
   const handleLogin = (userData: { name: string; email: string }) => {
     setUser(userData);
     localStorage.setItem('gc365_user', JSON.stringify(userData));
     setShowAuthModal(false);
+    setAuthEntryMode('login');
+    setIsAccountMenuOpen(false);
   };
 
   const handleLogout = () => {
@@ -191,6 +210,8 @@ const App: React.FC = () => {
     setCurrentStage(StageId.HOME);
     setIsMenuOpen(false);
     setShowProfileModal(false);
+    setIsAccountMenuOpen(false);
+    setAuthEntryMode('login');
   };
 
   const handleStageChange = (id: StageId) => {
@@ -204,9 +225,10 @@ const App: React.FC = () => {
     ];
 
     if (restrictedStages.includes(id) && !user) {
-      setShowAuthModal(true);
+      openAuthModal('login');
       return;
     }
+    setIsAccountMenuOpen(false);
     setCurrentStage(id);
     if (mainContentRef.current) {
       mainContentRef.current.scrollTo({ top: 0, behavior: 'smooth' });
@@ -266,9 +288,11 @@ const App: React.FC = () => {
       {showAuthModal && (
         <Auth
           logoSrc={logoSrc}
+          initialMode={authEntryMode}
           onLogin={handleLogin}
           onClose={() => {
             setShowAuthModal(false);
+            setAuthEntryMode('login');
             if (resetParams) {
               setResetParams(null);
               window.history.replaceState({}, '', '/');
@@ -296,7 +320,7 @@ const App: React.FC = () => {
         siteSettings={siteSettings}
         isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} user={user} onLogout={handleLogout}
         onShowProfile={() => { setIsMenuOpen(false); setShowProfileModal(true); }}
-        onShowAuth={() => { setIsMenuOpen(false); setShowAuthModal(true); }}
+        onShowAuth={() => { setIsMenuOpen(false); openAuthModal('login'); }}
       />
 
       <div className="relative z-10 flex h-screen overflow-hidden">
@@ -339,14 +363,77 @@ const App: React.FC = () => {
                      <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-[color:var(--accent)] rounded-full"></span>
                    )}
                  </button>
-                 {!user && (
+                 <div ref={accountMenuRef} className="relative">
                    <button
-                     onClick={() => setShowAuthModal(true)}
-                     className="hidden md:flex items-center px-6 py-2.5 gc-button-primary rounded-full text-[10px] font-semibold uppercase tracking-[0.3em]"
+                     onClick={() => {
+                       setIsAccountMenuOpen((prev) => !prev);
+                     }}
+                     className={`gc-icon-button rounded-full pl-1.5 pr-2 py-1.5 flex items-center gap-2 ${isAccountMenuOpen ? 'is-active' : ''}`}
+                     aria-label={user ? 'Akaunti yako' : 'Menyu ya akaunti'}
+                     aria-expanded={isAccountMenuOpen}
                    >
-                     Ingia
+                     <span className="w-10 h-10 rounded-full bg-gradient-to-tr from-gold-500 to-gold-700 text-[#020617] flex items-center justify-center overflow-hidden shadow-sm">
+                       {user ? (
+                         <img
+                           src={localStorage.getItem('gc365_profile_pic') || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=eab308&color=020617&bold=true`}
+                           alt="Akaunti"
+                           className="w-full h-full object-cover"
+                         />
+                       ) : (
+                         <User size={18} />
+                       )}
+                     </span>
+                     <div className="hidden md:flex flex-col items-start leading-none pr-1">
+                       <span className="text-[10px] font-black uppercase tracking-[0.16em] text-[color:var(--text-primary)]">
+                         {user ? user.name.split(' ')[0] : 'Mgeni'}
+                       </span>
+                       <span className="text-[8px] font-bold uppercase tracking-[0.24em] text-[color:var(--text-muted)]">
+                         {user ? 'Akaunti' : 'Ingia/Jisajili'}
+                       </span>
+                     </div>
+                     <ChevronDown size={14} className={`text-[color:var(--text-muted)] transition-transform ${isAccountMenuOpen ? 'rotate-180' : ''}`} />
                    </button>
-                 )}
+
+                   {isAccountMenuOpen && (
+                     <div className="absolute right-0 mt-2 w-48 rounded-2xl border border-[color:var(--line-strong)] bg-[color:var(--surface-2)] shadow-2xl overflow-hidden z-[80]">
+                       {user ? (
+                         <>
+                           <button
+                             onClick={() => {
+                               setShowProfileModal(true);
+                               setIsAccountMenuOpen(false);
+                             }}
+                             className="w-full text-left px-4 py-3 text-xs font-black uppercase tracking-[0.2em] text-[color:var(--text-primary)] hover:bg-[color:var(--surface-3)] transition-colors"
+                           >
+                             Akaunti Yangu
+                           </button>
+                           <button
+                             onClick={handleLogout}
+                             className="w-full text-left px-4 py-3 text-xs font-black uppercase tracking-[0.2em] text-red-500 hover:bg-[color:var(--surface-3)] transition-colors inline-flex items-center gap-2"
+                           >
+                             <LogOut size={14} />
+                             Ondoka
+                           </button>
+                         </>
+                       ) : (
+                         <>
+                           <button
+                             onClick={() => openAuthModal('login')}
+                             className="w-full text-left px-4 py-3 text-xs font-black uppercase tracking-[0.2em] text-[color:var(--text-primary)] hover:bg-[color:var(--surface-3)] transition-colors"
+                           >
+                             Ingia
+                           </button>
+                           <button
+                             onClick={() => openAuthModal('register')}
+                             className="w-full text-left px-4 py-3 text-xs font-black uppercase tracking-[0.2em] text-[color:var(--accent)] hover:bg-[color:var(--surface-3)] transition-colors"
+                           >
+                             Jisajili
+                           </button>
+                         </>
+                       )}
+                     </div>
+                   )}
+                 </div>
               </div>
             </header>
           )}

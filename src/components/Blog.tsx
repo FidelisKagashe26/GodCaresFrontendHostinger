@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Heart, MessageCircle, Share2, User, Clock, Bookmark, Search } from 'lucide-react';
 import { getBlogPost, getBlogPosts } from '../services/blogService';
 
@@ -16,63 +16,10 @@ interface BlogPost {
   tags: string[];
 }
 
-const BLOG_POSTS: BlogPost[] = [
-  {
-    id: 1,
-    title: "Kuelewa Unabii wa Danieli katika Karne ya 21",
-    excerpt: "Jinsi matukio ya sasa ya ulimwengu yanavyoendana na sanamu ya Danieli sura ya 2 na maana yake kwetu leo.",
-    author: "Pr. Juma M.",
-    date: "Oct 25, 2026",
-    readTime: "5 min read",
-    likes: 1240,
-    comments: 85,
-    image: "https://images.unsplash.com/photo-1447069387593-a5de0862481e?q=80&w=800",
-    tags: ["Unabii", "Historia"]
-  },
-  {
-    id: 2,
-    title: "Afya Bora: Dawa ya Mungu kwa Magonjwa",
-    excerpt: "Kanuni nane za afya na jinsi zinavyoweza kubadilisha maisha yako na kukuweka huru kutoka kwa magonjwa ya kisasa.",
-    author: "Dr. Sarah K.",
-    date: "Oct 20, 2026",
-    readTime: "7 min read",
-    likes: 856,
-    comments: 42,
-    image: "https://images.unsplash.com/photo-1498837167922-ddd27525d352?q=80&w=800",
-    tags: ["Afya", "Maisha"]
-  },
-  {
-    id: 3,
-    title: "Siri ya Sabato ya Kweli",
-    excerpt: "Je, siku ya ibada ilibadilishwa lini na nani? Uchunguzi wa kihistoria na kibiblia juu ya siku ya Bwana.",
-    author: "Ev. Peter D.",
-    date: "Oct 15, 2026",
-    readTime: "10 min read",
-    likes: 2100,
-    comments: 320,
-    image: "https://images.unsplash.com/photo-1543336783-bb59efd935a6?q=80&w=800",
-    tags: ["Mafundisho", "Sheria"]
-  },
-  {
-    id: 4,
-    title: "Nguvu ya Maombi ya Familia",
-    excerpt: "Ushuhuda wa jinsi maombi yalivyookoa ndoa yangu na kuleta amani nyumbani.",
-    author: "Maria J.",
-    date: "Oct 10, 2026",
-    readTime: "4 min read",
-    likes: 540,
-    comments: 28,
-    image: "https://images.unsplash.com/photo-1511632765486-a01980e01a18?q=80&w=800",
-    tags: ["Ushuhuda", "Familia"]
-  }
-];
-
 export const Blog: React.FC = () => {
   const [activePost, setActivePost] = useState<number | null>(null);
-   const [posts, setPosts] = useState<BlogPost[]>(BLOG_POSTS);
-   const [likes, setLikes] = useState<Record<number, number>>(
-      BLOG_POSTS.reduce((acc, post) => ({ ...acc, [post.id]: post.likes }), {})
-   );
+   const [posts, setPosts] = useState<BlogPost[]>([]);
+   const [likes, setLikes] = useState<Record<number, number>>({});
    const [loading, setLoading] = useState(false);
    const [errorMessage, setErrorMessage] = useState('');
    const [detail, setDetail] = useState<string | null>(null);
@@ -82,11 +29,11 @@ export const Blog: React.FC = () => {
       title: post.title,
       excerpt: post.excerpt,
       author: post.author,
-      date: new Date(post.published_at).toLocaleDateString(),
-      readTime: post.read_time || '5 min read',
+      date: post.published_at ? new Date(post.published_at).toLocaleDateString() : 'Hakuna taarifa',
+      readTime: post.read_time || 'Hakuna taarifa',
       likes: post.likes || 0,
       comments: post.comments || 0,
-      image: post.image,
+      image: post.image || '',
       tags: post.tags || [],
    });
 
@@ -96,13 +43,13 @@ export const Blog: React.FC = () => {
          setErrorMessage('');
          try {
             const data = await getBlogPosts();
-            if (data.length) {
-               const mapped = data.map(mapPost);
-               setPosts(mapped);
-               setLikes(mapped.reduce((acc, post) => ({ ...acc, [post.id]: post.likes }), {}));
-            }
+            const mapped = data.map(mapPost);
+            setPosts(mapped);
+            setLikes(mapped.reduce((acc, post) => ({ ...acc, [post.id]: post.likes }), {}));
          } catch (error) {
             setErrorMessage('Imeshindikana kupakua makala.');
+            setPosts([]);
+            setLikes({});
          } finally {
             setLoading(false);
          }
@@ -112,7 +59,7 @@ export const Blog: React.FC = () => {
    }, []);
 
   const handleLike = (id: number) => {
-    setLikes(prev => ({ ...prev, [id]: prev[id] + 1 }));
+    setLikes(prev => ({ ...prev, [id]: (prev[id] ?? 0) + 1 }));
   };
 
    useEffect(() => {
@@ -125,18 +72,38 @@ export const Blog: React.FC = () => {
          if (!post) return;
          try {
             const data = await getBlogPost(post.id);
-            setDetail(data.content || data.excerpt);
+            setDetail(data.content || data.excerpt || 'Hakuna taarifa.');
          } catch (error) {
-            setDetail(post.excerpt);
+            setDetail(post.excerpt || 'Hakuna taarifa.');
          }
       };
 
       loadDetail();
    }, [activePost, posts]);
 
-   if (activePost) {
+  const trendingTags = useMemo(
+    () => Array.from(new Set(posts.flatMap((post) => post.tags))).slice(0, 8),
+    [posts]
+  );
+  const editors = useMemo(
+    () => Array.from(new Set(posts.map((post) => post.author).filter(Boolean))).slice(0, 6),
+    [posts]
+  );
+
+  if (activePost) {
       const post = posts.find(p => p.id === activePost);
-      if (!post) return null;
+      if (!post) {
+        return (
+          <div className="max-w-3xl mx-auto bg-white min-h-screen text-slate-900 pb-20 animate-fade-in">
+            <div className="p-8 space-y-6">
+              <button onClick={() => setActivePost(null)} className="text-slate-500 hover:text-slate-900 font-bold text-sm">
+                Rudi kwenye Makala
+              </button>
+              <div className="text-sm text-slate-500 font-bold uppercase tracking-widest">Hakuna taarifa.</div>
+            </div>
+          </div>
+        );
+      }
 
     return (
       <div className="max-w-3xl mx-auto bg-white min-h-screen text-slate-900 pb-20 animate-fade-in">
@@ -163,18 +130,24 @@ export const Blog: React.FC = () => {
              </div>
           </div>
 
-          <img src={post.image} className="w-full h-96 object-cover rounded-xl mb-10" alt={post.title} />
+          {post.image ? (
+            <img src={post.image} className="w-full h-96 object-cover rounded-xl mb-10" alt={post.title} />
+          ) : (
+            <div className="w-full h-96 rounded-xl mb-10 bg-slate-100 flex items-center justify-center text-xs font-black uppercase tracking-widest text-slate-400">
+              Hakuna picha
+            </div>
+          )}
 
                <div className="prose prose-lg prose-slate max-w-none">
                    <p className="font-serif text-xl leading-relaxed text-slate-700">
-                      {detail || post.excerpt}
+                      {detail || post.excerpt || 'Hakuna taarifa.'}
                    </p>
                </div>
 
           <div className="mt-12 pt-8 border-t border-slate-100 flex items-center gap-8">
              <button onClick={() => handleLike(post.id)} className="flex items-center gap-2 text-slate-500 hover:text-red-500 transition-colors">
                 <Heart size={24} className={likes[post.id] > post.likes ? "fill-red-500 text-red-500" : ""} />
-                <span>{likes[post.id]}</span>
+                <span>{likes[post.id] ?? post.likes}</span>
              </button>
              <button className="flex items-center gap-2 text-slate-500 hover:text-blue-500 transition-colors">
                 <MessageCircle size={24} />
@@ -211,6 +184,11 @@ export const Blog: React.FC = () => {
                         {errorMessage}
                      </div>
                   )}
+                  {!loading && posts.length === 0 && (
+                     <div className="bg-slate-100 border border-slate-200 text-slate-500 text-[10px] font-bold uppercase tracking-widest px-4 py-3 rounded-lg">
+                        Hakuna taarifa za makala kwa sasa.
+                     </div>
+                  )}
                   {posts.map(post => (
                <div key={post.id} className="flex flex-col md:flex-row gap-6 group cursor-pointer" onClick={() => setActivePost(post.id)}>
                   <div className="flex-1 space-y-3">
@@ -236,7 +214,13 @@ export const Blog: React.FC = () => {
                      </div>
                   </div>
                   <div className="w-full md:w-48 h-32 shrink-0 rounded-lg overflow-hidden bg-slate-100">
-                     <img src={post.image} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt={post.title} />
+                     {post.image ? (
+                       <img src={post.image} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt={post.title} />
+                     ) : (
+                       <div className="w-full h-full flex items-center justify-center text-[10px] font-black uppercase tracking-widest text-slate-400">
+                         Hakuna picha
+                       </div>
+                     )}
                   </div>
                </div>
             ))}
@@ -246,7 +230,10 @@ export const Blog: React.FC = () => {
          <div className="space-y-8 border-l border-slate-100 pl-8 hidden md:block">
             <h3 className="font-black text-sm uppercase tracking-widest text-slate-900">Mada Zinazovuma</h3>
             <div className="flex flex-wrap gap-2">
-               {['Unabii', 'Afya', 'Mahusiano', 'Sheria', 'Imani', 'Historia'].map(tag => (
+               {trendingTags.length === 0 && (
+                 <span className="text-xs font-bold text-slate-400">Hakuna taarifa.</span>
+               )}
+               {trendingTags.map(tag => (
                   <span key={tag} className="px-4 py-2 border border-slate-200 rounded-full text-xs font-medium text-slate-600 hover:border-slate-800 cursor-pointer transition-colors">
                      {tag}
                   </span>
@@ -255,7 +242,10 @@ export const Blog: React.FC = () => {
 
             <h3 className="font-black text-sm uppercase tracking-widest text-slate-900 pt-8">Wahariri Wetu</h3>
             <div className="space-y-4">
-               {['Pr. Juma M.', 'Dr. Sarah K.', 'Ev. Peter D.'].map((author, i) => (
+               {editors.length === 0 && (
+                 <p className="text-sm font-bold text-slate-400">Hakuna taarifa.</p>
+               )}
+               {editors.map((author, i) => (
                   <div key={i} className="flex items-center gap-3">
                      <div className="w-8 h-8 rounded-full bg-slate-200"></div>
                      <p className="text-sm font-bold text-slate-700">{author}</p>

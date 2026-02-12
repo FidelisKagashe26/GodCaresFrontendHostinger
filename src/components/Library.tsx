@@ -22,23 +22,12 @@ interface LibraryItem {
   albumName?: string; // Imeongezwa kwa ajili ya kupanga picha
 }
 
-const LIBRARY_DATA: LibraryItem[] = [
-  { id: 'doc1', type: 'PDF', title: 'The Great Controversy', swahiliTitle: 'Pambano Kuu', description: 'Historia kamili ya pambano kati ya wema na uovu.', sizeOrDuration: '12.4 MB', image: 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&q=80&w=800', category: 'Historia', contentUrl: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf' },
-  { id: 'doc2', type: 'PDF', title: 'Daniel & Revelation', swahiliTitle: 'Danieli na Ufunuo', description: 'Ufafanuzi wa kina wa unabii wa nyakati hizi.', sizeOrDuration: '8.1 MB', image: 'https://images.unsplash.com/photo-1504052434569-70ad5836ab65?auto=format&fit=crop&q=80&w=800', category: 'Unabii', contentUrl: 'https://www.africau.edu/images/default/sample.pdf' },
-  { id: 'vid1', type: 'Video', title: 'The Final Crisis', swahiliTitle: 'Mgogoro wa Mwisho', description: 'Documentary ya matukio ya kabla ya marejeo.', sizeOrDuration: '58:12', image: 'https://images.unsplash.com/photo-1533105079780-92b9be482077?q=80&w=800', category: 'Unabii', contentUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ' },
-  { id: 'img1', type: 'Image', title: 'Sanamu ya Danieli 2', swahiliTitle: 'Sanamu ya Danieli', description: 'Ramani ya picha ya falme za dunia.', sizeOrDuration: '4K', image: 'https://images.unsplash.com/photo-1599596378252-474026337f71?q=80&w=800', category: 'Charts', albumName: 'Unabii wa Danieli' },
-  { id: 'img2', type: 'Image', title: 'Mfuatano wa Miaka', swahiliTitle: 'Timeline', description: 'Picha ya mfuatano wa unabii.', sizeOrDuration: '2K', image: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=800', category: 'Charts', albumName: 'Unabii wa Danieli' },
-  { id: 'img3', type: 'Image', title: 'Uumbaji Siku ya 1', swahiliTitle: 'Nuru', description: 'Picha ya uumbaji.', sizeOrDuration: 'HD', image: 'https://images.unsplash.com/photo-1464802686167-b939a6910659?q=80&w=800', category: 'Uumbaji', albumName: 'Albamu ya Uumbaji' },
-  { id: 'img4', type: 'Image', title: 'Adamu na Hawa', swahiliTitle: 'Bustani ya Edeni', description: 'Picha ya mwanzo wa mwanadamu.', sizeOrDuration: 'HD', image: 'https://images.unsplash.com/photo-1509248961158-e54f6934749c?q=80&w=800', category: 'Uumbaji', albumName: 'Albamu ya Uumbaji' },
-  { id: 'img5', type: 'Image', title: 'Mlima Sinai', swahiliTitle: 'Amri Kumi', description: 'Mlima wa sheria.', sizeOrDuration: 'HD', image: 'https://images.unsplash.com/photo-1543336783-bb59efd935a6?q=80&w=800', category: 'Sheria', albumName: 'Mlima wa Mungu' }
-];
-
 export const Library: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'Zote' | 'PDF' | 'Video' | 'Audio' | 'Image'>('Zote');
   const [search, setSearch] = useState('');
   const [viewingItem, setViewingItem] = useState<LibraryItem | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [items, setItems] = useState<LibraryItem[]>(LIBRARY_DATA);
+  const [items, setItems] = useState<LibraryItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -52,17 +41,15 @@ export const Library: React.FC = () => {
           id: item.id,
           type: item.type,
           title: item.title,
-          swahiliTitle: item.swahili_title || item.title,
+          swahiliTitle: item.swahili_title || 'Hakuna taarifa',
           description: item.description || '',
           sizeOrDuration: item.size_or_duration || '',
-          image: item.image || 'https://images.unsplash.com/photo-1504052434569-70ad5836ab65?auto=format&fit=crop&q=80&w=800',
-          category: item.category || 'General',
+          image: item.image || '',
+          category: item.category || 'Hakuna taarifa',
           contentUrl: item.content_url || undefined,
           albumName: item.album_name || undefined,
         }));
-        if (mapped.length > 0) {
-          setItems(mapped);
-        }
+        setItems(mapped);
       } catch (err: any) {
         setError(err?.message || 'Imeshindikana kupata maktaba.');
       } finally {
@@ -109,7 +96,7 @@ export const Library: React.FC = () => {
           </div>
           <div className="flex-1 min-w-0">
             <h4 className="text-sm font-bold text-slate-900 dark:text-white truncate">{item.title}</h4>
-            <p className="text-[10px] text-slate-500 font-medium uppercase tracking-widest">{item.swahiliTitle} • {item.sizeOrDuration || 'Audio'}</p>
+            <p className="text-[10px] text-slate-500 font-medium uppercase tracking-widest">{item.swahiliTitle} • {item.sizeOrDuration || 'Hakuna taarifa'}</p>
           </div>
           <div className="flex gap-2">
             <button onClick={() => setViewingItem(item)} className="flex items-center gap-2 px-4 py-2 bg-primary-900 text-gold-400 rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-gold-500 hover:text-primary-950 transition-all"><Play size={14} /> Sikiliza</button>
@@ -122,7 +109,7 @@ export const Library: React.FC = () => {
   // Gallery view for images grouped by albums
   const renderImageGallery = (items: LibraryItem[]) => {
     const albums = items.reduce((acc, item) => {
-      const album = item.albumName || 'General';
+      const album = item.albumName || 'Hakuna taarifa';
       if (!acc[album]) acc[album] = [];
       acc[album].push(item);
       return acc;
@@ -144,7 +131,13 @@ export const Library: React.FC = () => {
                   onClick={() => setViewingItem(item)}
                   className="group relative aspect-square bg-slate-100 dark:bg-slate-800 rounded-lg overflow-hidden cursor-pointer border border-transparent hover:border-gold-500/50 transition-all"
                 >
-                  <img src={item.image} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt="" />
+                  {item.image ? (
+                    <img src={item.image} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt="" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-[10px] font-black uppercase tracking-widest text-slate-500">
+                      Hakuna picha
+                    </div>
+                  )}
                   <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all flex items-center justify-center">
                     <Eye size={20} className="text-white opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 transition-all" />
                   </div>
@@ -165,7 +158,13 @@ export const Library: React.FC = () => {
       {items.map(item => (
         <div key={item.id} className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-white/5 overflow-hidden group hover:border-gold-500/30 transition-all">
           <div className="relative aspect-video overflow-hidden">
-            <img src={item.image} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt="" />
+            {item.image ? (
+              <img src={item.image} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt="" />
+            ) : (
+              <div className="w-full h-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-[10px] font-black uppercase tracking-widest text-slate-500">
+                Hakuna picha
+              </div>
+            )}
             <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-all"></div>
             <div className="absolute top-3 left-3 px-2 py-1 bg-black/60 backdrop-blur-md rounded text-[9px] font-black text-white uppercase tracking-widest flex items-center gap-1">
               {item.type === 'Video' ? <Video size={10} /> : <ImageIcon size={10} />} {item.type}
@@ -274,7 +273,13 @@ export const Library: React.FC = () => {
                     <audio controls className="w-full" src={viewingItem.contentUrl}></audio>
                   </div>
                 )}
-                {viewingItem.type === 'Image' && <img src={viewingItem.image} className="max-w-full max-h-full object-contain shadow-2xl" alt={viewingItem.title}/>}
+                {viewingItem.type === 'Image' && (
+                  viewingItem.image ? (
+                    <img src={viewingItem.image} className="max-w-full max-h-full object-contain shadow-2xl" alt={viewingItem.title}/>
+                  ) : (
+                    <div className="text-sm font-black uppercase tracking-widest text-slate-400">Hakuna picha</div>
+                  )
+                )}
              </div>
              <div className="p-6 bg-slate-900 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4">
                 <p className="text-xs text-slate-400 font-medium italic">"{viewingItem.description}"</p>
@@ -289,3 +294,5 @@ export const Library: React.FC = () => {
     </div>
   );
 };
+
+

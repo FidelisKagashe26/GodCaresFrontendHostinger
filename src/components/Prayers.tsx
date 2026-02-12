@@ -23,15 +23,7 @@ interface Props {
   aiLanguage?: LanguageCode;
 }
 
-const PUBLIC_REQUESTS: PrayerRequest[] = [
-  { id: '1', name: 'Grace M.', category: 'Afya', request: 'Tunaomba amani na uponyaji kwa mama yangu anayefanyiwa upasuaji kesho.', prayingCount: 45, timeAgo: 'Muda mchache' },
-  { id: '2', name: 'Nobert G.', category: 'Kiroho', request: 'Naomba nguvu ya kushinda majaribu ya kila siku na kukua katika imani.', prayingCount: 120, timeAgo: 'Saa 2 zilizopita' }
-];
-
-const ANSWERED_PRAYERS: PrayerRequest[] = [
-  { id: 'a1', name: 'David L.', category: 'Uponyaji', request: 'Mwanangu sasa yuko salama na amepona kabisa! Madaktari wameshangaa. Utukufu kwa Mungu!', prayingCount: 156, timeAgo: 'Leo' },
-  { id: 'a2', name: 'Esther P.', category: 'Uchumi', request: 'Mungu ametoa ada ya shule kwa wakati. Asante kwa maombi yenu!', prayingCount: 88, timeAgo: 'Jana' }
-];
+const ANSWERED_PRAYERS: PrayerRequest[] = [];
 
 export const Prayers: React.FC<Props> = ({ aiLanguage = 'en' }) => {
   const [request, setRequest] = useState('');
@@ -41,7 +33,7 @@ export const Prayers: React.FC<Props> = ({ aiLanguage = 'en' }) => {
   const [showAiModal, setShowAiModal] = useState(false);
   const [aiPrayer, setAiPrayer] = useState('');
   const [submitted, setSubmitted] = useState(false);
-   const [publicRequests, setPublicRequests] = useState<PrayerRequest[]>(PUBLIC_REQUESTS);
+   const [publicRequests, setPublicRequests] = useState<PrayerRequest[]>([]);
    const [isLoadingWall, setIsLoadingWall] = useState(false);
    const [wallError, setWallError] = useState('');
 
@@ -73,10 +65,10 @@ export const Prayers: React.FC<Props> = ({ aiLanguage = 'en' }) => {
                prayingCount: item.praying_count,
                timeAgo: formatTimeAgo(item.created_at),
             }));
-            setPublicRequests(mapped.length ? mapped : PUBLIC_REQUESTS);
+            setPublicRequests(mapped);
          } catch (error) {
             setWallError('Imeshindikana kupakua maombi ya umma.');
-            setPublicRequests(PUBLIC_REQUESTS);
+            setPublicRequests([]);
          } finally {
             setIsLoadingWall(false);
          }
@@ -91,7 +83,6 @@ export const Prayers: React.FC<Props> = ({ aiLanguage = 'en' }) => {
     setShowAiModal(true);
     try {
       const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-      const langName = aiLanguage === 'sw' ? 'Swahili' : 'English';
       const response = await ai.models.generateContent({
         model: 'gemini-3-flash-preview',
         contents: `Andika ombi fupi la maombi ya Kikristo (maneno max 80) kwa Kiswahili kuhusu: "${request}". Ongeza mstari mmoja wa Biblia mwishoni.`
@@ -260,6 +251,11 @@ export const Prayers: React.FC<Props> = ({ aiLanguage = 'en' }) => {
                                  {wallError}
                               </div>
                            )}
+                           {!isLoadingWall && mappedWall.length === 0 && (
+                              <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-50 dark:border-white/5 text-slate-400 text-xs uppercase tracking-widest font-black">
+                                Hakuna taarifa za maombi ya umma kwa sasa.
+                              </div>
+                           )}
                            {mappedWall.map((req) => (
                   <div key={req.id} className="bg-white dark:bg-slate-900 p-8 rounded-2xl border border-slate-50 dark:border-white/5 shadow-sm group hover:border-gold-500/20 transition-all">
                      <div className="flex justify-between items-start mb-6">
@@ -277,6 +273,11 @@ export const Prayers: React.FC<Props> = ({ aiLanguage = 'en' }) => {
                            ))}
                         </>
               ) : (
+                ANSWERED_PRAYERS.length === 0 ? (
+                  <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-50 dark:border-white/5 text-slate-400 text-xs uppercase tracking-widest font-black">
+                    Hakuna taarifa za maombi yaliyojibiwa kwa sasa.
+                  </div>
+                ) : (
                 ANSWERED_PRAYERS.map((ans) => (
                   <div key={ans.id} className="bg-green-500/5 dark:bg-green-500/10 p-8 rounded-2xl border border-green-500/20 shadow-sm relative overflow-hidden group">
                      <div className="absolute top-0 right-0 p-6 text-green-500/10 rotate-12 group-hover:scale-110 transition-transform"><CheckCircle2 size={100} /></div>
@@ -293,6 +294,7 @@ export const Prayers: React.FC<Props> = ({ aiLanguage = 'en' }) => {
                      </div>
                   </div>
                 ))
+                )
               )}
 
               <button className="w-full py-4 border-2 border-dashed border-slate-200 dark:border-white/10 rounded-2xl text-[10px] font-black uppercase text-slate-400 tracking-[0.3em] hover:border-gold-500/50 hover:text-gold-500 transition-all flex items-center justify-center gap-2">
@@ -333,3 +335,4 @@ export const Prayers: React.FC<Props> = ({ aiLanguage = 'en' }) => {
     </div>
   );
 };
+

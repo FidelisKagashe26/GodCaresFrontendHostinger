@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { 
   Play, Globe, Users, ArrowRight, Film, Mic2, Tv, 
   Clock, Star, PlayCircle, MoreVertical, Share2, 
@@ -28,55 +28,18 @@ interface Playlist {
   videos: Video[];
 }
 
-const PLAYLISTS: Playlist[] = [
-  {
-    id: 'p1',
-    title: 'Siri za Unabii wa Danieli',
-    category: 'Unabii',
-    description: 'Mfululizo wa masomo yanayochambua sanamu ya Danieli na falme za dunia.',
-    thumbnail: 'https://images.unsplash.com/photo-1599596378252-474026337f71?auto=format&fit=crop&q=80&w=800',
-    videoCount: 12,
-    videos: [
-      { id: 'v1-1', title: 'Sura ya 1: Uaminifu Katika Jaribu', duration: '45:12', views: '12K', postedAt: '2 days ago', thumbnail: 'https://images.unsplash.com/photo-1599596378252-474026337f71?q=80&w=800' },
-      { id: 'v1-2', title: 'Sura ya 2: Sanamu ya Nebukadreza', duration: '55:30', views: '25K', postedAt: '1 week ago', thumbnail: 'https://images.unsplash.com/photo-1543165731-0d29792694b8?q=80&w=800' },
-      { id: 'v1-3', title: 'Sura ya 7: Wanyama Wanne na Pembe Ndogo', duration: '1:02:15', views: '18K', postedAt: '2 weeks ago', thumbnail: 'https://images.unsplash.com/photo-1478737270239-2f02b77fc618?q=80&w=800' }
-    ]
-  },
-  {
-    id: 'p2',
-    title: 'Afya na Uponyaji wa Kiungu',
-    category: 'Afya',
-    description: 'Kanuni nane za asili za afya na jinsi ya kuepuka magonjwa ya kisasa.',
-    thumbnail: 'https://images.unsplash.com/photo-1498837167922-ddd27525d352?auto=format&fit=crop&q=80&w=800',
-    videoCount: 8,
-    videos: [
-      { id: 'v2-1', title: 'Maji: Dawa ya Bure Kutoka kwa Mungu', duration: '15:45', views: '8K', postedAt: '1 month ago', thumbnail: 'https://images.unsplash.com/photo-1498837167922-ddd27525d352?q=80&w=800' },
-      { id: 'v2-2', title: 'Chakula Bora: Rudi Kwenye Bustani ya Edeni', duration: '22:10', views: '15K', postedAt: '2 months ago', thumbnail: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?q=80&w=800' }
-    ]
-  },
-  {
-    id: 'p3',
-    title: 'Shuhuda za Ushindi',
-    category: 'Shuhuda',
-    description: 'Watu mbalimbali wakishuhudia jinsi ukweli wa neno la Mungu ulivyobadili maisha yao.',
-    thumbnail: 'https://images.unsplash.com/photo-1511632765486-a01980e01a18?auto=format&fit=crop&q=80&w=800',
-    videoCount: 24,
-    videos: [
-      { id: 'v3-1', title: 'Nilivyotoka Kwenye Mafundisho ya Uongo', duration: '12:40', views: '45K', postedAt: '5 days ago', thumbnail: 'https://images.unsplash.com/photo-1511632765486-a01980e01a18?q=80&w=800' },
-      { id: 'v3-2', title: 'Ukweli wa Sabato Ulivyonipa Amani', duration: '18:15', views: '32K', postedAt: '3 weeks ago', thumbnail: 'https://images.unsplash.com/photo-1504052434569-70ad5836ab65?q=80&w=800' }
-    ]
-  }
-];
-
 export const MediaProjects: React.FC = () => {
   const [activeCategory, setActiveCategory] = useState('Zote');
   const [selectedPlaylist, setSelectedPlaylist] = useState<Playlist | null>(null);
   const [playingVideo, setPlayingVideo] = useState<Video | null>(null);
-  const [playlists, setPlaylists] = useState<Playlist[]>(PLAYLISTS);
+  const [playlists, setPlaylists] = useState<Playlist[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const categories = ['Zote', 'Unabii', 'Afya', 'Shuhuda', 'Elimu'];
+  const categories = useMemo(() => {
+    const unique = new Set(playlists.map((playlist) => playlist.category).filter(Boolean));
+    return ['Zote', ...Array.from(unique)];
+  }, [playlists]);
 
   useEffect(() => {
     const loadPlaylists = async () => {
@@ -87,23 +50,21 @@ export const MediaProjects: React.FC = () => {
         const mapped: Playlist[] = data.map((playlist) => ({
           id: String(playlist.id),
           title: playlist.title,
-          category: playlist.category || 'General',
+          category: playlist.category || 'Hakuna taarifa',
           description: playlist.description || '',
-          thumbnail: playlist.thumbnail || 'https://images.unsplash.com/photo-1478737270239-2f02b77fc618?q=80&w=800',
+          thumbnail: playlist.thumbnail || '',
           videoCount: playlist.video_count ?? playlist.videos.length,
           videos: playlist.videos.map((video) => ({
             id: String(video.id),
             title: video.title,
-            thumbnail: video.thumbnail || 'https://images.unsplash.com/photo-1478737270239-2f02b77fc618?q=80&w=800',
-            duration: video.duration || '00:00',
-            views: video.views || '0',
+            thumbnail: video.thumbnail || '',
+            duration: video.duration || 'Hakuna taarifa',
+            views: video.views || 'Hakuna taarifa',
             postedAt: video.posted_at || '',
             embedUrl: video.embed_url,
           })),
         }));
-        if (mapped.length > 0) {
-          setPlaylists(mapped);
-        }
+        setPlaylists(mapped);
       } catch (err: any) {
         setError(err?.message || 'Imeshindikana kupata playlists.');
       } finally {
@@ -161,7 +122,12 @@ export const MediaProjects: React.FC = () => {
               <div className="p-6 bg-slate-50 dark:bg-white/5 border-b border-slate-200 dark:border-white/5">
                  <h3 className="font-black text-sm uppercase tracking-widest text-slate-500 dark:text-slate-400">Orodha ya Video</h3>
               </div>
-              <div className="max-h-[600px] overflow-y-auto scrollbar-hide">
+               <div className="max-h-[600px] overflow-y-auto scrollbar-hide">
+                 {selectedPlaylist.videos.length === 0 && (
+                   <div className="p-6 text-center text-xs font-black uppercase tracking-widest text-slate-400">
+                     Hakuna video kwenye playlist hii.
+                   </div>
+                 )}
                  {selectedPlaylist.videos.map((v, idx) => (
                     <div 
                       key={v.id} 
@@ -169,7 +135,13 @@ export const MediaProjects: React.FC = () => {
                       className={`flex gap-3 p-4 hover:bg-slate-50 dark:hover:bg-white/5 cursor-pointer transition-all border-b border-slate-50 dark:border-white/5 ${playingVideo?.id === v.id ? 'bg-blue-50 dark:bg-blue-500/10' : ''}`}
                     >
                        <div className="w-32 h-20 shrink-0 rounded-lg overflow-hidden bg-slate-100 dark:bg-slate-800 relative">
-                          <img src={v.thumbnail} className="w-full h-full object-cover" alt="" />
+                          {v.thumbnail ? (
+                            <img src={v.thumbnail} className="w-full h-full object-cover" alt="" />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-[8px] font-black uppercase tracking-widest text-slate-500">
+                              Hakuna picha
+                            </div>
+                          )}
                           <div className="absolute bottom-1 right-1 bg-black/80 text-white text-[9px] font-bold px-1 rounded">{v.duration}</div>
                        </div>
                        <div className="flex-1 min-w-0">
@@ -213,6 +185,11 @@ export const MediaProjects: React.FC = () => {
         {error && (
           <div className="py-2 text-center text-xs font-black uppercase tracking-widest text-red-500">{error}</div>
         )}
+        {!loading && filteredPlaylists.length === 0 && (
+          <div className="py-6 text-center text-xs font-black uppercase tracking-widest text-slate-400">
+            Hakuna taarifa za playlists kwa sasa.
+          </div>
+        )}
         
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
           {filteredPlaylists.map((playlist) => (
@@ -220,7 +197,13 @@ export const MediaProjects: React.FC = () => {
               <div className="relative aspect-video rounded-xl overflow-hidden shadow-md border border-slate-200 dark:border-white/5">
                 <div className="absolute top-0 right-0 w-full h-full bg-slate-300 dark:bg-slate-800 -translate-y-1 scale-95 rounded-xl"></div>
                 <div className="relative z-10 w-full h-full">
-                  <img src={playlist.thumbnail} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="" />
+                  {playlist.thumbnail ? (
+                    <img src={playlist.thumbnail} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="" />
+                  ) : (
+                    <div className="w-full h-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-[10px] font-black uppercase tracking-widest text-slate-500">
+                      Hakuna picha
+                    </div>
+                  )}
                   <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-all"></div>
                   <div className="absolute top-0 right-0 w-1/3 h-full bg-black/80 backdrop-blur-md flex flex-col items-center justify-center text-white">
                      <p className="font-black text-lg">{playlist.videoCount}</p>
@@ -239,3 +222,4 @@ export const MediaProjects: React.FC = () => {
     </div>
   );
 };
+

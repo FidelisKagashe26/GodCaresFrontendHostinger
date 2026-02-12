@@ -23,53 +23,12 @@ interface Testimony {
   reactions: { amen: number; praise: number; love: number };
 }
 
-const INITIAL_TESTIMONIES: Testimony[] = [
-  {
-    id: 1,
-    name: 'Sarah Joseph',
-    location: 'Dodoma, Tanzania',
-    story: 'Nilikuwa na maswali mengi juu ya hali ya wafu. Baada ya hatua ya tatu, nuru ya ajabu iliingia moyoni mwangu. Sasa nina amani na tumaini la kweli!',
-    verified: true,
-    stars: 5,
-    date: 'Oct 24, 2024',
-    type: 'text',
-    category: 'Conversion',
-    reactions: { amen: 124, praise: 45, love: 89 }
-  },
-  {
-    id: 2,
-    name: 'David Emmanuel',
-    location: 'Nairobi, Kenya',
-    story: 'Kujifunza unabii kupitia platform hii kumenifanya nijue kuwa Mungu yuko kwenye usukani wa historia ya dunia.',
-    verified: true,
-    stars: 5,
-    date: 'Oct 22, 2024',
-    type: 'video',
-    category: 'Miracle',
-    thumbnail: 'https://images.unsplash.com/photo-1504052434569-70ad5836ab65?auto=format&fit=crop&q=80&w=800',
-    videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
-    reactions: { amen: 560, praise: 120, love: 230 }
-  },
-  {
-    id: 3,
-    name: 'John Malisa',
-    location: 'Mbeya, Tanzania',
-    story: 'Nimekuwa Mkristo kwa miaka 20 lakini sikuwa nawahi kuelewa maana ya Sabato hadi nilipopitia darasa hapa.',
-    verified: false,
-    stars: 5,
-    date: 'Oct 20, 2024',
-    type: 'text',
-    category: 'Healing',
-    reactions: { amen: 88, praise: 12, love: 34 }
-  }
-];
-
 export const Testimonies: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'All' | 'Video' | 'Text'>('All');
   const [showForm, setShowForm] = useState(false);
   const [isSent, setIsSent] = useState(false);
   const [formData, setFormData] = useState({ name: '', story: '', location: '', type: 'text' as 'text' | 'video', videoUrl: '', category: 'Conversion' as 'Miracle' | 'Conversion' | 'Healing' });
-  const [testimonies, setTestimonies] = useState<Testimony[]>(INITIAL_TESTIMONIES);
+  const [testimonies, setTestimonies] = useState<Testimony[]>([]);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
@@ -85,8 +44,7 @@ export const Testimonies: React.FC = () => {
       setErrorMessage('');
       try {
         const data = await getTestimonies();
-        if (data.length) {
-          const mapped: Testimony[] = data.map(item => ({
+        const mapped: Testimony[] = data.map(item => ({
             id: item.id,
             name: item.name,
             location: item.location,
@@ -98,12 +56,12 @@ export const Testimonies: React.FC = () => {
             category: item.category,
             thumbnail: item.thumbnail,
             videoUrl: item.video_url,
-            reactions: item.reactions,
+            reactions: item.reactions || { amen: 0, praise: 0, love: 0 },
           }));
-          setTestimonies(mapped);
-        }
+        setTestimonies(mapped);
       } catch (error) {
         setErrorMessage('Imeshindikana kupakua shuhuda.');
+        setTestimonies([]);
       } finally {
         setLoading(false);
       }
@@ -191,12 +149,23 @@ export const Testimonies: React.FC = () => {
       {loading && (
         <div className="text-xs uppercase tracking-widest text-slate-400 font-black">Inapakia shuhuda...</div>
       )}
+      {!loading && filtered.length === 0 && (
+        <div className="bg-slate-100 border border-slate-200 text-slate-500 text-[10px] font-bold uppercase tracking-widest px-4 py-3 rounded-lg">
+          Hakuna taarifa za shuhuda kwa sasa.
+        </div>
+      )}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
         {filtered.map((t) => (
           <div key={t.id} className="group bg-white dark:bg-slate-900 rounded-xl border border-slate-100 dark:border-white/5 overflow-hidden transition-all duration-500 hover:shadow-2xl flex flex-col h-full">
             {t.type === 'video' ? (
               <div className="relative aspect-video overflow-hidden bg-black">
-                <img src={t.thumbnail} className="w-full h-full object-cover opacity-60 group-hover:scale-110 transition-all duration-700" alt="" />
+                {t.thumbnail ? (
+                  <img src={t.thumbnail} className="w-full h-full object-cover opacity-60 group-hover:scale-110 transition-all duration-700" alt="" />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-[10px] font-black uppercase tracking-widest text-slate-400">
+                    Hakuna picha
+                  </div>
+                )}
                 <div className="absolute inset-0 flex items-center justify-center">
                    <div className="w-14 h-14 bg-red-600 text-white rounded-full flex items-center justify-center shadow-2xl group-hover:scale-110 transition-transform">
                       <Play size={24} fill="currentColor" className="ml-1" />
@@ -348,3 +317,4 @@ export const Testimonies: React.FC = () => {
     </div>
   );
 };
+

@@ -23,69 +23,6 @@ interface HeroProfile {
   videoUrl: string;
 }
 
-const HEROES: HeroProfile[] = [
-  {
-    id: 'daudi',
-    period: 'Agano la Kale',
-    category: 'Wapiganaji',
-    name: 'Daudi',
-    title: 'Mshindi wa Goliathi',
-    challenge: 'Goliathi na hofu ya jeshi zima.',
-    faithAction: 'Akiwa na kombeo na imani, Daudi alisimama dhidi ya jitu aliyemtukana Mungu.',
-    swahiliQuote: '"Wewe unanijia na mkuki, mimi nakujia kwa jina la Bwana."',
-    verse: '1 Samweli 17:45',
-    image: 'https://images.unsplash.com/photo-1509248961158-e54f6934749c?auto=format&fit=crop&q=80&w=800',
-    story: 'Kijana mchungaji mdogo Daudi hakutumia silaha za kijeshi. Aliamini kuwa Mungu aliyemwokoa kutoka kwa simba na dubu, angemshinda pia huyu Filisti.',
-    lesson: 'Ukubwa wa adui yako hauogopeshi kama unajua ukubwa wa Mungu wako.',
-    videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ'
-  },
-  {
-    id: 'esta',
-    period: 'Agano la Kale',
-    category: 'Wanawake',
-    name: 'Esta',
-    title: 'Malkia wa Ujasiri',
-    challenge: 'Amri ya maangamizi ya watu wa Mungu.',
-    faithAction: 'Alihatarisha maisha yake kwa kuingia mbele ya mfalme bila kuitwa.',
-    swahiliQuote: '"Nikiangamia, na niangamie."',
-    verse: 'Esta 4:16',
-    image: 'https://images.unsplash.com/photo-1507676184212-d03ab07a01bf?auto=format&fit=crop&q=80&w=800',
-    story: 'Esta alikuwa binti wa Kiyahudi aliyekuwa malkia Uajemi. Hamani alipopanga njama za kuwaua Wayahudi wote, Mordekai alimwambia Esta kuwa labda alipata ufalme kwa ajili ya wakati kama huo.',
-    lesson: 'Mungu anakuweka katika nafasi fulani kwa lengo maalum; usikae kimya wakati ukweli unahitajika.',
-    videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ'
-  },
-  {
-    id: 'nuhu',
-    period: 'Agano la Kale',
-    category: 'Manabii',
-    name: 'Nuhu',
-    title: 'Mjenzi wa Safina ya Ahadi',
-    challenge: 'Gharika inayokuja na dhihaka za ulimwengu.',
-    faithAction: 'Nuhu aliamini neno la Mungu na kujenga safina ya wokovu kwa miaka 120.',
-    swahiliQuote: '"Nuhu aliamini na kujenga tumaini."',
-    verse: 'Waebrania 11:7',
-    image: 'https://images.unsplash.com/photo-1518107612744-298f21427d35?auto=format&fit=crop&q=80&w=800',
-    story: 'Katika kipindi ambacho dunia ilikuwa imefikia kilele cha uasi, Nuhu alipokea maagizo yaliyopingana kabisa na akili ya kibinadamu.',
-    lesson: 'Imani ya kweli si hisia, bali ni hatua ya utii kwa neno la Mungu.',
-    videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ'
-  },
-  {
-    id: 'gidioni',
-    period: 'Agano la Kale',
-    category: 'Wapiganaji',
-    name: 'Gidioni',
-    title: 'Mshindi wa 300',
-    challenge: 'Jeshi kubwa la Midiani dhidi ya jeshi dogo.',
-    faithAction: 'Alikubali kupunguza jeshi lake hadi 300 ili utukufu urudi kwa Mungu pekee.',
-    swahiliQuote: '"Upanga wa Bwana na wa Gidioni!"',
-    verse: 'Waamuzi 7:20',
-    image: 'https://images.unsplash.com/photo-1590073844006-33379778ae09?auto=format&fit=crop&q=80&w=800',
-    story: 'Gidioni alikuwa akijificha midianini alipozungumziwa na malaika. Mungu alimtuma kuwakomboa Israeli kwa mbinu isiyo ya kawaida.',
-    lesson: 'Nguvu ya Mungu inakamilika katika udhaifu wetu.',
-    videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ'
-  }
-];
-
 const CATEGORIES = ['Zote', 'Wapiganaji', 'Wanawake', 'Manabii'];
 
 export const FaithBuilder: React.FC = () => {
@@ -93,7 +30,7 @@ export const FaithBuilder: React.FC = () => {
   const [activeCategory, setActiveCategory] = useState('Zote');
   const [showVideoInModal, setShowVideoInModal] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const [heroes, setHeroes] = useState<HeroProfile[]>(HEROES);
+  const [heroes, setHeroes] = useState<HeroProfile[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -111,16 +48,14 @@ export const FaithBuilder: React.FC = () => {
           faithAction: hero.faith_action,
           swahiliQuote: hero.swahili_quote,
           verse: hero.verse,
-          image: hero.image || 'https://images.unsplash.com/photo-1509248961158-e54f6934749c?auto=format&fit=crop&q=80&w=800',
+          image: hero.image || '',
           story: hero.story,
           lesson: hero.lesson,
           period: hero.period,
           category: hero.category,
-          videoUrl: hero.video_url || 'https://www.youtube.com/embed/dQw4w9WgXcQ',
+          videoUrl: hero.video_url || '',
         }));
-        if (mapped.length > 0) {
-          setHeroes(mapped);
-        }
+        setHeroes(mapped);
       } catch (err: any) {
         setError(err?.message || 'Imeshindikana kupata mashujaa wa imani.');
       } finally {
@@ -247,9 +182,15 @@ export const FaithBuilder: React.FC = () => {
               className="min-w-[75vw] md:min-w-[320px] snap-center cursor-pointer group/card relative transition-all duration-500 animate-fade-in"
             >
               {/* Card Container */}
-              <div className="relative h-[340px] md:h-[400px] bg-slate-900 rounded-3xl border border-white/5 overflow-hidden transition-all duration-700 group-hover/card:border-gold-500/30 shadow-xl">
+                <div className="relative h-[340px] md:h-[400px] bg-slate-900 rounded-3xl border border-white/5 overflow-hidden transition-all duration-700 group-hover/card:border-gold-500/30 shadow-xl">
                 <div className="h-full w-full relative">
-                  <img src={hero.image} className="w-full h-full object-cover grayscale opacity-30 group-hover/card:grayscale-0 group-hover/card:opacity-100 group-hover/card:scale-105 transition-all duration-1000" alt="" />
+                  {hero.image ? (
+                    <img src={hero.image} className="w-full h-full object-cover grayscale opacity-30 group-hover/card:grayscale-0 group-hover/card:opacity-100 group-hover/card:scale-105 transition-all duration-1000" alt="" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-xs font-black uppercase tracking-widest text-slate-400">
+                      Hakuna picha
+                    </div>
+                  )}
                   <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/70 to-transparent"></div>
                   
                   {/* Share Button (Mobile-accessible) */}
@@ -309,24 +250,36 @@ export const FaithBuilder: React.FC = () => {
 
               <div className="w-full md:w-1/2 relative h-[300px] md:h-full bg-slate-900 overflow-hidden group">
                  {showVideoInModal ? (
-                    <div className="w-full h-full bg-black">
-                       <iframe 
-                         src={`${currentHero.videoUrl}?autoplay=1`} 
-                         className="w-full h-full border-none" 
-                         allow="autoplay; encrypted-media" 
-                         allowFullScreen
-                       ></iframe>
-                    </div>
+                    currentHero.videoUrl ? (
+                      <div className="w-full h-full bg-black">
+                        <iframe 
+                          src={`${currentHero.videoUrl}?autoplay=1`} 
+                          className="w-full h-full border-none" 
+                          allow="autoplay; encrypted-media" 
+                          allowFullScreen
+                        ></iframe>
+                      </div>
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-sm font-black uppercase tracking-widest text-slate-300">
+                        Hakuna video
+                      </div>
+                    )
                  ) : (
                     <>
-                       <img src={currentHero.image} className="w-full h-full object-cover contrast-[1.1]" alt="" />
+                       {currentHero.image ? (
+                         <img src={currentHero.image} className="w-full h-full object-cover contrast-[1.1]" alt="" />
+                       ) : (
+                         <div className="w-full h-full flex items-center justify-center text-sm font-black uppercase tracking-widest text-slate-300">
+                           Hakuna picha
+                         </div>
+                       )}
                        <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20"></div>
                        
                        {/* Play Button in Modal */}
                        <div className="absolute inset-0 flex items-center justify-center z-30">
                           <button 
-                            onClick={() => setShowVideoInModal(true)}
-                            className="w-20 h-20 bg-white/20 backdrop-blur-sm border border-white/30 rounded-full flex items-center justify-center text-white hover:bg-red-600 hover:border-red-600 transition-all shadow-2xl animate-pulse-slow group/btn"
+                            onClick={() => currentHero.videoUrl && setShowVideoInModal(true)}
+                            className={`w-20 h-20 backdrop-blur-sm border rounded-full flex items-center justify-center text-white transition-all shadow-2xl animate-pulse-slow group/btn ${currentHero.videoUrl ? 'bg-white/20 border-white/30 hover:bg-red-600 hover:border-red-600' : 'bg-white/10 border-white/15 cursor-not-allowed opacity-60'}`}
                           >
                              <Play size={32} fill="currentColor" className="ml-1 group-hover/btn:scale-110 transition-transform" />
                           </button>
@@ -406,3 +359,4 @@ export const FaithBuilder: React.FC = () => {
     </div>
   );
 };
+

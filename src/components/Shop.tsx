@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { 
   ShoppingCart, Star, Truck, CheckCircle2, ChevronRight, Search, 
   Filter, ShoppingBag, Heart, ArrowUpRight, X, Minus, Plus, 
@@ -24,73 +24,6 @@ interface Product {
   specs: string[];
 }
 
-const PRODUCTS: Product[] = [
-  { 
-    id: 1, 
-    title: 'The Great Controversy (Pambano Kuu) - Premium Edition', 
-    price: 15000, 
-    originalPrice: 25000, 
-    image: 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&q=80&w=800', 
-    category: 'Vitabu', 
-    rating: 5.0, 
-    reviews: 1240, 
-    sold: 5200,
-    isChoice: true,
-    freeShipping: true,
-    description: "Kitabu hiki kinachambua historia ya pambano kati ya wema na uovu tangu kuanguka kwa Yerusalemu hadi kuumba upya kwa dunia. Ni nakala ya lazima kwa kila mtafuta ukweli.",
-    colors: ['Gold', 'Black', 'Deep Blue'],
-    specs: ['Hardcover', 'Premium Paper', '800 Pages']
-  },
-  { 
-    id: 2, 
-    title: 'Biblia ya Kujifunza (Life Application Study Bible)', 
-    price: 45000, 
-    originalPrice: 55000, 
-    image: 'https://images.unsplash.com/photo-1504052434569-70ad5836ab65?auto=format&fit=crop&q=80&w=800', 
-    category: 'Biblia', 
-    rating: 4.9, 
-    reviews: 850, 
-    sold: 1100,
-    isChoice: true,
-    freeShipping: false,
-    description: "Biblia bora zaidi kwa ajili ya kujifunza maisha ya kila siku. Inajumuisha maelezo ya aya, ramani, na wasifu wa wahusika wa Biblia.",
-    colors: ['Burgundy', 'Black Leather', 'Brown'],
-    specs: ['Large Print', 'Index Tabs', 'References']
-  },
-  { 
-    id: 3, 
-    title: 'God Cares 365 Missionary Technical T-Shirt', 
-    price: 25000, 
-    originalPrice: 35000, 
-    image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&q=80&w=800', 
-    category: 'Mavazi', 
-    rating: 4.8, 
-    reviews: 210, 
-    sold: 450,
-    isChoice: false,
-    freeShipping: true,
-    description: "T-shirt rasmi ya wamishenari wa kidijitali. Imetengenezwa kwa kitambaa cha kisasa (Dry-Fit) kinachopumua na kudumu.",
-    colors: ['White', 'Heather Gray', 'Charcoal'],
-    specs: ['100% Breathable', 'UV Protection', 'Official Logo']
-  },
-  { 
-    id: 4, 
-    title: 'Steps to Christ (Hatua kwa Kristo)', 
-    price: 8000, 
-    originalPrice: 12000, 
-    image: 'https://images.unsplash.com/photo-1589829085413-56de8ae18c73?auto=format&fit=crop&q=80&w=800', 
-    category: 'Vitabu', 
-    rating: 5.0, 
-    reviews: 3100, 
-    sold: 8000,
-    isChoice: true,
-    freeShipping: true,
-    description: "Kitabu kinachopendwa zaidi duniani kwa ajili ya kumjua Yesu na kukua katika neema Yeye.",
-    colors: ['Standard'],
-    specs: ['Softcover', 'Pocket Size']
-  }
-];
-
 export const Shop: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'Browse' | 'Tracking'>('Browse');
   const [cartCount, setCartCount] = useState(0);
@@ -101,11 +34,19 @@ export const Shop: React.FC = () => {
   const [trackingId, setTrackingId] = useState('');
   const [trackingResult, setTrackingResult] = useState<any | null>(null);
   const [trackingError, setTrackingError] = useState<string | null>(null);
-  const [products, setProducts] = useState<Product[]>(PRODUCTS);
+  const [products, setProducts] = useState<Product[]>([]);
   const [loadingProducts, setLoadingProducts] = useState(false);
   const [productsError, setProductsError] = useState<string | null>(null);
   const [orderQuantity, setOrderQuantity] = useState(1);
   const [selectedColor, setSelectedColor] = useState('');
+  const categories = useMemo(() => {
+    const unique = new Set(products.map((product) => product.category).filter(Boolean));
+    return ['Zote', ...Array.from(unique)];
+  }, [products]);
+  const filteredProducts = useMemo(
+    () => products.filter((product) => activeCategory === 'Zote' || product.category === activeCategory),
+    [products, activeCategory]
+  );
 
   const formatPrice = (amount: number) => {
     if (amount === 0) return "BURE";
@@ -141,20 +82,18 @@ export const Shop: React.FC = () => {
           title: item.title,
           price: item.price,
           originalPrice: item.original_price,
-          image: item.image || 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&q=80&w=800',
-          category: item.category || 'Zote',
-          rating: Number(item.rating || 5),
+          image: item.image || '',
+          category: item.category || 'Hakuna taarifa',
+          rating: Number(item.rating || 0),
           reviews: item.reviews || 0,
           sold: item.sold || 0,
           isChoice: item.is_choice,
           freeShipping: item.free_shipping,
           description: item.description || '',
-          colors: item.colors?.length ? item.colors : ['Standard'],
+          colors: item.colors || [],
           specs: item.specs?.length ? item.specs : [],
         }));
-        if (mapped.length > 0) {
-          setProducts(mapped);
-        }
+        setProducts(mapped);
       } catch (err: any) {
         setProductsError(err?.message || 'Imeshindikana kupata bidhaa.');
       } finally {
@@ -164,6 +103,12 @@ export const Shop: React.FC = () => {
 
     loadProducts();
   }, []);
+
+  useEffect(() => {
+    if (activeCategory !== 'Zote' && !categories.includes(activeCategory)) {
+      setActiveCategory('Zote');
+    }
+  }, [activeCategory, categories]);
 
   const handleTrackOrder = async () => {
     if (!trackingId) return;
@@ -268,7 +213,7 @@ export const Shop: React.FC = () => {
         <>
           {/* Category Navigation */}
           <div className="flex items-center justify-center gap-3 overflow-x-auto scrollbar-hide py-2">
-            {['Zote', 'Vitabu', 'Biblia', 'Mavazi', 'Vifaa'].map(cat => (
+            {categories.map(cat => (
               <button 
                 key={cat}
                 onClick={() => setActiveCategory(cat)}
@@ -288,16 +233,27 @@ export const Shop: React.FC = () => {
           {productsError && (
             <div className="py-2 text-center text-xs font-black uppercase tracking-widest text-red-500">{productsError}</div>
           )}
+          {!loadingProducts && filteredProducts.length === 0 && (
+            <div className="py-6 text-center text-xs font-black uppercase tracking-widest text-slate-400">
+              Hakuna taarifa za bidhaa kwa sasa.
+            </div>
+          )}
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-8 pt-8">
-            {products.filter(p => activeCategory === 'Zote' || p.category === activeCategory).map((product) => (
+            {filteredProducts.map((product) => (
               <div 
                 key={product.id}
-                onClick={() => { setSelectedProduct(product); setOrderStep('Detail'); setOrderQuantity(1); setSelectedColor(product.colors[0]); }}
+                onClick={() => { setSelectedProduct(product); setOrderStep('Detail'); setOrderQuantity(1); setSelectedColor(product.colors[0] || ''); }}
                 className="group relative flex flex-col bg-white dark:bg-slate-900 border border-slate-100 dark:border-white/5 rounded-xl overflow-hidden transition-all duration-500 hover:shadow-xl hover:border-gold-500/30 cursor-pointer"
               >
                 {/* Image Section - Compact */}
                 <div className="relative aspect-square overflow-hidden bg-slate-50 dark:bg-slate-950 rounded-lg m-1.5">
-                  <img src={product.image} className="w-full h-full object-cover transition-all duration-1000 group-hover:scale-110" alt={product.title} />
+                  {product.image ? (
+                    <img src={product.image} className="w-full h-full object-cover transition-all duration-1000 group-hover:scale-110" alt={product.title} />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-[10px] font-black uppercase tracking-widest text-slate-500">
+                      Hakuna picha
+                    </div>
+                  )}
                   <div className="absolute inset-0 bg-black/5 group-hover:bg-black/20 transition-all duration-500"></div>
                   
                   {/* Floating Badges - Smaller */}
@@ -349,7 +305,13 @@ export const Shop: React.FC = () => {
 
               {/* LEFT: Image Section */}
               <div className="w-full md:w-2/5 h-[250px] md:h-auto relative bg-slate-900 overflow-hidden shrink-0">
-                 <img src={selectedProduct.image} className="w-full h-full object-cover grayscale-[0.2] contrast-[1.1] transition-transform duration-1000 hover:scale-105" alt="" />
+                 {selectedProduct.image ? (
+                   <img src={selectedProduct.image} className="w-full h-full object-cover grayscale-[0.2] contrast-[1.1] transition-transform duration-1000 hover:scale-105" alt="" />
+                 ) : (
+                   <div className="w-full h-full flex items-center justify-center text-xs font-black uppercase tracking-widest text-slate-400">
+                     Hakuna picha
+                   </div>
+                 )}
                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent"></div>
                  <div className="absolute bottom-6 left-6 right-6">
                     <div className="flex gap-2 mb-2">
@@ -392,6 +354,9 @@ export const Shop: React.FC = () => {
                                       {color}
                                     </button>
                                   ))}
+                                  {selectedProduct.colors.length === 0 && (
+                                    <span className="text-[10px] font-bold text-slate-400">Hakuna taarifa.</span>
+                                  )}
                                </div>
                             </section>
 
@@ -506,3 +471,4 @@ export const Shop: React.FC = () => {
     </div>
   );
 };
+

@@ -9,11 +9,12 @@ interface AuthProps {
   resetParams?: { uid: string; token: string } | null;
   onResetComplete?: () => void;
   logoSrc?: string;
+  initialMode?: 'login' | 'register';
 }
 
-export const Auth: React.FC<AuthProps> = ({ onLogin, onClose, resetParams, onResetComplete, logoSrc }) => {
+export const Auth: React.FC<AuthProps> = ({ onLogin, onClose, resetParams, onResetComplete, logoSrc, initialMode = 'login' }) => {
   const resolvedLogoSrc = logoSrc || `${import.meta.env.BASE_URL}Logo.png`;
-  const [isLogin, setIsLogin] = useState(true);
+  const [isLogin, setIsLogin] = useState(initialMode === 'login');
   const [isResetMode, setIsResetMode] = useState(false);
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
@@ -32,6 +33,12 @@ export const Auth: React.FC<AuthProps> = ({ onLogin, onClose, resetParams, onRes
       setIsLogin(true);
     }
   }, [resetParams]);
+
+  useEffect(() => {
+    if (!isResetMode) {
+      setIsLogin(initialMode === 'login');
+    }
+  }, [initialMode, isResetMode]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
