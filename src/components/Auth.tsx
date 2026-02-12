@@ -3,6 +3,8 @@ import React, { useEffect, useState } from 'react';
 import { Mail, Lock, User, ArrowRight, X, Zap, Chrome, ShieldCheck } from 'lucide-react';
 import { forgotPassword, getCurrentUser, loginUser, registerUser, resetPassword } from '../services/authService';
 
+const LOGO_SRC = `${import.meta.env.BASE_URL}Logo.png`;
+
 interface AuthProps {
   onLogin: (userData: { name: string; email: string }) => void;
   onClose: () => void;
@@ -115,7 +117,7 @@ export const Auth: React.FC<AuthProps> = ({ onLogin, onClose, resetParams, onRes
         <div className="p-6 md:p-8 pt-8 relative overflow-y-auto">
           <div className="text-center space-y-2 mb-6">
             <div className="flex justify-center mb-4">
-              <img src="/Logo.png" alt="God Cares 365" className="h-20 w-auto" />
+              <img src={LOGO_SRC} alt="God Cares 365" className="h-20 w-auto" />
             </div>
             <h3 className="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">
               {isResetMode ? 'Badili Nenosiri' : (isLogin ? 'Karibu Tena' : 'Jiunge Nasi')}

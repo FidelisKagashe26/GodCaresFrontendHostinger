@@ -33,6 +33,8 @@ import { LogOut, Sun, Moon, Languages, Menu, Bell, User, Monitor, Cross, BookOpe
 import { clearTokens, getCurrentUser } from './services/authService';
 import { getSystemMessages } from './services/systemMessageService';
 
+const LOGO_SRC = `${import.meta.env.BASE_URL}Logo.png`;
+
 const stages: StageConfig[] = [
   { id: StageId.HOME, title: 'Nyumbani', description: 'Karibu katika mafundisho.', icon: 'home' },
   { id: StageId.BLOG, title: 'Blog', description: 'Makala na Maarifa', icon: 'book-open' },
@@ -271,7 +273,7 @@ const App: React.FC = () => {
                   <Menu size={22} className="group-hover:text-[color:var(--accent)] transition-colors" />
                 </button>
                 <div onClick={() => handleStageChange(StageId.HOME)} className="hidden md:flex items-center gap-3 cursor-pointer group">
-                  <img src="/Logo.png" alt="God Cares 365" className="h-12 md:h-14 w-auto" />
+                  <img src={LOGO_SRC} alt="God Cares 365" className="h-12 md:h-14 w-auto" />
                   <div className="flex flex-col leading-tight">
                     <span className="text-sm font-display tracking-[0.2em] text-[color:var(--text-primary)]">GOD CARES 365</span>
                     <span className="text-[10px] uppercase tracking-[0.32em] text-[color:var(--text-muted)]">Hope / Prayer / Scripture</span>
