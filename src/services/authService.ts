@@ -119,6 +119,8 @@ export const registerUser = async (payload: {
   name: string;
   email: string;
   password: string;
+  passwordConfirm: string;
+  phone: string;
 }): Promise<AuthUser> => {
   const [first_name, ...rest] = payload.name.trim().split(" ");
   const last_name = rest.join(" ");
@@ -129,6 +131,8 @@ export const registerUser = async (payload: {
       username: payload.email,
       email: payload.email,
       password: payload.password,
+      password_confirm: payload.passwordConfirm,
+      phone: payload.phone.trim(),
       first_name: first_name || "",
       last_name: last_name || "",
     }),

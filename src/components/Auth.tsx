@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
-import { Mail, Lock, User, ArrowRight, X, Zap, Chrome, ShieldCheck } from 'lucide-react';
+import { Mail, Lock, User, ArrowRight, X, Chrome, ShieldCheck, Phone, Eye, EyeOff } from 'lucide-react';
 import { forgotPassword, getCurrentUser, loginUser, registerUser, resetPassword } from '../services/authService';
 
 interface AuthProps {
@@ -16,9 +16,12 @@ export const Auth: React.FC<AuthProps> = ({ onLogin, onClose, resetParams, onRes
   const [isLogin, setIsLogin] = useState(true);
   const [isResetMode, setIsResetMode] = useState(false);
   const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [name, setName] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [infoMessage, setInfoMessage] = useState('');
@@ -64,10 +67,20 @@ export const Auth: React.FC<AuthProps> = ({ onLogin, onClose, resetParams, onRes
         const user = await getCurrentUser();
         onLogin(user);
       } else {
-        await registerUser({ name, email, password });
+        if (!phone.trim()) {
+          throw new Error('Weka namba ya simu.');
+        }
+        if (password !== confirmPassword) {
+          throw new Error('Nenosiri hayalingani.');
+        }
+        await registerUser({ name, email, password, passwordConfirm: confirmPassword, phone });
         setInfoMessage('Usajili umefanikiwa. Sasa ingia kwa email na nenosiri lako.');
         setIsLogin(true);
+        setShowPassword(false);
+        setShowConfirmPassword(false);
         setPassword('');
+        setConfirmPassword('');
+        setPhone('');
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Imeshindikana kuingia.';
@@ -172,6 +185,17 @@ export const Auth: React.FC<AuthProps> = ({ onLogin, onClose, resetParams, onRes
                 </div>
               )}
 
+              {!isLogin && !isResetMode && (
+                <div className="relative group">
+                  <Phone className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-gold-500 transition-colors" size={16} />
+                  <input
+                    type="tel" required value={phone} onChange={e => setPhone(e.target.value)}
+                    placeholder="Namba ya Simu"
+                    className="w-full pl-14 pr-6 py-3 bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/5 rounded-lg outline-none focus:border-gold-500 transition-all text-sm text-slate-900 dark:text-white font-medium"
+                  />
+                </div>
+              )}
+
               {!isResetMode && (
                 <div className="relative group">
                   <Mail className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-gold-500 transition-colors" size={16} />
@@ -186,20 +210,36 @@ export const Auth: React.FC<AuthProps> = ({ onLogin, onClose, resetParams, onRes
               <div className="relative group">
                 <Lock className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-gold-500 transition-colors" size={16} />
                 <input 
-                  type="password" required value={password} onChange={e => setPassword(e.target.value)}
+                  type={showPassword ? "text" : "password"} required value={password} onChange={e => setPassword(e.target.value)}
                   placeholder={isResetMode ? "Nenosiri Jipya" : "Nenosiri"}
-                  className="w-full pl-14 pr-6 py-3 bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/5 rounded-lg outline-none focus:border-gold-500 transition-all text-sm text-slate-900 dark:text-white font-medium"
+                  className="w-full pl-14 pr-14 py-3 bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/5 rounded-lg outline-none focus:border-gold-500 transition-all text-sm text-slate-900 dark:text-white font-medium"
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(prev => !prev)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-gold-500 transition-colors"
+                  aria-label={showPassword ? 'Ficha nenosiri' : 'Onyesha nenosiri'}
+                >
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
               </div>
 
-              {isResetMode && (
+              {(isResetMode || !isLogin) && (
                 <div className="relative group">
                   <Lock className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-gold-500 transition-colors" size={16} />
                   <input 
-                    type="password" required value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)}
+                    type={showConfirmPassword ? "text" : "password"} required value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)}
                     placeholder="Thibitisha Nenosiri"
-                    className="w-full pl-14 pr-6 py-3 bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/5 rounded-lg outline-none focus:border-gold-500 transition-all text-sm text-slate-900 dark:text-white font-medium"
+                    className="w-full pl-14 pr-14 py-3 bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/5 rounded-lg outline-none focus:border-gold-500 transition-all text-sm text-slate-900 dark:text-white font-medium"
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(prev => !prev)}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-gold-500 transition-colors"
+                    aria-label={showConfirmPassword ? 'Ficha nenosiri la uthibitisho' : 'Onyesha nenosiri la uthibitisho'}
+                  >
+                    {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
                 </div>
               )}
 
@@ -229,6 +269,10 @@ export const Auth: React.FC<AuthProps> = ({ onLogin, onClose, resetParams, onRes
             {!isResetMode && (
               <button 
                 onClick={() => setIsLogin(!isLogin)}
+                onMouseDown={() => {
+                  setShowPassword(false);
+                  setShowConfirmPassword(false);
+                }}
                 className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest hover:text-gold-600 transition-colors"
               >
                 {isLogin ? 'Hujawahi kujiunga? Jisajili' : 'Tayari unayo akaunti? Ingia'}
