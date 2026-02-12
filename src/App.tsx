@@ -32,8 +32,7 @@ import { ThemeCenter } from './components/ThemeCenter';
 import { LogOut, Sun, Moon, Languages, Menu, Bell, User, Monitor, Cross, BookOpen } from 'lucide-react';
 import { clearTokens, getCurrentUser } from './services/authService';
 import { getSystemMessages } from './services/systemMessageService';
-
-const LOGO_SRC = `${import.meta.env.BASE_URL}Logo.png`;
+import { DEFAULT_SITE_SETTINGS, getSiteSettings, SiteSettings } from './services/siteSettingsService';
 
 const stages: StageConfig[] = [
   { id: StageId.HOME, title: 'Nyumbani', description: 'Karibu katika mafundisho.', icon: 'home' },
@@ -79,6 +78,10 @@ const App: React.FC = () => {
 
   const [aiLanguage, setAiLanguage] = useState<LanguageCode>('en');
   const [theme, setTheme] = useState<ThemePreference>('system');
+  const [siteSettings, setSiteSettings] = useState<SiteSettings>(DEFAULT_SITE_SETTINGS);
+
+  const fallbackLogoSrc = `${import.meta.env.BASE_URL}Logo.png`;
+  const logoSrc = siteSettings.logo_url || fallbackLogoSrc;
 
   useEffect(() => {
     const savedUser = localStorage.getItem('gc365_user');
@@ -122,6 +125,19 @@ const App: React.FC = () => {
     };
 
     loadMessages();
+  }, []);
+
+  useEffect(() => {
+    const loadSiteSettings = async () => {
+      try {
+        const settings = await getSiteSettings();
+        setSiteSettings(settings);
+      } catch (error) {
+        // Keep defaults when API is unavailable.
+      }
+    };
+
+    loadSiteSettings();
   }, []);
 
   useEffect(() => {
@@ -236,6 +252,7 @@ const App: React.FC = () => {
 
       {showAuthModal && (
         <Auth
+          logoSrc={logoSrc}
           onLogin={handleLogin}
           onClose={() => {
             setShowAuthModal(false);
@@ -251,10 +268,19 @@ const App: React.FC = () => {
           }}
         />
       )}
-      {showProfileModal && user && <ProfileModal user={user} onLogout={handleLogout} onClose={() => setShowProfileModal(false)} />}
+      {showProfileModal && user && (
+        <ProfileModal
+          user={user}
+          supportEmail={siteSettings.support_email}
+          onLogout={handleLogout}
+          onClose={() => setShowProfileModal(false)}
+        />
+      )}
 
       <Sidebar 
         currentStage={currentStage} onStageChange={handleStageChange} stages={stages}
+        logoSrc={logoSrc}
+        siteSettings={siteSettings}
         isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} user={user} onLogout={handleLogout}
         onShowProfile={() => { setIsMenuOpen(false); setShowProfileModal(true); }}
         onShowAuth={() => { setIsMenuOpen(false); setShowAuthModal(true); }}
@@ -273,10 +299,10 @@ const App: React.FC = () => {
                   <Menu size={22} className="group-hover:text-[color:var(--accent)] transition-colors" />
                 </button>
                 <div onClick={() => handleStageChange(StageId.HOME)} className="hidden md:flex items-center gap-3 cursor-pointer group">
-                  <img src={LOGO_SRC} alt="God Cares 365" className="h-12 md:h-14 w-auto" />
+                  <img src={logoSrc} alt={siteSettings.site_name} className="h-12 md:h-14 w-auto" />
                   <div className="flex flex-col leading-tight">
-                    <span className="text-sm font-display tracking-[0.2em] text-[color:var(--text-primary)]">GOD CARES 365</span>
-                    <span className="text-[10px] uppercase tracking-[0.32em] text-[color:var(--text-muted)]">Hope / Prayer / Scripture</span>
+                    <span className="text-sm font-display tracking-[0.2em] text-[color:var(--text-primary)]">{siteSettings.site_name}</span>
+                    <span className="text-[10px] uppercase tracking-[0.32em] text-[color:var(--text-muted)]">{siteSettings.site_tagline}</span>
                   </div>
                 </div>
               </div>
@@ -317,7 +343,7 @@ const App: React.FC = () => {
             className="flex-1 overflow-y-auto scroll-smooth scrollbar-hide pt-20 pb-16"
           >
             {renderContent()}
-            {!isImmersive && <Footer onNavigate={handleStageChange} />}
+            {!isImmersive && <Footer onNavigate={handleStageChange} siteSettings={siteSettings} />}
           </div>
         </main>
       </div>

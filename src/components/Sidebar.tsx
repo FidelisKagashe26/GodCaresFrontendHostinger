@@ -1,6 +1,7 @@
 
 import React, { useEffect, useState, useRef } from 'react';
 import { StageConfig, StageId } from '../types';
+import { DEFAULT_SITE_SETTINGS, SiteSettings } from '../services/siteSettingsService';
 import { 
   Home, BookCheck, Microscope, ShieldAlert, MessageSquare, 
   ShoppingBag, Library, Newspaper, Heart, Gift, Info, Calendar, PlayCircle, 
@@ -12,8 +13,6 @@ import {
   Globe, Zap, ExternalLink, Baby, Users
 } from 'lucide-react';
 
-const LOGO_SRC = `${import.meta.env.BASE_URL}Logo.png`;
-
 interface SidebarProps {
   currentStage: StageId;
   onStageChange: (id: StageId) => void;
@@ -24,6 +23,8 @@ interface SidebarProps {
   onLogout: () => void;
   onShowProfile?: () => void;
   onShowAuth?: () => void;
+  logoSrc?: string;
+  siteSettings?: SiteSettings;
 }
 
 const TILE_IMAGES: Record<string, string> = {
@@ -45,7 +46,7 @@ const TILE_IMAGES: Record<string, string> = {
   [StageId.DONATE]: "https://images.unsplash.com/photo-1469571486292-0ba58a3f068b?q=80&w=400",
 };
 
-export const ProfileModal: React.FC<{ user: any; onLogout: () => void; onClose: () => void }> = ({ user, onLogout, onClose }) => {
+export const ProfileModal: React.FC<{ user: any; onLogout: () => void; onClose: () => void; supportEmail?: string }> = ({ user, onLogout, onClose, supportEmail }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [profilePic, setProfilePic] = useState<string>(localStorage.getItem('gc365_profile_pic') || '');
   
@@ -79,7 +80,8 @@ export const ProfileModal: React.FC<{ user: any; onLogout: () => void; onClose: 
     } else if (feature === 'Security') {
       alert("Hali ya Ulinzi: Akaunti yako imelindwa na Itifaki ya GC-Shield. Hakuna uingiaji mgeni uliogundulika.");
     } else if (feature === 'Support') {
-      window.location.href = "mailto:support@godcares365.org?subject=Msaada wa Akaunti";
+      const email = supportEmail || "support@godcares365.org";
+      window.location.href = `mailto:${email}?subject=Msaada wa Akaunti`;
     } else if (feature === 'Settings') {
       alert("Mipangilio ya Mfumo: Unaweza kubadili lugha na rangi (Theme) kupitia toolbar iliyo juu ya ukurasa.");
     }
@@ -268,10 +270,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onLogout,
   user,
   onShowProfile,
-  onShowAuth
+  onShowAuth,
+  logoSrc,
+  siteSettings
 }) => {
   const [isVisible, setIsVisible] = useState(false);
   const [profilePic, setProfilePic] = useState<string>(localStorage.getItem('gc365_profile_pic') || '');
+  const resolvedSettings = siteSettings || DEFAULT_SITE_SETTINGS;
+  const resolvedLogoSrc = logoSrc || resolvedSettings.logo_url || `${import.meta.env.BASE_URL}Logo.png`;
 
   useEffect(() => {
     const handleStorage = () => {
@@ -318,29 +324,29 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const externalWebsites = [
     {
       name: "PAMBANO KUU YESU ANASHINDA SHETANI ANASHINDWA",
-      url: "https://godcares365.org/pambano-kuu",
+      url: resolvedSettings.website_main_url,
       desc: "Ushindi wa Milele",
       icon: <ShieldCheck size={18} className="text-red-500" />
     },
     {
       name: "GODCARES 365 KIDS",
-      url: "https://kids.godcares365.org",
+      url: resolvedSettings.website_kids_url,
       desc: "Ukweli kwa Wadogo",
       icon: <Baby size={18} className="text-blue-400" />
     },
     {
       name: "GODCARES 365 OUTREACH",
-      url: "https://outreach.godcares365.org",
+      url: resolvedSettings.website_outreach_url,
       desc: "Huduma kwa Jamii",
       icon: <Users size={18} className="text-emerald-500" />
     }
-  ];
+  ].filter((web) => Boolean(web.url && web.url.trim()));
 
   return (
     <div className={`fixed inset-0 z-[200] bg-slate-50/80 dark:bg-[#020617]/70 backdrop-blur-2xl flex flex-col transition-all duration-700 ease-in-out ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
       <div className="relative z-10 flex items-center justify-between p-4 md:p-6 border-b border-slate-200/20 dark:border-white/5 bg-white/20 dark:bg-black/10 backdrop-blur-md h-20">
         <div onClick={() => { onStageChange(StageId.HOME); onClose(); }} className="flex items-center cursor-pointer group">
-           <img src={LOGO_SRC} alt="God Cares 365" className="h-24 w-auto group-hover:scale-105 transition-transform" />
+           <img src={resolvedLogoSrc} alt={resolvedSettings.site_name} className="h-24 w-auto group-hover:scale-105 transition-transform" />
         </div>
         <button onClick={onClose} className="p-3 bg-white/10 hover:bg-red-500/20 dark:hover:bg-red-500/30 text-slate-600 dark:text-slate-400 hover:text-red-500 transition-all rounded-xl border border-transparent hover:border-red-500/20">
           <X size={24} />

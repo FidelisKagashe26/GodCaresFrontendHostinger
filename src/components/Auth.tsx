@@ -3,16 +3,16 @@ import React, { useEffect, useState } from 'react';
 import { Mail, Lock, User, ArrowRight, X, Zap, Chrome, ShieldCheck } from 'lucide-react';
 import { forgotPassword, getCurrentUser, loginUser, registerUser, resetPassword } from '../services/authService';
 
-const LOGO_SRC = `${import.meta.env.BASE_URL}Logo.png`;
-
 interface AuthProps {
   onLogin: (userData: { name: string; email: string }) => void;
   onClose: () => void;
   resetParams?: { uid: string; token: string } | null;
   onResetComplete?: () => void;
+  logoSrc?: string;
 }
 
-export const Auth: React.FC<AuthProps> = ({ onLogin, onClose, resetParams, onResetComplete }) => {
+export const Auth: React.FC<AuthProps> = ({ onLogin, onClose, resetParams, onResetComplete, logoSrc }) => {
+  const resolvedLogoSrc = logoSrc || `${import.meta.env.BASE_URL}Logo.png`;
   const [isLogin, setIsLogin] = useState(true);
   const [isResetMode, setIsResetMode] = useState(false);
   const [email, setEmail] = useState('');
@@ -117,7 +117,7 @@ export const Auth: React.FC<AuthProps> = ({ onLogin, onClose, resetParams, onRes
         <div className="p-6 md:p-8 pt-8 relative overflow-y-auto">
           <div className="text-center space-y-2 mb-6">
             <div className="flex justify-center mb-4">
-              <img src={LOGO_SRC} alt="God Cares 365" className="h-20 w-auto" />
+              <img src={resolvedLogoSrc} alt="God Cares 365" className="h-20 w-auto" />
             </div>
             <h3 className="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">
               {isResetMode ? 'Badili Nenosiri' : (isLogin ? 'Karibu Tena' : 'Jiunge Nasi')}

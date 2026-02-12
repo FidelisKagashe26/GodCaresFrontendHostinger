@@ -2,6 +2,7 @@
 import React from 'react';
 import { Facebook, Instagram, Youtube, Heart, Phone, Mail, Gift, Zap } from 'lucide-react';
 import { StageId } from '../types';
+import { DEFAULT_SITE_SETTINGS, SiteSettings } from '../services/siteSettingsService';
 
 const TikTokIcon = ({ size = 20, className = "" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" className={className}>
@@ -21,7 +22,26 @@ const WhatsAppIcon = ({ size = 20, className = "" }) => (
   </svg>
 );
 
-export const Footer: React.FC<{ onNavigate?: (id: StageId) => void }> = ({ onNavigate }) => {
+interface FooterProps {
+  onNavigate?: (id: StageId) => void;
+  siteSettings?: SiteSettings;
+}
+
+export const Footer: React.FC<FooterProps> = ({ onNavigate, siteSettings }) => {
+  const settings = siteSettings || DEFAULT_SITE_SETTINGS;
+  const siteName = settings.site_name || DEFAULT_SITE_SETTINGS.site_name;
+  const contactPhone = settings.contact_phone || DEFAULT_SITE_SETTINGS.contact_phone;
+  const contactEmail = settings.contact_email || DEFAULT_SITE_SETTINGS.contact_email;
+
+  const socialItems = [
+    { icon: Facebook, link: settings.facebook_url },
+    { icon: XIcon, link: settings.x_url },
+    { icon: Instagram, link: settings.instagram_url },
+    { icon: TikTokIcon, link: settings.tiktok_url },
+    { icon: Youtube, link: settings.youtube_url },
+    { icon: WhatsAppIcon, link: settings.whatsapp_url },
+  ].filter((item) => Boolean(item.link && item.link.trim()));
+
   return (
     <footer className="bg-slate-950 border-t border-white/5 py-16 w-full">
       <div className="container mx-auto px-6 flex flex-col items-center justify-center space-y-12">
@@ -35,7 +55,7 @@ export const Footer: React.FC<{ onNavigate?: (id: StageId) => void }> = ({ onNav
              <Zap size={32} fill="currentColor" />
           </div>
           <h2 className="text-2xl font-black text-white tracking-[0.2em] uppercase">
-            God Cares <span className="text-gold-500">365</span>
+            {siteName}
           </h2>
         </div>
 
@@ -77,14 +97,14 @@ export const Footer: React.FC<{ onNavigate?: (id: StageId) => void }> = ({ onNav
 
         {/* Contact & Support Section */}
         <div className="flex flex-wrap justify-center gap-6 md:gap-12 border-y border-white/5 py-10 w-full max-w-4xl">
-           <div className="flex items-center gap-3 text-slate-400 hover:text-white transition-colors cursor-pointer group">
+           <a href={`tel:${contactPhone}`} className="flex items-center gap-3 text-slate-400 hover:text-white transition-colors cursor-pointer group">
               <div className="p-3 bg-white/5 rounded-lg group-hover:bg-primary-900 group-hover:text-gold-400 transition-all"><Phone size={18} /></div>
-              <span className="text-sm font-bold tracking-tight">+255 744 780 244</span>
-           </div>
-           <div className="flex items-center gap-3 text-slate-400 hover:text-white transition-colors cursor-pointer group">
+              <span className="text-sm font-bold tracking-tight">{contactPhone}</span>
+           </a>
+           <a href={`mailto:${contactEmail}`} className="flex items-center gap-3 text-slate-400 hover:text-white transition-colors cursor-pointer group">
               <div className="p-3 bg-white/5 rounded-lg group-hover:bg-primary-900 group-hover:text-gold-400 transition-all"><Mail size={18} /></div>
-              <span className="text-sm font-bold tracking-tight">fathercares365@gmail.com</span>
-           </div>
+              <span className="text-sm font-bold tracking-tight">{contactEmail}</span>
+           </a>
            <button 
              onClick={() => onNavigate?.(StageId.DONATE)}
              className="flex items-center gap-3 text-gold-500 hover:text-gold-400 transition-colors cursor-pointer group border border-gold-500/20 px-8 py-3 rounded-lg hover:bg-gold-500/10"
@@ -96,17 +116,10 @@ export const Footer: React.FC<{ onNavigate?: (id: StageId) => void }> = ({ onNav
 
         {/* Social Icons */}
         <div className="flex items-center gap-4">
-          {[
-            { icon: Facebook, link: "#" }, 
-            { icon: XIcon, link: "https://x.com/Godcares365" }, 
-            { icon: Instagram, link: "https://www.instagram.com/god_cares365?igsh=MXdmdmJ4b3c5OTdlYQ==" }, 
-            { icon: TikTokIcon, link: "https://vm.tiktok.com/ZMHEoAMgBnUD3-hkUHg/" }, 
-            { icon: Youtube, link: "https://www.youtube.com/@GodCares365" },
-            { icon: WhatsAppIcon, link: "https://whatsapp.com/channel/0029VaJmiMu3WHTb3achqE1o" }
-          ].map((Item, i) => (
+          {socialItems.map((Item, i) => (
             <a 
               key={i} 
-              href={Item.link} 
+              href={Item.link}
               target="_blank" 
               rel="noopener noreferrer" 
               className="w-12 h-12 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 hover:text-gold-400 hover:bg-gold-400/10 hover:scale-110 transition-all"
