@@ -1,7 +1,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { Mail, Lock, User, ArrowRight, X, Chrome, ShieldCheck, Phone, Eye, EyeOff } from 'lucide-react';
-import { forgotPassword, getCurrentUser, loginUser, registerUser, resetPassword } from '../services/authService';
+import { forgotPassword, getCurrentUser, loginUser, registerUser, resendRegistrationOtp, resetPassword, verifyRegistrationOtp } from '../services/authService';
 
 interface AuthProps {
   onLogin: (userData: { name: string; email: string }) => void;
@@ -23,6 +23,10 @@ export const Auth: React.FC<AuthProps> = ({ onLogin, onClose, resetParams, onRes
   const [name, setName] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [otpCode, setOtpCode] = useState('');
+  const [isOtpMode, setIsOtpMode] = useState(false);
+  const [pendingPhone, setPendingPhone] = useState('');
+  const [pendingEmail, setPendingEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [infoMessage, setInfoMessage] = useState('');
@@ -37,8 +41,19 @@ export const Auth: React.FC<AuthProps> = ({ onLogin, onClose, resetParams, onRes
   useEffect(() => {
     if (!isResetMode) {
       setIsLogin(initialMode === 'login');
+      if (initialMode === 'register') {
+        setIsOtpMode(false);
+      }
     }
   }, [initialMode, isResetMode]);
+
+  const resetToLogin = () => {
+    setIsOtpMode(false);
+    setOtpCode('');
+    setPendingPhone('');
+    setPendingEmail('');
+    setIsLogin(true);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -69,6 +84,22 @@ export const Auth: React.FC<AuthProps> = ({ onLogin, onClose, resetParams, onRes
         return;
       }
 
+      if (isOtpMode) {
+        if (!otpCode.trim()) {
+          throw new Error('Weka OTP uliyopokea kwenye simu yako.');
+        }
+        const result = await verifyRegistrationOtp({
+          email: pendingEmail || email,
+          phone: pendingPhone,
+          code: otpCode.trim(),
+        });
+        setInfoMessage(result.welcomeMessage || 'Hongera! Usajili umekamilika. Sasa ingia.');
+        resetToLogin();
+        setPassword('');
+        setConfirmPassword('');
+        return;
+      }
+
       if (isLogin) {
         await loginUser({ email, password });
         const user = await getCurrentUser();
@@ -80,14 +111,14 @@ export const Auth: React.FC<AuthProps> = ({ onLogin, onClose, resetParams, onRes
         if (password !== confirmPassword) {
           throw new Error('Nenosiri hayalingani.');
         }
-        await registerUser({ name, email, password, passwordConfirm: confirmPassword, phone });
-        setInfoMessage('Usajili umefanikiwa. Sasa ingia kwa email na nenosiri lako.');
-        setIsLogin(true);
+        const result = await registerUser({ name, email, password, passwordConfirm: confirmPassword, phone });
+        setPendingPhone(result.phone || phone.trim());
+        setPendingEmail(result.email || email.trim());
+        setInfoMessage(result.message || 'OTP imetumwa. Ingiza hapa chini kuthibitisha usajili.');
+        setIsOtpMode(true);
+        setIsLogin(false);
         setShowPassword(false);
         setShowConfirmPassword(false);
-        setPassword('');
-        setConfirmPassword('');
-        setPhone('');
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Imeshindikana kuingia.';
@@ -120,6 +151,29 @@ export const Auth: React.FC<AuthProps> = ({ onLogin, onClose, resetParams, onRes
     }
   };
 
+  const handleResendOtp = async () => {
+    setLoading(true);
+    setErrorMessage('');
+    try {
+      const response = await resendRegistrationOtp({
+        email: pendingEmail || email,
+        phone: pendingPhone || phone,
+      });
+      if (response.phone) {
+        setPendingPhone(response.phone);
+      }
+      if (response.email) {
+        setPendingEmail(response.email);
+      }
+      setInfoMessage(response.message || 'OTP mpya imetumwa.');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Imeshindikana kutuma OTP tena.';
+      setErrorMessage(message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="fixed inset-0 z-[600] flex items-center justify-center p-4 bg-slate-950/90 backdrop-blur-xl animate-fade-in">
       <div className="relative w-full max-w-lg max-h-[95vh] flex flex-col bg-white dark:bg-[#0f172a] rounded-lg overflow-hidden shadow-2xl border border-slate-200 dark:border-white/10 animate-scale-up">
@@ -140,17 +194,17 @@ export const Auth: React.FC<AuthProps> = ({ onLogin, onClose, resetParams, onRes
               <img src={resolvedLogoSrc} alt="God Cares 365" className="h-20 w-auto" />
             </div>
             <h3 className="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">
-              {isResetMode ? 'Badili Nenosiri' : (isLogin ? 'Karibu Tena' : 'Jiunge Nasi')}
+              {isResetMode ? 'Badili Nenosiri' : (isOtpMode ? 'Thibitisha OTP' : (isLogin ? 'Karibu Tena' : 'Jiunge Nasi'))}
             </h3>
             <p className="text-slate-500 dark:text-slate-400 text-[10px] font-bold uppercase tracking-widest px-4">
               {isResetMode
                 ? 'Weka nenosiri jipya ili kuendelea'
-                : (isLogin ? 'Ingia ili uendelee na uchambuzi' : 'Tengeneza akaunti kuanza safari')}
+                : (isOtpMode ? 'Ingiza msimbo wa OTP uliotumwa kwenye simu yako' : (isLogin ? 'Ingia ili uendelee na uchambuzi' : 'Tengeneza akaunti kuanza safari'))}
             </p>
           </div>
 
           <div className="space-y-3">
-            {!isResetMode && (
+            {!isResetMode && !isOtpMode && (
               <>
                 {/* Google Login Button */}
                 <button 
@@ -181,7 +235,7 @@ export const Auth: React.FC<AuthProps> = ({ onLogin, onClose, resetParams, onRes
                   {infoMessage}
                 </div>
               )}
-              {!isLogin && !isResetMode && (
+              {!isLogin && !isResetMode && !isOtpMode && (
                 <div className="relative group">
                   <User className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-gold-500 transition-colors" size={16} />
                   <input 
@@ -192,7 +246,7 @@ export const Auth: React.FC<AuthProps> = ({ onLogin, onClose, resetParams, onRes
                 </div>
               )}
 
-              {!isLogin && !isResetMode && (
+              {!isLogin && !isResetMode && !isOtpMode && (
                 <div className="relative group">
                   <Phone className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-gold-500 transition-colors" size={16} />
                   <input
@@ -203,7 +257,7 @@ export const Auth: React.FC<AuthProps> = ({ onLogin, onClose, resetParams, onRes
                 </div>
               )}
 
-              {!isResetMode && (
+              {!isResetMode && !isOtpMode && (
                 <div className="relative group">
                   <Mail className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-gold-500 transition-colors" size={16} />
                   <input 
@@ -214,6 +268,7 @@ export const Auth: React.FC<AuthProps> = ({ onLogin, onClose, resetParams, onRes
                 </div>
               )}
 
+              {!isOtpMode && (
               <div className="relative group">
                 <Lock className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-gold-500 transition-colors" size={16} />
                 <input 
@@ -230,8 +285,23 @@ export const Auth: React.FC<AuthProps> = ({ onLogin, onClose, resetParams, onRes
                   {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
               </div>
+              )}
 
-              {(isResetMode || !isLogin) && (
+              {isOtpMode && (
+                <div className="relative group">
+                  <ShieldCheck className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-gold-500 transition-colors" size={16} />
+                  <input
+                    type="text"
+                    required
+                    value={otpCode}
+                    onChange={e => setOtpCode(e.target.value.replace(/[^0-9]/g, ''))}
+                    placeholder="Weka OTP (mfano: 123456)"
+                    className="w-full pl-14 pr-6 py-3 bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/5 rounded-lg outline-none focus:border-gold-500 transition-all text-sm text-slate-900 dark:text-white font-medium"
+                  />
+                </div>
+              )}
+
+              {(isResetMode || (!isLogin && !isOtpMode)) && (
                 <div className="relative group">
                   <Lock className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-gold-500 transition-colors" size={16} />
                   <input 
@@ -250,7 +320,7 @@ export const Auth: React.FC<AuthProps> = ({ onLogin, onClose, resetParams, onRes
                 </div>
               )}
 
-              {isLogin && !isResetMode && (
+              {isLogin && !isResetMode && !isOtpMode && (
                 <div className="text-right">
                   <button 
                     type="button"
@@ -262,11 +332,24 @@ export const Auth: React.FC<AuthProps> = ({ onLogin, onClose, resetParams, onRes
                 </div>
               )}
 
+              {isOtpMode && (
+                <div className="text-right">
+                  <button
+                    type="button"
+                    onClick={handleResendOtp}
+                    disabled={loading}
+                    className="text-[10px] font-black text-gold-600 dark:text-gold-400 uppercase tracking-widest hover:text-gold-700 dark:hover:text-gold-300 transition-colors disabled:opacity-50"
+                  >
+                    Tuma OTP Tena
+                  </button>
+                </div>
+              )}
+
               <button 
                 type="submit" disabled={loading}
                 className="w-full bg-primary-950 dark:bg-gold-500 text-white dark:text-primary-950 py-4 rounded-lg font-black text-xs uppercase tracking-[0.3em] flex items-center justify-center gap-3 hover:opacity-90 transition-all shadow-xl active:scale-[0.98] disabled:opacity-50"
               >
-                {loading ? 'Inachakata...' : (isResetMode ? 'BADILISHA NENOSIRI' : (isLogin ? 'INGIA' : 'JISAJILI'))} 
+                {loading ? 'Inachakata...' : (isResetMode ? 'BADILISHA NENOSIRI' : (isOtpMode ? 'THIBITISHA OTP' : (isLogin ? 'INGIA' : 'JISAJILI')))} 
                 {!loading && <ArrowRight size={16} />}
               </button>
             </form>
@@ -275,14 +358,24 @@ export const Auth: React.FC<AuthProps> = ({ onLogin, onClose, resetParams, onRes
           <div className="mt-5 text-center space-y-3">
             {!isResetMode && (
               <button 
-                onClick={() => setIsLogin(!isLogin)}
+                onClick={() => {
+                  if (isOtpMode) {
+                    setIsOtpMode(false);
+                    setOtpCode('');
+                    setInfoMessage('Usajili umehifadhiwa. Unaweza kuomba OTP tena kwa kusajili upya.');
+                    return;
+                  }
+                  setIsLogin(!isLogin);
+                }}
                 onMouseDown={() => {
                   setShowPassword(false);
                   setShowConfirmPassword(false);
                 }}
                 className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest hover:text-gold-600 transition-colors"
               >
-                {isLogin ? 'Hujawahi kujiunga? Jisajili' : 'Tayari unayo akaunti? Ingia'}
+                {isOtpMode
+                  ? 'Rudi kwenye usajili'
+                  : (isLogin ? 'Hujawahi kujiunga? Jisajili' : 'Tayari unayo akaunti? Ingia')}
               </button>
             )}
             

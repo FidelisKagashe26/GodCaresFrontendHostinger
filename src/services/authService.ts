@@ -11,6 +11,18 @@ export interface AuthUser {
   email: string;
 }
 
+export interface RegisterResult {
+  success: boolean;
+  message: string;
+  phone: string;
+  email: string;
+}
+
+export interface VerifyOtpResult {
+  user: AuthUser;
+  welcomeMessage: string;
+}
+
 interface TokenPair {
   access: string;
   refresh: string;
@@ -121,7 +133,7 @@ export const registerUser = async (payload: {
   password: string;
   passwordConfirm: string;
   phone: string;
-}): Promise<AuthUser> => {
+}): Promise<RegisterResult> => {
   const [first_name, ...rest] = payload.name.trim().split(" ");
   const last_name = rest.join(" ");
 
@@ -143,8 +155,68 @@ export const registerUser = async (payload: {
     throw new Error(message);
   }
 
-  const user = (await response.json()) as ApiUser;
-  return toAuthUser(user);
+  const data = (await response.json()) as {
+    success: boolean;
+    message: string;
+    phone: string;
+    email: string;
+  };
+  return {
+    success: Boolean(data.success),
+    message: data.message || "OTP imetumwa.",
+    phone: data.phone,
+    email: data.email,
+  };
+};
+
+export const verifyRegistrationOtp = async (payload: {
+  email: string;
+  phone: string;
+  code: string;
+}): Promise<VerifyOtpResult> => {
+  const response = await request("/api/auth/verify-otp/", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    const message = await readErrorMessage(response, "Imeshindikana kuthibitisha OTP.");
+    throw new Error(message);
+  }
+
+  const data = (await response.json()) as (ApiUser & { welcome_message?: string; user?: ApiUser });
+  const rawUser = (data.user || data) as ApiUser;
+  return {
+    user: toAuthUser(rawUser),
+    welcomeMessage: data.welcome_message || "Hongera! Usajili umekamilika.",
+  };
+};
+
+export const resendRegistrationOtp = async (payload: {
+  email?: string;
+  phone?: string;
+}): Promise<{ message: string; email?: string; phone?: string }> => {
+  const response = await request("/api/auth/resend-otp/", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    const message = await readErrorMessage(response, "Imeshindikana kutuma OTP tena.");
+    throw new Error(message);
+  }
+
+  const data = (await response.json()) as {
+    message?: string;
+    email?: string;
+    phone?: string;
+  };
+
+  return {
+    message: data.message || "OTP mpya imetumwa.",
+    email: data.email,
+    phone: data.phone,
+  };
 };
 
 export const loginUser = async (payload: {

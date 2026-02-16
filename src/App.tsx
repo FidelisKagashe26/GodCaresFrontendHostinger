@@ -201,6 +201,16 @@ const App: React.FC = () => {
     setShowAuthModal(false);
     setAuthEntryMode('login');
     setIsAccountMenuOpen(false);
+    setNotifications((prev) => [
+      {
+        id: `verify-${Date.now()}`,
+        title: 'Karibu God Cares 365 🎉',
+        message: 'Hongera kwa kuingia! Tafadhali nenda kwenye Profile ukamilishe verification ya email yako.',
+        type: 'info',
+        timestamp: new Date().toLocaleTimeString(),
+      },
+      ...prev,
+    ]);
   };
 
   const handleLogout = () => {
