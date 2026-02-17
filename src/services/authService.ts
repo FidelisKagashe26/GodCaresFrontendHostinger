@@ -1,4 +1,4 @@
-export interface ApiUser {
+﻿export interface ApiUser {
   id: number;
   username: string;
   email: string;
@@ -28,6 +28,34 @@ interface TokenPair {
   refresh: string;
 }
 
+export type FieldErrorMap = Record<string, string>;
+
+interface AuthRequestErrorOptions {
+  code?: string;
+  fieldErrors?: FieldErrorMap;
+  phone?: string;
+  email?: string;
+  status?: number;
+}
+
+export class AuthRequestError extends Error {
+  code?: string;
+  fieldErrors: FieldErrorMap;
+  phone?: string;
+  email?: string;
+  status?: number;
+
+  constructor(message: string, options: AuthRequestErrorOptions = {}) {
+    super(message);
+    this.name = "AuthRequestError";
+    this.code = options.code;
+    this.fieldErrors = options.fieldErrors || {};
+    this.phone = options.phone;
+    this.email = options.email;
+    this.status = options.status;
+  }
+}
+
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || window.location.origin).replace(/\/$/, "");
 const ACCESS_TOKEN_KEY = "gc365_access_token";
 const REFRESH_TOKEN_KEY = "gc365_refresh_token";
@@ -48,28 +76,81 @@ const setTokens = (tokens: TokenPair) => {
   localStorage.setItem(REFRESH_TOKEN_KEY, tokens.refresh);
 };
 
+const parseValueMessage = (value: unknown): string => {
+  if (typeof value === "string" && value.trim()) {
+    return value.trim();
+  }
+  if (Array.isArray(value) && value.length) {
+    const first = value[0];
+    if (typeof first === "string" && first.trim()) {
+      return first.trim();
+    }
+  }
+  return "";
+};
+
+const buildFieldErrors = (payload: any): FieldErrorMap => {
+  if (!payload || typeof payload !== "object") {
+    return {};
+  }
+
+  const skipKeys = new Set(["detail", "message", "status_code", "success"]);
+  const errors: FieldErrorMap = {};
+
+  Object.entries(payload).forEach(([key, value]) => {
+    if (skipKeys.has(key)) {
+      return;
+    }
+    if (key === "code" && value === "verification_required") {
+      return;
+    }
+    const parsed = parseValueMessage(value);
+    if (parsed) {
+      errors[key] = parsed;
+    }
+  });
+
+  return errors;
+};
+
+const toAuthRequestError = async (response: Response, fallback: string): Promise<AuthRequestError> => {
+  const payload = await response.json().catch(() => ({} as any));
+  const code = typeof payload?.code === "string" ? payload.code.trim() : undefined;
+  const fieldErrors = buildFieldErrors(payload);
+
+  if (code && code !== "verification_required" && !fieldErrors.code) {
+    fieldErrors.code = code;
+  }
+
+  let message = "";
+  if (typeof payload?.detail === "string" && payload.detail.trim()) {
+    message = payload.detail.trim();
+  }
+  if (!message && typeof payload?.message === "string" && payload.message.trim()) {
+    message = payload.message.trim();
+  }
+  if (!message && Object.keys(fieldErrors).length) {
+    message = fieldErrors[Object.keys(fieldErrors)[0]];
+  }
+
+  return new AuthRequestError(message || fallback, {
+    code,
+    fieldErrors,
+    phone: typeof payload?.phone === "string" ? payload.phone : undefined,
+    email: typeof payload?.email === "string" ? payload.email : undefined,
+    status: response.status,
+  });
+};
+
 const safeFetch = async (input: RequestInfo | URL, init?: RequestInit) => {
   try {
     return await fetch(input, init);
   } catch {
-    throw new Error("Imeshindikana kuwasiliana na seva. Hakikisha internet na API zipo sawa.");
+    throw new AuthRequestError(
+      "Hakuna mawasiliano ya mtandao kwa sasa. Tafadhali angalia internet yako kisha ujaribu tena.",
+      { code: "network_unavailable" }
+    );
   }
-};
-
-const readErrorMessage = async (response: Response, fallback: string) => {
-  const payload = await response.json().catch(() => ({} as any));
-  const detail = payload?.detail;
-  if (typeof detail === "string" && detail.trim()) return detail;
-
-  const keys = Object.keys(payload || {});
-  if (keys.length) {
-    const first = payload[keys[0]];
-    if (Array.isArray(first) && first.length && typeof first[0] === "string") {
-      return first[0];
-    }
-    if (typeof first === "string") return first;
-  }
-  return fallback;
 };
 
 export const clearTokens = () => {
@@ -151,8 +232,7 @@ export const registerUser = async (payload: {
   });
 
   if (!response.ok) {
-    const message = await readErrorMessage(response, "Imeshindikana kusajili.");
-    throw new Error(message);
+    throw await toAuthRequestError(response, "Imeshindikana kusajili. Tafadhali jaribu tena.");
   }
 
   const data = (await response.json()) as {
@@ -161,9 +241,10 @@ export const registerUser = async (payload: {
     phone: string;
     email: string;
   };
+
   return {
     success: Boolean(data.success),
-    message: data.message || "OTP imetumwa.",
+    message: data.message || "Tumekutumia OTP kwenye simu yako.",
     phone: data.phone,
     email: data.email,
   };
@@ -180,15 +261,14 @@ export const verifyRegistrationOtp = async (payload: {
   });
 
   if (!response.ok) {
-    const message = await readErrorMessage(response, "Imeshindikana kuthibitisha OTP.");
-    throw new Error(message);
+    throw await toAuthRequestError(response, "Imeshindikana kuthibitisha msimbo wa OTP.");
   }
 
   const data = (await response.json()) as (ApiUser & { welcome_message?: string; user?: ApiUser });
   const rawUser = (data.user || data) as ApiUser;
   return {
     user: toAuthUser(rawUser),
-    welcomeMessage: data.welcome_message || "Hongera! Usajili umekamilika.",
+    welcomeMessage: data.welcome_message || "Hongera! Uthibitisho umekamilika.",
   };
 };
 
@@ -202,8 +282,7 @@ export const resendRegistrationOtp = async (payload: {
   });
 
   if (!response.ok) {
-    const message = await readErrorMessage(response, "Imeshindikana kutuma OTP tena.");
-    throw new Error(message);
+    throw await toAuthRequestError(response, "Imeshindikana kutuma OTP tena.");
   }
 
   const data = (await response.json()) as {
@@ -226,16 +305,11 @@ export const loginUser = async (payload: {
   const response = await safeFetch(`${API_BASE_URL}/api/auth/token/`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ username: payload.email, password: payload.password }),
+    body: JSON.stringify({ username: payload.email.trim(), password: payload.password }),
   });
 
   if (!response.ok) {
-    const message = await readErrorMessage(response, "Imeshindikana kuingia.");
-    const detail = String(message).toLowerCase();
-    if (detail.includes("no active account")) {
-      throw new Error("Akaunti haijathibitishwa au taarifa za kuingia si sahihi.");
-    }
-    throw new Error(message);
+    throw await toAuthRequestError(response, "Imeshindikana kuingia. Tafadhali jaribu tena.");
   }
 
   const data = (await response.json()) as TokenPair;
@@ -246,8 +320,7 @@ export const getCurrentUser = async (): Promise<AuthUser> => {
   const response = await request("/api/auth/me/");
 
   if (!response.ok) {
-    const message = await readErrorMessage(response, "Imeshindikana kupata taarifa za mtumiaji.");
-    throw new Error(message);
+    throw await toAuthRequestError(response, "Imeshindikana kupata taarifa za mtumiaji.");
   }
 
   const user = (await response.json()) as ApiUser;
@@ -262,8 +335,7 @@ export const forgotPassword = async (email: string): Promise<void> => {
   });
 
   if (!response.ok) {
-    const message = await readErrorMessage(response, "Imeshindikana kutuma link.");
-    throw new Error(message);
+    throw await toAuthRequestError(response, "Imeshindikana kutuma link ya kubadili nenosiri.");
   }
 };
 
@@ -279,8 +351,6 @@ export const resetPassword = async (payload: {
   });
 
   if (!response.ok) {
-    const message = await readErrorMessage(response, "Imeshindikana kubadili nenosiri.");
-    throw new Error(message);
+    throw await toAuthRequestError(response, "Imeshindikana kubadili nenosiri.");
   }
 };
-

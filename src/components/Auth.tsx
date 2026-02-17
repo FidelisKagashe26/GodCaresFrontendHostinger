@@ -1,7 +1,16 @@
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Mail, Lock, User, ArrowRight, X, Chrome, ShieldCheck, Phone, Eye, EyeOff } from 'lucide-react';
-import { forgotPassword, getCurrentUser, loginUser, registerUser, resendRegistrationOtp, resetPassword, verifyRegistrationOtp } from '../services/authService';
+import {
+  AuthRequestError,
+  forgotPassword,
+  getCurrentUser,
+  loginUser,
+  registerUser,
+  resendRegistrationOtp,
+  resetPassword,
+  verifyRegistrationOtp,
+} from '../services/authService';
 
 interface AuthProps {
   onLogin: (userData: { name: string; email: string }) => void;
@@ -12,10 +21,43 @@ interface AuthProps {
   initialMode?: 'login' | 'register';
 }
 
+type OtpContext = 'register' | 'login' | null;
+type FormErrors = Record<string, string>;
+
+const OTP_LENGTH = 6;
+
+const normalizePhone = (value: string): string => {
+  const digits = value.replace(/\D/g, '');
+  if (!digits) return '';
+  if (digits.startsWith('0') && digits.length === 10) return `255${digits.slice(1)}`;
+  if (digits.startsWith('255') && digits.length === 12) return digits;
+  return '';
+};
+
+const isValidEmail = (value: string): boolean => /.+@.+\..+/.test(value.trim());
+
+const mapServerFieldErrors = (errors: Record<string, string>): FormErrors => {
+  const mapped: FormErrors = {};
+  Object.entries(errors).forEach(([key, value]) => {
+    if (key === 'password_confirm') {
+      mapped.confirmPassword = value;
+      return;
+    }
+    if (key === 'username') {
+      mapped.email = value;
+      return;
+    }
+    mapped[key] = value;
+  });
+  return mapped;
+};
+
 export const Auth: React.FC<AuthProps> = ({ onLogin, onClose, resetParams, onResetComplete, logoSrc, initialMode = 'login' }) => {
   const resolvedLogoSrc = logoSrc || `${import.meta.env.BASE_URL}Logo.png`;
   const [isLogin, setIsLogin] = useState(initialMode === 'login');
   const [isResetMode, setIsResetMode] = useState(false);
+  const [isOtpMode, setIsOtpMode] = useState(false);
+  const [otpContext, setOtpContext] = useState<OtpContext>(null);
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
@@ -23,18 +65,31 @@ export const Auth: React.FC<AuthProps> = ({ onLogin, onClose, resetParams, onRes
   const [name, setName] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [otpCode, setOtpCode] = useState('');
-  const [isOtpMode, setIsOtpMode] = useState(false);
+  const [otpDigits, setOtpDigits] = useState<string[]>(() => Array.from({ length: OTP_LENGTH }, () => ''));
   const [pendingPhone, setPendingPhone] = useState('');
   const [pendingEmail, setPendingEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [infoMessage, setInfoMessage] = useState('');
+  const [fieldErrors, setFieldErrors] = useState<FormErrors>({});
+
+  const nameInputRef = useRef<HTMLInputElement | null>(null);
+  const phoneInputRef = useRef<HTMLInputElement | null>(null);
+  const emailInputRef = useRef<HTMLInputElement | null>(null);
+  const passwordInputRef = useRef<HTMLInputElement | null>(null);
+  const confirmPasswordInputRef = useRef<HTMLInputElement | null>(null);
+  const otpInputRefs = useRef<Array<HTMLInputElement | null>>([]);
+
+  const otpCode = useMemo(() => otpDigits.join(''), [otpDigits]);
+  const isLoginOtpOverlay = isOtpMode && otpContext === 'login';
+  const isRegisterOtpMode = isOtpMode && otpContext === 'register';
 
   useEffect(() => {
     if (resetParams) {
       setIsResetMode(true);
       setIsLogin(true);
+      setIsOtpMode(false);
+      setOtpContext(null);
     }
   }, [resetParams]);
 
@@ -43,121 +98,381 @@ export const Auth: React.FC<AuthProps> = ({ onLogin, onClose, resetParams, onRes
       setIsLogin(initialMode === 'login');
       if (initialMode === 'register') {
         setIsOtpMode(false);
+        setOtpContext(null);
       }
     }
   }, [initialMode, isResetMode]);
 
-  const resetToLogin = () => {
+  useEffect(() => {
+    if (isOtpMode) {
+      window.setTimeout(() => otpInputRefs.current[0]?.focus(), 60);
+    }
+  }, [isOtpMode, otpContext]);
+
+  const clearOtpInputs = () => {
+    setOtpDigits(Array.from({ length: OTP_LENGTH }, () => ''));
+  };
+
+  const focusField = (field: string) => {
+    if (field === 'name') nameInputRef.current?.focus();
+    if (field === 'phone') phoneInputRef.current?.focus();
+    if (field === 'email') emailInputRef.current?.focus();
+    if (field === 'password') passwordInputRef.current?.focus();
+    if (field === 'confirmPassword') confirmPasswordInputRef.current?.focus();
+    if (field === 'code') otpInputRefs.current[0]?.focus();
+  };
+
+  const focusFirstError = (errors: FormErrors) => {
+    const order = ['name', 'phone', 'email', 'password', 'confirmPassword', 'code'];
+    const first = order.find((key) => errors[key]);
+    if (!first) return;
+    window.setTimeout(() => focusField(first), 0);
+  };
+
+  const resetToLogin = (message = '') => {
     setIsOtpMode(false);
-    setOtpCode('');
+    setOtpContext(null);
+    clearOtpInputs();
     setPendingPhone('');
     setPendingEmail('');
     setIsLogin(true);
+    if (message) {
+      setInfoMessage(message);
+    }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const startOtpFlow = (context: Exclude<OtpContext, null>, nextEmail: string, nextPhone: string, message: string) => {
+    setPendingEmail(nextEmail);
+    setPendingPhone(nextPhone);
+    clearOtpInputs();
+    setIsOtpMode(true);
+    setOtpContext(context);
+    setIsLogin(true);
+    setErrorMessage('');
+    setFieldErrors({});
+    setInfoMessage(message);
+  };
+
+  const handleOtpInputChange = (index: number, value: string) => {
+    const clean = value.replace(/\D/g, '');
+    const nextDigit = clean ? clean.charAt(clean.length - 1) : '';
+
+    setOtpDigits((prev) => {
+      const copy = [...prev];
+      copy[index] = nextDigit;
+      return copy;
+    });
+
+    if (fieldErrors.code) {
+      setFieldErrors((prev) => {
+        const copy = { ...prev };
+        delete copy.code;
+        return copy;
+      });
+    }
+
+    if (nextDigit && index < OTP_LENGTH - 1) {
+      otpInputRefs.current[index + 1]?.focus();
+    }
+  };
+
+  const handleOtpPaste = (event: React.ClipboardEvent<HTMLInputElement>) => {
+    const pasted = event.clipboardData.getData('text').replace(/\D/g, '').slice(0, OTP_LENGTH);
+    if (!pasted) return;
+
+    event.preventDefault();
+    const next = Array.from({ length: OTP_LENGTH }, (_, idx) => pasted[idx] || '');
+    setOtpDigits(next);
+
+    const focusIndex = Math.min(pasted.length, OTP_LENGTH) - 1;
+    window.setTimeout(() => otpInputRefs.current[focusIndex]?.focus(), 0);
+  };
+
+  const applyError = (error: unknown, fallback: string) => {
+    if (error instanceof AuthRequestError) {
+      const mappedErrors = mapServerFieldErrors(error.fieldErrors || {});
+      setFieldErrors(mappedErrors);
+      if (Object.keys(mappedErrors).length) {
+        focusFirstError(mappedErrors);
+      }
+      setErrorMessage(error.message || fallback);
+      return;
+    }
+
+    const message = error instanceof Error ? error.message : fallback;
+    setErrorMessage(message);
+  };
+
+  const handleOtpKeyDown = async (index: number, event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'Backspace' && !otpDigits[index] && index > 0) {
+      otpInputRefs.current[index - 1]?.focus();
+    }
+    if (event.key === 'ArrowLeft' && index > 0) {
+      event.preventDefault();
+      otpInputRefs.current[index - 1]?.focus();
+    }
+    if (event.key === 'ArrowRight' && index < OTP_LENGTH - 1) {
+      event.preventDefault();
+      otpInputRefs.current[index + 1]?.focus();
+    }
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      await submitOtpVerification();
+    }
+  };
+
+  const submitOtpVerification = async () => {
+    const localErrors: FormErrors = {};
+    const normalizedPhone = normalizePhone(pendingPhone || phone);
+    const otpEmail = (pendingEmail || email).trim().toLowerCase();
+
+    if (!otpEmail) localErrors.email = 'Barua pepe ya usajili inahitajika.';
+    if (!normalizedPhone) localErrors.phone = 'Namba ya simu ya usajili si sahihi.';
+    if (otpCode.length !== OTP_LENGTH) localErrors.code = 'Weka tarakimu 6 za OTP.';
+
+    if (Object.keys(localErrors).length) {
+      setFieldErrors(localErrors);
+      setErrorMessage('Tafadhali rekebisha sehemu zilizoonyesha hitilafu.');
+      focusFirstError(localErrors);
+      return;
+    }
+
     setLoading(true);
     setErrorMessage('');
     setInfoMessage('');
+    setFieldErrors({});
     try {
-      if (isResetMode) {
-        if (!resetParams) {
-          throw new Error('Link ya kubadili nenosiri haipo.');
-        }
-        if (password.length < 8) {
-          throw new Error('Nenosiri liwe na angalau herufi 8.');
-        }
-        if (password !== confirmPassword) {
-          throw new Error('Nenosiri hazilingani.');
-        }
-        await resetPassword({
-          uid: resetParams.uid,
-          token: resetParams.token,
-          password,
-        });
-        setInfoMessage('Nenosiri limebadilishwa. Sasa ingia.');
-        setIsResetMode(false);
-        setPassword('');
-        setConfirmPassword('');
-        onResetComplete?.();
-        return;
-      }
-
-      if (isOtpMode) {
-        if (!otpCode.trim()) {
-          throw new Error('Weka OTP uliyopokea kwenye simu yako.');
-        }
-        const result = await verifyRegistrationOtp({
-          email: pendingEmail || email,
-          phone: pendingPhone,
-          code: otpCode.trim(),
-        });
-        setInfoMessage(result.welcomeMessage || 'Hongera! Usajili umekamilika. Sasa ingia.');
-        resetToLogin();
-        setPassword('');
-        setConfirmPassword('');
-        return;
-      }
-
-      if (isLogin) {
-        await loginUser({ email, password });
-        const user = await getCurrentUser();
-        onLogin(user);
-      } else {
-        if (!phone.trim()) {
-          throw new Error('Weka namba ya simu.');
-        }
-        if (password !== confirmPassword) {
-          throw new Error('Nenosiri hayalingani.');
-        }
-        const result = await registerUser({ name, email, password, passwordConfirm: confirmPassword, phone });
-        setPendingPhone(result.phone || phone.trim());
-        setPendingEmail(result.email || email.trim());
-        setInfoMessage(result.message || 'OTP imetumwa. Ingiza hapa chini kuthibitisha usajili.');
-        setIsOtpMode(true);
-        setIsLogin(false);
-        setShowPassword(false);
-        setShowConfirmPassword(false);
-      }
+      const result = await verifyRegistrationOtp({
+        email: otpEmail,
+        phone: normalizedPhone,
+        code: otpCode,
+      });
+      setPassword('');
+      setConfirmPassword('');
+      setShowPassword(false);
+      setShowConfirmPassword(false);
+      resetToLogin(result.welcomeMessage || 'Hongera! Uthibitisho umekamilika. Sasa ingia.');
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Imeshindikana kuingia.';
-      setErrorMessage(message);
+      applyError(error, 'Imeshindikana kuthibitisha OTP.');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleGoogleLogin = () => {
-    setInfoMessage('');
-    setErrorMessage('Google login bado haijaunganishwa. Tumia email na nenosiri.');
-  };
+  const submitRegistration = async () => {
+    const localErrors: FormErrors = {};
+    const trimmedName = name.trim();
+    const normalizedPhone = normalizePhone(phone);
+    const normalizedEmail = email.trim().toLowerCase();
 
-  const handleForgotPassword = async () => {
+    if (!trimmedName) localErrors.name = 'Weka jina lako.';
+    if (!normalizedPhone) localErrors.phone = 'Weka namba sahihi ya simu (mfano: 2557XXXXXXXX).';
+    if (!normalizedEmail) {
+      localErrors.email = 'Weka barua pepe yako.';
+    } else if (!isValidEmail(normalizedEmail)) {
+      localErrors.email = 'Barua pepe si sahihi.';
+    }
+    if (!password) {
+      localErrors.password = 'Weka nenosiri.';
+    } else if (password.length < 8) {
+      localErrors.password = 'Nenosiri liwe na angalau herufi 8.';
+    }
+    if (!confirmPassword) {
+      localErrors.confirmPassword = 'Thibitisha nenosiri lako.';
+    } else if (password !== confirmPassword) {
+      localErrors.confirmPassword = 'Nenosiri hayalingani.';
+    }
+
+    if (Object.keys(localErrors).length) {
+      setFieldErrors(localErrors);
+      setErrorMessage('Tafadhali jaza taarifa zote sahihi kabla ya kuendelea.');
+      focusFirstError(localErrors);
+      return;
+    }
+
     setLoading(true);
     setErrorMessage('');
     setInfoMessage('');
+    setFieldErrors({});
     try {
-      if (!email) {
-        throw new Error('Weka barua pepe kwanza.');
-      }
-      await forgotPassword(email);
-      setInfoMessage('Tumepeleka link kwenye email yako.');
+      const result = await registerUser({
+        name: trimmedName,
+        email: normalizedEmail,
+        password,
+        passwordConfirm: confirmPassword,
+        phone: normalizedPhone,
+      });
+      setPhone(result.phone || normalizedPhone);
+      setEmail(result.email || normalizedEmail);
+      setShowPassword(false);
+      setShowConfirmPassword(false);
+      startOtpFlow(
+        'register',
+        result.email || normalizedEmail,
+        result.phone || normalizedPhone,
+        result.message || 'Tumekutumia OTP kwenye simu yako. Weka tarakimu 6 kuthibitisha usajili.'
+      );
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Imeshindikana kutuma link.';
-      setErrorMessage(message);
+      applyError(error, 'Imeshindikana kusajili.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const submitLogin = async () => {
+    const localErrors: FormErrors = {};
+    const normalizedEmail = email.trim().toLowerCase();
+
+    if (!normalizedEmail) {
+      localErrors.email = 'Weka barua pepe yako.';
+    } else if (!isValidEmail(normalizedEmail)) {
+      localErrors.email = 'Barua pepe si sahihi.';
+    }
+    if (!password) localErrors.password = 'Weka nenosiri lako.';
+
+    if (Object.keys(localErrors).length) {
+      setFieldErrors(localErrors);
+      setErrorMessage('Tafadhali rekebisha taarifa za kuingia.');
+      focusFirstError(localErrors);
+      return;
+    }
+
+    setLoading(true);
+    setErrorMessage('');
+    setInfoMessage('');
+    setFieldErrors({});
+    try {
+      await loginUser({ email: normalizedEmail, password });
+      const user = await getCurrentUser();
+      onLogin(user);
+    } catch (error) {
+      if (error instanceof AuthRequestError && error.code === 'verification_required') {
+        startOtpFlow(
+          'login',
+          error.email || normalizedEmail,
+          normalizePhone(error.phone || pendingPhone || phone),
+          error.message || 'Akaunti yako bado haijathibitishwa. Weka OTP tuliyotuma sasa hivi.'
+        );
+        return;
+      }
+      applyError(error, 'Imeshindikana kuingia.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const submitPasswordReset = async () => {
+    const localErrors: FormErrors = {};
+    if (!resetParams) {
+      setErrorMessage('Link ya kubadili nenosiri haipo.');
+      return;
+    }
+    if (!password) {
+      localErrors.password = 'Weka nenosiri jipya.';
+    } else if (password.length < 8) {
+      localErrors.password = 'Nenosiri liwe na angalau herufi 8.';
+    }
+    if (!confirmPassword) {
+      localErrors.confirmPassword = 'Thibitisha nenosiri jipya.';
+    } else if (password !== confirmPassword) {
+      localErrors.confirmPassword = 'Nenosiri hayalingani.';
+    }
+    if (Object.keys(localErrors).length) {
+      setFieldErrors(localErrors);
+      setErrorMessage('Tafadhali rekebisha taarifa za nenosiri.');
+      focusFirstError(localErrors);
+      return;
+    }
+
+    setLoading(true);
+    setErrorMessage('');
+    setInfoMessage('');
+    setFieldErrors({});
+    try {
+      await resetPassword({
+        uid: resetParams.uid,
+        token: resetParams.token,
+        password,
+      });
+      setInfoMessage('Nenosiri limebadilishwa. Sasa ingia.');
+      setIsResetMode(false);
+      setPassword('');
+      setConfirmPassword('');
+      onResetComplete?.();
+    } catch (error) {
+      applyError(error, 'Imeshindikana kubadili nenosiri.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    if (isLoginOtpOverlay) {
+      return;
+    }
+    if (isResetMode) {
+      await submitPasswordReset();
+      return;
+    }
+    if (isRegisterOtpMode) {
+      await submitOtpVerification();
+      return;
+    }
+    if (isLogin) {
+      await submitLogin();
+      return;
+    }
+    await submitRegistration();
+  };
+
+  const handleGoogleLogin = () => {
+    setInfoMessage('');
+    setErrorMessage('Google login bado haijaunganishwa. Tumia barua pepe na nenosiri.');
+  };
+
+  const handleForgotPassword = async () => {
+    const normalizedEmail = email.trim().toLowerCase();
+    const localErrors: FormErrors = {};
+
+    if (!normalizedEmail) {
+      localErrors.email = 'Weka barua pepe kwanza.';
+    } else if (!isValidEmail(normalizedEmail)) {
+      localErrors.email = 'Barua pepe si sahihi.';
+    }
+    if (Object.keys(localErrors).length) {
+      setFieldErrors(localErrors);
+      setErrorMessage('Weka barua pepe sahihi kabla ya kuendelea.');
+      focusFirstError(localErrors);
+      return;
+    }
+
+    setLoading(true);
+    setErrorMessage('');
+    setInfoMessage('');
+    setFieldErrors({});
+    try {
+      await forgotPassword(normalizedEmail);
+      setInfoMessage('Tumetuma maelekezo ya kubadili nenosiri kwenye barua pepe yako.');
+    } catch (error) {
+      applyError(error, 'Imeshindikana kutuma link ya kubadili nenosiri.');
     } finally {
       setLoading(false);
     }
   };
 
   const handleResendOtp = async () => {
+    const resolvedEmail = (pendingEmail || email).trim().toLowerCase();
+    const resolvedPhone = normalizePhone(pendingPhone || phone);
+
     setLoading(true);
     setErrorMessage('');
+    setInfoMessage('');
+    setFieldErrors({});
     try {
       const response = await resendRegistrationOtp({
-        email: pendingEmail || email,
-        phone: pendingPhone || phone,
+        email: resolvedEmail,
+        phone: resolvedPhone,
       });
       if (response.phone) {
         setPendingPhone(response.phone);
@@ -165,22 +480,97 @@ export const Auth: React.FC<AuthProps> = ({ onLogin, onClose, resetParams, onRes
       if (response.email) {
         setPendingEmail(response.email);
       }
-      setInfoMessage(response.message || 'OTP mpya imetumwa.');
+      setInfoMessage(response.message || 'OTP mpya imetumwa kwenye simu yako.');
+      clearOtpInputs();
+      window.setTimeout(() => otpInputRefs.current[0]?.focus(), 80);
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Imeshindikana kutuma OTP tena.';
-      setErrorMessage(message);
+      applyError(error, 'Imeshindikana kutuma OTP tena.');
     } finally {
       setLoading(false);
     }
   };
 
+  const renderOtpBoxes = () => (
+    <div className="space-y-2">
+      <div className="grid grid-cols-6 gap-2 sm:gap-3">
+        {otpDigits.map((digit, index) => (
+          <input
+            key={`otp-${index}`}
+            ref={(node) => {
+              otpInputRefs.current[index] = node;
+            }}
+            type="text"
+            value={digit}
+            inputMode="numeric"
+            autoComplete="one-time-code"
+            maxLength={1}
+            onPaste={handleOtpPaste}
+            onChange={(event) => handleOtpInputChange(index, event.target.value)}
+            onKeyDown={(event) => {
+              void handleOtpKeyDown(index, event);
+            }}
+            className={`h-12 w-full rounded-lg border text-center text-lg font-black outline-none transition-all ${
+              fieldErrors.code
+                ? 'border-red-400 bg-red-500/10 text-red-600'
+                : 'border-slate-300 bg-white/80 text-slate-900 focus:border-gold-500 dark:border-white/10 dark:bg-black/20 dark:text-white'
+            }`}
+          />
+        ))}
+      </div>
+      {fieldErrors.code && <p className="text-[11px] font-semibold text-red-500">{fieldErrors.code}</p>}
+    </div>
+  );
+
   return (
     <div className="fixed inset-0 z-[600] flex items-center justify-center p-4 bg-slate-950/90 backdrop-blur-xl animate-fade-in">
       <div className="relative w-full max-w-lg max-h-[95vh] flex flex-col bg-white dark:bg-[#0f172a] rounded-lg overflow-hidden shadow-2xl border border-slate-200 dark:border-white/10 animate-scale-up">
-        
-        {/* Decorative Top Pattern - Fixed */}
         <div className="absolute top-0 left-0 right-0 h-24 bg-gradient-to-br from-gold-500 to-gold-600 opacity-10 dark:opacity-20 pointer-events-none"></div>
-        
+
+        {isLoginOtpOverlay && (
+          <div className="absolute top-3 left-1/2 z-20 w-[calc(100%-1.5rem)] -translate-x-1/2">
+            <div className="rounded-2xl border border-white/50 bg-white/35 p-4 shadow-2xl backdrop-blur-xl dark:border-white/20 dark:bg-slate-900/45">
+              <p className="text-[10px] font-black uppercase tracking-[0.24em] text-gold-700 dark:text-gold-300">Thibitisha Akaunti</p>
+              <p className="mt-1 text-xs font-semibold text-slate-700 dark:text-slate-200">
+                Akaunti hii bado haijathibitishwa. Ingiza OTP ya tarakimu 6 tuliyotuma kwenye simu yako.
+              </p>
+              <div className="mt-3">{renderOtpBoxes()}</div>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    void submitOtpVerification();
+                  }}
+                  disabled={loading}
+                  className="rounded-lg bg-primary-950 px-4 py-2 text-[10px] font-black uppercase tracking-[0.2em] text-white disabled:opacity-50 dark:bg-gold-500 dark:text-primary-950"
+                >
+                  Thibitisha OTP
+                </button>
+                <button
+                  type="button"
+                  onClick={handleResendOtp}
+                  disabled={loading}
+                  className="rounded-lg border border-gold-500/50 px-4 py-2 text-[10px] font-black uppercase tracking-[0.2em] text-gold-700 disabled:opacity-50 dark:text-gold-300"
+                >
+                  Tuma Tena
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsOtpMode(false);
+                    setOtpContext(null);
+                    clearOtpInputs();
+                    setInfoMessage('Uthibitisho umeahirishwa. Unaweza kuendelea kujaribu kuingia ukihitaji OTP tena.');
+                  }}
+                  disabled={loading}
+                  className="rounded-lg border border-slate-300 px-4 py-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-600 disabled:opacity-50 dark:border-white/15 dark:text-slate-300"
+                >
+                  Funga
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         <button 
           onClick={onClose} 
           className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-900 dark:hover:text-white bg-slate-100 dark:bg-white/5 rounded-full transition-all z-10"
@@ -194,17 +584,21 @@ export const Auth: React.FC<AuthProps> = ({ onLogin, onClose, resetParams, onRes
               <img src={resolvedLogoSrc} alt="God Cares 365" className="h-20 w-auto" />
             </div>
             <h3 className="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">
-              {isResetMode ? 'Badili Nenosiri' : (isOtpMode ? 'Thibitisha OTP' : (isLogin ? 'Karibu Tena' : 'Jiunge Nasi'))}
+              {isResetMode ? 'Badili Nenosiri' : isRegisterOtpMode ? 'Thibitisha OTP' : isLogin ? 'Karibu Tena' : 'Jiunge Nasi'}
             </h3>
             <p className="text-slate-500 dark:text-slate-400 text-[10px] font-bold uppercase tracking-widest px-4">
               {isResetMode
                 ? 'Weka nenosiri jipya ili kuendelea'
-                : (isOtpMode ? 'Ingiza msimbo wa OTP uliotumwa kwenye simu yako' : (isLogin ? 'Ingia ili uendelee na uchambuzi' : 'Tengeneza akaunti kuanza safari'))}
+                : isRegisterOtpMode
+                  ? 'Ingiza tarakimu 6 za msimbo uliotumwa kwenye simu yako'
+                  : isLogin
+                    ? 'Ingia ili uendelee na uchambuzi'
+                    : 'Tengeneza akaunti kuanza safari'}
             </p>
           </div>
 
           <div className="space-y-3">
-            {!isResetMode && !isOtpMode && (
+            {!isResetMode && !isRegisterOtpMode && (
               <>
                 {/* Google Login Button */}
                 <button 
@@ -226,101 +620,129 @@ export const Auth: React.FC<AuthProps> = ({ onLogin, onClose, resetParams, onRes
 
             <form onSubmit={handleSubmit} className="space-y-3">
               {errorMessage && (
-                <div className="bg-red-500/10 border border-red-500/20 text-red-500 text-[10px] font-bold uppercase tracking-widest px-4 py-2 rounded-lg">
+                <div className="bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 text-[11px] font-semibold px-4 py-2 rounded-lg">
                   {errorMessage}
                 </div>
               )}
               {infoMessage && (
-                <div className="bg-green-500/10 border border-green-500/20 text-green-500 text-[10px] font-bold uppercase tracking-widest px-4 py-2 rounded-lg">
+                <div className="bg-green-500/10 border border-green-500/20 text-green-700 dark:text-green-400 text-[11px] font-semibold px-4 py-2 rounded-lg">
                   {infoMessage}
                 </div>
               )}
-              {!isLogin && !isResetMode && !isOtpMode && (
-                <div className="relative group">
-                  <User className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-gold-500 transition-colors" size={16} />
-                  <input 
-                    type="text" required value={name} onChange={e => setName(e.target.value)}
-                    placeholder="Jina Lako" 
-                    className="w-full pl-14 pr-6 py-3 bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/5 rounded-lg outline-none focus:border-gold-500 transition-all text-sm text-slate-900 dark:text-white font-medium"
-                  />
+              {!isLogin && !isResetMode && !isRegisterOtpMode && (
+                <div className="space-y-1">
+                  <div className="relative group">
+                    <User className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-gold-500 transition-colors" size={16} />
+                    <input 
+                      ref={nameInputRef}
+                      type="text" required value={name} onChange={e => setName(e.target.value)}
+                      placeholder="Jina Lako" 
+                      className={`w-full pl-14 pr-6 py-3 bg-slate-50 dark:bg-black/20 border rounded-lg outline-none transition-all text-sm text-slate-900 dark:text-white font-medium ${
+                        fieldErrors.name ? 'border-red-400 focus:border-red-500' : 'border-slate-200 dark:border-white/5 focus:border-gold-500'
+                      }`}
+                    />
+                  </div>
+                  {fieldErrors.name && <p className="text-[11px] font-semibold text-red-500">{fieldErrors.name}</p>}
                 </div>
               )}
 
-              {!isLogin && !isResetMode && !isOtpMode && (
-                <div className="relative group">
-                  <Phone className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-gold-500 transition-colors" size={16} />
-                  <input
-                    type="tel" required value={phone} onChange={e => setPhone(e.target.value)}
-                    placeholder="Namba ya Simu"
-                    className="w-full pl-14 pr-6 py-3 bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/5 rounded-lg outline-none focus:border-gold-500 transition-all text-sm text-slate-900 dark:text-white font-medium"
-                  />
+              {!isLogin && !isResetMode && !isRegisterOtpMode && (
+                <div className="space-y-1">
+                  <div className="relative group">
+                    <Phone className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-gold-500 transition-colors" size={16} />
+                    <input
+                      ref={phoneInputRef}
+                      type="tel" required value={phone} onChange={e => setPhone(e.target.value)}
+                      placeholder="Namba ya Simu (mfano: 2557XXXXXXXX)"
+                      className={`w-full pl-14 pr-6 py-3 bg-slate-50 dark:bg-black/20 border rounded-lg outline-none transition-all text-sm text-slate-900 dark:text-white font-medium ${
+                        fieldErrors.phone ? 'border-red-400 focus:border-red-500' : 'border-slate-200 dark:border-white/5 focus:border-gold-500'
+                      }`}
+                    />
+                  </div>
+                  {fieldErrors.phone && <p className="text-[11px] font-semibold text-red-500">{fieldErrors.phone}</p>}
                 </div>
               )}
 
-              {!isResetMode && !isOtpMode && (
-                <div className="relative group">
-                  <Mail className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-gold-500 transition-colors" size={16} />
-                  <input 
-                    type="email" required value={email} onChange={e => setEmail(e.target.value)}
-                    placeholder="Barua Pepe" 
-                    className="w-full pl-14 pr-6 py-3 bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/5 rounded-lg outline-none focus:border-gold-500 transition-all text-sm text-slate-900 dark:text-white font-medium"
-                  />
+              {!isResetMode && !isRegisterOtpMode && (
+                <div className="space-y-1">
+                  <div className="relative group">
+                    <Mail className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-gold-500 transition-colors" size={16} />
+                    <input 
+                      ref={emailInputRef}
+                      type="email" required value={email} onChange={e => setEmail(e.target.value)}
+                      placeholder="Barua Pepe" 
+                      className={`w-full pl-14 pr-6 py-3 bg-slate-50 dark:bg-black/20 border rounded-lg outline-none transition-all text-sm text-slate-900 dark:text-white font-medium ${
+                        fieldErrors.email ? 'border-red-400 focus:border-red-500' : 'border-slate-200 dark:border-white/5 focus:border-gold-500'
+                      }`}
+                    />
+                  </div>
+                  {fieldErrors.email && <p className="text-[11px] font-semibold text-red-500">{fieldErrors.email}</p>}
                 </div>
               )}
 
-              {!isOtpMode && (
-              <div className="relative group">
-                <Lock className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-gold-500 transition-colors" size={16} />
-                <input 
-                  type={showPassword ? "text" : "password"} required value={password} onChange={e => setPassword(e.target.value)}
-                  placeholder={isResetMode ? "Nenosiri Jipya" : "Nenosiri"}
-                  className="w-full pl-14 pr-14 py-3 bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/5 rounded-lg outline-none focus:border-gold-500 transition-all text-sm text-slate-900 dark:text-white font-medium"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(prev => !prev)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-gold-500 transition-colors"
-                  aria-label={showPassword ? 'Ficha nenosiri' : 'Onyesha nenosiri'}
-                >
-                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                </button>
-              </div>
-              )}
-
-              {isOtpMode && (
-                <div className="relative group">
-                  <ShieldCheck className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-gold-500 transition-colors" size={16} />
-                  <input
-                    type="text"
-                    required
-                    value={otpCode}
-                    onChange={e => setOtpCode(e.target.value.replace(/[^0-9]/g, ''))}
-                    placeholder="Weka OTP (mfano: 123456)"
-                    className="w-full pl-14 pr-6 py-3 bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/5 rounded-lg outline-none focus:border-gold-500 transition-all text-sm text-slate-900 dark:text-white font-medium"
-                  />
+              {!isRegisterOtpMode && (
+                <div className="space-y-1">
+                  <div className="relative group">
+                    <Lock className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-gold-500 transition-colors" size={16} />
+                    <input 
+                      ref={passwordInputRef}
+                      type={showPassword ? "text" : "password"} required value={password} onChange={e => setPassword(e.target.value)}
+                      placeholder={isResetMode ? "Nenosiri Jipya" : "Nenosiri"}
+                      className={`w-full pl-14 pr-14 py-3 bg-slate-50 dark:bg-black/20 border rounded-lg outline-none transition-all text-sm text-slate-900 dark:text-white font-medium ${
+                        fieldErrors.password ? 'border-red-400 focus:border-red-500' : 'border-slate-200 dark:border-white/5 focus:border-gold-500'
+                      }`}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(prev => !prev)}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-gold-500 transition-colors"
+                      aria-label={showPassword ? 'Ficha nenosiri' : 'Onyesha nenosiri'}
+                    >
+                      {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
+                  </div>
+                  {fieldErrors.password && <p className="text-[11px] font-semibold text-red-500">{fieldErrors.password}</p>}
                 </div>
               )}
 
-              {(isResetMode || (!isLogin && !isOtpMode)) && (
-                <div className="relative group">
-                  <Lock className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-gold-500 transition-colors" size={16} />
-                  <input 
-                    type={showConfirmPassword ? "text" : "password"} required value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)}
-                    placeholder="Thibitisha Nenosiri"
-                    className="w-full pl-14 pr-14 py-3 bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/5 rounded-lg outline-none focus:border-gold-500 transition-all text-sm text-slate-900 dark:text-white font-medium"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowConfirmPassword(prev => !prev)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-gold-500 transition-colors"
-                    aria-label={showConfirmPassword ? 'Ficha nenosiri la uthibitisho' : 'Onyesha nenosiri la uthibitisho'}
-                  >
-                    {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                  </button>
+              {isRegisterOtpMode && (
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 text-slate-600 dark:text-slate-300">
+                    <ShieldCheck size={14} className="text-gold-600 dark:text-gold-400" />
+                    <p className="text-[11px] font-semibold">
+                      Weka OTP ya tarakimu 6 tuliyotuma kwenye namba yako ya simu.
+                    </p>
+                  </div>
+                  {renderOtpBoxes()}
                 </div>
               )}
 
-              {isLogin && !isResetMode && !isOtpMode && (
+              {(isResetMode || (!isLogin && !isRegisterOtpMode)) && (
+                <div className="space-y-1">
+                  <div className="relative group">
+                    <Lock className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-gold-500 transition-colors" size={16} />
+                    <input 
+                      ref={confirmPasswordInputRef}
+                      type={showConfirmPassword ? "text" : "password"} required value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)}
+                      placeholder="Thibitisha Nenosiri"
+                      className={`w-full pl-14 pr-14 py-3 bg-slate-50 dark:bg-black/20 border rounded-lg outline-none transition-all text-sm text-slate-900 dark:text-white font-medium ${
+                        fieldErrors.confirmPassword ? 'border-red-400 focus:border-red-500' : 'border-slate-200 dark:border-white/5 focus:border-gold-500'
+                      }`}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmPassword(prev => !prev)}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-gold-500 transition-colors"
+                      aria-label={showConfirmPassword ? 'Ficha nenosiri la uthibitisho' : 'Onyesha nenosiri la uthibitisho'}
+                    >
+                      {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
+                  </div>
+                  {fieldErrors.confirmPassword && <p className="text-[11px] font-semibold text-red-500">{fieldErrors.confirmPassword}</p>}
+                </div>
+              )}
+
+              {isLogin && !isResetMode && !isRegisterOtpMode && (
                 <div className="text-right">
                   <button 
                     type="button"
@@ -332,7 +754,7 @@ export const Auth: React.FC<AuthProps> = ({ onLogin, onClose, resetParams, onRes
                 </div>
               )}
 
-              {isOtpMode && (
+              {isRegisterOtpMode && (
                 <div className="text-right">
                   <button
                     type="button"
@@ -346,11 +768,21 @@ export const Auth: React.FC<AuthProps> = ({ onLogin, onClose, resetParams, onRes
               )}
 
               <button 
-                type="submit" disabled={loading}
+                type="submit" disabled={loading || isLoginOtpOverlay}
                 className="w-full bg-primary-950 dark:bg-gold-500 text-white dark:text-primary-950 py-4 rounded-lg font-black text-xs uppercase tracking-[0.3em] flex items-center justify-center gap-3 hover:opacity-90 transition-all shadow-xl active:scale-[0.98] disabled:opacity-50"
               >
-                {loading ? 'Inachakata...' : (isResetMode ? 'BADILISHA NENOSIRI' : (isOtpMode ? 'THIBITISHA OTP' : (isLogin ? 'INGIA' : 'JISAJILI')))} 
-                {!loading && <ArrowRight size={16} />}
+                {loading
+                  ? 'Inachakata...'
+                  : isLoginOtpOverlay
+                    ? 'THIBITISHA OTP KWANZA'
+                    : isResetMode
+                      ? 'BADILISHA NENOSIRI'
+                      : isRegisterOtpMode
+                        ? 'THIBITISHA OTP'
+                        : isLogin
+                          ? 'INGIA'
+                          : 'JISAJILI'}
+                {!loading && !isLoginOtpOverlay && <ArrowRight size={16} />}
               </button>
             </form>
           </div>
@@ -359,13 +791,17 @@ export const Auth: React.FC<AuthProps> = ({ onLogin, onClose, resetParams, onRes
             {!isResetMode && (
               <button 
                 onClick={() => {
-                  if (isOtpMode) {
+                  if (isRegisterOtpMode) {
                     setIsOtpMode(false);
-                    setOtpCode('');
-                    setInfoMessage('Usajili umehifadhiwa. Unaweza kuomba OTP tena kwa kusajili upya.');
+                    setOtpContext(null);
+                    clearOtpInputs();
+                    setInfoMessage('Usajili umehifadhiwa. Unaweza kuomba OTP tena kwa kubonyeza Jisajili.');
                     return;
                   }
                   setIsLogin(!isLogin);
+                  setFieldErrors({});
+                  setErrorMessage('');
+                  setInfoMessage('');
                 }}
                 onMouseDown={() => {
                   setShowPassword(false);
@@ -373,7 +809,7 @@ export const Auth: React.FC<AuthProps> = ({ onLogin, onClose, resetParams, onRes
                 }}
                 className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest hover:text-gold-600 transition-colors"
               >
-                {isOtpMode
+                {isRegisterOtpMode
                   ? 'Rudi kwenye usajili'
                   : (isLogin ? 'Hujawahi kujiunga? Jisajili' : 'Tayari unayo akaunti? Ingia')}
               </button>
