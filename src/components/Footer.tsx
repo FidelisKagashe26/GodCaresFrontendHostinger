@@ -66,6 +66,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, siteSettings }) => {
               <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-4">Misingi</h4>
               <ul className="space-y-2">
                  <li onClick={() => onNavigate?.(StageId.ABOUT)} className="text-xs font-bold text-slate-400 hover:text-gold-400 cursor-pointer transition-colors">Maono Yetu</li>
+                 <li onClick={() => onNavigate?.(StageId.BLOG)} className="text-xs font-bold text-slate-400 hover:text-gold-400 cursor-pointer transition-colors">Blog ya Imani</li>
                  <li onClick={() => onNavigate?.(StageId.BIBLE_STUDY)} className="text-xs font-bold text-slate-400 hover:text-gold-400 cursor-pointer transition-colors">Mtaala wa Biblia</li>
                  <li onClick={() => onNavigate?.(StageId.TESTIMONIES)} className="text-xs font-bold text-slate-400 hover:text-gold-400 cursor-pointer transition-colors">Shuhuda</li>
               </ul>

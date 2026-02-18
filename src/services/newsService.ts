@@ -7,6 +7,7 @@ export interface NewsItemApi {
   content: string;
   author: string;
   featured: boolean;
+  views?: number;
   published_at: string;
 }
 
@@ -18,5 +19,18 @@ export const getNewsItems = async (): Promise<NewsItemApi[]> => {
     throw new Error("Imeshindikana kupata habari.");
   }
   return (await response.json()) as NewsItemApi[];
+};
+
+export const registerNewsView = async (newsId: number): Promise<number> => {
+  const response = await fetch(`${API_BASE_URL}/api/news/${newsId}/view/`, {
+    method: "POST",
+  });
+
+  if (!response.ok) {
+    throw new Error("Imeshindikana kusasisha idadi ya wasomaji.");
+  }
+
+  const data = (await response.json()) as { views?: number };
+  return Number(data.views || 0);
 };
 

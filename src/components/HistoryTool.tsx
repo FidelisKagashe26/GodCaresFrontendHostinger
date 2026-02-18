@@ -1,11 +1,12 @@
 
-import React, { useState, useEffect } from 'react';
-import { CalendarClock, ChevronRight, ChevronLeft, ArrowRight, X, Clock, MapPin, Layers, Loader2, Calendar as CalendarIcon, Search } from 'lucide-react';
+import React, { useState } from 'react';
+import { CalendarClock, ChevronRight, ChevronLeft, ArrowRight, X, MapPin, Layers, Loader2, Calendar as CalendarIcon } from 'lucide-react';
 import { LanguageCode } from '../types';
+import { EventApi, getEvents } from '../services/eventService';
 
 interface HistoryEvent {
   id: string;
-  month: number; 
+  month: number;
   day: number;
   year: string;
   title: string;
@@ -16,112 +17,169 @@ interface HistoryEvent {
   location: string;
 }
 
-// Database of Events (Simulating Backend)
-const HISTORY_DB: HistoryEvent[] = [
+const FALLBACK_HISTORY_EVENTS: HistoryEvent[] = [
   {
     id: '1',
-    month: 2, // March (0-indexed)
+    month: 2,
     day: 7,
-    year: "321 B.K",
-    title: "Amri ya Jumapili",
+    year: '321 B.K',
+    title: 'Amri ya Jumapili',
     description: "Imemkandikwa Konstantino alitoa amri ya kwanza ya kiraia kulazimisha mapumziko siku ya Jumapili ('Venerable Day of the Sun').",
-    significance: "Mwanzo wa kuingizwa kwa ibada ya jua kanisani kisheria.",
-    image: "https://images.unsplash.com/photo-1555462542-a72a7c47f722?q=80&w=1600",
-    tag: "SHERIA & DINI",
-    location: "Roma, Italia"
+    significance: 'Mwanzo wa kuingizwa kwa ibada ya jua kanisani kisheria.',
+    image: 'https://images.unsplash.com/photo-1555462542-a72a7c47f722?q=80&w=1600',
+    tag: 'SHERIA & DINI',
+    location: 'Roma, Italia',
   },
   {
     id: '2',
-    month: 9, // October
+    month: 9,
     day: 31,
-    year: "1517",
-    title: "Matengenezo Makuu",
-    description: "Martin Luther alibandika Hoja 95 Wittenberg, akipinga biashara ya vyeti vya msamaha (Indulgences).",
-    significance: "Kurejeshwa kwa Biblia kama mamlaka kuu (Sola Scriptura).",
-    image: "https://images.unsplash.com/photo-1548013146-72479768bbaa?q=80&w=1600",
-    tag: "MATENGENEZO",
-    location: "Wittenberg, Ujerumani"
+    year: '1517',
+    title: 'Matengenezo Makuu',
+    description: 'Martin Luther alibandika Hoja 95 Wittenberg, akipinga biashara ya vyeti vya msamaha (Indulgences).',
+    significance: 'Kurejeshwa kwa Biblia kama mamlaka kuu (Sola Scriptura).',
+    image: 'https://images.unsplash.com/photo-1548013146-72479768bbaa?q=80&w=1600',
+    tag: 'MATENGENEZO',
+    location: 'Wittenberg, Ujerumani',
   },
   {
     id: '3',
-    month: 9, // October
+    month: 9,
     day: 22,
-    year: "1844",
-    title: "Kukatishwa Tamaa Kuu",
-    description: "Siku ambayo waumini walitarajia marejeo ya Yesu, kumbe ilikuwa siku ya Yesu kuingia Patakatifu pa Patakatifu.",
-    significance: "Kuanza kwa Hukumu ya Upelelezi mbinguni.",
-    image: "https://images.unsplash.com/photo-1504052434569-70ad5836ab65?q=80&w=1600",
-    tag: "UNABII WA MUDA",
-    location: "New England, Marekani"
-  }
+    year: '1844',
+    title: 'Kukatishwa Tamaa Kuu',
+    description: 'Siku ambayo waumini walitarajia marejeo ya Yesu, kumbe ilikuwa siku ya Yesu kuingia Patakatifu pa Patakatifu.',
+    significance: 'Kuanza kwa Hukumu ya Upelelezi mbinguni.',
+    image: 'https://images.unsplash.com/photo-1504052434569-70ad5836ab65?q=80&w=1600',
+    tag: 'UNABII WA MUDA',
+    location: 'New England, Marekani',
+  },
 ];
+
+const GENERIC_EVENT_IMAGE = 'https://images.unsplash.com/photo-1461360370896-922624d12aa1?q=80&w=1600';
+
+const mapBackendEvent = (item: EventApi): HistoryEvent | null => {
+  const parsed = new Date(item.starts_at);
+  if (Number.isNaN(parsed.getTime())) {
+    return null;
+  }
+
+  return {
+    id: `event-${item.id}`,
+    month: parsed.getMonth(),
+    day: parsed.getDate(),
+    year: String(parsed.getFullYear()),
+    title: item.title || 'Tukio la Kanisa',
+    description: item.description || `Tukio la ${item.title} limepangwa kwenye kalenda ya huduma.`,
+    significance:
+      item.event_type === 'Virtual'
+        ? 'Tukio hili linafanyika mtandaoni kwa ushiriki mpana wa waumini.'
+        : 'Tukio hili linafanyika kwa kuhudhuria ana kwa ana kwa ajili ya ushirika wa karibu.',
+    image: item.image || GENERIC_EVENT_IMAGE,
+    tag: `${item.category || 'MATUKIO'} / ${item.event_type || 'GENERAL'}`.toUpperCase(),
+    location: item.location || 'Mahali pa tukio',
+  };
+};
+
+const formatDateInput = (date: Date) => {
+  const year = date.getFullYear();
+  const month = `${date.getMonth() + 1}`.padStart(2, '0');
+  const day = `${date.getDate()}`.padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
+const resolveEventByDate = (date: Date, events: HistoryEvent[]) => {
+  const month = date.getMonth();
+  const day = date.getDate();
+
+  const found = events.find((event) => event.month === month && event.day === day);
+  if (found) {
+    return found;
+  }
+
+  return {
+    id: 'generic',
+    month,
+    day,
+    year: 'Historia',
+    title: 'Tukio la Kihistoria',
+    description: `Katika tarehe hii ya ${date.toLocaleDateString('sw-TZ', { day: 'numeric', month: 'long' })}, matukio mbalimbali ya kiimani yalitokea ulimwenguni kote yakichagiza mpango wa Mungu.`,
+    significance: 'Kila siku ni ukurasa mpya katika kitabu cha historia ya ukombozi.',
+    image: GENERIC_EVENT_IMAGE,
+    tag: 'KUMBUKUMBU',
+    location: 'Ulimwenguni',
+  };
+};
 
 interface Props {
   aiLanguage?: LanguageCode;
   onGoToTimeline?: () => void;
 }
 
-export const HistoryTool: React.FC<Props> = ({ aiLanguage = 'sw', onGoToTimeline }) => {
+export const HistoryTool: React.FC<Props> = ({ onGoToTimeline }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [todaysEvent, setTodaysEvent] = useState<HistoryEvent | null>(null);
+  const [historyEvents, setHistoryEvents] = useState<HistoryEvent[]>(FALLBACK_HISTORY_EVENTS);
+  const [eventsError, setEventsError] = useState('');
+  const [hasLoadedEvents, setHasLoadedEvents] = useState(false);
   
-  // Format date for display: "7 Machi"
   const formattedDateDisplay = currentDate.toLocaleDateString('sw-TZ', { day: 'numeric', month: 'long' });
-  
-  // Format date for input value: "YYYY-MM-DD"
-  const dateInputValue = currentDate.toISOString().split('T')[0];
+  const dateInputValue = formatDateInput(currentDate);
 
-  const fetchHistoryForDate = (date: Date) => {
+  const fetchHistoryForDate = (date: Date, sourceEvents: HistoryEvent[] = historyEvents) => {
+    setTodaysEvent(resolveEventByDate(date, sourceEvents));
+  };
+
+  const loadBackendEvents = async (targetDate: Date) => {
     setLoading(true);
-    
-    // Simulate Network Delay and logic
-    setTimeout(() => {
-      const month = date.getMonth();
-      const day = date.getDate();
+    setEventsError('');
+    try {
+      const backendEvents = await getEvents();
+      const mapped = backendEvents
+        .map(mapBackendEvent)
+        .filter((event): event is HistoryEvent => Boolean(event));
 
-      const found = HISTORY_DB.find(e => e.month === month && e.day === day);
-      
-      if (found) {
-        setTodaysEvent(found);
-      } else {
-        // Fallback generic event for dates without specific data in this mock DB
-        setTodaysEvent({
-            id: 'generic',
-            month: month,
-            day: day,
-            year: "Historia",
-            title: "Tukio la Kihistoria",
-            description: `Katika tarehe hii ya ${date.toLocaleDateString('sw-TZ', { day: 'numeric', month: 'long' })}, matukio mbalimbali ya kiimani yalitokea ulimwenguni kote yakichagiza mpango wa Mungu.`,
-            significance: "Kila siku ni ukurasa mpya katika kitabu cha historia ya ukombozi.",
-            image: "https://images.unsplash.com/photo-1461360370896-922624d12aa1?q=80&w=1600",
-            tag: "KUMBUKUMBU",
-            location: "Ulimwenguni"
-        });
-      }
+      const sourceEvents = mapped.length > 0 ? mapped : FALLBACK_HISTORY_EVENTS;
+      setHistoryEvents(sourceEvents);
+      setHasLoadedEvents(true);
+      fetchHistoryForDate(targetDate, sourceEvents);
+    } catch {
+      setEventsError('Imeshindikana kupakua matukio kutoka backend. Tunaonyesha data ya msingi.');
+      setHistoryEvents(FALLBACK_HISTORY_EVENTS);
+      setHasLoadedEvents(true);
+      fetchHistoryForDate(targetDate, FALLBACK_HISTORY_EVENTS);
+    } finally {
       setLoading(false);
-    }, 800);
+    }
   };
 
   const handleOpen = () => {
     setIsOpen(true);
-    fetchHistoryForDate(new Date());
+    const today = new Date();
+    setCurrentDate(today);
+    if (hasLoadedEvents && !eventsError) {
+      fetchHistoryForDate(today, historyEvents);
+      return;
+    }
+    loadBackendEvents(today);
   };
 
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.value) {
-        const newDate = new Date(e.target.value);
-        setCurrentDate(newDate);
-        fetchHistoryForDate(newDate);
+      const [year, month, day] = e.target.value.split('-').map((value) => Number(value));
+      const newDate = new Date(year, month - 1, day);
+      setCurrentDate(newDate);
+      fetchHistoryForDate(newDate);
     }
   };
 
   const navigateDay = (direction: 'next' | 'prev') => {
-      const newDate = new Date(currentDate);
-      newDate.setDate(currentDate.getDate() + (direction === 'next' ? 1 : -1));
-      setCurrentDate(newDate);
-      fetchHistoryForDate(newDate);
+    const newDate = new Date(currentDate);
+    newDate.setDate(currentDate.getDate() + (direction === 'next' ? 1 : -1));
+    setCurrentDate(newDate);
+    fetchHistoryForDate(newDate);
   };
 
   return (
@@ -183,6 +241,12 @@ export const HistoryTool: React.FC<Props> = ({ aiLanguage = 'sw', onGoToTimeline
                        </button>
 
                        <div className="flex-1 space-y-6">
+                          {eventsError && (
+                            <div className="bg-amber-500/10 border border-amber-500/30 text-amber-300 text-[10px] font-bold uppercase tracking-widest px-3 py-2 rounded-lg">
+                              {eventsError}
+                            </div>
+                          )}
+
                           {/* Date Navigation & Picker */}
                           <div className="flex items-center justify-between bg-purple-900/10 p-2 rounded-xl border border-purple-500/10">
                              <button onClick={() => navigateDay('prev')} className="p-2 hover:bg-purple-500/20 rounded-lg text-purple-300 transition-colors"><ChevronLeft size={16}/></button>

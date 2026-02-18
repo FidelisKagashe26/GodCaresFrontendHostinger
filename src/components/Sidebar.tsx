@@ -309,7 +309,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const sections = [
     {
       title: "Mitaala ya Msingi",
-      ids: [StageId.HOME, StageId.ABOUT, StageId.BIBLE_STUDY, StageId.FAITH_BUILDER]
+      ids: [StageId.HOME, StageId.BLOG, StageId.ABOUT, StageId.BIBLE_STUDY, StageId.FAITH_BUILDER]
     },
     {
       title: "Ujasusi wa Kiungu",

@@ -17,6 +17,7 @@ import {
   PlayCircle, Video, ChevronLeft
 } from 'lucide-react';
 import { StageId } from '../types';
+import { JourneyLesson, JourneyModule, getJourneyModules } from '../services/journeyService';
 
 interface Milestone {
   id: string;
@@ -220,6 +221,110 @@ const TIMELINES: TimelineSection[] = [
   }
 ];
 
+const FALLBACK_TIMELINE_IMAGE = 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2000';
+
+const MODULE_COLOR_MAP: Record<JourneyModule['component_key'], string> = {
+  foundations: '#10b981',
+  prophecy: '#6366f1',
+  deception: '#ef4444',
+  custom: '#14b8a6',
+};
+
+const getModuleIcon = (componentKey: JourneyModule['component_key']) => {
+  if (componentKey === 'foundations') {
+    return <BookOpen size={20} />;
+  }
+  if (componentKey === 'prophecy') {
+    return <Clock size={20} />;
+  }
+  if (componentKey === 'deception') {
+    return <Shield size={20} />;
+  }
+  return <Compass size={20} />;
+};
+
+const getPayloadString = (payload: Record<string, unknown>, keys: string[]) => {
+  for (const key of keys) {
+    const value = payload?.[key];
+    if (typeof value === 'string' && value.trim()) {
+      return value.trim();
+    }
+  }
+  return '';
+};
+
+const inferMilestoneCategory = (lesson: JourneyLesson): Milestone['category'] => {
+  const searchable = `${lesson.title} ${lesson.swahili_title} ${lesson.summary} ${lesson.focus}`.toLowerCase();
+  if (/(future|mwisho|kurudi|kuja|second coming|eshatology|coming)/.test(searchable)) {
+    return 'Future';
+  }
+  if (/(present|leo|today|sasa|current)/.test(searchable)) {
+    return 'Present';
+  }
+  return 'Past';
+};
+
+const mapModulesToTimelineSections = (modules: JourneyModule[]): TimelineSection[] => {
+  return modules
+    .map((module, moduleIndex) => {
+      const milestones: Milestone[] = (module.lessons || []).map((lesson, lessonIndex) => {
+        const payload = lesson.payload || {};
+        const didYouKnow =
+          getPayloadString(payload, ['didYouKnow', 'did_you_know', 'fact']) ||
+          lesson.focus ||
+          lesson.summary ||
+          'Dondoo la somo hili lipo ndani ya maudhui ya backend.';
+
+        const deepStory =
+          getPayloadString(payload, ['swahiliDeep', 'swahili_deep', 'deepStory']) ||
+          lesson.summary ||
+          lesson.focus ||
+          lesson.content ||
+          '';
+
+        const fullStory =
+          getPayloadString(payload, ['fullStory', 'full_story']) ||
+          lesson.content ||
+          lesson.summary ||
+          lesson.focus ||
+          '';
+
+        const yearLabel =
+          getPayloadString(payload, ['year', 'timelineYear', 'timeline_year']) ||
+          lesson.code ||
+          `Somo ${lessonIndex + 1}`;
+
+        const videoUrl = getPayloadString(payload, ['videoUrl', 'video_url']) || undefined;
+
+        return {
+          id: `${module.code}-${lesson.id}`,
+          year: yearLabel,
+          title: lesson.title || `Lesson ${lessonIndex + 1}`,
+          swahiliTitle: lesson.swahili_title || lesson.title || `Somo ${lessonIndex + 1}`,
+          description: lesson.summary || lesson.focus || 'Somo la safari ya imani.',
+          category: inferMilestoneCategory(lesson),
+          image: lesson.hero_image || FALLBACK_TIMELINE_IMAGE,
+          verse: lesson.scripture || 'Somo la Biblia',
+          fullStory,
+          swahiliDeep: deepStory,
+          didYouKnow,
+          videoUrl,
+        };
+      });
+
+      return {
+        id: module.code,
+        name: module.title,
+        swahiliName: `${moduleIndex + 1}. ${module.swahili_title || module.title}`,
+        icon: getModuleIcon(module.component_key),
+        color: MODULE_COLOR_MAP[module.component_key] || '#14b8a6',
+        description: module.description || 'Timeline kutoka backend.',
+        milestones,
+      };
+    })
+    .filter((section) => section.milestones.length > 0);
+};
+
 interface PropheticTimelineProps {
   activeTimelineId: string;
   setActiveTimelineId: (id: string) => void;
@@ -230,11 +335,53 @@ export const PropheticTimeline: React.FC<PropheticTimelineProps> = ({ activeTime
   const [selected, setSelected] = useState<Milestone | null>(null);
   const [scrollProgress, setScrollProgress] = useState(0);
   const [showTimelineList, setShowTimelineList] = useState(false);
+  const [backendTimelines, setBackendTimelines] = useState<TimelineSection[]>([]);
+  const [timelineError, setTimelineError] = useState('');
   
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  const activeTimelineIndex = useMemo(() => TIMELINES.findIndex(t => t.id === activeTimelineId), [activeTimelineId]);
-  const activeTimeline = TIMELINES[activeTimelineIndex !== -1 ? activeTimelineIndex : 0];
+  const timelines = useMemo(
+    () => (backendTimelines.length > 0 ? backendTimelines : TIMELINES),
+    [backendTimelines]
+  );
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadTimelineFromBackend = async () => {
+      try {
+        const modules = await getJourneyModules();
+        const mapped = mapModulesToTimelineSections(modules);
+        if (!isMounted || mapped.length === 0) {
+          return;
+        }
+        setBackendTimelines(mapped);
+      } catch {
+        if (!isMounted) {
+          return;
+        }
+        setTimelineError('Timeline ya backend haijapatikana kwa sasa. Tunaonyesha timeline ya msingi.');
+      }
+    };
+
+    loadTimelineFromBackend();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!timelines.length) {
+      return;
+    }
+    if (!timelines.some((timeline) => timeline.id === activeTimelineId)) {
+      setActiveTimelineId(timelines[0].id);
+    }
+  }, [activeTimelineId, setActiveTimelineId, timelines]);
+
+  const activeTimelineIndex = useMemo(() => timelines.findIndex(t => t.id === activeTimelineId), [activeTimelineId, timelines]);
+  const activeTimeline = timelines[activeTimelineIndex !== -1 ? activeTimelineIndex : 0];
 
   const handleScroll = () => {
     if (scrollRef.current) {
@@ -249,13 +396,19 @@ export const PropheticTimeline: React.FC<PropheticTimelineProps> = ({ activeTime
 
   // Simple Navigation Logic
   const handleNextTimeline = () => {
-    const nextIndex = (activeTimelineIndex + 1) % TIMELINES.length;
-    setActiveTimelineId(TIMELINES[nextIndex].id);
+    if (!timelines.length) {
+      return;
+    }
+    const nextIndex = (activeTimelineIndex + 1) % timelines.length;
+    setActiveTimelineId(timelines[nextIndex].id);
   };
 
   const handlePrevTimeline = () => {
-    const prevIndex = (activeTimelineIndex - 1 + TIMELINES.length) % TIMELINES.length;
-    setActiveTimelineId(TIMELINES[prevIndex].id);
+    if (!timelines.length) {
+      return;
+    }
+    const prevIndex = (activeTimelineIndex - 1 + timelines.length) % timelines.length;
+    setActiveTimelineId(timelines[prevIndex].id);
   };
 
   const handleScrollUp = () => {
@@ -281,6 +434,12 @@ export const PropheticTimeline: React.FC<PropheticTimelineProps> = ({ activeTime
         }}
       ></div>
       <div className="absolute inset-0 bg-gradient-to-b from-primary-900/90 via-transparent to-primary-900 pointer-events-none"></div>
+
+      {timelineError && (
+        <div className="fixed top-24 left-1/2 -translate-x-1/2 z-[65] bg-amber-500/10 border border-amber-500/30 text-amber-300 text-[10px] font-black uppercase tracking-widest px-4 py-2 rounded-lg">
+          {timelineError}
+        </div>
+      )}
 
       {/* Floating Back Button for Navigation */}
       <div className="fixed top-8 left-8 z-[60] pointer-events-auto">
@@ -318,11 +477,11 @@ export const PropheticTimeline: React.FC<PropheticTimelineProps> = ({ activeTime
         </div>
 
         <div className="relative pt-24 pb-48">
-          {activeTimeline.milestones.map((milestone, idx) => (
+          {(activeTimeline?.milestones || []).map((milestone, idx) => (
             <TimelineScreen 
               key={milestone.id} 
               milestone={milestone} 
-              color={activeTimeline.color} 
+              color={activeTimeline?.color || '#14b8a6'} 
               onSelect={() => setSelected(milestone)}
               isLeft={idx % 2 === 0}
               onVisible={() => {}}
@@ -341,8 +500,8 @@ export const PropheticTimeline: React.FC<PropheticTimelineProps> = ({ activeTime
             <div className="px-6 py-2 text-center min-w-[200px] border-x border-white/5">
                <p className="text-[9px] font-black uppercase text-slate-500 tracking-widest mb-1">Current Timeline</p>
                <div className="flex items-center justify-center gap-2 text-gold-400">
-                  {activeTimeline.icon}
-                  <h3 className="text-sm font-black uppercase tracking-wider">{activeTimeline.swahiliName}</h3>
+                  {activeTimeline?.icon}
+                  <h3 className="text-sm font-black uppercase tracking-wider">{activeTimeline?.swahiliName || 'Timeline'}</h3>
                </div>
             </div>
 
@@ -370,7 +529,7 @@ export const PropheticTimeline: React.FC<PropheticTimelineProps> = ({ activeTime
               </div>
 
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                 {TIMELINES.map((t) => (
+                 {timelines.map((t) => (
                     <button
                       key={t.id}
                       onClick={() => { setActiveTimelineId(t.id); setShowTimelineList(false); }}

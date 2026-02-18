@@ -23,7 +23,7 @@ export const submitDonation = async (payload: {
   donor_email?: string;
   amount: number;
   payment_method: "mobile" | "card";
-}) => {
+}): Promise<{ detail: string; project_id?: number | null; new_raised?: number | null }> => {
   const response = await fetch(`${API_BASE_URL}/api/donations/`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -35,6 +35,6 @@ export const submitDonation = async (payload: {
     throw new Error(error?.detail || "Imeshindikana kutuma sadaka.");
   }
 
-  return response.json().catch(() => ({}));
+  return response.json().catch(() => ({ detail: "Asante kwa sadaka yako." }));
 };
 

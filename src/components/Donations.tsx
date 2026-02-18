@@ -40,6 +40,11 @@ export const Donations: React.FC = () => {
     }).format(val).replace('TZS', 'TSh');
   };
 
+  const progressPercent = (goal: number, raised: number) => {
+    if (!goal) return 0;
+    return Math.min((raised / goal) * 100, 100);
+  };
+
   useEffect(() => {
     const loadProjects = async () => {
       try {
@@ -69,7 +74,7 @@ export const Donations: React.FC = () => {
     setIsProcessing(true);
     setErrorMessage('');
     try {
-      await submitDonation({
+      const result = await submitDonation({
         project: donationType === 'project' && selectedProject ? Number(selectedProject) : null,
         donor_name: donorName || undefined,
         donor_email: donorEmail || undefined,
@@ -78,7 +83,14 @@ export const Donations: React.FC = () => {
       });
       setShowSuccess(true);
       if (donationType === 'project' && selectedProject) {
-        setProjects(prev => prev.map(p => p.id === selectedProject ? { ...p, raised: p.raised + amount } : p));
+        const raisedFromApi = Number(result?.new_raised || 0);
+        setProjects((prev) =>
+          prev.map((p) =>
+            p.id === selectedProject
+              ? { ...p, raised: raisedFromApi > 0 ? raisedFromApi : p.raised + amount }
+              : p
+          )
+        );
       }
       setDonorName('');
       setDonorEmail('');
@@ -127,6 +139,11 @@ export const Donations: React.FC = () => {
           </div>
 
           <div className={`space-y-4 transition-all duration-500 ${donationType === 'general' ? 'opacity-60 grayscale' : 'opacity-100'}`}>
+             {!projects.length && (
+               <div className="bg-slate-100 border border-slate-200 rounded-xl p-4 text-[10px] font-black uppercase tracking-widest text-slate-500">
+                 Hakuna miradi ya kuonyesha kwa sasa.
+               </div>
+             )}
              {projects.map((project) => (
                <div 
                  key={project.id}
@@ -159,13 +176,18 @@ export const Donations: React.FC = () => {
                        <div className="h-1.5 w-full bg-slate-100 dark:bg-white/5 rounded-full overflow-hidden">
                           <div 
                             className="h-full bg-gold-500 shadow-[0_0_10px_#eab308] transition-all duration-1000" 
-                            style={{ width: `${(project.raised / project.goal) * 100}%` }}
+                            style={{ width: `${progressPercent(project.goal, project.raised)}%` }}
                           ></div>
                        </div>
                        <div className="flex justify-between items-end">
                           <div>
                             <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1">Mchango wa Sasa</p>
                             <p className="text-lg font-black text-slate-900 dark:text-white">{formatTZS(project.raised)}</p>
+                            {project.raised > project.goal && (
+                              <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest mt-1">
+                                Imevuka lengo kwa {formatTZS(project.raised - project.goal)}
+                              </p>
+                            )}
                           </div>
                           <div className="text-right">
                             <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1">Target Goal</p>

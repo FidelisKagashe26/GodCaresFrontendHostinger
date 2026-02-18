@@ -2,7 +2,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { 
   Heart, Send, BookOpen, Users, CheckCircle2, Clock, 
-  Share2, X, Lock, ShieldCheck, MessageSquare, 
+  Share2, X, ShieldCheck, MessageSquare, 
   Eye, EyeOff, Sparkles, ChevronRight
 } from 'lucide-react';
 import { GoogleGenAI } from "@google/genai";
@@ -146,14 +146,11 @@ export const Prayers: React.FC<Props> = ({ aiLanguage = 'en' }) => {
         </div>
         <div className="absolute inset-0 bg-gradient-to-r from-primary-950 via-primary-950/80 to-transparent"></div>
         <div className="relative z-10 max-w-2xl space-y-6">
-           <div className="inline-flex items-center gap-2 px-3 py-1 bg-gold-500/10 text-gold-400 border border-gold-500/20 rounded-lg text-[10px] font-black uppercase tracking-[0.3em]">
-              <Lock size={12} /> Privacy Guaranteed
-           </div>
            <h1 className="text-4xl md:text-7xl font-black text-white tracking-tighter uppercase leading-none italic">
-             Madhabahu ya <span className="text-gold-500">Siri.</span>
+             Ukuta wa <span className="text-gold-500">Maombi.</span>
            </h1>
            <p className="text-slate-300 text-lg md:text-xl font-medium leading-relaxed italic border-l-4 border-gold-500/50 pl-6">
-             "Lakini wewe usalipo, ingia katika chumba chako cha ndani..." — Mathayo 6:6. Maombi yako ni siri kati yako na Timu yetu ya Maombi.
+             "Lakini wewe usalipo, ingia katika chumba chako cha ndani..." - Mathayo 6:6.
            </p>
         </div>
       </section>
@@ -174,7 +171,7 @@ export const Prayers: React.FC<Props> = ({ aiLanguage = 'en' }) => {
                 <div className="py-12 text-center space-y-6 animate-scale-up bg-slate-50 dark:bg-white/5 rounded-xl border border-dashed border-slate-200 dark:border-white/10">
                    <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center text-white mx-auto shadow-xl animate-bounce"><CheckCircle2 size={32} /></div>
                    <div className="space-y-2">
-                      <h4 className="text-xl font-black uppercase text-slate-900 dark:text-white">Imepokelewa kwa Siri</h4>
+                      <h4 className="text-xl font-black uppercase text-slate-900 dark:text-white">Imepokelewa</h4>
                       <p className="text-sm text-slate-500 px-8 italic">Mungu amesikia ombi lako. Timu yetu itakuwa ikikuombea masaa 24 kuanzia sasa.</p>
                    </div>
                 </div>
@@ -214,7 +211,7 @@ export const Prayers: React.FC<Props> = ({ aiLanguage = 'en' }) => {
                          onClick={handleGeneratePrayer}
                          className="py-4 bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-400 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-gold-500/10 hover:text-gold-600 transition-all flex items-center justify-center gap-2"
                       >
-                         <Sparkles size={14} /> AI Word
+                         <Sparkles size={14} /> Neno la Faraja
                       </button>
                       <button 
                          type="submit"
@@ -322,14 +319,14 @@ export const Prayers: React.FC<Props> = ({ aiLanguage = 'en' }) => {
         </div>
       </div>
 
-      {/* AI WORD MODAL */}
+      {/* NENO LA FARAJA MODAL */}
       {showAiModal && (
          <div className="fixed inset-0 z-[600] flex items-center justify-center p-4 bg-black/95 backdrop-blur-2xl animate-fade-in">
             <div className="bg-white dark:bg-slate-950 w-full max-w-lg rounded-3xl p-10 md:p-14 text-center space-y-8 shadow-[0_0_80px_rgba(234,179,8,0.2)] border border-white/10 animate-scale-up relative">
                <button onClick={() => setShowAiModal(false)} className="absolute top-8 right-8 p-3 bg-slate-50 dark:bg-white/5 rounded-xl hover:bg-slate-100 dark:hover:bg-white/10 transition-all"><X size={20}/></button>
                <div className="space-y-4">
                   <div className="w-20 h-20 bg-gold-400 text-primary-950 rounded-2xl flex items-center justify-center mx-auto shadow-2xl group transition-all"><BookOpen size={32} /></div>
-                  <h3 className="text-3xl font-black tracking-tighter uppercase italic leading-none">Neno la <span className="text-gold-500">Maombi</span></h3>
+                  <h3 className="text-3xl font-black tracking-tighter uppercase italic leading-none">Neno la <span className="text-gold-500">Faraja</span></h3>
                </div>
                
                <div className="p-8 bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/10 rounded-2xl min-h-[150px] flex items-center justify-center relative overflow-hidden">

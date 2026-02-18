@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { 
   Globe, Users, BookOpen, ShieldCheck, 
   Target, Star, Lightbulb, User, 
@@ -7,8 +7,84 @@ import {
   Activity, Zap, MapPin, Quote, FileText, CheckCircle2,
   BarChart3, Layers, ArrowRight
 } from 'lucide-react';
+import { getTeamMembers } from '../services/aboutService';
+
+interface TeamLeader {
+  id: string;
+  name: string;
+  role: string;
+  email: string;
+  phone: string;
+  accentColor: string;
+}
+
+const DEFAULT_LEADERS: TeamLeader[] = [
+  {
+    id: 'lead-1',
+    name: 'Frank Majibwene',
+    role: 'President',
+    email: 'president@godcares365.org',
+    phone: '+255 744 780 244',
+    accentColor: '#eab308',
+  },
+  {
+    id: 'lead-2',
+    name: 'Nobert Goodluck',
+    role: 'Vice President',
+    email: 'vp@godcares365.org',
+    phone: '+255 655 464 655',
+    accentColor: '#2563eb',
+  },
+  {
+    id: 'lead-3',
+    name: 'Neema Athuman',
+    role: 'Secretary',
+    email: 'secretary@godcares365.org',
+    phone: '+255 713 000 000',
+    accentColor: '#475569',
+  },
+  {
+    id: 'lead-4',
+    name: 'Elson Salala',
+    role: 'Dir. Evangelism & Outreach',
+    email: 'evangelism@godcares365.org',
+    phone: '+255 700 000 000',
+    accentColor: '#059669',
+  },
+];
 
 export const AboutUs: React.FC = () => {
+  const [teamLeaders, setTeamLeaders] = useState<TeamLeader[]>(DEFAULT_LEADERS);
+  const [teamError, setTeamError] = useState('');
+
+  useEffect(() => {
+    const loadTeam = async () => {
+      try {
+        const data = await getTeamMembers();
+        const mapped: TeamLeader[] = data.map((member) => ({
+          id: String(member.id),
+          name: member.name,
+          role: member.role,
+          email: member.email || '',
+          phone: member.phone || '',
+          accentColor: member.accent_color || '#eab308',
+        }));
+        if (mapped.length) {
+          setTeamLeaders(mapped);
+        }
+      } catch {
+        setTeamError('Imeshindikana kupakua viongozi kutoka backend. Tunaonyesha data ya msingi.');
+      }
+    };
+
+    loadTeam();
+  }, []);
+
+  const leaders = useMemo(
+    () => (teamLeaders.length ? teamLeaders : DEFAULT_LEADERS),
+    [teamLeaders]
+  );
+
   return (
     <div className="space-y-16 animate-fade-in pb-32 max-w-7xl mx-auto px-4 md:px-6 pt-12">
        
@@ -47,47 +123,19 @@ export const AboutUs: React.FC = () => {
              <h2 className="text-2xl md:text-3xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">Viongozi Wetu</h2>
           </div>
 
+          {teamError && (
+            <div className="text-center text-[10px] font-bold uppercase tracking-widest text-amber-600 dark:text-amber-400">
+              {teamError}
+            </div>
+          )}
+
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-             {[
-                { 
-                  name: "Frank Majibwene", 
-                  role: "President", 
-                  icon: <User size={20} />, 
-                  color: "bg-gold-500",
-                  email: "president@godcares365.org",
-                  phone: "+255 744 780 244"
-                },
-                { 
-                  name: "Nobert Goodluck", 
-                  role: "Vice President", 
-                  icon: <User size={20} />, 
-                  color: "bg-primary-600",
-                  email: "vp@godcares365.org",
-                  phone: "+255 655 464 655"
-                },
-                { 
-                  name: "Neema Athuman", 
-                  role: "Secretary", 
-                  icon: <User size={20} />, 
-                  color: "bg-slate-600",
-                  email: "secretary@godcares365.org",
-                  phone: "+255 713 000 000"
-                },
-                { 
-                  name: "Elson Salala", 
-                  role: "Dir. Evangelism & Outreach", 
-                  icon: <User size={20} />, 
-                  color: "bg-emerald-600",
-                  email: "evangelism@godcares365.org",
-                  phone: "+255 700 000 000"
-                }
-             ].map((leader, i) => (
-                <div key={i} className="flex flex-col items-center justify-center text-center gap-4 bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-100 dark:border-white/5 shadow-sm hover:border-gold-500/30 hover:shadow-lg transition-all group relative overflow-hidden aspect-square">
-                   {/* Top Color Line */}
-                   <div className={`absolute top-0 left-0 w-full h-1 ${leader.color}`}></div>
+             {leaders.map((leader) => (
+                <div key={leader.id} className="flex flex-col items-center justify-center text-center gap-4 bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-100 dark:border-white/5 shadow-sm hover:border-gold-500/30 hover:shadow-lg transition-all group relative overflow-hidden aspect-square">
+                   <div className="absolute top-0 left-0 w-full h-1" style={{ backgroundColor: leader.accentColor }}></div>
                    
-                   <div className={`w-14 h-14 rounded-2xl ${leader.color} flex items-center justify-center text-white shadow-lg shrink-0 group-hover:scale-110 transition-transform mb-1`}>
-                      {leader.icon}
+                   <div className="w-14 h-14 rounded-2xl flex items-center justify-center text-white shadow-lg shrink-0 group-hover:scale-110 transition-transform mb-1" style={{ backgroundColor: leader.accentColor }}>
+                      <User size={20} />
                    </div>
                    
                    <div className="space-y-1">
@@ -96,13 +144,17 @@ export const AboutUs: React.FC = () => {
                    </div>
 
                    <div className="flex gap-3 mt-1 opacity-60 group-hover:opacity-100 transition-opacity">
-                      <a href={`mailto:${leader.email}`} className="p-2 bg-slate-50 dark:bg-white/5 rounded-lg text-slate-400 hover:text-primary-600 hover:bg-white transition-all border border-transparent hover:border-slate-100"><Mail size={12}/></a>
-                      <a href={`tel:${leader.phone}`} className="p-2 bg-slate-50 dark:bg-white/5 rounded-lg text-slate-400 hover:text-green-600 hover:bg-white transition-all border border-transparent hover:border-slate-100"><Phone size={12}/></a>
+                      {leader.email && (
+                        <a href={`mailto:${leader.email}`} className="p-2 bg-slate-50 dark:bg-white/5 rounded-lg text-slate-400 hover:text-primary-600 hover:bg-white transition-all border border-transparent hover:border-slate-100"><Mail size={12}/></a>
+                      )}
+                      {leader.phone && (
+                        <a href={`tel:${leader.phone}`} className="p-2 bg-slate-50 dark:bg-white/5 rounded-lg text-slate-400 hover:text-green-600 hover:bg-white transition-all border border-transparent hover:border-slate-100"><Phone size={12}/></a>
+                      )}
                    </div>
                 </div>
              ))}
           </div>
-       </section>
+        </section>
 
        {/* 3. Message from the President - Full Text Restored */}
        <section className="relative overflow-hidden bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/5 rounded-2xl shadow-lg">
