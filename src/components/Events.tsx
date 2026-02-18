@@ -25,6 +25,7 @@ interface Event {
   id: string;
   title: string;
   date: Date;
+  endDate: Date | null;
   location: string;
   image: string;
   description: string;
@@ -37,6 +38,21 @@ interface Event {
 }
 
 const INITIAL_EVENTS: Event[] = [];
+
+const toDate = (value?: string | null): Date | null => {
+  if (!value) return null;
+  const parsed = new Date(value);
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+};
+
+const getDaysLeft = (targetDate: Date): number => Math.ceil((targetDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+
+const formatTimeRange = (start: Date, end: Date | null): string => {
+  const startText = start.toLocaleTimeString('sw-TZ', { hour: '2-digit', minute: '2-digit' });
+  if (!end) return startText;
+  const endText = end.toLocaleTimeString('sw-TZ', { hour: '2-digit', minute: '2-digit' });
+  return `${startText} - ${endText}`;
+};
 
 const CountdownTimer: React.FC<{ targetDate: Date }> = ({ targetDate }) => {
   const [timeLeft, setTimeLeft] = useState({ d: 0, h: 0, m: 0, s: 0 });
@@ -91,7 +107,8 @@ export const Events: React.FC = () => {
         const mapped = data.map((item): Event => ({
           id: String(item.id),
           title: item.title,
-          date: new Date(item.starts_at),
+          date: toDate(item.starts_at) || new Date(),
+          endDate: toDate(item.ends_at || null),
           location: item.location,
           image: item.image,
           description: item.description,
@@ -115,9 +132,12 @@ export const Events: React.FC = () => {
 
   const upcomingEvent = useMemo(() => {
     if (!events.length) return null;
-    return events.reduce((prev, curr) =>
-      (curr.date.getTime() < prev.date.getTime() && curr.date.getTime() > Date.now()) ? curr : prev
-    , events[0]);
+    const now = Date.now();
+    const futureEvents = events.filter((event) => event.date.getTime() > now);
+    if (!futureEvents.length) return null;
+    return futureEvents.reduce((prev, curr) =>
+      curr.date.getTime() < prev.date.getTime() ? curr : prev
+    , futureEvents[0]);
   }, [events]);
 
   const filtered = events.filter(e => filter === 'All' || e.type === filter);
@@ -200,6 +220,7 @@ export const Events: React.FC = () => {
                 <h2 className="text-3xl md:text-5xl font-black tracking-tighter uppercase leading-tight">{upcomingEvent.title}</h2>
               <div className="flex items-center gap-4 text-slate-400 text-xs font-bold uppercase tracking-widest">
                   <div className="flex items-center gap-2 text-gold-400"><Calendar size={14}/> {upcomingEvent.date.toLocaleDateString()}</div>
+                 <div className="flex items-center gap-2"><Clock size={14}/> {formatTimeRange(upcomingEvent.date, upcomingEvent.endDate)}</div>
                  <div className="flex items-center gap-2"><MapPin size={14}/> {upcomingEvent.location}</div>
               </div>
            </div>
@@ -237,8 +258,11 @@ export const Events: React.FC = () => {
         {loadingEvents && (
           <div className="col-span-full bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-50 dark:border-white/5 text-slate-400 text-xs uppercase tracking-widest font-black">Inapakia matukio...</div>
         )}
-        {filtered.map(event => (
-          <div 
+        {filtered.map(event => {
+          const daysLeft = getDaysLeft(event.date);
+
+          return (
+          <div
             key={event.id}
             onClick={() => setSelectedEvent(event)}
             className="group bg-white dark:bg-slate-900 rounded-sm border border-slate-100 dark:border-white/5 overflow-hidden transition-all duration-300 hover:border-gold-500/50 hover:shadow-2xl cursor-pointer flex flex-col"
@@ -259,7 +283,13 @@ export const Events: React.FC = () => {
                     <span className="text-[10px] font-black uppercase tracking-widest">
                       {event.date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                     </span>
+                    <span className={`ml-auto text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded-sm ${daysLeft >= 0 ? 'bg-gold-500/15 text-gold-600 dark:text-gold-400' : 'bg-slate-100 text-slate-500 dark:bg-white/10 dark:text-slate-400'}`}>
+                      {daysLeft > 0 ? `Siku ${daysLeft}` : daysLeft === 0 ? 'Leo' : 'Imepita'}
+                    </span>
                   </div>
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                    {formatTimeRange(event.date, event.endDate)}
+                  </p>
                   <h3 className="text-xl md:text-2xl font-black text-slate-900 dark:text-white uppercase leading-tight group-hover:text-gold-500 transition-colors">
                     {event.title}
                   </h3>
@@ -295,7 +325,13 @@ export const Events: React.FC = () => {
                </div>
             </div>
           </div>
-        ))}
+          );
+        })}
+        {!loadingEvents && !filtered.length && (
+          <div className="col-span-full bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-50 dark:border-white/5 text-slate-500 text-xs uppercase tracking-widest font-black">
+            Hakuna matukio ya kuonyesha kwa sasa.
+          </div>
+        )}
       </div>
 
       {/* EVENT DETAIL OVERLAY - Minimum Bevel Modal */}
@@ -378,7 +414,8 @@ export const Events: React.FC = () => {
                                 </div>
                                 <div>
                                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Time & Date</p>
-                                   <p className="text-sm font-bold text-slate-900 dark:text-white uppercase">{selectedEvent.date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</p>
+                                   <p className="text-sm font-bold text-slate-900 dark:text-white uppercase">{selectedEvent.date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}</p>
+                                   <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{formatTimeRange(selectedEvent.date, selectedEvent.endDate)}</p>
                                 </div>
                              </div>
                              <div className="flex items-center gap-4">

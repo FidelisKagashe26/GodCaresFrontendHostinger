@@ -344,9 +344,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   return (
     <div className={`fixed inset-0 z-[200] bg-[color:var(--surface-1)] dark:bg-[#020617]/72 backdrop-blur-2xl flex flex-col transition-all duration-700 ease-in-out ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
-      <div className="relative z-10 flex items-center justify-between p-4 md:p-6 border-b border-slate-200/20 dark:border-white/5 bg-[color:var(--surface-2)] dark:bg-black/20 backdrop-blur-md h-20">
-        <div onClick={() => { onStageChange(StageId.HOME); onClose(); }} className="flex items-center cursor-pointer group">
-           <img src={resolvedLogoSrc} alt={resolvedSettings.site_name} className="h-24 w-auto group-hover:scale-105 transition-transform" />
+      <div className="relative z-10 flex items-center justify-end p-4 md:p-6 border-b border-slate-200/20 dark:border-white/5 bg-[color:var(--surface-2)] dark:bg-black/20 backdrop-blur-md h-20">
+        <div onClick={() => { onStageChange(StageId.HOME); onClose(); }} className="absolute left-1/2 -translate-x-1/2 flex items-center cursor-pointer group">
+           <img src={resolvedLogoSrc} alt={resolvedSettings.site_name} className="h-20 w-auto group-hover:scale-105 transition-transform" />
         </div>
         <button onClick={onClose} className="p-3 bg-[color:var(--surface-3)] hover:bg-red-500/20 dark:hover:bg-red-500/30 text-slate-600 dark:text-slate-400 hover:text-red-500 transition-all rounded-xl border border-transparent hover:border-red-500/20">
           <X size={24} />

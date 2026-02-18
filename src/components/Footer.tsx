@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Facebook, Instagram, Youtube, Heart, Phone, Mail, Gift, Zap } from 'lucide-react';
+import { Facebook, Instagram, Youtube, Phone, Mail, Gift } from 'lucide-react';
 import { StageId } from '../types';
 import { DEFAULT_SITE_SETTINGS, SiteSettings } from '../services/siteSettingsService';
 
@@ -32,6 +32,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, siteSettings }) => {
   const siteName = settings.site_name || DEFAULT_SITE_SETTINGS.site_name;
   const contactPhone = settings.contact_phone || DEFAULT_SITE_SETTINGS.contact_phone;
   const contactEmail = settings.contact_email || DEFAULT_SITE_SETTINGS.contact_email;
+  const logoSrc = settings.logo_url?.trim() ? settings.logo_url : `${import.meta.env.BASE_URL}Logo.png`;
 
   const socialItems = [
     { icon: Facebook, link: settings.facebook_url },
@@ -51,8 +52,8 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, siteSettings }) => {
           onClick={() => onNavigate?.(StageId.HOME)}
           className="flex flex-col items-center gap-4 cursor-pointer group"
         >
-          <div className="w-14 h-14 bg-gold-500 rounded-lg flex items-center justify-center text-primary-950 shadow-xl group-hover:scale-110 transition-transform">
-             <Zap size={32} fill="currentColor" />
+          <div className="w-16 h-16 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform overflow-hidden">
+             <img src={logoSrc} alt={siteName} className="h-12 w-auto object-contain" />
           </div>
           <h2 className="text-2xl font-black text-white tracking-[0.2em] uppercase">
             {siteName}

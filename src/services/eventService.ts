@@ -15,6 +15,7 @@ export interface EventApi {
   id: number;
   title: string;
   starts_at: string;
+  ends_at?: string | null;
   location: string;
   image: string;
   description: string;
