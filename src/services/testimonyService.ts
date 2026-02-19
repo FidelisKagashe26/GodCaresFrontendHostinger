@@ -6,6 +6,7 @@ export interface TestimonyApi {
   verified: boolean;
   stars: number;
   testimony_type: "text" | "video";
+  profile_image?: string;
   thumbnail?: string;
   video_url?: string;
   category: "Miracle" | "Conversion" | "Healing";
@@ -30,12 +31,41 @@ export const submitTestimony = async (payload: {
   testimony_type: "text" | "video";
   video_url?: string;
   category: "Miracle" | "Conversion" | "Healing";
+  profile_image_upload?: File;
+  thumbnail_upload?: File;
 }): Promise<TestimonyApi> => {
-  const response = await fetch(`${API_BASE_URL}/api/testimonies/`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-  });
+  const hasFileUpload = Boolean(payload.profile_image_upload || payload.thumbnail_upload);
+  const url = `${API_BASE_URL}/api/testimonies/`;
+
+  let response: Response;
+  if (hasFileUpload) {
+    const formData = new FormData();
+    formData.append("name", payload.name);
+    formData.append("location", payload.location);
+    formData.append("story", payload.story);
+    formData.append("testimony_type", payload.testimony_type);
+    formData.append("category", payload.category);
+    if (payload.video_url) {
+      formData.append("video_url", payload.video_url);
+    }
+    if (payload.profile_image_upload) {
+      formData.append("profile_image_upload", payload.profile_image_upload);
+    }
+    if (payload.thumbnail_upload) {
+      formData.append("thumbnail_upload", payload.thumbnail_upload);
+    }
+
+    response = await fetch(url, {
+      method: "POST",
+      body: formData,
+    });
+  } else {
+    response = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+  }
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({}));
@@ -43,5 +73,23 @@ export const submitTestimony = async (payload: {
   }
 
   return (await response.json()) as TestimonyApi;
+};
+
+export const reactToTestimony = async (
+  testimonyId: number,
+  reaction: "amen" | "praise" | "love",
+): Promise<{ id: number; reactions: { amen: number; praise: number; love: number } }> => {
+  const response = await fetch(`${API_BASE_URL}/api/testimonies/${testimonyId}/react/`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ reaction }),
+  });
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}));
+    throw new Error(error?.detail || "Imeshindikana kusasisha reaction.");
+  }
+
+  return (await response.json()) as { id: number; reactions: { amen: number; praise: number; love: number } };
 };
 

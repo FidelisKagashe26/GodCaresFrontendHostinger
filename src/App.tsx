@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Sidebar, ProfileModal } from './components/Sidebar';
 import { Home } from './components/Home';
 import { Auth } from './components/Auth';
@@ -29,7 +29,7 @@ import { ToastContainer } from './components/ui/Toast';
 import { NotificationCenter } from './components/NotificationCenter';
 import { LanguageCenter } from './components/LanguageCenter';
 import { ThemeCenter } from './components/ThemeCenter';
-import { Sun, Moon, Menu, Bell, User, Monitor, ChevronDown, LogOut } from 'lucide-react';
+import { Sun, Moon, Menu, Bell, User, Monitor, ChevronDown, LogOut, ArrowLeft, ChevronRight } from 'lucide-react';
 import { clearTokens, getCurrentUser } from './services/authService';
 import { getSystemMessages } from './services/systemMessageService';
 import { DEFAULT_SITE_SETTINGS, getSiteSettings, SiteSettings } from './services/siteSettingsService';
@@ -54,6 +54,51 @@ const stages: StageConfig[] = [
   { id: StageId.ABOUT, title: 'Kuhusu Sisi', description: 'Lengo Letu', icon: 'info' },
 ];
 
+const NOTIFICATION_STATE_KEY = 'gc365_center_notification_state_v1';
+const STAGE_HASH_PREFIX = '#/';
+const STAGE_ID_SET = new Set(Object.values(StageId) as StageId[]);
+
+type StageNavigationOptions = {
+  pushHistory?: boolean;
+  trackHistory?: boolean;
+  scrollBehavior?: ScrollBehavior;
+};
+
+const getStageFromHash = (hashValue: string): StageId | null => {
+  const normalized = (hashValue || '').replace(/^#\/?/, '').trim() as StageId;
+  if (!normalized) {
+    return null;
+  }
+  return STAGE_ID_SET.has(normalized) ? normalized : null;
+};
+
+const buildStageHash = (stage: StageId) => `${STAGE_HASH_PREFIX}${stage}`;
+
+interface NotificationStorageState {
+  dismissedIds: string[];
+  readIds: string[];
+}
+
+const loadNotificationStorageState = (): NotificationStorageState => {
+  try {
+    const raw = localStorage.getItem(NOTIFICATION_STATE_KEY);
+    if (!raw) {
+      return { dismissedIds: [], readIds: [] };
+    }
+    const parsed = JSON.parse(raw) as Partial<NotificationStorageState>;
+    return {
+      dismissedIds: Array.isArray(parsed.dismissedIds) ? parsed.dismissedIds.map(String) : [],
+      readIds: Array.isArray(parsed.readIds) ? parsed.readIds.map(String) : [],
+    };
+  } catch {
+    return { dismissedIds: [], readIds: [] };
+  }
+};
+
+const saveNotificationStorageState = (state: NotificationStorageState) => {
+  localStorage.setItem(NOTIFICATION_STATE_KEY, JSON.stringify(state));
+};
+
 const App: React.FC = () => {
   const [user, setUser] = useState<{ name: string; email: string } | null>(null);
   const [currentStage, setCurrentStage] = useState<StageId>(StageId.HOME);
@@ -71,8 +116,10 @@ const App: React.FC = () => {
   
   const mainContentRef = useRef<HTMLDivElement>(null);
   const accountMenuRef = useRef<HTMLDivElement>(null);
+  const stageHistoryRef = useRef<StageId[]>([StageId.HOME]);
 
   const [centerNotifications, setCenterNotifications] = useState<ToastNotification[]>([]);
+  const [canGoBack, setCanGoBack] = useState(false);
 
   const [resetParams, setResetParams] = useState<{ uid: string; token: string } | null>(null);
 
@@ -106,17 +153,41 @@ const App: React.FC = () => {
   }, []);
 
   useEffect(() => {
+    const stageFromUrl = getStageFromHash(window.location.hash) || StageId.HOME;
+    setCurrentStage(stageFromUrl);
+    stageHistoryRef.current = [stageFromUrl];
+    setCanGoBack(false);
+
+    const targetHash = buildStageHash(stageFromUrl);
+    const targetUrl = `${window.location.pathname}${window.location.search}${targetHash}`;
+    if (window.location.hash !== targetHash) {
+      window.history.replaceState({ gcStage: stageFromUrl }, '', targetUrl);
+    } else {
+      window.history.replaceState({ ...(window.history.state || {}), gcStage: stageFromUrl }, '', window.location.href);
+    }
+  }, []);
+
+  useEffect(() => {
     const loadMessages = async () => {
       try {
-        const messages = await getSystemMessages();
-        const mapped: ToastNotification[] = messages.map((msg) => ({
-          id: String(msg.id),
+        const storageState = loadNotificationStorageState();
+        const dismissedSet = new Set(storageState.dismissedIds);
+        const readSet = new Set(storageState.readIds);
+
+        const messages = await getSystemMessages({
+          stage: currentStage,
+          userEmail: user?.email || undefined,
+        });
+        const mapped: ToastNotification[] = messages
+          .filter((msg) => !dismissedSet.has(String(msg.id)))
+          .map((msg) => ({
+            id: String(msg.id),
           title: msg.title,
           message: msg.body,
           type: msg.level === 'success' ? 'success' : msg.level === 'warning' ? 'error' : 'info',
           timestamp: new Date(msg.created_at).toLocaleDateString(),
-          read: false,
-        }));
+            read: readSet.has(String(msg.id)),
+          }));
         setCenterNotifications(mapped);
       } catch (error) {
         setCenterNotifications([]);
@@ -124,7 +195,7 @@ const App: React.FC = () => {
     };
 
     loadMessages();
-  }, []);
+  }, [currentStage, user?.email]);
 
   useEffect(() => {
     const loadSiteSettings = async () => {
@@ -217,6 +288,10 @@ const App: React.FC = () => {
     setUser(null);
     localStorage.removeItem('gc365_user');
     clearTokens();
+    const homeHash = buildStageHash(StageId.HOME);
+    window.history.replaceState({ gcStage: StageId.HOME }, '', `${window.location.pathname}${window.location.search}${homeHash}`);
+    stageHistoryRef.current = [StageId.HOME];
+    setCanGoBack(false);
     setCurrentStage(StageId.HOME);
     setIsMenuOpen(false);
     setShowProfileModal(false);
@@ -224,26 +299,111 @@ const App: React.FC = () => {
     setAuthEntryMode('login');
   };
 
-  const handleStageChange = (id: StageId) => {
+  const navigateToStage = (
+    id: StageId,
+    options: StageNavigationOptions = {},
+  ) => {
+    const {
+      pushHistory = true,
+      trackHistory = true,
+      scrollBehavior = 'smooth',
+    } = options;
+
     const restrictedStages = [
-      StageId.BIBLE_STUDY, 
-      StageId.FAITH_BUILDER, 
-      StageId.TIMELINE, 
-      StageId.EVIDENCE, 
-      StageId.DECEPTION_VAULT, 
-      StageId.QUESTION_VAULT
+      StageId.BIBLE_STUDY,
+      StageId.FAITH_BUILDER,
+      StageId.TIMELINE,
+      StageId.EVIDENCE,
+      StageId.DECEPTION_VAULT,
+      StageId.QUESTION_VAULT,
     ];
 
     if (restrictedStages.includes(id) && !user) {
       openAuthModal('login');
+      if (currentStage !== StageId.HOME) {
+        setCurrentStage(StageId.HOME);
+      }
+      if (window.location.hash !== buildStageHash(StageId.HOME)) {
+        window.history.replaceState(
+          { gcStage: StageId.HOME },
+          '',
+          `${window.location.pathname}${window.location.search}${buildStageHash(StageId.HOME)}`,
+        );
+      }
+      stageHistoryRef.current = [StageId.HOME];
+      setCanGoBack(false);
       return;
     }
+
     setIsAccountMenuOpen(false);
+    setIsMenuOpen(false);
     setCurrentStage(id);
+
+    const targetHash = buildStageHash(id);
+    if (pushHistory && window.location.hash !== targetHash) {
+      window.history.pushState(
+        { gcStage: id },
+        '',
+        `${window.location.pathname}${window.location.search}${targetHash}`,
+      );
+    }
+
+    if (trackHistory) {
+      const lastStage = stageHistoryRef.current[stageHistoryRef.current.length - 1];
+      if (lastStage !== id) {
+        stageHistoryRef.current = [...stageHistoryRef.current, id];
+      }
+      setCanGoBack(stageHistoryRef.current.length > 1);
+    }
+
     if (mainContentRef.current) {
-      mainContentRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+      mainContentRef.current.scrollTo({ top: 0, behavior: scrollBehavior });
     }
   };
+
+  const handleStageChange = (id: StageId) => {
+    if (id === currentStage) {
+      setIsMenuOpen(false);
+      setIsAccountMenuOpen(false);
+      if (mainContentRef.current) {
+        mainContentRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+      return;
+    }
+    navigateToStage(id, { pushHistory: true, trackHistory: true, scrollBehavior: 'smooth' });
+  };
+
+  useEffect(() => {
+    const syncStageFromUrl = () => {
+      const stageFromUrl = getStageFromHash(window.location.hash) || StageId.HOME;
+      const historyTrail = stageHistoryRef.current;
+      const lastStage = historyTrail[historyTrail.length - 1];
+
+      if (lastStage !== stageFromUrl) {
+        if (historyTrail.length > 1 && historyTrail[historyTrail.length - 2] === stageFromUrl) {
+          stageHistoryRef.current = historyTrail.slice(0, -1);
+        } else {
+          stageHistoryRef.current = [...historyTrail, stageFromUrl];
+        }
+      }
+      setCanGoBack(stageHistoryRef.current.length > 1);
+
+      if (stageFromUrl !== currentStage) {
+        navigateToStage(stageFromUrl, {
+          pushHistory: false,
+          trackHistory: false,
+          scrollBehavior: 'auto',
+        });
+      }
+    };
+
+    window.addEventListener('hashchange', syncStageFromUrl);
+    window.addEventListener('popstate', syncStageFromUrl);
+    return () => {
+      window.removeEventListener('hashchange', syncStageFromUrl);
+      window.removeEventListener('popstate', syncStageFromUrl);
+    };
+  }, [currentStage, user]);
 
   const renderContent = () => {
     switch (currentStage) {
@@ -270,6 +430,21 @@ const App: React.FC = () => {
 
   const unreadCount = centerNotifications.filter(n => !n.read).length;
   const isImmersive = currentStage === StageId.TIMELINE && user;
+  const currentStageLabel = useMemo(
+    () => stages.find((stage) => stage.id === currentStage)?.title || 'Nyumbani',
+    [currentStage],
+  );
+
+  const handleGlobalBack = () => {
+    if (canGoBack) {
+      window.history.back();
+      return;
+    }
+
+    if (currentStage !== StageId.HOME) {
+      navigateToStage(StageId.HOME, { pushHistory: true, trackHistory: true, scrollBehavior: 'smooth' });
+    }
+  };
   
   return (
     <div className="relative min-h-screen bg-[color:var(--page-bg)] text-[color:var(--text-primary)] font-sans transition-colors duration-500 overflow-hidden">
@@ -277,8 +452,40 @@ const App: React.FC = () => {
       
       <NotificationCenter 
         isOpen={isNotificationOpen} onClose={() => setIsNotificationOpen(false)} notifications={centerNotifications}
-        onMarkAllRead={() => setCenterNotifications(prev => prev.map(n => ({ ...n, read: true })))}
-        onClearAll={() => setCenterNotifications([])} onDismiss={(id) => setCenterNotifications(prev => prev.filter(n => n.id !== id))}
+        onMarkAllRead={() => {
+          setCenterNotifications((prev) => {
+            const next = prev.map((n) => ({ ...n, read: true }));
+            const storageState = loadNotificationStorageState();
+            const readSet = new Set(storageState.readIds);
+            next.forEach((item) => readSet.add(item.id));
+            saveNotificationStorageState({
+              dismissedIds: storageState.dismissedIds,
+              readIds: Array.from(readSet),
+            });
+            return next;
+          });
+        }}
+        onClearAll={() => {
+          const idsToDismiss = centerNotifications.map((item) => item.id);
+          const storageState = loadNotificationStorageState();
+          const dismissedSet = new Set(storageState.dismissedIds);
+          idsToDismiss.forEach((id) => dismissedSet.add(id));
+          saveNotificationStorageState({
+            dismissedIds: Array.from(dismissedSet),
+            readIds: storageState.readIds,
+          });
+          setCenterNotifications([]);
+        }}
+        onDismiss={(id) => {
+          const storageState = loadNotificationStorageState();
+          const dismissedSet = new Set(storageState.dismissedIds);
+          dismissedSet.add(id);
+          saveNotificationStorageState({
+            dismissedIds: Array.from(dismissedSet),
+            readIds: storageState.readIds,
+          });
+          setCenterNotifications((prev) => prev.filter((n) => n.id !== id));
+        }}
         onNavigateToEvent={() => { handleStageChange(StageId.EVENTS); setIsNotificationOpen(false); }}
       />
 
@@ -286,8 +493,11 @@ const App: React.FC = () => {
       <ThemeCenter isOpen={isThemeOpen} onClose={() => setIsThemeOpen(false)} currentTheme={theme} onThemeChange={setTheme} />
 
       {/* Floating Tools - Available for everyone now to increase engagement on Homepage */}
-      <div className="fixed bottom-6 right-6 z-[90] pointer-events-auto">
-        <div className="gc-floating-tools flex flex-col gap-3 saturate-75">
+      <div
+        className="fixed right-3 md:right-6 z-[90] pointer-events-auto"
+        style={{ bottom: 'max(0.85rem, env(safe-area-inset-bottom))' }}
+      >
+        <div className="gc-floating-tools flex flex-col gap-2 md:gap-3 saturate-75 scale-90 md:scale-100 origin-bottom-right">
           <HistoryTool aiLanguage={aiLanguage} onGoToTimeline={() => handleStageChange(StageId.TIMELINE)} />
           <QuestionTool onGoToVault={() => handleStageChange(StageId.QUESTION_VAULT)} />
           <DeceptionTool onGoToVault={() => handleStageChange(StageId.DECEPTION_VAULT)} />
@@ -336,14 +546,14 @@ const App: React.FC = () => {
       <div className="relative z-10 flex h-screen overflow-hidden">
         <main className="flex-1 flex flex-col relative w-full h-full bg-[color:var(--page-surface)] backdrop-blur-md">
           {!isImmersive && (
-            <header className="fixed top-0 left-0 right-0 h-20 px-5 md:px-10 flex items-center justify-between z-[50] gc-header">
-              <div className="flex items-center gap-4">
+            <header className="fixed top-0 left-0 right-0 h-20 px-3 sm:px-5 md:px-10 flex items-center justify-between z-[50] gc-header">
+              <div className="flex items-center gap-2 md:gap-4">
                 <button
                   onClick={() => setIsMenuOpen(true)}
-                  className="gc-icon-button p-3.5 rounded-full group"
+                  className="gc-icon-button p-2.5 md:p-3.5 rounded-full group"
                   aria-label="Open menu"
                 >
-                  <Menu size={22} className="group-hover:text-[color:var(--accent)] transition-colors" />
+                  <Menu size={20} className="group-hover:text-[color:var(--accent)] transition-colors" />
                 </button>
                 <div onClick={() => handleStageChange(StageId.HOME)} className="hidden md:flex items-center gap-3 cursor-pointer group">
                   <img src={logoSrc} alt={siteSettings.site_name} className="h-12 md:h-14 w-auto" />
@@ -354,21 +564,21 @@ const App: React.FC = () => {
                 </div>
               </div>
 
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-1.5 md:gap-3">
                  {/* <button onClick={() => setIsLanguageOpen(!isLanguageOpen)} className="p-3.5 rounded-full bg-white/90 dark:bg-black/40 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-white transition-all shadow-xl hover:bg-gold-400/10"><Languages size={18} /></button> */}
                  <button
                    onClick={() => setIsThemeOpen(!isThemeOpen)}
-                   className="gc-icon-button p-3.5 rounded-full"
+                   className="gc-icon-button p-2.5 md:p-3.5 rounded-full"
                    aria-label="Theme"
                  >
-                   {theme === 'light' ? <Sun size={18} /> : theme === 'dark' ? <Moon size={18} /> : <Monitor size={18} />}
+                   {theme === 'light' ? <Sun size={16} /> : theme === 'dark' ? <Moon size={16} /> : <Monitor size={16} />}
                  </button>
                  <button
                    onClick={() => setIsNotificationOpen(!isNotificationOpen)}
-                   className={`relative gc-icon-button p-3.5 rounded-full ${isNotificationOpen ? 'is-active' : ''}`}
+                   className={`relative gc-icon-button p-2.5 md:p-3.5 rounded-full ${isNotificationOpen ? 'is-active' : ''}`}
                    aria-label="Notifications"
                  >
-                   <Bell size={18} />
+                   <Bell size={16} />
                    {unreadCount > 0 && (
                      <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-[color:var(--accent)] rounded-full"></span>
                    )}
@@ -448,9 +658,41 @@ const App: React.FC = () => {
             </header>
           )}
 
+          {!isImmersive && (
+            <div className="fixed top-20 left-0 right-0 h-12 px-4 md:px-10 z-[45] bg-[color:var(--page-surface)]/90 backdrop-blur-md border-b border-[color:var(--line-strong)]">
+              <div className="h-full flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={handleGlobalBack}
+                  className="w-8 h-8 md:w-9 md:h-9 rounded-full border border-[color:var(--line-strong)] bg-[color:var(--surface-2)] text-[color:var(--text-primary)] inline-flex items-center justify-center hover:border-[color:var(--accent)] hover:text-[color:var(--accent)] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                  disabled={!canGoBack && currentStage === StageId.HOME}
+                  aria-label="Rudi hatua moja nyuma"
+                >
+                  <ArrowLeft size={16} />
+                </button>
+
+                <div className="min-w-0 inline-flex items-center gap-1.5 text-[10px] md:text-xs font-black uppercase tracking-[0.12em] text-[color:var(--text-muted)]">
+                  <button
+                    type="button"
+                    onClick={() => handleStageChange(StageId.HOME)}
+                    className="hover:text-[color:var(--accent)] transition-colors"
+                  >
+                    Nyumbani
+                  </button>
+                  {currentStage !== StageId.HOME && (
+                    <>
+                      <ChevronRight size={12} />
+                      <span className="text-[color:var(--text-primary)] truncate">{currentStageLabel}</span>
+                    </>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
           <div 
             ref={mainContentRef}
-            className="gc-content-scroll flex-1 overflow-y-auto scroll-smooth pt-20 pb-16"
+            className={`gc-content-scroll flex-1 overflow-y-auto scroll-smooth pb-16 ${isImmersive ? 'pt-20' : 'pt-32'}`}
           >
             {renderContent()}
             {!isImmersive && <Footer onNavigate={handleStageChange} siteSettings={siteSettings} />}

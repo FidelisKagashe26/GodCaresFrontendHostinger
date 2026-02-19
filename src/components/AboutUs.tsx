@@ -15,6 +15,7 @@ interface TeamLeader {
   role: string;
   email: string;
   phone: string;
+  avatarUrl?: string;
   accentColor: string;
 }
 
@@ -25,6 +26,7 @@ const DEFAULT_LEADERS: TeamLeader[] = [
     role: 'President',
     email: 'president@godcares365.org',
     phone: '+255 744 780 244',
+    avatarUrl: '',
     accentColor: '#eab308',
   },
   {
@@ -33,6 +35,7 @@ const DEFAULT_LEADERS: TeamLeader[] = [
     role: 'Vice President',
     email: 'vp@godcares365.org',
     phone: '+255 655 464 655',
+    avatarUrl: '',
     accentColor: '#2563eb',
   },
   {
@@ -41,6 +44,7 @@ const DEFAULT_LEADERS: TeamLeader[] = [
     role: 'Secretary',
     email: 'secretary@godcares365.org',
     phone: '+255 713 000 000',
+    avatarUrl: '',
     accentColor: '#475569',
   },
   {
@@ -49,6 +53,7 @@ const DEFAULT_LEADERS: TeamLeader[] = [
     role: 'Dir. Evangelism & Outreach',
     email: 'evangelism@godcares365.org',
     phone: '+255 700 000 000',
+    avatarUrl: '',
     accentColor: '#059669',
   },
 ];
@@ -67,6 +72,7 @@ export const AboutUs: React.FC = () => {
           role: member.role,
           email: member.email || '',
           phone: member.phone || '',
+          avatarUrl: member.avatar_url || '',
           accentColor: member.accent_color || '#eab308',
         }));
         if (mapped.length) {
@@ -86,14 +92,14 @@ export const AboutUs: React.FC = () => {
   );
 
   return (
-    <div className="space-y-16 animate-fade-in pb-32 max-w-7xl mx-auto px-4 md:px-6 pt-12">
+    <div className="space-y-12 md:space-y-16 animate-fade-in pb-28 md:pb-32 max-w-7xl mx-auto px-4 md:px-6 pt-8 md:pt-12">
        
        {/* 1. Philosophy Section (Now Main Header - Centered, No Image Card) */}
-       <section className="max-w-3xl mx-auto text-center space-y-6">
+       <section className="max-w-3xl mx-auto text-center space-y-5 md:space-y-6">
           <div className="flex items-center justify-center gap-2 text-gold-500 font-black text-[9px] uppercase tracking-[0.2em]">
              <Lightbulb size={12} /> Falsafa Yetu
           </div>
-          <h2 className="text-3xl md:text-5xl font-black text-slate-900 dark:text-white uppercase tracking-tighter leading-none">
+          <h2 className="text-2xl sm:text-3xl md:text-5xl font-black text-slate-900 dark:text-white uppercase tracking-tighter leading-none">
              Mungu Anajali, <br/><span className="text-gold-500">Ukweli Ni Muhimu.</span>
           </h2>
           <div className="space-y-4 text-slate-600 dark:text-slate-400 text-sm leading-relaxed font-medium">
@@ -117,7 +123,7 @@ export const AboutUs: React.FC = () => {
        </section>
 
        {/* 2. Leadership Section - Square/Boxy Cards */}
-       <section className="space-y-6 pt-8">
+       <section className="space-y-6 pt-4 md:pt-8">
           <div className="text-center space-y-2">
              <h3 className="text-[8px] font-black text-gold-500 uppercase tracking-[0.4em]">TIMU YA UONGOZI</h3>
              <h2 className="text-2xl md:text-3xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">Viongozi Wetu</h2>
@@ -129,13 +135,17 @@ export const AboutUs: React.FC = () => {
             </div>
           )}
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
              {leaders.map((leader) => (
-                <div key={leader.id} className="flex flex-col items-center justify-center text-center gap-4 bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-100 dark:border-white/5 shadow-sm hover:border-gold-500/30 hover:shadow-lg transition-all group relative overflow-hidden aspect-square">
+                <div key={leader.id} className="flex flex-col items-center justify-center text-center gap-4 bg-white dark:bg-slate-900 p-5 md:p-6 rounded-2xl border border-slate-100 dark:border-white/5 shadow-sm hover:border-gold-500/30 hover:shadow-lg transition-all group relative overflow-hidden aspect-square">
                    <div className="absolute top-0 left-0 w-full h-1" style={{ backgroundColor: leader.accentColor }}></div>
                    
-                   <div className="w-14 h-14 rounded-2xl flex items-center justify-center text-white shadow-lg shrink-0 group-hover:scale-110 transition-transform mb-1" style={{ backgroundColor: leader.accentColor }}>
-                      <User size={20} />
+                   <div className="w-14 h-14 rounded-2xl flex items-center justify-center text-white shadow-lg shrink-0 group-hover:scale-110 transition-transform mb-1 overflow-hidden" style={{ backgroundColor: leader.accentColor }}>
+                      {leader.avatarUrl ? (
+                        <img src={leader.avatarUrl} alt={leader.name} className="w-full h-full object-cover" />
+                      ) : (
+                        <User size={20} />
+                      )}
                    </div>
                    
                    <div className="space-y-1">
@@ -171,7 +181,7 @@ export const AboutUs: React.FC = () => {
              </div>
 
              {/* Right Column: The Message */}
-             <div className="lg:col-span-9 p-6 md:p-8 space-y-4">
+             <div className="lg:col-span-9 p-5 md:p-8 space-y-4">
                 <div className="flex items-center gap-2 mb-1">
                    <div className="h-[2px] w-6 bg-gold-500"></div>
                    <h3 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-widest">
@@ -194,8 +204,8 @@ export const AboutUs: React.FC = () => {
                    </p>
                 </div>
 
-                <div className="pt-4 border-t border-slate-100 dark:border-white/5 flex items-center justify-between">
-                   <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">
+                <div className="pt-4 border-t border-slate-100 dark:border-white/5 flex items-start justify-between gap-3">
+                   <p className="text-[8px] md:text-[9px] font-black text-slate-400 uppercase tracking-widest">
                       "Amani ya Bwana wetu Yesu Kristo na upendo wa Mungu Baba na Ushirika wa Roho Mtakatifu uwe Pamoja nawe. Amina."
                    </p>
                    <div className="text-gold-500 opacity-50">
@@ -330,16 +340,16 @@ export const AboutUs: React.FC = () => {
 
           <div className="max-w-md mx-auto relative group">
              <div className="absolute -inset-1 bg-gradient-to-r from-gold-500 to-primary-600 rounded-xl blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
-             <div className="relative flex items-center bg-white dark:bg-slate-900 rounded-xl p-1 border border-slate-200 dark:border-white/10 shadow-xl">
-                <div className="pl-4 text-slate-400">
+             <div className="relative flex flex-col sm:flex-row sm:items-center bg-white dark:bg-slate-900 rounded-xl p-1 border border-slate-200 dark:border-white/10 shadow-xl gap-1.5 sm:gap-0">
+                <div className="pl-3 sm:pl-4 text-slate-400 hidden sm:block">
                    <Mail size={18} />
                 </div>
                 <input
                   type="email"
                   placeholder="Weka email yako hapa..."
-                  className="w-full bg-transparent p-3 text-sm font-bold text-slate-900 dark:text-white placeholder:text-slate-400 outline-none"
+                  className="w-full bg-transparent px-3 py-3 text-sm font-bold text-slate-900 dark:text-white placeholder:text-slate-400 outline-none"
                 />
-                <button className="bg-primary-900 text-gold-400 px-6 py-2.5 rounded-lg font-black text-[10px] uppercase tracking-widest hover:bg-gold-500 hover:text-primary-950 transition-all shadow-lg shrink-0 flex items-center gap-1 group/btn">
+                <button className="bg-primary-900 text-gold-400 px-4 sm:px-6 py-2.5 rounded-lg font-black text-[10px] uppercase tracking-widest hover:bg-gold-500 hover:text-primary-950 transition-all shadow-lg shrink-0 flex items-center justify-center gap-1 group/btn w-full sm:w-auto">
                    Jiunge <ArrowRight size={12} className="group-hover/btn:translate-x-1 transition-transform" />
                 </button>
              </div>

@@ -31,7 +31,7 @@ export interface ToastNotification {
   id: string;
   title: string;
   message: string;
-  type: 'success' | 'error' | 'info' | 'award';
+  type: 'success' | 'error' | 'info' | 'award' | 'event';
   timestamp?: string;
   read?: boolean;
 }

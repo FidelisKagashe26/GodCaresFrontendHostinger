@@ -26,7 +26,7 @@ interface Props {
 export const Prayers: React.FC<Props> = ({ aiLanguage = 'en' }) => {
   const [request, setRequest] = useState('');
   const [activeTab, setActiveTab] = useState<'wall' | 'answered'>('wall');
-  const [isPublic, setIsPublic] = useState(false);
+  const [isPublic, setIsPublic] = useState(true);
   const [isGenerating, setIsGenerating] = useState(false);
   const [showAiModal, setShowAiModal] = useState(false);
   const [aiPrayer, setAiPrayer] = useState('');
@@ -129,7 +129,7 @@ export const Prayers: React.FC<Props> = ({ aiLanguage = 'en' }) => {
          setTimeout(() => {
             setSubmitted(false);
             setRequest('');
-            setIsPublic(false);
+            setIsPublic(true);
          }, 3500);
       } catch (error) {
          setSubmitted(false);
@@ -138,18 +138,18 @@ export const Prayers: React.FC<Props> = ({ aiLanguage = 'en' }) => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto space-y-12 animate-fade-in pb-32 px-4">
+    <div className="max-w-7xl mx-auto space-y-10 md:space-y-12 animate-fade-in pb-28 md:pb-32 px-4">
       {/* Hero Section - Minimum Bevel */}
-      <section className="relative bg-primary-950 rounded-2xl p-10 md:p-20 overflow-hidden shadow-2xl border border-white/5">
+      <section className="relative bg-primary-950 rounded-2xl p-6 md:p-20 overflow-hidden shadow-2xl border border-white/5">
         <div className="absolute inset-0 opacity-20">
            <img src="https://images.unsplash.com/photo-1512412023212-f05419bb100d?auto=format&fit=crop&q=80&w=2000" className="w-full h-full object-cover" alt="" />
         </div>
         <div className="absolute inset-0 bg-gradient-to-r from-primary-950 via-primary-950/80 to-transparent"></div>
         <div className="relative z-10 max-w-2xl space-y-6">
-           <h1 className="text-4xl md:text-7xl font-black text-white tracking-tighter uppercase leading-none italic">
+           <h1 className="text-3xl sm:text-4xl md:text-7xl font-black text-white tracking-tighter uppercase leading-none italic">
              Ukuta wa <span className="text-gold-500">Maombi.</span>
            </h1>
-           <p className="text-slate-300 text-lg md:text-xl font-medium leading-relaxed italic border-l-4 border-gold-500/50 pl-6">
+           <p className="text-slate-300 text-sm sm:text-base md:text-xl font-medium leading-relaxed italic border-l-4 border-gold-500/50 pl-4 md:pl-6">
              "Lakini wewe usalipo, ingia katika chumba chako cha ndani..." - Mathayo 6:6.
            </p>
         </div>
@@ -158,7 +158,7 @@ export const Prayers: React.FC<Props> = ({ aiLanguage = 'en' }) => {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
         {/* LEFT: SUBMISSION FORM */}
         <div className="lg:col-span-5">
-           <div className="bg-white dark:bg-slate-900 rounded-2xl p-8 border border-slate-100 dark:border-white/5 shadow-2xl sticky top-28">
+           <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 md:p-8 border border-slate-100 dark:border-white/5 shadow-2xl lg:sticky lg:top-28">
               <div className="flex items-center gap-3 mb-6">
                  <div className="w-12 h-12 bg-primary-950 text-gold-400 rounded-xl flex items-center justify-center shadow-lg"><MessageSquare size={24} /></div>
                  <div>
@@ -193,7 +193,7 @@ export const Prayers: React.FC<Props> = ({ aiLanguage = 'en' }) => {
                          {isPublic ? <Eye className="text-gold-500" size={18} /> : <EyeOff className="text-slate-400" size={18} />}
                          <div>
                             <p className="text-xs font-black uppercase text-slate-700 dark:text-slate-300">Public Wall</p>
-                            <p className="text-[9px] text-slate-500 uppercase font-bold">Ruhusu wengine waione?</p>
+                            <p className="text-[9px] text-slate-500 uppercase font-bold">Ukuta wa Umma - wengine waione?</p>
                          </div>
                       </div>
                       <button 
@@ -205,7 +205,7 @@ export const Prayers: React.FC<Props> = ({ aiLanguage = 'en' }) => {
                       </button>
                    </div>
 
-                   <div className="grid grid-cols-2 gap-3">
+                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <button 
                          type="button"
                          onClick={handleGeneratePrayer}
@@ -232,18 +232,18 @@ export const Prayers: React.FC<Props> = ({ aiLanguage = 'en' }) => {
 
         {/* RIGHT: WALL & TESTIMONIES */}
         <div className="lg:col-span-7 space-y-6">
-           <div className="flex bg-slate-100 dark:bg-white/5 p-1.5 rounded-xl w-fit border border-slate-200 dark:border-white/10 shadow-inner">
+           <div className="flex bg-slate-100 dark:bg-white/5 p-1.5 rounded-xl w-full md:w-fit border border-slate-200 dark:border-white/10 shadow-inner overflow-x-auto">
               <button 
                  onClick={() => setActiveTab('wall')}
-                 className={`px-8 py-3 rounded-lg font-black text-[10px] uppercase tracking-widest transition-all flex items-center gap-2 ${activeTab === 'wall' ? 'bg-white dark:bg-slate-800 text-primary-950 dark:text-white shadow-xl' : 'text-slate-500'}`}
+                 className={`flex-1 md:flex-none px-4 sm:px-6 md:px-8 py-3 rounded-lg font-black text-[10px] uppercase tracking-widest transition-all flex items-center justify-center gap-2 whitespace-nowrap ${activeTab === 'wall' ? 'bg-white dark:bg-slate-800 text-primary-950 dark:text-white shadow-xl' : 'text-slate-500'}`}
               >
-                 <Users size={14} /> Public Wall
+                 <Users size={14} /> Ukuta wa Maombi
               </button>
               <button 
                  onClick={() => setActiveTab('answered')}
-                 className={`px-8 py-3 rounded-lg font-black text-[10px] uppercase tracking-widest transition-all flex items-center gap-2 ${activeTab === 'answered' ? 'bg-white dark:bg-slate-800 text-green-600 shadow-xl' : 'text-slate-500'}`}
+                 className={`flex-1 md:flex-none px-4 sm:px-6 md:px-8 py-3 rounded-lg font-black text-[10px] uppercase tracking-widest transition-all flex items-center justify-center gap-2 whitespace-nowrap ${activeTab === 'answered' ? 'bg-white dark:bg-slate-800 text-green-600 shadow-xl' : 'text-slate-500'}`}
               >
-                 <CheckCircle2 size={14} /> Shuhuda
+                 <CheckCircle2 size={14} /> Yaliyojibiwa
               </button>
            </div>
 
@@ -264,7 +264,7 @@ export const Prayers: React.FC<Props> = ({ aiLanguage = 'en' }) => {
                               </div>
                            )}
                            {mappedWall.map((req) => (
-                  <div key={req.id} className="bg-white dark:bg-slate-900 p-8 rounded-2xl border border-slate-50 dark:border-white/5 shadow-sm group hover:border-gold-500/20 transition-all">
+                  <div key={req.id} className="bg-white dark:bg-slate-900 p-6 md:p-8 rounded-2xl border border-slate-50 dark:border-white/5 shadow-sm group hover:border-gold-500/20 transition-all">
                      <div className="flex justify-between items-start mb-6">
                         <div className="flex items-center gap-4">
                            <div className="w-12 h-12 bg-slate-50 dark:bg-white/5 rounded-xl flex items-center justify-center text-primary-950 dark:text-gold-500 font-black border border-slate-100 dark:border-white/10">{req.name.charAt(0)}</div>
@@ -294,14 +294,14 @@ export const Prayers: React.FC<Props> = ({ aiLanguage = 'en' }) => {
                   </div>
                 ) : (
                 answeredRequests.map((ans) => (
-                  <div key={ans.id} className="bg-green-500/5 dark:bg-green-500/10 p-8 rounded-2xl border border-green-500/20 shadow-sm relative overflow-hidden group">
+                  <div key={ans.id} className="bg-green-500/5 dark:bg-green-500/10 p-6 md:p-8 rounded-2xl border border-green-500/20 shadow-sm relative overflow-hidden group">
                      <div className="absolute top-0 right-0 p-6 text-green-500/10 rotate-12 group-hover:scale-110 transition-transform"><CheckCircle2 size={100} /></div>
                      <div className="relative z-10 space-y-4">
                         <div className="flex items-center gap-3">
                            <div className="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center text-white"><CheckCircle2 size={16}/></div>
                            <h4 className="text-sm font-black text-green-700 dark:text-green-400 uppercase tracking-tight">Ombi Lililojibiwa: {ans.name}</h4>
                         </div>
-                        <p className="text-slate-700 dark:text-slate-200 text-lg font-serif italic leading-relaxed">"{ans.request}"</p>
+                        <p className="text-slate-700 dark:text-slate-200 text-base md:text-lg font-serif italic leading-relaxed">"{ans.request}"</p>
                         <div className="flex items-center justify-between pt-4 border-t border-green-500/10">
                            <span className="text-[9px] font-bold text-slate-500 uppercase">Imepublishwa: {ans.timeAgo}</span>
                            <button className="text-green-600 hover:text-green-700 transition-colors"><Share2 size={16}/></button>
@@ -322,7 +322,7 @@ export const Prayers: React.FC<Props> = ({ aiLanguage = 'en' }) => {
       {/* NENO LA FARAJA MODAL */}
       {showAiModal && (
          <div className="fixed inset-0 z-[600] flex items-center justify-center p-4 bg-black/95 backdrop-blur-2xl animate-fade-in">
-            <div className="bg-white dark:bg-slate-950 w-full max-w-lg rounded-3xl p-10 md:p-14 text-center space-y-8 shadow-[0_0_80px_rgba(234,179,8,0.2)] border border-white/10 animate-scale-up relative">
+            <div className="bg-white dark:bg-slate-950 w-full max-w-lg rounded-3xl p-6 md:p-14 text-center space-y-8 shadow-[0_0_80px_rgba(234,179,8,0.2)] border border-white/10 animate-scale-up relative max-h-[92vh] overflow-y-auto">
                <button onClick={() => setShowAiModal(false)} className="absolute top-8 right-8 p-3 bg-slate-50 dark:bg-white/5 rounded-xl hover:bg-slate-100 dark:hover:bg-white/10 transition-all"><X size={20}/></button>
                <div className="space-y-4">
                   <div className="w-20 h-20 bg-gold-400 text-primary-950 rounded-2xl flex items-center justify-center mx-auto shadow-2xl group transition-all"><BookOpen size={32} /></div>
@@ -340,7 +340,7 @@ export const Prayers: React.FC<Props> = ({ aiLanguage = 'en' }) => {
                   )}
                </div>
 
-               <div className="grid grid-cols-2 gap-4">
+               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <button onClick={() => setShowAiModal(false)} className="w-full py-5 bg-primary-950 text-gold-400 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-gold-500 hover:text-primary-950 transition-all shadow-xl">OMBA SASA</button>
                   <button className="w-full py-5 bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-300 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-slate-200 transition-all">Copy Text</button>
                </div>
