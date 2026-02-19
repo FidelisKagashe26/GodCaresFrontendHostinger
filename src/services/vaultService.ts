@@ -96,12 +96,36 @@ export interface QuestionVaultSubmissionApi {
 
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || window.location.origin).replace(/\/$/, "");
 
+const toAbsoluteUrl = (value: string): string => {
+  const raw = (value || "").trim();
+  if (!raw) {
+    return "";
+  }
+  if (/^https?:\/\//i.test(raw) || raw.startsWith("data:")) {
+    return raw;
+  }
+  const normalized = raw.startsWith("/") ? raw : `/${raw}`;
+  return `${API_BASE_URL}${normalized}`;
+};
+
 export const getEvidenceItems = async (): Promise<EvidenceItemApi[]> => {
   const response = await fetch(`${API_BASE_URL}/api/evidence-vault/`);
   if (!response.ok) {
     throw new Error("Imeshindikana kupata evidence vault.");
   }
-  return (await response.json()) as EvidenceItemApi[];
+  const payload = (await response.json()) as EvidenceItemApi[];
+  if (!Array.isArray(payload)) {
+    return [];
+  }
+  return payload.map((item) => ({
+    ...item,
+    heroImage: toAbsoluteUrl(item.heroImage),
+    videoUrl: toAbsoluteUrl(item.videoUrl || ""),
+    author: {
+      ...item.author,
+      image: toAbsoluteUrl(item.author?.image || ""),
+    },
+  }));
 };
 
 export const getDeceptionCases = async (): Promise<DeceptionCaseApi[]> => {
@@ -109,7 +133,14 @@ export const getDeceptionCases = async (): Promise<DeceptionCaseApi[]> => {
   if (!response.ok) {
     throw new Error("Imeshindikana kupata deception cases.");
   }
-  return (await response.json()) as DeceptionCaseApi[];
+  const payload = (await response.json()) as DeceptionCaseApi[];
+  if (!Array.isArray(payload)) {
+    return [];
+  }
+  return payload.map((item) => ({
+    ...item,
+    videoUrl: toAbsoluteUrl(item.videoUrl),
+  }));
 };
 
 export const getQuestionVaultItems = async (): Promise<QuestionVaultItemApi[]> => {
@@ -117,7 +148,15 @@ export const getQuestionVaultItems = async (): Promise<QuestionVaultItemApi[]> =
   if (!response.ok) {
     throw new Error("Imeshindikana kupata question vault.");
   }
-  return (await response.json()) as QuestionVaultItemApi[];
+  const payload = (await response.json()) as QuestionVaultItemApi[];
+  if (!Array.isArray(payload)) {
+    return [];
+  }
+  return payload.map((item) => ({
+    ...item,
+    videoUrl: toAbsoluteUrl(item.videoUrl || ""),
+    videoThumbnail: toAbsoluteUrl(item.videoThumbnail || ""),
+  }));
 };
 
 export const submitQuestionVaultQuestion = async (

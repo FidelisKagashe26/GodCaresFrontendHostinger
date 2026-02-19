@@ -28,6 +28,57 @@ interface Playlist {
   videos: Video[];
 }
 
+const normalizeVideoUrl = (value: string): string => {
+  const raw = (value || '').trim();
+  if (!raw) {
+    return '';
+  }
+
+  try {
+    const url = new URL(raw);
+    const host = url.hostname.toLowerCase();
+    const path = url.pathname;
+
+    if (host.includes('youtu.be')) {
+      const id = path.replace(/^\/+/, '').split('/')[0];
+      return id ? `https://www.youtube.com/embed/${id}` : raw;
+    }
+
+    if (host.includes('youtube.com')) {
+      if (path.startsWith('/embed/')) {
+        return raw;
+      }
+
+      if (path.startsWith('/watch')) {
+        const id = url.searchParams.get('v');
+        return id ? `https://www.youtube.com/embed/${id}` : raw;
+      }
+
+      if (path.startsWith('/shorts/')) {
+        const id = path.split('/')[2];
+        return id ? `https://www.youtube.com/embed/${id}` : raw;
+      }
+    }
+  } catch {
+    return raw;
+  }
+
+  return raw;
+};
+
+const isIframeVideoSource = (value: string): boolean => {
+  const normalized = normalizeVideoUrl(value);
+  return /youtube\.com\/embed|player\.vimeo\.com/i.test(normalized);
+};
+
+const withAutoplay = (value: string): string => {
+  const normalized = normalizeVideoUrl(value);
+  if (!normalized) {
+    return normalized;
+  }
+  return `${normalized}${normalized.includes('?') ? '&' : '?'}autoplay=1`;
+};
+
 export const MediaProjects: React.FC = () => {
   const [activeCategory, setActiveCategory] = useState('Zote');
   const [selectedPlaylist, setSelectedPlaylist] = useState<Playlist | null>(null);
@@ -92,7 +143,11 @@ export const MediaProjects: React.FC = () => {
               {playingVideo ? (
                 <div className="space-y-6 animate-fade-in">
                    <div className="aspect-video bg-black rounded-2xl overflow-hidden shadow-2xl relative">
-                     <iframe src={`${playingVideo.embedUrl}?autoplay=1`} className="w-full h-full border-none" allowFullScreen></iframe>
+                     {isIframeVideoSource(playingVideo.embedUrl) ? (
+                       <iframe src={withAutoplay(playingVideo.embedUrl)} className="w-full h-full border-none" allow="autoplay; encrypted-media" allowFullScreen></iframe>
+                     ) : (
+                       <video src={playingVideo.embedUrl} className="w-full h-full" controls autoPlay />
+                     )}
                    </div>
                    <div className="space-y-2">
                       <h1 className="text-2xl font-black leading-tight text-slate-900 dark:text-white">{playingVideo.title}</h1>
@@ -161,7 +216,7 @@ export const MediaProjects: React.FC = () => {
     <div className="bg-slate-50 dark:bg-[#020617] min-h-screen text-slate-900 dark:text-white pb-20 animate-fade-in pt-8 transition-colors duration-500">
       <div className="max-w-[1600px] mx-auto px-4 md:px-8 space-y-12">
         <section className="space-y-4">
-           <h1 className="text-3xl md:text-5xl font-black tracking-tight uppercase border-l-8 border-red-600 pl-6 text-slate-900 dark:text-white">Playlists za <span className="text-gold-500">Ukweli</span></h1>
+           <h1 className="text-3xl md:text-5xl font-black tracking-tight uppercase border-l-8 border-red-600 pl-6 text-slate-900 dark:text-white">GC365 <span className="text-gold-500">Playlists</span></h1>
            <div className="flex gap-3 overflow-x-auto scrollbar-hide py-2">
               {categories.map(cat => (
                 <button 
@@ -213,7 +268,7 @@ export const MediaProjects: React.FC = () => {
               </div>
               <div className="px-1 space-y-1">
                 <h4 className="font-black text-slate-900 dark:text-white group-hover:text-red-600 dark:group-hover:text-red-500 transition-colors leading-tight">{playlist.title}</h4>
-                <p className="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest">{playlist.category} • Full Playlist</p>
+                <p className="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest">{playlist.category} | Full Playlist</p>
               </div>
             </div>
           ))}

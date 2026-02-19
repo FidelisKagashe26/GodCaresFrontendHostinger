@@ -1,4 +1,4 @@
-
+﻿
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { 
@@ -67,6 +67,107 @@ interface EvidenceItem {
   videoUrl?: string; // Added optional video URL
 }
 
+const IMAGE_EXTENSIONS = new Set(['.jpg', '.jpeg', '.png', '.gif', '.webp', '.avif', '.svg', '.bmp']);
+const PDF_EXTENSIONS = new Set(['.pdf']);
+const AUDIO_EXTENSIONS = new Set(['.mp3', '.wav', '.m4a', '.aac', '.ogg', '.flac']);
+const VIDEO_EXTENSIONS = new Set(['.mp4', '.mov', '.m4v', '.webm', '.mkv']);
+
+const getFileExtension = (value: string): string => {
+  const raw = (value || '').trim();
+  if (!raw) {
+    return '';
+  }
+  const [withoutHash] = raw.split('#');
+  const [withoutQuery] = withoutHash.split('?');
+  const idx = withoutQuery.lastIndexOf('.');
+  return idx >= 0 ? withoutQuery.slice(idx).toLowerCase() : '';
+};
+
+const isPdfSource = (url: string, type: MediaType): boolean => type === 'PDF' || PDF_EXTENSIONS.has(getFileExtension(url));
+const isImageSource = (url: string, type: MediaType): boolean => type === 'Image' || IMAGE_EXTENSIONS.has(getFileExtension(url));
+const isVideoSource = (url: string, type: MediaType): boolean => type === 'Video' || VIDEO_EXTENSIONS.has(getFileExtension(url));
+const isAudioSource = (url: string, type: MediaType): boolean => type === 'Audio' || AUDIO_EXTENSIONS.has(getFileExtension(url));
+
+const normalizeVideoUrl = (value: string): string => {
+  const raw = (value || '').trim();
+  if (!raw) {
+    return '';
+  }
+  if (raw.includes('youtube.com/watch?v=')) {
+    const id = raw.split('v=')[1]?.split('&')[0];
+    return id ? `https://www.youtube.com/embed/${id}` : raw;
+  }
+  if (raw.includes('youtu.be/')) {
+    const id = raw.split('youtu.be/')[1]?.split('?')[0];
+    return id ? `https://www.youtube.com/embed/${id}` : raw;
+  }
+  return raw;
+};
+
+const isIframeVideoSource = (value: string): boolean => {
+  const normalized = normalizeVideoUrl(value);
+  return /youtube\.com\/embed|player\.vimeo\.com|drive\.google\.com\/file/i.test(normalized);
+};
+
+const withAutoplay = (value: string): string => {
+  const normalized = normalizeVideoUrl(value);
+  if (!normalized) {
+    return '';
+  }
+  const separator = normalized.includes('?') ? '&' : '?';
+  return `${normalized}${separator}autoplay=1`;
+};
+
+const clampPage = (page: number, totalPages: number): number => {
+  const parsed = Number.isFinite(page) ? Math.floor(page) : 1;
+  if (parsed < 1) {
+    return 1;
+  }
+  if (totalPages > 0 && parsed > totalPages) {
+    return totalPages;
+  }
+  return parsed;
+};
+
+const buildPdfPageUrl = (url: string, page: number): string => {
+  if (!url) {
+    return '';
+  }
+  const base = url.split('#')[0];
+  return `${base}#page=${Math.max(1, Math.floor(page))}&view=FitH`;
+};
+
+const getMediaBadge = (item: EvidenceItem): { icon: JSX.Element; label: string } => {
+  if (isPdfSource(item.heroImage, item.type)) {
+    return { icon: <FileText size={22} />, label: 'PDF Evidence' };
+  }
+  if (isVideoSource(item.heroImage, item.type)) {
+    return { icon: <PlayCircle size={22} />, label: 'Video Evidence' };
+  }
+  if (isAudioSource(item.heroImage, item.type)) {
+    return { icon: <Activity size={22} />, label: 'Audio Evidence' };
+  }
+  return { icon: <Eye size={22} />, label: 'Image Evidence' };
+};
+
+const renderMediaCover = (item: EvidenceItem, className: string) => {
+  if (isImageSource(item.heroImage, item.type)) {
+    return <img src={item.heroImage} className={className} alt={item.title} />;
+  }
+
+  const badge = getMediaBadge(item);
+  return (
+    <div className={`${className} bg-gradient-to-br from-slate-900 via-slate-800 to-slate-950 flex flex-col items-center justify-center gap-3 text-slate-200`}>
+      <div className="w-12 h-12 rounded-full border border-gold-500/40 bg-gold-500/10 text-gold-400 flex items-center justify-center">
+        {badge.icon}
+      </div>
+      <p className="text-[10px] font-black uppercase tracking-[0.22em] text-slate-200">{badge.label}</p>
+    </div>
+  );
+};
+
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || window.location.origin).replace(/\/$/, '');
+
 // --- MOCK DATA ---
 
 const VAULT_ITEMS: EvidenceItem[] = [
@@ -76,7 +177,7 @@ const VAULT_ITEMS: EvidenceItem[] = [
     subCategory: 'Catholic Confessions',
     hint: 'Sabato Ilibadilishwa',
     type: 'PDF',
-    title: "The Convert’s Catechism",
+    title: "The Convertâ€™s Catechism",
     swahiliTitle: 'Katekisimu ya Mafundisho',
     description: 'Kukiri rasmi kuhusu mabadiliko ya Sabato kutoka Jumamosi kwenda Jumapili.',
     fact: "Kanisa linakiri kuwa Jumamosi ndiyo Sabato.",
@@ -127,7 +228,7 @@ const VAULT_ITEMS: EvidenceItem[] = [
     sourceBook: "The Catholic Priest",
     publisher: "Kreuzer Brothers",
     author: {
-      name: "Michael Müller",
+      name: "Michael MÃ¼ller",
       role: "Redemptorist Priest",
       authority: "Ecclesiastical Approval",
       organization: "C.SS.R.",
@@ -303,7 +404,7 @@ const EvidenceSummary: React.FC<{
 
         {/* Left: Image Context */}
         <div className="w-full md:w-2/5 h-64 md:h-auto relative bg-black overflow-hidden group">
-          <img src={item.heroImage} className="w-full h-full object-cover opacity-60 group-hover:opacity-80 transition-opacity duration-700" alt="" />
+          {renderMediaCover(item, 'w-full h-full object-cover opacity-60 group-hover:opacity-80 transition-opacity duration-700')}
           <div className="absolute inset-0 bg-gradient-to-t from-[#0f172a] via-transparent to-transparent"></div>
           <div className="absolute bottom-6 left-6 right-6">
              <div className="inline-flex items-center gap-2 px-3 py-1 bg-gold-500 text-black rounded text-[9px] font-black uppercase tracking-widest mb-3">
@@ -325,7 +426,7 @@ const EvidenceSummary: React.FC<{
                        "{item.translations.original}"
                     </p>
                     <p className="text-xs text-slate-500 mt-2 font-mono uppercase tracking-widest text-right">
-                       — {item.sourceBook}, Pg. {item.evidenceData.page}
+                       â€” {item.sourceBook}, Pg. {item.evidenceData.page}
                     </p>
                  </div>
               </div>
@@ -441,6 +542,23 @@ const AuthorityProfile: React.FC<{ item: EvidenceItem; onBack: () => void; onClo
 
 // 3. DOCUMENT PREVIEW (The Forensic Viewer)
 const DocumentPreview: React.FC<{ item: EvidenceItem; onBack: () => void; onClose: () => void }> = ({ item, onBack, onClose }) => {
+  const primaryEvidenceUrl = item.type === 'Video' ? (item.videoUrl || item.heroImage || '') : (item.heroImage || '');
+  const normalizedPrimaryVideoUrl = normalizeVideoUrl(primaryEvidenceUrl);
+  const normalizedVideoUrl = normalizeVideoUrl(item.videoUrl || '');
+
+  const isPdfDocument = isPdfSource(primaryEvidenceUrl, item.type);
+  const isImageDocument = isImageSource(primaryEvidenceUrl, item.type);
+  const isVideoDocument = isVideoSource(primaryEvidenceUrl, item.type);
+  const isAudioDocument = isAudioSource(primaryEvidenceUrl, item.type);
+
+  const hasSeparateAnalysisVideo = Boolean(normalizedVideoUrl) && normalizedVideoUrl !== normalizedPrimaryVideoUrl;
+  const hasAnnotations = Array.isArray(item.evidenceData.annotations) && item.evidenceData.annotations.length > 0;
+  const canImageForensics = isImageDocument && hasAnnotations;
+
+  const citedPage = Math.max(1, Math.floor(Number(item.evidenceData.page || 1)));
+  const configuredTotalPages = Math.max(0, Math.floor(Number(item.evidenceData.totalPages || 0)));
+  const totalPages = configuredTotalPages > 0 ? Math.max(configuredTotalPages, citedPage) : 0;
+
   const [scale, setScale] = useState(1);
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [stage, setStage] = useState<'provenance' | 'navigating' | 'verified'>('provenance');
@@ -448,67 +566,37 @@ const DocumentPreview: React.FC<{ item: EvidenceItem; onBack: () => void; onClos
   const [activeAnnotationIndex, setActiveAnnotationIndex] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
   const [showVideo, setShowVideo] = useState(false);
-  
-  // Pan/Zoom State
+  const [pdfPage, setPdfPage] = useState(citedPage);
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const containerRef = useRef<HTMLDivElement>(null);
-  
-  const activeAnnotation = item.evidenceData.annotations[activeAnnotationIndex] || { x: 0, y: 0, w: 0, h: 0, text: "" };
 
-  // Lock body scroll
-  useEffect(() => {
-    document.body.style.overflow = 'hidden';
-    return () => { document.body.style.overflow = 'unset'; };
-  }, []);
+  const safePdfPage = clampPage(pdfPage, totalPages);
+  const pdfViewerUrl = isPdfDocument ? buildPdfPageUrl(primaryEvidenceUrl, safePdfPage) : '';
 
-  // Automated Verification Sequence & Cycling Highlights
-  useEffect(() => {
-    let interval: ReturnType<typeof setInterval>;
-
-    if (stage === 'provenance') {
-      const timeout = setTimeout(() => {
-        setStage('navigating');
-        autoZoomToEvidence(0);
-        setTimeout(() => setStage('verified'), 1000);
-      }, 1500);
-      return () => clearTimeout(timeout);
-    }
-
-    if (stage === 'verified' && item.evidenceData.annotations.length > 1 && isAutoPlaying && !showVideo) {
-      interval = setInterval(() => {
-        nextAnnotation();
-      }, 5000); 
-    }
-
-    return () => clearInterval(interval);
-  }, [item, stage, activeAnnotationIndex, isAutoPlaying, showVideo]);
-
-  // Sync zoom when index changes
-  useEffect(() => {
-    if (stage === 'verified' && !showVideo) {
-      autoZoomToEvidence(activeAnnotationIndex);
-    }
-  }, [activeAnnotationIndex, showVideo]);
+  const fallbackQuote =
+    (item.translations?.original || item.translations?.sw || item.description || item.fact || '').trim();
+  const activeAnnotation = hasAnnotations
+    ? item.evidenceData.annotations[activeAnnotationIndex]
+    : { x: 0, y: 0, w: 0, h: 0, text: fallbackQuote || 'Hakuna nukuu iliyowekwa.' };
+  const quoteText = (activeAnnotation?.text || fallbackQuote || 'Hakuna nukuu iliyowekwa bado.').trim();
 
   const autoZoomToEvidence = (index: number) => {
-    if (!containerRef.current) return;
-    
+    if (!containerRef.current || !canImageForensics) return;
+
     const targetAnnotation = item.evidenceData.annotations[index];
     if (!targetAnnotation) return;
 
     const { w, x, y, h } = targetAnnotation;
-    
-    const paddingFactor = 0.6; 
-    const targetScale = (100 / w) * paddingFactor; 
-    const safeScale = Math.min(Math.max(targetScale, 1.5), 3.5); 
+    const paddingFactor = 0.6;
+    const targetScale = (100 / Math.max(w, 1)) * paddingFactor;
+    const safeScale = Math.min(Math.max(targetScale, 1.5), 3.5);
 
     const centerX = x + w / 2;
     const centerY = y + h / 2;
-
     const containerW = containerRef.current.clientWidth;
     const containerH = containerRef.current.clientHeight;
-    
+
     const offsetX = ((50 - centerX) / 100) * containerW * safeScale;
     const offsetY = ((50 - centerY) / 100) * containerH * safeScale;
 
@@ -517,61 +605,140 @@ const DocumentPreview: React.FC<{ item: EvidenceItem; onBack: () => void; onClos
   };
 
   const nextAnnotation = () => {
+    if (!hasAnnotations) return;
     setActiveAnnotationIndex((prev) => (prev + 1) % item.evidenceData.annotations.length);
   };
 
   const prevAnnotation = () => {
+    if (!hasAnnotations) return;
     setActiveAnnotationIndex((prev) => (prev - 1 + item.evidenceData.annotations.length) % item.evidenceData.annotations.length);
   };
 
   const handleManualNavigation = (direction: 'next' | 'prev') => {
-    setIsAutoPlaying(false); // Stop auto play on manual interaction
+    setIsAutoPlaying(false);
+    if (isPdfDocument) {
+      const delta = direction === 'next' ? 1 : -1;
+      setPdfPage((prev) => clampPage(prev + delta, totalPages));
+      return;
+    }
     if (direction === 'next') nextAnnotation();
     else prevAnnotation();
   };
 
   const handleReset = () => {
+    setIsAutoPlaying(false);
+    if (isPdfDocument) {
+      setPdfPage(citedPage);
+      return;
+    }
     setScale(1);
     setPosition({ x: 0, y: 0 });
     setStage('verified');
-    setIsAutoPlaying(false);
   };
 
   const handleManualZoom = (delta: number) => {
+    if (!isImageDocument) return;
     setIsAutoPlaying(false);
-    setScale(s => Math.min(Math.max(s + delta, 1), 6));
+    setScale((value) => Math.min(Math.max(value + delta, 1), 6));
   };
 
   const onMouseDown = (e: React.MouseEvent) => {
+    if (!isImageDocument || isPdfDocument || isVideoDocument || isAudioDocument) return;
     setIsDragging(true);
     setIsAutoPlaying(false);
     setDragStart({ x: e.clientX - position.x, y: e.clientY - position.y });
   };
 
   const onMouseMove = (e: React.MouseEvent) => {
-    if (!isDragging) return;
+    if (!isDragging || !isImageDocument) return;
     e.preventDefault();
     setPosition({
       x: e.clientX - dragStart.x,
-      y: e.clientY - dragStart.y
+      y: e.clientY - dragStart.y,
     });
   };
 
   const onMouseUp = () => setIsDragging(false);
 
-  const handleDownload = () => {
+  const handleJumpToCitationPage = () => {
+    setIsAutoPlaying(false);
+    setPdfPage(citedPage);
+  };
+
+  const handleDownload = (mode: 'full' | 'page' = 'full') => {
+    if (mode === 'page' && isPdfDocument) {
+      const endpoint = `${API_BASE_URL}/api/evidence-vault/${encodeURIComponent(item.id)}/page-pdf/?page=${safePdfPage}`;
+      const link = document.createElement('a');
+      link.href = endpoint;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      return;
+    }
+
+    const source = (primaryEvidenceUrl || normalizedVideoUrl || '').split('#')[0];
+    if (!source) return;
+
+    const ext = getFileExtension(source) || (isPdfDocument ? '.pdf' : '.jpg');
     const link = document.createElement('a');
-    link.href = item.heroImage;
-    link.download = `${item.id}-evidence.jpg`;
+    link.href = source;
+    link.download = `${item.id}-evidence${ext}`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
   };
 
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, []);
+
+  useEffect(() => {
+    setPdfPage((prev) => clampPage(prev, totalPages));
+  }, [totalPages]);
+
+  useEffect(() => {
+    if (stage !== 'provenance') {
+      return;
+    }
+
+    let verifyTimer: ReturnType<typeof setTimeout> | undefined;
+    const timer = setTimeout(() => {
+      if (canImageForensics) {
+        setStage('navigating');
+        autoZoomToEvidence(0);
+        verifyTimer = setTimeout(() => setStage('verified'), 900);
+      } else {
+        setStage('verified');
+      }
+    }, 1200);
+
+    return () => {
+      clearTimeout(timer);
+      if (verifyTimer) clearTimeout(verifyTimer);
+    };
+  }, [stage, canImageForensics]);
+
+  useEffect(() => {
+    if (!(stage === 'verified' && canImageForensics && item.evidenceData.annotations.length > 1 && isAutoPlaying && !showVideo)) {
+      return;
+    }
+    const interval = setInterval(() => {
+      nextAnnotation();
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [stage, canImageForensics, item.evidenceData.annotations.length, isAutoPlaying, showVideo]);
+
+  useEffect(() => {
+    if (stage === 'verified' && canImageForensics && !showVideo) {
+      autoZoomToEvidence(activeAnnotationIndex);
+    }
+  }, [activeAnnotationIndex, stage, canImageForensics, showVideo]);
+
   return createPortal(
     <div className="fixed inset-0 z-[300] bg-[#050505] text-slate-200 flex flex-col animate-fade-in font-sans">
-      
-      {/* HEADER */}
       <header className="h-16 border-b border-white/10 bg-[#0a0a0a] flex items-center justify-between px-4 md:px-6 shrink-0 relative z-50">
         <div className="flex items-center gap-4">
           <button onClick={onBack} className="p-2 hover:bg-white/10 rounded-lg text-slate-400 hover:text-white transition-all flex items-center gap-2 group">
@@ -583,12 +750,11 @@ const DocumentPreview: React.FC<{ item: EvidenceItem; onBack: () => void; onClos
               <ShieldCheck size={14} /> Forensic Preview
             </h2>
             <p className="text-[9px] text-slate-500 font-mono uppercase tracking-widest">
-              UKURASA {item.evidenceData.page} • SCAN {item.evidenceData.scanDate}
+              UKURASA {isPdfDocument ? safePdfPage : citedPage} • SCAN {item.evidenceData.scanDate || 'N/A'}
             </p>
           </div>
         </div>
 
-        {/* Status Indicators */}
         <div className="hidden lg:flex items-center gap-8 text-[10px] font-mono text-slate-500">
           <div className="flex items-center gap-2">
             <Activity size={14} className={stage === 'verified' ? 'text-green-500' : 'text-gold-500 animate-pulse'} />
@@ -596,145 +762,280 @@ const DocumentPreview: React.FC<{ item: EvidenceItem; onBack: () => void; onClos
           </div>
           <div className="flex items-center gap-2">
             <Fingerprint size={14} />
-            HASH: <span className="text-white">{item.evidenceData.sourceHash.substring(0, 8)}...</span>
+            HASH: <span className="text-white">{(item.evidenceData.sourceHash || 'N/A').substring(0, 8)}...</span>
           </div>
         </div>
 
         <button onClick={onClose} className="p-2 bg-white/5 hover:bg-red-500/20 text-slate-400 hover:text-red-500 rounded-lg transition-all">
-           <X size={20} />
+          <X size={20} />
         </button>
       </header>
 
-      {/* VIEWER AREA */}
-      <main 
-          className="flex-1 relative bg-[#020202] overflow-hidden flex items-center justify-center z-10" 
-          ref={containerRef}
-          onMouseDown={onMouseDown}
-          onMouseMove={onMouseMove}
-          onMouseUp={onMouseUp}
-          onMouseLeave={onMouseUp}
-          style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
+      <main
+        className="flex-1 relative bg-[#020202] overflow-hidden flex items-center justify-center z-10"
+        ref={containerRef}
+        onMouseDown={onMouseDown}
+        onMouseMove={onMouseMove}
+        onMouseUp={onMouseUp}
+        onMouseLeave={onMouseUp}
+        style={{ cursor: isImageDocument && !isPdfDocument && !isVideoDocument && !isAudioDocument ? (isDragging ? 'grabbing' : 'grab') : 'default' }}
+      >
+        <div
+          className="relative transition-transform duration-[400ms] ease-out origin-center will-change-transform"
+          style={
+            isImageDocument && !isPdfDocument && !isVideoDocument && !isAudioDocument
+              ? {
+                  transform: `translate(${position.x}px, ${position.y}px) scale(${scale})`,
+                  transition: isDragging ? 'none' : 'transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+                  width: '100%',
+                  height: '100%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }
+              : {
+                  width: '100%',
+                  height: '100%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }
+          }
         >
-          
-          {/* Document Layer */}
-          <div 
-            className="relative transition-transform duration-[400ms] ease-out origin-center will-change-transform"
-            style={{ 
-              transform: `translate(${position.x}px, ${position.y}px) scale(${scale})`,
-              transition: isDragging ? 'none' : 'transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-              width: '100%', 
-              height: '100%',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}
-          >
-            <div className="relative shadow-[0_0_100px_rgba(0,0,0,0.8)]">
-               <img 
-                 src={item.heroImage} 
-                 alt="Evidence Document" 
-                 draggable={false}
-                 className={`max-w-none w-auto h-[60vh] md:h-[85vh] object-contain transition-all duration-700 ${stage === 'provenance' ? 'blur-sm opacity-50 grayscale' : 'blur-0 opacity-100 grayscale-0'}`} 
-               />
-
-               {showHighlight && stage !== 'provenance' && (
-                 <div 
-                   className="absolute border-2 border-gold-500 shadow-[0_0_30px_rgba(234,179,8,0.3)] bg-gold-500/10 mix-blend-overlay transition-all duration-1000 ease-in-out z-20"
-                   style={{
-                     top: `${activeAnnotation.y}%`,
-                     left: `${activeAnnotation.x}%`,
-                     width: `${activeAnnotation.w}%`,
-                     height: `${activeAnnotation.h}%`,
-                     opacity: stage === 'verified' ? 1 : 0,
-                     transform: stage === 'verified' ? 'scale(1)' : 'scale(1.1)'
-                   }}
-                 >
-                   {/* Context Text Label - Refined Style */}
-                   <div className="absolute -top-8 left-0 bg-black/90 backdrop-blur-md text-gold-400 text-[10px] font-semibold px-3 py-1.5 rounded-md flex items-center gap-2 shadow-lg border border-gold-500/30 whitespace-nowrap z-30 transition-all duration-300 transform -translate-y-2">
-                      <Crosshair size={10} className="text-gold-500" />
-                      {activeAnnotation.text || "Verified Segment"}
-                   </div>
-                 </div>
-               )}
-            </div>
-          </div>
-
-          {/* Grid Overlay */}
-          <div className="absolute inset-0 pointer-events-none opacity-[0.03]" 
-               style={{ backgroundImage: 'linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px)', backgroundSize: '40px 40px' }}>
-          </div>
-
-          {/* Loading Overlay */}
-          {stage === 'provenance' && (
-            <div className="absolute inset-0 bg-black/80 flex flex-col items-center justify-center space-y-6 z-50 pointer-events-none">
-               <div className="w-16 h-16 border-4 border-white/10 rounded-full relative">
-                 <div className="absolute inset-0 border-4 border-gold-500 border-t-transparent rounded-full animate-spin"></div>
-               </div>
-               <p className="text-gold-500 text-xs font-black uppercase tracking-[0.3em] animate-pulse">Inahakiki Chanzo...</p>
+          {isPdfDocument && (
+            <div className="w-full h-full flex items-center justify-center px-3 md:px-6 py-4 md:py-6">
+              {pdfViewerUrl ? (
+                <iframe
+                  title={`${item.title} PDF Preview`}
+                  src={pdfViewerUrl}
+                  className="w-full max-w-6xl h-full rounded-xl border border-white/15 bg-[#0d1117] shadow-[0_0_80px_rgba(0,0,0,0.6)]"
+                />
+              ) : (
+                <div className="w-full max-w-2xl p-8 rounded-xl border border-white/10 bg-white/5 text-center space-y-3">
+                  <FileText size={24} className="mx-auto text-gold-400" />
+                  <p className="text-sm text-slate-300">Hakuna PDF source iliyowekwa kwa item hii.</p>
+                </div>
+              )}
             </div>
           )}
 
-          {/* Video Modal Overlay */}
-          {showVideo && (
-            <div className="absolute inset-0 z-[60] bg-black/95 flex items-center justify-center p-4 animate-fade-in">
-               <div className="relative w-full max-w-5xl aspect-video bg-black rounded-2xl overflow-hidden shadow-2xl border border-white/10">
-                  <button 
-                    onClick={() => setShowVideo(false)} 
-                    className="absolute top-4 right-4 p-2 bg-black/50 text-white hover:bg-red-600 rounded-full transition-all z-20"
-                  >
-                    <X size={24} />
-                  </button>
-                  <iframe 
-                    src={`${item.videoUrl || 'https://www.youtube.com/embed/dQw4w9WgXcQ'}?autoplay=1`} 
+          {isImageDocument && !isPdfDocument && !isVideoDocument && !isAudioDocument && (
+            <div className="relative shadow-[0_0_100px_rgba(0,0,0,0.8)]">
+              <img
+                src={primaryEvidenceUrl}
+                alt="Evidence Document"
+                draggable={false}
+                className={`max-w-none w-auto h-[60vh] md:h-[85vh] object-contain transition-all duration-700 ${stage === 'provenance' ? 'blur-sm opacity-50 grayscale' : 'blur-0 opacity-100 grayscale-0'}`}
+              />
+
+              {showHighlight && canImageForensics && stage !== 'provenance' && (
+                <div
+                  className="absolute border-2 border-gold-500 shadow-[0_0_30px_rgba(234,179,8,0.3)] bg-gold-500/10 mix-blend-overlay transition-all duration-1000 ease-in-out z-20"
+                  style={{
+                    top: `${activeAnnotation.y}%`,
+                    left: `${activeAnnotation.x}%`,
+                    width: `${activeAnnotation.w}%`,
+                    height: `${activeAnnotation.h}%`,
+                    opacity: stage === 'verified' ? 1 : 0,
+                    transform: stage === 'verified' ? 'scale(1)' : 'scale(1.1)',
+                  }}
+                >
+                  <div className="absolute -top-8 left-0 bg-black/90 backdrop-blur-md text-gold-400 text-[10px] font-semibold px-3 py-1.5 rounded-md flex items-center gap-2 shadow-lg border border-gold-500/30 whitespace-nowrap z-30 transition-all duration-300 transform -translate-y-2">
+                    <Crosshair size={10} className="text-gold-500" />
+                    {activeAnnotation.text || 'Verified Segment'}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {isVideoDocument && !isPdfDocument && (
+            <div className="w-full h-full flex items-center justify-center p-4">
+              <div className="w-full max-w-6xl aspect-video rounded-2xl overflow-hidden border border-white/10 shadow-2xl bg-black">
+                {isIframeVideoSource(normalizedPrimaryVideoUrl) ? (
+                  <iframe
+                    src={normalizedPrimaryVideoUrl}
                     className="w-full h-full border-none"
-                    allow="autoplay; encrypted-media" 
+                    allow="autoplay; encrypted-media; picture-in-picture"
                     allowFullScreen
                   ></iframe>
-               </div>
+                ) : (
+                  <video src={primaryEvidenceUrl} className="w-full h-full" controls />
+                )}
+              </div>
             </div>
           )}
-          
-          {/* Controls - Updated with Navigation */}
-          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 bg-[#0a0a0a]/90 backdrop-blur-md border border-white/10 p-1.5 md:p-2 rounded-xl flex items-center gap-1 md:gap-2 shadow-2xl z-50">
-             
-             {/* Previous Quote */}
-             <button onClick={() => handleManualNavigation('prev')} className="p-2 md:p-3 hover:bg-white/10 rounded-lg text-slate-300 transition-colors" title="Nukuu Iliyopita">
-               <ChevronLeft size={18} />
-             </button>
 
-             {/* Play/Pause Indicator (Visual Only or functional) */}
-             <div onClick={() => setIsAutoPlaying(!isAutoPlaying)} className="w-6 md:w-8 flex justify-center cursor-pointer">
-                {isAutoPlaying ? <Pause size={12} className="text-green-500 animate-pulse" /> : <Play size={12} className="text-slate-500" />}
-             </div>
+          {isAudioDocument && !isPdfDocument && (
+            <div className="w-full h-full flex items-center justify-center p-4">
+              <div className="w-full max-w-3xl rounded-2xl border border-white/10 bg-[#0b1120] p-8 md:p-10 space-y-6 shadow-2xl">
+                <div className="flex items-center gap-3 text-gold-400">
+                  <Activity size={20} />
+                  <p className="text-xs font-black uppercase tracking-[0.2em]">Audio Evidence</p>
+                </div>
+                <h3 className="text-2xl font-black text-white uppercase tracking-tight">{item.title}</h3>
+                <p className="text-sm text-slate-400">{item.description || 'Sikiliza ushahidi huu wa sauti moja kwa moja.'}</p>
+                <audio src={primaryEvidenceUrl} controls className="w-full" />
+              </div>
+            </div>
+          )}
 
-             {/* Next Quote */}
-             <button onClick={() => handleManualNavigation('next')} className="p-2 md:p-3 bg-white/10 hover:bg-gold-500 hover:text-black text-white rounded-lg transition-colors" title="Nukuu Inayofuata">
-               <ChevronRight size={18} />
-             </button>
+          {!isPdfDocument && !isImageDocument && !isVideoDocument && !isAudioDocument && (
+            <div className="w-full max-w-2xl p-8 rounded-xl border border-white/10 bg-white/5 text-center space-y-3">
+              <AlertTriangle size={24} className="mx-auto text-gold-400" />
+              <p className="text-sm text-slate-300">Aina ya media haijatambulika. Tafadhali hakikisha source URL ni sahihi.</p>
+            </div>
+          )}
+        </div>
 
-             <div className="w-px h-6 bg-white/10 mx-0.5 md:mx-1"></div>
+        <div
+          className="absolute inset-0 pointer-events-none opacity-[0.03]"
+          style={{ backgroundImage: 'linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px)', backgroundSize: '40px 40px' }}
+        ></div>
 
-             <button onClick={() => handleManualZoom(-0.5)} className="p-2 md:p-3 hover:bg-white/10 rounded-lg text-slate-300 transition-colors"><ZoomOut size={18} /></button>
-             <span className="text-[9px] md:text-[10px] font-mono w-8 md:w-10 text-center text-slate-500">{Math.round(scale * 100)}%</span>
-             <button onClick={() => handleManualZoom(0.5)} className="p-2 md:p-3 hover:bg-white/10 rounded-lg text-slate-300 transition-colors"><ZoomIn size={18} /></button>
-             
-             <div className="w-px h-6 bg-white/10 mx-0.5 md:mx-1"></div>
-             
-             <button onClick={handleReset} className="p-2 md:p-3 hover:bg-white/10 rounded-lg text-slate-300 transition-colors" title="Reset View"><RotateCcw size={18} /></button>
-             
-             {/* Video Watch Button */}
-             <button 
-               onClick={() => setShowVideo(true)} 
-               className="p-2 md:p-3 hover:bg-white/10 rounded-lg text-slate-300 hover:text-gold-500 transition-colors" 
-               title="Watch Analysis Video"
-             >
-               <PlayCircle size={18} />
-             </button>
+        {stage === 'provenance' && (
+          <div className="absolute inset-0 bg-black/80 flex flex-col items-center justify-center space-y-6 z-50 pointer-events-none">
+            <div className="w-16 h-16 border-4 border-white/10 rounded-full relative">
+              <div className="absolute inset-0 border-4 border-gold-500 border-t-transparent rounded-full animate-spin"></div>
+            </div>
+            <p className="text-gold-500 text-xs font-black uppercase tracking-[0.3em] animate-pulse">Inahakiki Chanzo...</p>
+          </div>
+        )}
 
-             <button onClick={handleDownload} className="p-2 md:p-3 hover:bg-white/10 rounded-lg text-slate-300 transition-colors" title="Download Evidence"><Download size={18} /></button>
+        {stage === 'verified' && (
+          <div className="absolute top-20 left-4 right-4 md:left-6 md:right-auto md:max-w-xl bg-black/75 backdrop-blur-xl border border-white/10 rounded-xl p-4 z-40 shadow-2xl">
+            <div className="flex items-center justify-between gap-4 mb-2">
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gold-400 flex items-center gap-2">
+                <Quote size={12} /> Nukuu ya Ushahidi
+              </p>
+              {isPdfDocument && (
+                <button
+                  onClick={handleJumpToCitationPage}
+                  className="text-[9px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg border border-gold-500/30 text-gold-400 hover:bg-gold-500/10 transition-colors"
+                >
+                  Nenda Pg {citedPage}
+                </button>
+              )}
+            </div>
+            <p className="text-sm text-slate-200 leading-relaxed line-clamp-3">{quoteText}</p>
+          </div>
+        )}
+
+        {showVideo && hasSeparateAnalysisVideo && (
+          <div className="absolute inset-0 z-[60] bg-black/95 flex items-center justify-center p-4 animate-fade-in">
+            <div className="relative w-full max-w-5xl aspect-video bg-black rounded-2xl overflow-hidden shadow-2xl border border-white/10">
+              <button
+                onClick={() => setShowVideo(false)}
+                className="absolute top-4 right-4 p-2 bg-black/50 text-white hover:bg-red-600 rounded-full transition-all z-20"
+              >
+                <X size={24} />
+              </button>
+              {isIframeVideoSource(normalizedVideoUrl) ? (
+                <iframe
+                  src={withAutoplay(normalizedVideoUrl)}
+                  className="w-full h-full border-none"
+                  allow="autoplay; encrypted-media; picture-in-picture"
+                  allowFullScreen
+                ></iframe>
+              ) : (
+                <video src={normalizedVideoUrl} className="w-full h-full" controls autoPlay />
+              )}
+            </div>
+          </div>
+        )}
+
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 bg-[#0a0a0a]/92 backdrop-blur-md border border-white/10 p-1.5 md:p-2 rounded-xl flex items-center gap-1 md:gap-2 shadow-2xl z-50 max-w-[95vw] overflow-x-auto scrollbar-hide">
+          <button
+            onClick={() => handleManualNavigation('prev')}
+            className="p-2 md:p-3 hover:bg-white/10 rounded-lg text-slate-300 transition-colors"
+            title={isPdfDocument ? 'Ukurasa Uliopita' : 'Nukuu Iliyopita'}
+          >
+            <ChevronLeft size={18} />
+          </button>
+
+          <div className="px-2 min-w-[74px] text-center text-[10px] font-mono text-slate-400">
+            {isPdfDocument
+              ? totalPages > 0
+                ? `Pg ${safePdfPage}/${totalPages}`
+                : `Pg ${safePdfPage}`
+              : hasAnnotations
+                ? `${activeAnnotationIndex + 1}/${item.evidenceData.annotations.length}`
+                : '1/1'}
           </div>
 
-        </main>
+          <button
+            onClick={() => handleManualNavigation('next')}
+            className="p-2 md:p-3 bg-white/10 hover:bg-gold-500 hover:text-black text-white rounded-lg transition-colors"
+            title={isPdfDocument ? 'Ukurasa Unaofuata' : 'Nukuu Inayofuata'}
+          >
+            <ChevronRight size={18} />
+          </button>
+
+          <div className="w-px h-6 bg-white/10 mx-0.5 md:mx-1"></div>
+
+          {isImageDocument && !isPdfDocument && (
+            <>
+              <button onClick={() => handleManualZoom(-0.5)} className="p-2 md:p-3 hover:bg-white/10 rounded-lg text-slate-300 transition-colors" title="Punguza Zoom">
+                <ZoomOut size={18} />
+              </button>
+              <span className="text-[9px] md:text-[10px] font-mono w-10 text-center text-slate-500">{Math.round(scale * 100)}%</span>
+              <button onClick={() => handleManualZoom(0.5)} className="p-2 md:p-3 hover:bg-white/10 rounded-lg text-slate-300 transition-colors" title="Ongeza Zoom">
+                <ZoomIn size={18} />
+              </button>
+
+              <button
+                onClick={() => setShowHighlight((prev) => !prev)}
+                className={`p-2 md:p-3 rounded-lg transition-colors ${showHighlight ? 'text-gold-400 bg-gold-500/10' : 'text-slate-300 hover:bg-white/10'}`}
+                title="Onyesha/Ficha Highlight"
+              >
+                <Crosshair size={18} />
+              </button>
+            </>
+          )}
+
+          <button onClick={handleReset} className="p-2 md:p-3 hover:bg-white/10 rounded-lg text-slate-300 transition-colors" title={isPdfDocument ? 'Rudi Citation Page' : 'Reset View'}>
+            <RotateCcw size={18} />
+          </button>
+
+          {isPdfDocument && (
+            <button
+              onClick={handleJumpToCitationPage}
+              className="p-2 md:p-3 hover:bg-white/10 rounded-lg text-slate-300 hover:text-gold-400 transition-colors"
+              title={`Nenda moja kwa moja kwenye page ${citedPage}`}
+            >
+              <BookOpen size={18} />
+            </button>
+          )}
+
+          {hasSeparateAnalysisVideo && (
+            <button
+              onClick={() => setShowVideo(true)}
+              className="p-2 md:p-3 hover:bg-white/10 rounded-lg text-slate-300 hover:text-gold-500 transition-colors"
+              title="Tazama Analysis Video"
+            >
+              <PlayCircle size={18} />
+            </button>
+          )}
+
+          <button onClick={() => handleDownload('full')} className="p-2 md:p-3 hover:bg-white/10 rounded-lg text-slate-300 transition-colors" title="Pakua Hati Nzima">
+            <Download size={18} />
+          </button>
+
+          {isPdfDocument && (
+            <button
+              onClick={() => handleDownload('page')}
+              className="p-2 md:p-3 hover:bg-white/10 rounded-lg text-slate-300 hover:text-gold-400 transition-colors"
+              title="Fungua/Pakua Ukurasa Huu"
+            >
+              <FileText size={18} />
+            </button>
+          )}
+
+          <button onClick={() => setIsAutoPlaying((prev) => !prev)} className="p-2 md:p-3 hover:bg-white/10 rounded-lg text-slate-300 transition-colors" title="Washa/Zima Auto">
+            {isAutoPlaying ? <Pause size={16} className="text-green-500 animate-pulse" /> : <Play size={16} className="text-slate-500" />}
+          </button>
+        </div>
+      </main>
     </div>,
     document.body
   );
@@ -953,7 +1254,7 @@ export const EvidenceVault: React.FC = () => {
                       </div>
 
                       <div className="aspect-[4/5] relative overflow-hidden bg-black">
-                        <img src={item.heroImage} className="w-full h-full object-cover grayscale opacity-60 group-hover:grayscale-0 group-hover:opacity-40 transition-all duration-700 group-hover:scale-110" alt="" />
+                        {renderMediaCover(item, 'w-full h-full object-cover grayscale opacity-60 group-hover:grayscale-0 group-hover:opacity-40 transition-all duration-700 group-hover:scale-110')}
                         <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent"></div>
                         
                         {/* Reveal Hint Overlay */}
@@ -989,3 +1290,5 @@ export const EvidenceVault: React.FC = () => {
     </div>
   );
 };
+
+

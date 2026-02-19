@@ -22,6 +22,56 @@ interface LibraryItem {
   albumName?: string; // Imeongezwa kwa ajili ya kupanga picha
 }
 
+interface LibraryNotice {
+  type: 'success' | 'error';
+  message: string;
+}
+
+const normalizeVideoUrl = (value: string): string => {
+  const raw = (value || '').trim();
+  if (!raw) {
+    return '';
+  }
+
+  try {
+    const url = new URL(raw);
+    const host = url.hostname.toLowerCase();
+    const path = url.pathname;
+
+    if (host.includes('youtu.be')) {
+      const id = path.replace(/^\/+/, '').split('/')[0];
+      return id ? `https://www.youtube.com/embed/${id}` : raw;
+    }
+
+    if (host.includes('youtube.com') && path.startsWith('/watch')) {
+      const id = url.searchParams.get('v');
+      return id ? `https://www.youtube.com/embed/${id}` : raw;
+    }
+
+    if (host.includes('youtube.com') && path.startsWith('/shorts/')) {
+      const id = path.split('/')[2];
+      return id ? `https://www.youtube.com/embed/${id}` : raw;
+    }
+  } catch {
+    return raw;
+  }
+
+  return raw;
+};
+
+const isIframeVideoSource = (value?: string): boolean => {
+  const normalized = normalizeVideoUrl(value || '');
+  return /youtube\.com\/embed|player\.vimeo\.com/i.test(normalized);
+};
+
+const withAutoplay = (value?: string): string => {
+  const normalized = normalizeVideoUrl(value || '');
+  if (!normalized) {
+    return '';
+  }
+  return `${normalized}${normalized.includes('?') ? '&' : '?'}autoplay=1`;
+};
+
 export const Library: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'Zote' | 'PDF' | 'Video' | 'Audio' | 'Image'>('Zote');
   const [search, setSearch] = useState('');
@@ -30,6 +80,15 @@ export const Library: React.FC = () => {
   const [items, setItems] = useState<LibraryItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<LibraryNotice | null>(null);
+
+  useEffect(() => {
+    if (!notice) {
+      return;
+    }
+    const timer = window.setTimeout(() => setNotice(null), 4000);
+    return () => window.clearTimeout(timer);
+  }, [notice]);
 
   useEffect(() => {
     const loadItems = async () => {
@@ -60,6 +119,78 @@ export const Library: React.FC = () => {
     loadItems();
   }, []);
 
+  const getPrimaryAssetUrl = (item: LibraryItem): string => {
+    return (item.contentUrl || item.image || '').trim();
+  };
+
+  const fileNameFromItem = (item: LibraryItem, sourceUrl: string): string => {
+    const extFromType: Record<LibraryItem['type'], string> = {
+      PDF: '.pdf',
+      Audio: '.mp3',
+      Video: '.mp4',
+      Image: '.jpg',
+    };
+    const fromUrl = sourceUrl.split('?')[0].split('#')[0].split('/').pop() || '';
+    if (fromUrl.includes('.')) {
+      return fromUrl;
+    }
+    const safeTitle = (item.title || 'library-item')
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+    return `${safeTitle || 'library-item'}${extFromType[item.type] || ''}`;
+  };
+
+  const handleDownload = (item: LibraryItem) => {
+    const sourceUrl = getPrimaryAssetUrl(item);
+    if (!sourceUrl) {
+      setNotice({ type: 'error', message: 'Hakuna link ya kupakua kwenye rasilimali hii.' });
+      return;
+    }
+
+    const anchor = document.createElement('a');
+    anchor.href = sourceUrl;
+    anchor.target = '_blank';
+    anchor.rel = 'noopener noreferrer';
+    anchor.download = fileNameFromItem(item, sourceUrl);
+    document.body.appendChild(anchor);
+    anchor.click();
+    document.body.removeChild(anchor);
+    setNotice({ type: 'success', message: 'Upakuaji umeanzishwa.' });
+  };
+
+  const handleShare = async (item: LibraryItem) => {
+    const sourceUrl = getPrimaryAssetUrl(item);
+    if (!sourceUrl) {
+      setNotice({ type: 'error', message: 'Hakuna link ya kushiriki kwenye rasilimali hii.' });
+      return;
+    }
+
+    const sharePayload = {
+      title: item.title,
+      text: item.swahiliTitle || item.description || 'Rasilimali kutoka GC365 Maktaba',
+      url: sourceUrl,
+    };
+
+    if (navigator.share) {
+      try {
+        await navigator.share(sharePayload);
+        setNotice({ type: 'success', message: 'Rasilimali imeshirikiwa.' });
+        return;
+      } catch {
+        // Fallback to clipboard if sharing is cancelled or unavailable in context.
+      }
+    }
+
+    try {
+      await navigator.clipboard.writeText(sourceUrl);
+      setNotice({ type: 'success', message: 'Link imenakiliwa kwenye clipboard.' });
+    } catch {
+      setNotice({ type: 'error', message: 'Imeshindikana kushiriki au kunakili link.' });
+    }
+  };
+
   const filteredItems = items.filter(item => {
     const matchesTab = activeTab === 'Zote' || item.type === activeTab;
     const matchesSearch = item.title.toLowerCase().includes(search.toLowerCase()) || 
@@ -76,11 +207,11 @@ export const Library: React.FC = () => {
           </div>
           <div className="flex-1 min-w-0">
             <h4 className="text-sm font-bold text-slate-900 dark:text-white truncate">{item.title}</h4>
-            <p className="text-[10px] text-slate-500 font-medium uppercase tracking-widest">{item.swahiliTitle} • {item.sizeOrDuration}</p>
+            <p className="text-[10px] text-slate-500 font-medium uppercase tracking-widest">{item.swahiliTitle} | {item.sizeOrDuration}</p>
           </div>
           <div className="flex gap-2">
             <button onClick={() => setViewingItem(item)} className="flex items-center gap-2 px-4 py-2 bg-primary-900 text-gold-400 rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-gold-500 hover:text-primary-950 transition-all"><BookOpen size={14} /> Soma</button>
-            <button className="p-2 bg-slate-50 dark:bg-white/5 text-slate-400 rounded-lg hover:text-slate-900 dark:hover:text-white transition-all"><Download size={14} /></button>
+            <button onClick={() => handleDownload(item)} className="p-2 bg-slate-50 dark:bg-white/5 text-slate-400 rounded-lg hover:text-slate-900 dark:hover:text-white transition-all"><Download size={14} /></button>
           </div>
         </div>
       ))}
@@ -96,10 +227,11 @@ export const Library: React.FC = () => {
           </div>
           <div className="flex-1 min-w-0">
             <h4 className="text-sm font-bold text-slate-900 dark:text-white truncate">{item.title}</h4>
-            <p className="text-[10px] text-slate-500 font-medium uppercase tracking-widest">{item.swahiliTitle} • {item.sizeOrDuration || 'Hakuna taarifa'}</p>
+            <p className="text-[10px] text-slate-500 font-medium uppercase tracking-widest">{item.swahiliTitle} | {item.sizeOrDuration || 'Hakuna taarifa'}</p>
           </div>
           <div className="flex gap-2">
             <button onClick={() => setViewingItem(item)} className="flex items-center gap-2 px-4 py-2 bg-primary-900 text-gold-400 rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-gold-500 hover:text-primary-950 transition-all"><Play size={14} /> Sikiliza</button>
+            <button onClick={() => handleDownload(item)} className="p-2 bg-slate-50 dark:bg-white/5 text-slate-400 rounded-lg hover:text-slate-900 dark:hover:text-white transition-all"><Download size={14} /></button>
           </div>
         </div>
       ))}
@@ -124,7 +256,7 @@ export const Library: React.FC = () => {
               <h3 className="text-sm font-black uppercase tracking-[0.2em] text-slate-800 dark:text-slate-200">{albumName}</h3>
               <span className="bg-slate-100 dark:bg-white/5 px-2 py-0.5 rounded text-[10px] font-bold text-slate-500">{albumItems.length} Picha</span>
             </div>
-            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-3">
               {albumItems.map(item => (
                 <div 
                   key={item.id} 
@@ -182,7 +314,7 @@ export const Library: React.FC = () => {
               <button onClick={() => setViewingItem(item)} className="text-[10px] font-black text-slate-500 hover:text-gold-500 uppercase tracking-widest flex items-center gap-1 transition-colors">
                 {item.type === 'Video' ? <><Play size={12} /> Watch Now</> : <><Eye size={12} /> View Item</>}
               </button>
-              <button className="p-2 text-slate-400 hover:text-slate-900 dark:hover:text-white"><ArrowDownToLine size={16} /></button>
+              <button onClick={() => handleDownload(item)} className="p-2 text-slate-400 hover:text-slate-900 dark:hover:text-white"><ArrowDownToLine size={16} /></button>
             </div>
           </div>
         </div>
@@ -212,6 +344,16 @@ export const Library: React.FC = () => {
           <button key={tab} onClick={() => setActiveTab(tab)} className={`px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === tab ? 'bg-primary-950 text-gold-400 shadow-xl' : 'bg-slate-50 dark:bg-white/5 text-slate-500 hover:text-slate-900 dark:hover:text-white'}`}>{tab}</button>
         ))}
       </div>
+
+      {notice && (
+        <div className={`rounded-xl border px-4 py-3 text-[10px] font-black uppercase tracking-widest ${
+          notice.type === 'success'
+            ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500'
+            : 'bg-red-500/10 border-red-500/20 text-red-500'
+        }`}>
+          {notice.message}
+        </div>
+      )}
 
       {/* Main Content Area */}
       <div className="space-y-12">
@@ -261,21 +403,43 @@ export const Library: React.FC = () => {
              <div className="p-6 border-b border-white/5 flex items-center justify-between bg-black/40">
                 <div className="flex items-center gap-4">
                   <div className={`p-3 rounded-xl ${viewingItem.type === 'PDF' ? 'bg-red-500/20 text-red-500' : viewingItem.type === 'Video' ? 'bg-red-600 text-white' : viewingItem.type === 'Image' ? 'bg-emerald-500 text-white' : 'bg-blue-500 text-white'}`}>{viewingItem.type === 'PDF' ? <FileText size={20}/> : viewingItem.type === 'Video' ? <Video size={20}/> : viewingItem.type === 'Image' ? <ImageIcon size={20}/> : <Headphones size={20}/>}</div>
-                  <div><h3 className="text-lg font-black text-white tracking-tight uppercase leading-none">{viewingItem.title}</h3><p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-1">{viewingItem.category} • {viewingItem.type}</p></div>
+                  <div><h3 className="text-lg font-black text-white tracking-tight uppercase leading-none">{viewingItem.title}</h3><p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-1">{viewingItem.category} | {viewingItem.type}</p></div>
                 </div>
                 <button onClick={() => { setViewingItem(null); setIsPlaying(false); }} className="p-3 bg-white/5 hover:bg-red-500 text-white rounded-xl transition-all"><X size={20}/></button>
              </div>
              <div className="flex-1 overflow-hidden relative bg-black flex items-center justify-center">
-                {viewingItem.type === 'PDF' && viewingItem.contentUrl && <iframe src={`${viewingItem.contentUrl}#toolbar=0`} className="w-full h-full border-none" title={viewingItem.title}></iframe>}
-                {viewingItem.type === 'Video' && viewingItem.contentUrl && <iframe src={`${viewingItem.contentUrl}?autoplay=1`} className="w-full max-w-4xl aspect-video rounded-xl" allow="autoplay; encrypted-media" allowFullScreen></iframe>}
+                {viewingItem.type === 'PDF' && (
+                  viewingItem.contentUrl ? (
+                    <iframe src={`${viewingItem.contentUrl}#toolbar=0`} className="w-full h-full border-none" title={viewingItem.title}></iframe>
+                  ) : (
+                    <div className="text-sm font-black uppercase tracking-widest text-slate-400">Hakuna PDF link iliyowekwa</div>
+                  )
+                )}
+                {viewingItem.type === 'Video' && (
+                  viewingItem.contentUrl ? (
+                    isIframeVideoSource(viewingItem.contentUrl) ? (
+                    <iframe src={withAutoplay(viewingItem.contentUrl)} className="w-full max-w-4xl aspect-video rounded-xl" allow="autoplay; encrypted-media" allowFullScreen></iframe>
+                    ) : (
+                      <video src={viewingItem.contentUrl} className="w-full max-w-4xl aspect-video rounded-xl" controls autoPlay />
+                    )
+                  ) : (
+                    <div className="text-sm font-black uppercase tracking-widest text-slate-400">Hakuna video link iliyowekwa</div>
+                  )
+                )}
                 {viewingItem.type === 'Audio' && (
-                  <div className="w-full max-w-3xl bg-slate-900/60 p-6 rounded-2xl border border-white/10">
-                    <audio controls className="w-full" src={viewingItem.contentUrl}></audio>
-                  </div>
+                  viewingItem.contentUrl ? (
+                    <div className="w-full max-w-3xl bg-slate-900/60 p-6 rounded-2xl border border-white/10">
+                      <audio controls className="w-full" src={viewingItem.contentUrl}></audio>
+                    </div>
+                  ) : (
+                    <div className="text-sm font-black uppercase tracking-widest text-slate-400">Hakuna audio link iliyowekwa</div>
+                  )
                 )}
                 {viewingItem.type === 'Image' && (
                   viewingItem.image ? (
-                    <img src={viewingItem.image} className="max-w-full max-h-full object-contain shadow-2xl" alt={viewingItem.title}/>
+                    <div className="w-full h-full flex items-center justify-center p-6">
+                      <img src={viewingItem.image} className="max-w-[75vw] max-h-[75vh] object-contain shadow-2xl rounded-xl" alt={viewingItem.title}/>
+                    </div>
                   ) : (
                     <div className="text-sm font-black uppercase tracking-widest text-slate-400">Hakuna picha</div>
                   )
@@ -284,8 +448,8 @@ export const Library: React.FC = () => {
              <div className="p-6 bg-slate-900 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4">
                 <p className="text-xs text-slate-400 font-medium italic">"{viewingItem.description}"</p>
                 <div className="flex gap-4">
-                   <button className="px-6 py-2 border border-white/10 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-white/5 transition-all flex items-center gap-2"><Share2 size={14}/> Shiriki</button>
-                   <button className="px-6 py-2 bg-gold-500 text-primary-950 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-white transition-all flex items-center gap-2"><Download size={14}/> Pakua</button>
+                   <button onClick={() => handleShare(viewingItem)} className="px-6 py-2 border border-white/10 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-white/5 transition-all flex items-center gap-2"><Share2 size={14}/> Shiriki</button>
+                   <button onClick={() => handleDownload(viewingItem)} className="px-6 py-2 bg-gold-500 text-primary-950 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-white transition-all flex items-center gap-2"><Download size={14}/> Pakua</button>
                 </div>
              </div>
           </div>

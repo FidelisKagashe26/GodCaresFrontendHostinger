@@ -25,6 +25,55 @@ interface HeroProfile {
 
 const CATEGORIES = ['Zote', 'Wapiganaji', 'Wanawake', 'Manabii'];
 
+const normalizeVideoUrl = (value: string): string => {
+  const raw = (value || '').trim();
+  if (!raw) {
+    return '';
+  }
+
+  try {
+    const url = new URL(raw);
+    const host = url.hostname.toLowerCase();
+    const path = url.pathname;
+
+    if (host.includes('youtu.be')) {
+      const id = path.replace(/^\/+/, '').split('/')[0];
+      return id ? `https://www.youtube.com/embed/${id}` : raw;
+    }
+
+    if (host.includes('youtube.com')) {
+      if (path.startsWith('/embed/')) {
+        return raw;
+      }
+      if (path.startsWith('/watch')) {
+        const id = url.searchParams.get('v');
+        return id ? `https://www.youtube.com/embed/${id}` : raw;
+      }
+      if (path.startsWith('/shorts/')) {
+        const id = path.split('/')[2];
+        return id ? `https://www.youtube.com/embed/${id}` : raw;
+      }
+    }
+  } catch {
+    return raw;
+  }
+
+  return raw;
+};
+
+const withAutoplay = (value: string): string => {
+  const normalized = normalizeVideoUrl(value);
+  if (!normalized) {
+    return normalized;
+  }
+  return `${normalized}${normalized.includes('?') ? '&' : '?'}autoplay=1`;
+};
+
+const isIframeVideoSource = (value: string): boolean => {
+  const normalized = normalizeVideoUrl(value);
+  return /youtube\.com\/embed|player\.vimeo\.com/i.test(normalized);
+};
+
 export const FaithBuilder: React.FC = () => {
   const [activeHero, setActiveHero] = useState<string | null>(null);
   const [activeCategory, setActiveCategory] = useState('Zote');
@@ -122,7 +171,7 @@ export const FaithBuilder: React.FC = () => {
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-gold-400 via-gold-500 to-gold-400 italic">IMANI.</span>
             </h1>
             <p className="text-slate-500 font-serif italic text-sm md:text-lg max-w-xl mx-auto opacity-70">
-              "Ulimwengu haukuwastahili hawa..." — Waebrania 11:38.
+              "Ulimwengu haukuwastahili hawa..." - Waebrania 11:38.
             </p>
           </div>
         </div>
@@ -179,10 +228,10 @@ export const FaithBuilder: React.FC = () => {
             <div 
               key={hero.id}
               onClick={() => handleHeroOpen(hero.id)}
-              className="min-w-[75vw] md:min-w-[320px] snap-center cursor-pointer group/card relative transition-all duration-500 animate-fade-in"
+              className="min-w-[68vw] md:min-w-[280px] snap-center cursor-pointer group/card relative transition-all duration-500 animate-fade-in"
             >
               {/* Card Container */}
-                <div className="relative h-[340px] md:h-[400px] bg-slate-900 rounded-3xl border border-white/5 overflow-hidden transition-all duration-700 group-hover/card:border-gold-500/30 shadow-xl">
+                <div className="relative h-[380px] md:h-[430px] bg-slate-900 rounded-3xl border border-white/5 overflow-hidden transition-all duration-700 group-hover/card:border-gold-500/30 shadow-xl">
                 <div className="h-full w-full relative">
                   {hero.image ? (
                     <img src={hero.image} className="w-full h-full object-cover grayscale opacity-30 group-hover/card:grayscale-0 group-hover/card:opacity-100 group-hover/card:scale-105 transition-all duration-1000" alt="" />
@@ -252,12 +301,16 @@ export const FaithBuilder: React.FC = () => {
                  {showVideoInModal ? (
                     currentHero.videoUrl ? (
                       <div className="w-full h-full bg-black">
-                        <iframe 
-                          src={`${currentHero.videoUrl}?autoplay=1`} 
-                          className="w-full h-full border-none" 
-                          allow="autoplay; encrypted-media" 
-                          allowFullScreen
-                        ></iframe>
+                        {isIframeVideoSource(currentHero.videoUrl) ? (
+                          <iframe 
+                            src={withAutoplay(currentHero.videoUrl)} 
+                            className="w-full h-full border-none" 
+                            allow="autoplay; encrypted-media; picture-in-picture"
+                            allowFullScreen
+                          ></iframe>
+                        ) : (
+                          <video src={currentHero.videoUrl} className="w-full h-full" controls autoPlay />
+                        )}
                       </div>
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-sm font-black uppercase tracking-widest text-slate-300">
