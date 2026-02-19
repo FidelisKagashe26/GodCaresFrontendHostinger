@@ -430,6 +430,7 @@ const App: React.FC = () => {
 
   const unreadCount = centerNotifications.filter(n => !n.read).length;
   const isImmersive = currentStage === StageId.TIMELINE && user;
+  const showStageBreadcrumb = !isImmersive && currentStage !== StageId.HOME;
   const currentStageLabel = useMemo(
     () => stages.find((stage) => stage.id === currentStage)?.title || 'Nyumbani',
     [currentStage],
@@ -658,7 +659,7 @@ const App: React.FC = () => {
             </header>
           )}
 
-          {!isImmersive && (
+          {showStageBreadcrumb && (
             <div className="fixed top-20 left-0 right-0 h-12 px-4 md:px-10 z-[45] bg-[color:var(--page-surface)]/90 backdrop-blur-md border-b border-[color:var(--line-strong)]">
               <div className="h-full flex items-center gap-3">
                 <button
@@ -692,7 +693,7 @@ const App: React.FC = () => {
 
           <div 
             ref={mainContentRef}
-            className={`gc-content-scroll flex-1 overflow-y-auto scroll-smooth pb-16 ${isImmersive ? 'pt-20' : 'pt-32'}`}
+            className={`gc-content-scroll flex-1 overflow-y-auto scroll-smooth pb-16 ${isImmersive ? 'pt-20' : showStageBreadcrumb ? 'pt-32' : 'pt-20'}`}
           >
             {renderContent()}
             {!isImmersive && <Footer onNavigate={handleStageChange} siteSettings={siteSettings} />}
