@@ -18,7 +18,12 @@ const ScrollReveal: React.FC<{ children: React.ReactNode; className?: string; th
 
   useEffect(() => {
     const observer = new IntersectionObserver(entries => {
-      entries.forEach(entry => setIsVisible(entry.isIntersecting));
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.unobserve(entry.target);
+        }
+      });
     }, { threshold });
     if (domRef.current) observer.observe(domRef.current);
     return () => observer.disconnect();
@@ -27,8 +32,8 @@ const ScrollReveal: React.FC<{ children: React.ReactNode; className?: string; th
   return (
     <div
       ref={domRef}
-      className={`${className} transition-all duration-[1200ms] cubic-bezier(0.23, 1, 0.32, 1) transform ${
-        isVisible ? 'opacity-100 translate-y-0 filter-none' : 'opacity-0 translate-y-20 blur-sm'
+      className={`${className} transform-gpu will-change-transform transition duration-700 ease-out motion-reduce:transform-none motion-reduce:transition-none ${
+        isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6 md:translate-y-10'
       }`}
     >
       {children}
@@ -61,14 +66,14 @@ export const Home: React.FC<HomeProps> = ({ onNavigate }) => {
     <div className="relative w-full bg-[color:var(--surface-0)] text-slate-900 dark:bg-[#020617] dark:text-slate-200 overflow-x-hidden font-sans selection:bg-gold-500/30">
       
       {/* --- HERO --- */}
-      <section className="relative min-h-[75vh] md:min-h-[82vh] flex flex-col items-center justify-center overflow-hidden">
+      <section className="relative min-h-[68vh] sm:min-h-[72vh] md:min-h-[82vh] flex flex-col items-center justify-center overflow-hidden">
         <div className="absolute inset-0 z-0">
            <img src="https://images.unsplash.com/photo-1462331940025-496dfbfc7564?q=80&w=2500" className="w-full h-full object-cover opacity-55 dark:opacity-45 animate-ken-burns" alt="Cosmos" />
            <div className="absolute inset-0 bg-gradient-to-b from-emerald-100/70 via-emerald-100/20 to-emerald-100/70 dark:from-[#020617] dark:via-transparent dark:to-[#020617]"></div>
         </div>
         <div className="relative z-10 text-center px-4 sm:px-6 max-w-5xl space-y-6">
            <ScrollReveal>
-             <div className="inline-flex items-center gap-3 px-4 sm:px-6 py-2 rounded-md border border-slate-200/80 dark:border-white/10 bg-[color:var(--surface-2)] dark:bg-white/5 backdrop-blur-md mb-4 shadow-[0_0_20px_rgba(234,179,8,0.1)]">
+             <div className="inline-flex items-center gap-3 px-4 sm:px-6 py-2 rounded-md border border-slate-200/80 dark:border-white/10 bg-[color:var(--surface-2)] dark:bg-white/5 backdrop-blur-sm md:backdrop-blur-md mb-4 shadow-[0_0_20px_rgba(234,179,8,0.1)]">
                 <span className="w-2 h-2 bg-gold-500 rounded-full animate-pulse"></span>
                 <span className="text-[10px] font-black tracking-[0.4em] uppercase text-gold-400">Yohana 8:32</span>
              </div>
@@ -97,8 +102,8 @@ export const Home: React.FC<HomeProps> = ({ onNavigate }) => {
           { id: 2, tag: "Jibu la Mfalme", h2: "Yesu Anamjibu Pilato.", h3: "NIMEKUJA NIISHUHUDIE KWELI.", p: <>"Mimi nimezaliwa kwa ajili ya haya, na kwa ajili ya haya mimi nalikuja ulimwenguni, ili niishuhudie kweli. Kila aliye wa hiyo kweli hunisikia sauti yangu." - <span className="text-gold-400 font-black">Yohana 18:37</span></>, img: "https://images.unsplash.com/photo-1512117187123-f365d9c227ba?q=80&w=2000" },
           { id: 3, tag: "Dhana Moja", h2: "Kweli Zipo Ngapi?", h3: "UKWELI UPO MMOJA TU.", p: <>"Yesu akamwambia, Mimi ndimi njia, na kweli, na uzima; mtu haji kwa Baba, ila kwa njia ya mimi." - <span className="text-gold-400 font-black">Yohana 14:6</span> <br/><br/> <span className="text-gold-400 font-medium">Kwa kuwa ukweli ni msingi wa kile tunachoamini, lazima uwe mmoja.</span></>, img: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2000" }
         ].map((step, i) => (
-          <div key={i} className="relative min-h-[70vh] md:min-h-[75vh] flex items-center overflow-hidden border-b border-slate-200 dark:border-white/5">
-            <img src={step.img} className="absolute inset-0 w-full h-full object-cover opacity-25 dark:opacity-20 transition-transform duration-[8s] ease-out hover:scale-110" alt="" />
+          <div key={i} className="relative min-h-[58vh] sm:min-h-[64vh] md:min-h-[75vh] flex items-center overflow-hidden border-b border-slate-200 dark:border-white/5">
+            <img src={step.img} loading="lazy" className="absolute inset-0 w-full h-full object-cover opacity-25 dark:opacity-20 transition-transform duration-[5s] ease-out md:hover:scale-105" alt="" />
             <div className="absolute inset-0 bg-gradient-to-r from-emerald-100/85 via-emerald-100/60 to-transparent dark:from-[#020617] dark:via-[#020617]/90"></div>
             <div className="max-w-6xl mx-auto px-4 sm:px-6 relative z-10 w-full">
               <ScrollReveal className={i % 2 === 1 ? "text-right ml-auto" : ""}>
@@ -107,7 +112,7 @@ export const Home: React.FC<HomeProps> = ({ onNavigate }) => {
                     <span className="text-gold-500 font-black text-xs uppercase tracking-[0.4em]">{step.tag}</span>
                 </div>
                 <h2 className="text-2xl sm:text-4xl md:text-6xl font-serif text-slate-900 dark:text-white italic opacity-90 dark:opacity-80 mb-6 leading-tight">{step.h2}</h2>
-                <div className={`bg-[color:var(--surface-2)] dark:bg-white/5 p-6 sm:p-10 md:p-14 border-l-4 ${i % 2 === 1 ? 'border-r-4 border-l-0 text-right' : 'border-l-4'} border-gold-500/50 backdrop-blur-md shadow-2xl max-w-3xl ${i % 2 === 1 ? 'ml-auto' : ''} rounded-sm transition-all hover:bg-[color:var(--surface-3)] dark:hover:bg-white/[0.08]`}>
+                <div className={`bg-[color:var(--surface-2)] dark:bg-white/5 p-6 sm:p-10 md:p-14 border-l-4 ${i % 2 === 1 ? 'border-r-4 border-l-0 text-right' : 'border-l-4'} border-gold-500/50 backdrop-blur-sm md:backdrop-blur-md shadow-2xl max-w-3xl ${i % 2 === 1 ? 'ml-auto' : ''} rounded-sm transition-all hover:bg-[color:var(--surface-3)] dark:hover:bg-white/[0.08]`}>
                   <h3 className="text-2xl sm:text-3xl md:text-5xl font-black text-slate-900 dark:text-white uppercase tracking-tighter mb-6">{step.h3}</h3>
                   <div className="text-slate-700 dark:text-slate-300 font-serif italic text-base sm:text-lg md:text-xl leading-relaxed">{step.p}</div>
                 </div>
@@ -129,8 +134,8 @@ export const Home: React.FC<HomeProps> = ({ onNavigate }) => {
           { id: 2, tag: "Asili ya Uongo", h2: "Shetani Ndiye Muongo.", h3: "YESU ALISEMA.", p: <>"Ninyi ni wa baba yenu, Ibilisi, na tamaa za baba yenu ndizo mpendazo kuzitenda. Yeye alikuwa mwuaji tangu mwanzo; wala hakusimama katika kweli, kwa kuwa hamna hiyo kweli ndani yake. Asemapo uongo, husema yaliyo yake mwenyewe; kwa sababu yeye ni mwongo, na baba wa huo." - <span className="text-red-500 font-black">Yohana 8:44</span></>, img: "https://images.unsplash.com/photo-1519074069444-1ba4fff66d16?q=80&w=2000" },
           { id: 3, tag: "Kilele cha Udanganyifu", h2: "Shetani Ameudanganya Ulimwengu Wote.", h3: "KILA MTU AMEDANGANYWA.", p: <>"Yule joka akatupwa, yule mkubwa, nyoka wa zamani, aitwaye Ibilisi na Shetani, audanganyaye ulimwengu wote; akatupwa hata nchi, na malaika zake wakatupwa pamoja naye." - <span className="text-red-500 font-black">Ufunuo 12:9</span></>, img: "https://images.unsplash.com/photo-1533105079780-92b9be482077?q=80&w=2000" }
         ].map((step, i) => (
-          <div key={i} className="relative min-h-[70vh] md:min-h-[75vh] flex items-center overflow-hidden border-b border-slate-200 dark:border-white/5">
-            <img src={step.img} className="absolute inset-0 w-full h-full object-cover opacity-25 dark:opacity-20" alt="" />
+          <div key={i} className="relative min-h-[58vh] sm:min-h-[64vh] md:min-h-[75vh] flex items-center overflow-hidden border-b border-slate-200 dark:border-white/5">
+            <img src={step.img} loading="lazy" className="absolute inset-0 w-full h-full object-cover opacity-25 dark:opacity-20" alt="" />
             <div className="absolute inset-0 bg-gradient-to-r from-emerald-100/85 via-emerald-100/60 to-transparent dark:from-[#050b1d] dark:via-[#050b1d]/90"></div>
             <div className="max-w-6xl mx-auto px-4 sm:px-6 relative z-10 w-full">
               <ScrollReveal className={i % 2 === 0 ? "text-right ml-auto" : ""}>
@@ -139,7 +144,7 @@ export const Home: React.FC<HomeProps> = ({ onNavigate }) => {
                     <span className="text-red-500 font-black text-xs uppercase tracking-[0.4em]">{step.tag}</span>
                 </div>
                 <h2 className="text-2xl sm:text-4xl md:text-6xl font-serif text-slate-900 dark:text-white italic opacity-90 dark:opacity-80 mb-6 leading-tight">{step.h2}</h2>
-                <div className={`bg-red-50 dark:bg-red-950/5 p-6 sm:p-10 md:p-14 border-l-4 ${i % 2 === 0 ? 'border-r-4 border-l-0 text-right' : 'border-l-4'} border-red-500 backdrop-blur-md shadow-2xl max-w-3xl ${i % 2 === 0 ? 'ml-auto' : ''} rounded-sm transition-all hover:bg-red-100 dark:hover:bg-red-950/10`}>
+                <div className={`bg-red-50 dark:bg-red-950/5 p-6 sm:p-10 md:p-14 border-l-4 ${i % 2 === 0 ? 'border-r-4 border-l-0 text-right' : 'border-l-4'} border-red-500 backdrop-blur-sm md:backdrop-blur-md shadow-2xl max-w-3xl ${i % 2 === 0 ? 'ml-auto' : ''} rounded-sm transition-all hover:bg-red-100 dark:hover:bg-red-950/10`}>
                   <h3 className="text-2xl sm:text-3xl md:text-5xl font-black text-slate-900 dark:text-white uppercase tracking-tighter mb-6">{step.h3}</h3>
                   <div className="text-red-700 dark:text-red-50/70 font-serif italic text-base sm:text-lg md:text-xl leading-relaxed">{step.p}</div>
                 </div>
@@ -160,8 +165,8 @@ export const Home: React.FC<HomeProps> = ({ onNavigate }) => {
           { id: 1, tag: "Tumaini Limerejea", h2: "Tunalo Tumaini", h3: "TUNAWEZA KUUJUA UKWELI", p: <>"Tena mtaifahamu kweli, nayo hiyo kweli itawaweka huru." - <span className="text-emerald-400 font-black">Yohana 8:32</span> <br/><br/> <span className="text-emerald-400 font-medium italic">Ukweli unaweza kufichwa kwa muda, lakini hauwezi kufichwa milele.</span></>, img: "https://images.unsplash.com/photo-1491466424936-e304919aada7?q=80&w=2000" },
           { id: 2, tag: "Njia ya Mafanikio", h2: "Kuutafuta Ukweli", h3: "UKWELI UNAPATIKANA", p: <>"Tafuteni, nanyi mtaona;" - <span className="text-emerald-400 font-black">Mathayo 7:7</span> <br/> "Mtafuteni Bwana, maadamu anapatikana; mwiteni, maadamu yu karibu;" - <span className="text-emerald-400 font-black">Isaya 55:6</span> <br/><br/> <span className="text-emerald-400 font-medium italic">Tukiutafuta ukweli, tutaupata. Hili ni jukumu letu: kuutafuta ukweli.</span></>, img: "https://images.unsplash.com/photo-1454165833767-02638a5996bc?q=80&w=2000" },
         ].map((step, i) => (
-          <div key={i} className="relative min-h-[70vh] md:min-h-[75vh] flex items-center overflow-hidden border-b border-slate-200 dark:border-white/5">
-            <img src={step.img} className="absolute inset-0 w-full h-full object-cover opacity-25 dark:opacity-20" alt="" />
+          <div key={i} className="relative min-h-[58vh] sm:min-h-[64vh] md:min-h-[75vh] flex items-center overflow-hidden border-b border-slate-200 dark:border-white/5">
+            <img src={step.img} loading="lazy" className="absolute inset-0 w-full h-full object-cover opacity-25 dark:opacity-20" alt="" />
             <div className="absolute inset-0 bg-gradient-to-r from-emerald-100/85 via-emerald-100/60 to-transparent dark:from-[#020617] dark:via-[#020617]/90"></div>
             <div className="max-w-6xl mx-auto px-4 sm:px-6 relative z-10 w-full">
               <ScrollReveal className={i % 2 === 1 ? "text-right ml-auto" : ""}>
@@ -170,7 +175,7 @@ export const Home: React.FC<HomeProps> = ({ onNavigate }) => {
                     <span className="text-emerald-500 font-black text-xs uppercase tracking-[0.4em]">{step.tag}</span>
                 </div>
                 <h2 className="text-2xl sm:text-4xl md:text-6xl font-serif text-slate-900 dark:text-white italic opacity-90 dark:opacity-80 mb-6 leading-tight">{step.h2}</h2>
-                <div className={`bg-emerald-50 dark:bg-emerald-950/5 p-6 sm:p-10 md:p-14 border-l-4 ${i % 2 === 1 ? 'border-r-4 border-l-0 text-right' : 'border-l-4'} border-emerald-500/50 backdrop-blur-md shadow-2xl max-w-3xl ${i % 2 === 1 ? 'ml-auto' : ''} rounded-sm transition-all hover:bg-emerald-100 dark:hover:bg-emerald-950/10`}>
+                <div className={`bg-emerald-50 dark:bg-emerald-950/5 p-6 sm:p-10 md:p-14 border-l-4 ${i % 2 === 1 ? 'border-r-4 border-l-0 text-right' : 'border-l-4'} border-emerald-500/50 backdrop-blur-sm md:backdrop-blur-md shadow-2xl max-w-3xl ${i % 2 === 1 ? 'ml-auto' : ''} rounded-sm transition-all hover:bg-emerald-100 dark:hover:bg-emerald-950/10`}>
                   <h3 className="text-2xl sm:text-3xl md:text-5xl font-black text-slate-900 dark:text-white uppercase tracking-tighter mb-6">{step.h3}</h3>
                   <div className="text-slate-700 dark:text-slate-300 font-serif italic text-base sm:text-lg md:text-xl leading-relaxed">{step.p}</div>
                 </div>
@@ -327,7 +332,15 @@ export const Home: React.FC<HomeProps> = ({ onNavigate }) => {
           100% { transform: scale(1.1); }
         }
         .animate-ken-burns { 
-          animation: ken-burns 20s infinite alternate ease-in-out; 
+          animation: ken-burns 28s infinite alternate ease-in-out;
+          transform-origin: center center;
+          will-change: transform;
+        }
+        @media (max-width: 767px), (prefers-reduced-motion: reduce) {
+          .animate-ken-burns {
+            animation: none;
+            transform: scale(1.03);
+          }
         }
       `}</style>
     </div>

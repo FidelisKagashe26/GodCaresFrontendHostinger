@@ -96,17 +96,17 @@ export const AboutUs: React.FC = () => {
        
        {/* 1. Philosophy Section (Now Main Header - Centered, No Image Card) */}
        <section className="max-w-3xl mx-auto text-center space-y-5 md:space-y-6">
-          <div className="flex items-center justify-center gap-2 text-gold-500 font-black text-[9px] uppercase tracking-[0.2em]">
-             <Lightbulb size={12} /> Falsafa Yetu
+          <div className="flex items-center justify-center gap-2 text-gold-500 font-black text-[10px] sm:text-xs uppercase tracking-[0.2em]">
+             <Lightbulb size={14} /> Falsafa Yetu
           </div>
           <h2 className="text-2xl sm:text-3xl md:text-5xl font-black text-slate-900 dark:text-white uppercase tracking-tighter leading-none">
              Mungu Anajali, <br/><span className="text-gold-500">Ukweli Ni Muhimu.</span>
           </h2>
-          <div className="space-y-4 text-slate-600 dark:text-slate-400 text-sm leading-relaxed font-medium">
+          <div className="space-y-4 text-slate-600 dark:text-slate-400 text-sm sm:text-base leading-relaxed font-medium">
              <p>
                  Tunaishi katika kipindi ambacho ukweli unapotoshwa na kupuuzwa. God Cares 365 ilizaliwa kwa mzigo wa kuwasaidia watu wanaopotea na kuwaonyesha kwamba Mungu hajawaacha; ukweli wake ndio uhuru wa kweli.
              </p>
-             <div className="inline-block px-6 py-2 border-l-2 border-r-2 border-gold-500/30 italic text-slate-500 text-xs bg-slate-50 dark:bg-white/5 rounded-lg">
+             <div className="inline-block px-6 py-2 border-l-2 border-r-2 border-gold-500/30 italic text-slate-500 text-sm bg-slate-50 dark:bg-white/5 rounded-lg">
                 "Hatuhubiri dini, tunahubiri Kristo na Neno lake lililo hai."
              </div>
           </div>
@@ -114,8 +114,8 @@ export const AboutUs: React.FC = () => {
           {/* Independent Ministry Disclaimer */}
           <div className="pt-2 flex justify-center">
              <div className="flex gap-2 items-center opacity-70">
-                <Church size={14} className="text-slate-400 mt-0.5 shrink-0" />
-                <p className="text-[8px] text-slate-500 dark:text-slate-500 font-bold uppercase tracking-wide leading-tight">
+                <Church size={16} className="text-slate-400 mt-0.5 shrink-0" />
+                <p className="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-500 font-bold uppercase tracking-wide leading-tight">
                    God Cares 365 ni huduma huru inayofuata miongozo ya Kanisa la Waadventista Wasabato.
                 </p>
              </div>
@@ -125,42 +125,42 @@ export const AboutUs: React.FC = () => {
        {/* 2. Leadership Section - Square/Boxy Cards */}
        <section className="space-y-6 pt-4 md:pt-8">
           <div className="text-center space-y-2">
-             <h3 className="text-[8px] font-black text-gold-500 uppercase tracking-[0.4em]">TIMU YA UONGOZI</h3>
-             <h2 className="text-2xl md:text-3xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">Viongozi Wetu</h2>
+             <h3 className="text-[10px] sm:text-xs font-black text-gold-500 uppercase tracking-[0.4em]">TIMU YA UONGOZI</h3>
+             <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">Viongozi Wetu</h2>
           </div>
 
           {teamError && (
-            <div className="text-center text-[10px] font-bold uppercase tracking-widest text-amber-600 dark:text-amber-400">
+            <div className="text-center text-xs font-bold uppercase tracking-widest text-amber-600 dark:text-amber-400">
               {teamError}
             </div>
           )}
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 sm:gap-5">
              {leaders.map((leader) => (
-                <div key={leader.id} className="flex flex-col items-center justify-center text-center gap-4 bg-white dark:bg-slate-900 p-5 md:p-6 rounded-2xl border border-slate-100 dark:border-white/5 shadow-sm hover:border-gold-500/30 hover:shadow-lg transition-all group relative overflow-hidden aspect-square">
+                <div key={leader.id} className="flex flex-col items-center justify-center text-center gap-4 bg-white dark:bg-slate-900 p-5 sm:p-6 rounded-2xl border border-slate-100 dark:border-white/5 shadow-sm hover:border-gold-500/30 hover:shadow-lg transition-all group relative overflow-hidden min-h-[228px] sm:aspect-square">
                    <div className="absolute top-0 left-0 w-full h-1" style={{ backgroundColor: leader.accentColor }}></div>
-                   
-                   <div className="w-14 h-14 rounded-2xl flex items-center justify-center text-white shadow-lg shrink-0 group-hover:scale-110 transition-transform mb-1 overflow-hidden" style={{ backgroundColor: leader.accentColor }}>
-                      {leader.avatarUrl ? (
-                        <img src={leader.avatarUrl} alt={leader.name} className="w-full h-full object-cover" />
-                      ) : (
-                        <User size={20} />
-                      )}
-                   </div>
-                   
-                   <div className="space-y-1">
-                      <h4 className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-tight">{leader.name}</h4>
-                      <p className="text-[8px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest truncate w-full px-2">{leader.role}</p>
-                   </div>
+                    
+                    <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl flex items-center justify-center text-white shadow-lg shrink-0 group-hover:scale-110 transition-transform mb-1 overflow-hidden" style={{ backgroundColor: leader.accentColor }}>
+                       {leader.avatarUrl ? (
+                         <img src={leader.avatarUrl} alt={leader.name} className="w-full h-full object-cover" />
+                       ) : (
+                         <User size={24} />
+                       )}
+                    </div>
+                    
+                    <div className="space-y-1">
+                      <h4 className="text-sm sm:text-base font-black text-slate-900 dark:text-white uppercase tracking-tight">{leader.name}</h4>
+                      <p className="text-[10px] sm:text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest leading-tight w-full px-2">{leader.role}</p>
+                    </div>
 
-                   <div className="flex gap-3 mt-1 opacity-60 group-hover:opacity-100 transition-opacity">
-                      {leader.email && (
-                        <a href={`mailto:${leader.email}`} className="p-2 bg-slate-50 dark:bg-white/5 rounded-lg text-slate-400 hover:text-primary-600 hover:bg-white transition-all border border-transparent hover:border-slate-100"><Mail size={12}/></a>
-                      )}
-                      {leader.phone && (
-                        <a href={`tel:${leader.phone}`} className="p-2 bg-slate-50 dark:bg-white/5 rounded-lg text-slate-400 hover:text-green-600 hover:bg-white transition-all border border-transparent hover:border-slate-100"><Phone size={12}/></a>
-                      )}
-                   </div>
+                    <div className="flex gap-3 mt-1 opacity-60 group-hover:opacity-100 transition-opacity">
+                       {leader.email && (
+                        <a href={`mailto:${leader.email}`} className="p-2.5 bg-slate-50 dark:bg-white/5 rounded-lg text-slate-500 dark:text-slate-400 hover:text-primary-600 hover:bg-white dark:hover:bg-white/10 transition-all border border-transparent hover:border-slate-100 dark:hover:border-white/10"><Mail size={14}/></a>
+                       )}
+                       {leader.phone && (
+                        <a href={`tel:${leader.phone}`} className="p-2.5 bg-slate-50 dark:bg-white/5 rounded-lg text-slate-500 dark:text-slate-400 hover:text-green-600 hover:bg-white dark:hover:bg-white/10 transition-all border border-transparent hover:border-slate-100 dark:hover:border-white/10"><Phone size={14}/></a>
+                       )}
+                    </div>
                 </div>
              ))}
           </div>
@@ -170,26 +170,26 @@ export const AboutUs: React.FC = () => {
        <section className="relative overflow-hidden bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/5 rounded-2xl shadow-lg">
           <div className="grid grid-cols-1 lg:grid-cols-12">
              {/* Left Column: Profile */}
-             <div className="lg:col-span-3 bg-slate-50 dark:bg-black/20 p-6 flex flex-col items-center justify-center border-b lg:border-b-0 lg:border-r border-slate-100 dark:border-white/5">
-                <div className="w-24 h-24 rounded-full p-0.5 bg-gradient-to-tr from-gold-400 to-gold-600 shadow-md mb-3">
+             <div className="lg:col-span-3 bg-slate-50 dark:bg-black/20 p-6 sm:p-8 flex flex-col items-center justify-center border-b lg:border-b-0 lg:border-r border-slate-100 dark:border-white/5">
+                <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full p-0.5 bg-gradient-to-tr from-gold-400 to-gold-600 shadow-md mb-3">
                    <div className="w-full h-full rounded-full bg-slate-800 overflow-hidden relative flex items-center justify-center">
                       <User size={48} className="text-white/50" />
                    </div>
                 </div>
-                <h4 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-tight text-center">Frank Majibwene</h4>
-                <p className="text-[8px] font-black text-gold-500 uppercase tracking-widest text-center">Rais na Mwanzilishi</p>
+                <h4 className="text-base sm:text-lg font-black text-slate-900 dark:text-white uppercase tracking-tight text-center">Frank Majibwene</h4>
+                <p className="text-[10px] sm:text-xs font-black text-gold-500 uppercase tracking-widest text-center">Rais na Mwanzilishi</p>
              </div>
 
              {/* Right Column: The Message */}
-             <div className="lg:col-span-9 p-5 md:p-8 space-y-4">
+             <div className="lg:col-span-9 p-5 sm:p-6 md:p-8 space-y-4">
                 <div className="flex items-center gap-2 mb-1">
                    <div className="h-[2px] w-6 bg-gold-500"></div>
-                   <h3 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-widest">
+                   <h3 className="text-base sm:text-lg font-black text-slate-900 dark:text-white uppercase tracking-widest">
                       Ujumbe Kutoka kwa Rais
                    </h3>
                 </div>
                 
-                <div className="space-y-4 text-slate-600 dark:text-slate-300 text-xs md:text-sm leading-relaxed font-serif">
+                <div className="space-y-4 text-slate-600 dark:text-slate-300 text-sm md:text-base leading-relaxed font-serif">
                    <p>
                       "Habari, rafiki! Umechanganyikiwa? Umedanganywa? Unautafuta ukweli? Una roho ya udadisi? Unataka kujifunza zaidi? Je, unajua uko ndani kabisa ya moyo wa Mungu?"
                    </p>
@@ -205,7 +205,7 @@ export const AboutUs: React.FC = () => {
                 </div>
 
                 <div className="pt-4 border-t border-slate-100 dark:border-white/5 flex items-start justify-between gap-3">
-                   <p className="text-[8px] md:text-[9px] font-black text-slate-400 uppercase tracking-widest">
+                   <p className="text-[10px] sm:text-xs font-black text-slate-400 uppercase tracking-widest leading-relaxed">
                       "Amani ya Bwana wetu Yesu Kristo, na upendo wa Mungu Baba, na ushirika wa Roho Mtakatifu uwe pamoja nawe. Amina."
                    </p>
                    <div className="text-gold-500 opacity-50">
@@ -217,104 +217,104 @@ export const AboutUs: React.FC = () => {
        </section>
 
        {/* 4. Compact Impact & Features Dashboard */}
-       <section className="bg-slate-950 rounded-2xl p-6 relative overflow-hidden border border-slate-800 shadow-xl">
+       <section className="bg-[color:var(--surface-2)] dark:bg-slate-950 rounded-2xl p-5 sm:p-6 relative overflow-hidden border border-slate-200 dark:border-slate-800 shadow-xl">
           <div className="relative z-10 space-y-8">
              
              {/* Section Header */}
-             <div className="text-center space-y-2">
-                <div className="inline-flex items-center gap-2 text-gold-500 font-black text-[9px] uppercase tracking-[0.3em]">
+              <div className="text-center space-y-2">
+                <div className="inline-flex items-center gap-2 text-gold-500 font-black text-[10px] sm:text-xs uppercase tracking-[0.3em]">
                    <Activity size={12} className="animate-pulse" /> Hali
                 </div>
-                <h3 className="text-2xl font-black text-white uppercase tracking-tighter">
+                <h3 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">
                    Takwimu & Nyenzo
                 </h3>
              </div>
 
-             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                
-                {/* LEFT: Compact Stats */}
-                <div className="space-y-6">
-                   <div className="flex items-center justify-between border-b border-white/10 pb-2">
-                      <h4 className="text-[10px] font-black text-white uppercase tracking-[0.2em]">Mwenendo</h4>
+             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
+                 
+                 {/* LEFT: Compact Stats */}
+                 <div className="space-y-6">
+                   <div className="flex items-center justify-between border-b border-slate-200 dark:border-white/10 pb-2">
+                      <h4 className="text-[10px] sm:text-xs font-black text-slate-700 dark:text-white uppercase tracking-[0.2em]">Mwenendo</h4>
                       <div className="flex gap-2">
                          <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></div>
-                         <span className="text-[8px] font-bold text-green-500 uppercase">Sasa</span>
+                         <span className="text-[10px] font-bold text-green-500 uppercase">Sasa</span>
                       </div>
                    </div>
 
-                   {/* Tighter Grid for Circles */}
-                   <div className="grid grid-cols-3 gap-2">
-                      {/* Circular Item 1 */}
-                      <div className="flex flex-col items-center gap-2 group">
-                         <div className="relative w-16 h-16 md:w-20 md:h-20">
+                    {/* Tighter Grid for Circles */}
+                   <div className="grid grid-cols-3 gap-3 sm:gap-4">
+                       {/* Circular Item 1 */}
+                       <div className="flex flex-col items-center gap-2 group">
+                         <div className="relative w-20 h-20 sm:w-24 sm:h-24">
                             <svg className="w-full h-full rotate-[-90deg]" viewBox="0 0 36 36">
-                               <path className="text-slate-800" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" strokeWidth="3" />
+                               <path className="text-slate-200 dark:text-slate-800" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" strokeWidth="3" />
                                <path className="text-gold-500" strokeDasharray="100, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" strokeWidth="3" />
                             </svg>
                             <div className="absolute inset-0 flex items-center justify-center flex-col">
-                               <span className="text-xs font-black text-white">100%</span>
+                               <span className="text-sm sm:text-base font-black text-slate-900 dark:text-white">100%</span>
                             </div>
                          </div>
-                         <p className="text-[8px] font-bold text-white uppercase text-center">Biblia</p>
-                      </div>
+                         <p className="text-[10px] sm:text-xs font-bold text-slate-700 dark:text-white uppercase text-center">Biblia</p>
+                       </div>
 
-                      {/* Circular Item 2 */}
-                      <div className="flex flex-col items-center gap-2 group">
-                         <div className="relative w-16 h-16 md:w-20 md:h-20">
+                       {/* Circular Item 2 */}
+                       <div className="flex flex-col items-center gap-2 group">
+                         <div className="relative w-20 h-20 sm:w-24 sm:h-24">
                             <svg className="w-full h-full rotate-[-90deg]" viewBox="0 0 36 36">
-                               <path className="text-slate-800" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" strokeWidth="3" />
+                               <path className="text-slate-200 dark:text-slate-800" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" strokeWidth="3" />
                                <path className="text-blue-500" strokeDasharray="85, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" strokeWidth="3" />
                             </svg>
                             <div className="absolute inset-0 flex items-center justify-center flex-col">
-                               <span className="text-xs font-black text-white">7+</span>
+                               <span className="text-sm sm:text-base font-black text-slate-900 dark:text-white">7+</span>
                             </div>
                          </div>
-                         <p className="text-[8px] font-bold text-white uppercase text-center">Lugha</p>
-                      </div>
+                         <p className="text-[10px] sm:text-xs font-bold text-slate-700 dark:text-white uppercase text-center">Lugha</p>
+                       </div>
 
-                      {/* Circular Item 3 */}
-                      <div className="flex flex-col items-center gap-2 group">
-                         <div className="relative w-16 h-16 md:w-20 md:h-20 rounded-full border-2 border-slate-800 flex items-center justify-center bg-slate-900">
+                       {/* Circular Item 3 */}
+                       <div className="flex flex-col items-center gap-2 group">
+                         <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-full border-2 border-slate-200 dark:border-slate-800 flex items-center justify-center bg-white dark:bg-slate-900">
                             <div className="text-center">
-                               <span className="text-xs font-black text-white block">50K</span>
+                               <span className="text-sm sm:text-base font-black text-slate-900 dark:text-white block">50K</span>
                             </div>
                          </div>
-                         <p className="text-[8px] font-bold text-white uppercase text-center">Watu</p>
-                      </div>
+                         <p className="text-[10px] sm:text-xs font-bold text-slate-700 dark:text-white uppercase text-center">Watu</p>
+                       </div>
+                    </div>
+
+                    {/* Compact Bar */}
+                   <div className="bg-[color:var(--surface-1)] dark:bg-white/5 p-4 sm:p-5 rounded-lg border border-slate-200 dark:border-white/5">
+                       <div className="flex justify-between items-end mb-1">
+                         <h5 className="text-[10px] sm:text-xs font-black text-slate-700 dark:text-white uppercase tracking-widest">Mataifa</h5>
+                         <span className="text-base sm:text-lg font-black text-gold-500">12+</span>
+                       </div>
+                       <div className="h-1.5 w-full bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
+                          <div className="h-full bg-gold-500 w-3/4 rounded-full"></div>
+                       </div>
+                    </div>
+                 </div>
+
+                 {/* RIGHT: Compact Tools Grid */}
+                 <div className="space-y-6">
+                   <div className="flex items-center justify-between border-b border-slate-200 dark:border-white/10 pb-2">
+                      <h4 className="text-[10px] sm:text-xs font-black text-slate-700 dark:text-white uppercase tracking-[0.2em]">Zana</h4>
+                      <Zap size={14} className="text-gold-500" />
                    </div>
 
-                   {/* Compact Bar */}
-                   <div className="bg-white/5 p-4 rounded-lg border border-white/5">
-                      <div className="flex justify-between items-end mb-1">
-                         <h5 className="text-[9px] font-black text-white uppercase tracking-widest">Mataifa</h5>
-                         <span className="text-sm font-black text-gold-500">12+</span>
-                      </div>
-                      <div className="h-1.5 w-full bg-slate-800 rounded-full overflow-hidden">
-                         <div className="h-full bg-gold-500 w-3/4 rounded-full"></div>
-                      </div>
-                   </div>
-                </div>
-
-                {/* RIGHT: Compact Tools Grid */}
-                <div className="space-y-6">
-                   <div className="flex items-center justify-between border-b border-white/10 pb-2">
-                      <h4 className="text-[10px] font-black text-white uppercase tracking-[0.2em]">Zana (Tools)</h4>
-                      <Zap size={12} className="text-gold-500" />
-                   </div>
-
-                   <div className="grid grid-cols-2 gap-2">
+                   <div className="grid grid-cols-2 gap-3">
                       {[
-                         { icon: <Microscope size={14} />, title: "Uchambuzi", desc: "Uchunguzi wa kina.", color: "text-purple-400" },
-                         { icon: <Clock size={14} />, title: "Nyakati", desc: "Ramani za nyakati.", color: "text-blue-400" },
-                         { icon: <ShieldCheck size={14} />, title: "Ufichuzi", desc: "Kufichua uongo.", color: "text-red-400" },
-                         { icon: <Download size={14} />, title: "Upakuaji", desc: "Maktaba ya bure.", color: "text-green-400" },
-                         { icon: <Target size={14} />, title: "Faith", desc: "Mashujaa wa imani.", color: "text-gold-400" },
-                         { icon: <Activity size={14} />, title: "Maendeleo", desc: "Maendeleo yako.", color: "text-cyan-400" }
+                         { icon: <Microscope size={16} />, title: "Uchambuzi", desc: "Uchunguzi wa kina.", color: "text-purple-500 dark:text-purple-400" },
+                         { icon: <Clock size={16} />, title: "Nyakati", desc: "Ramani za nyakati.", color: "text-blue-500 dark:text-blue-400" },
+                         { icon: <ShieldCheck size={16} />, title: "Ufichuzi", desc: "Kufichua uongo.", color: "text-red-500 dark:text-red-400" },
+                         { icon: <Download size={16} />, title: "Upakuaji", desc: "Maktaba ya bure.", color: "text-green-500 dark:text-green-400" },
+                         { icon: <Target size={16} />, title: "Imani", desc: "Mashujaa wa imani.", color: "text-gold-500" },
+                         { icon: <Activity size={16} />, title: "Maendeleo", desc: "Maendeleo yako.", color: "text-cyan-500 dark:text-cyan-400" }
                       ].map((tool, i) => (
-                         <div key={i} className="bg-white/5 hover:bg-white/10 p-2 rounded-lg border border-white/5 transition-all group cursor-default">
-                            <div className={`mb-1 ${tool.color} bg-white/5 w-fit p-1 rounded group-hover:scale-110 transition-transform`}>{tool.icon}</div>
-                            <h5 className="text-[9px] font-black text-white uppercase tracking-widest mb-0.5">{tool.title}</h5>
-                            <p className="text-[7px] text-slate-400 leading-tight font-medium">{tool.desc}</p>
+                         <div key={i} className="bg-[color:var(--surface-1)] dark:bg-white/5 hover:bg-[color:var(--surface-3)] dark:hover:bg-white/10 p-3 sm:p-4 rounded-xl border border-slate-200 dark:border-white/5 transition-all group cursor-default">
+                            <div className={`mb-2 ${tool.color} bg-white dark:bg-white/5 w-fit p-2 rounded-lg group-hover:scale-110 transition-transform shadow-sm`}>{tool.icon}</div>
+                            <h5 className="text-xs sm:text-sm font-black text-slate-900 dark:text-white uppercase tracking-widest mb-1">{tool.title}</h5>
+                            <p className="text-[11px] sm:text-xs text-slate-600 dark:text-slate-400 leading-snug font-medium">{tool.desc}</p>
                          </div>
                       ))}
                    </div>
@@ -327,15 +327,15 @@ export const AboutUs: React.FC = () => {
        {/* 6. Newsletter Subscription (Replaces Call to Action) */}
        <section className="text-center space-y-6 pt-4 pb-2">
           <div className="max-w-xl mx-auto space-y-2">
-             <div className="inline-flex items-center gap-2 text-gold-500 font-black text-[9px] uppercase tracking-[0.2em] mb-1">
-                <Mail size={12} /> Taarifa za Kila Wiki
+             <div className="inline-flex items-center gap-2 text-gold-500 font-black text-[10px] sm:text-xs uppercase tracking-[0.2em] mb-1">
+                <Mail size={14} /> Taarifa za Kila Wiki
              </div>
-             <h3 className="text-2xl md:text-3xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">
-                Jiunge na Jarida Letu
-             </h3>
-             <p className="text-slate-500 dark:text-slate-400 text-xs md:text-sm font-medium">
-                Pata uchambuzi wa unabii, habari za misheni, na mafundisho mapya moja kwa moja kwenye barua pepe yako kila wiki.
-             </p>
+              <h3 className="text-2xl md:text-3xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">
+                 Jiunge na Jarida Letu
+              </h3>
+             <p className="text-slate-500 dark:text-slate-400 text-sm md:text-base font-medium">
+                 Pata uchambuzi wa unabii, habari za misheni, na mafundisho mapya moja kwa moja kwenye barua pepe yako kila wiki.
+              </p>
           </div>
 
           <div className="max-w-md mx-auto relative group">
@@ -355,7 +355,7 @@ export const AboutUs: React.FC = () => {
              </div>
           </div>
           
-          <p className="text-[9px] text-slate-400 dark:text-slate-600 font-bold uppercase tracking-widest">
+          <p className="text-[10px] sm:text-xs text-slate-400 dark:text-slate-600 font-bold uppercase tracking-widest">
              Hatutumi spam. Unaweza kujiondoa wakati wowote.
           </p>
        </section>
