@@ -4,6 +4,14 @@ export interface SiteSettings {
   site_name: string;
   site_tagline: string;
   logo_url: string;
+  home_truth_story_1_image: string;
+  home_truth_story_2_image: string;
+  home_truth_story_3_image: string;
+  home_deception_story_1_image: string;
+  home_deception_story_2_image: string;
+  home_deception_story_3_image: string;
+  home_hope_story_1_image: string;
+  home_hope_story_2_image: string;
   contact_phone: string;
   contact_email: string;
   support_email: string;
@@ -22,6 +30,14 @@ export const DEFAULT_SITE_SETTINGS: SiteSettings = {
   site_name: "God Cares 365",
   site_tagline: "Hope / Prayer / Scripture",
   logo_url: "",
+  home_truth_story_1_image: "",
+  home_truth_story_2_image: "",
+  home_truth_story_3_image: "",
+  home_deception_story_1_image: "",
+  home_deception_story_2_image: "",
+  home_deception_story_3_image: "",
+  home_hope_story_1_image: "",
+  home_hope_story_2_image: "",
   contact_phone: "+255 744 780 244",
   contact_email: "fathercares365@gmail.com",
   support_email: "support@godcares365.org",
@@ -50,6 +66,14 @@ const normalizeSettings = (input: Partial<SiteSettings>): SiteSettings => ({
   ...DEFAULT_SITE_SETTINGS,
   ...input,
   logo_url: toAbsoluteUrl((input.logo_url || "").trim()),
+  home_truth_story_1_image: toAbsoluteUrl((input.home_truth_story_1_image || "").trim()),
+  home_truth_story_2_image: toAbsoluteUrl((input.home_truth_story_2_image || "").trim()),
+  home_truth_story_3_image: toAbsoluteUrl((input.home_truth_story_3_image || "").trim()),
+  home_deception_story_1_image: toAbsoluteUrl((input.home_deception_story_1_image || "").trim()),
+  home_deception_story_2_image: toAbsoluteUrl((input.home_deception_story_2_image || "").trim()),
+  home_deception_story_3_image: toAbsoluteUrl((input.home_deception_story_3_image || "").trim()),
+  home_hope_story_1_image: toAbsoluteUrl((input.home_hope_story_1_image || "").trim()),
+  home_hope_story_2_image: toAbsoluteUrl((input.home_hope_story_2_image || "").trim()),
 });
 
 export const getSiteSettings = async (): Promise<SiteSettings> => {

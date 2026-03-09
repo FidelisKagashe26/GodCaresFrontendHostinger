@@ -1,6 +1,7 @@
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ShieldAlert, AlertTriangle, X, RefreshCcw, ShieldCheck, ArrowRight, BookOpen, AlertOctagon, ChevronLeft, ChevronRight } from 'lucide-react';
+import { DeceptionCaseApi, getDeceptionCases } from '../services/vaultService';
 
 interface Props {
   onGoToVault?: () => void;
@@ -66,9 +67,50 @@ const DECEPTIONS = [
 export const DeceptionTool: React.FC<Props> = ({ onGoToVault }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState(0);
+  const [deceptions, setDeceptions] = useState(DECEPTIONS);
+  const [loadError, setLoadError] = useState('');
+  const [hasLoaded, setHasLoaded] = useState(false);
 
-  const nextDeception = () => setActiveTab((prev) => (prev + 1) % DECEPTIONS.length);
-  const prevDeception = () => setActiveTab((prev) => (prev - 1 + DECEPTIONS.length) % DECEPTIONS.length);
+  useEffect(() => {
+    if (!isOpen || hasLoaded) {
+      return;
+    }
+
+    const loadDeceptions = async () => {
+      try {
+        const data: DeceptionCaseApi[] = await getDeceptionCases();
+        const mapped = data.map((item) => ({
+          topic: item.topic || 'Mada ya Udanganyifu',
+          myth: item.category || 'Mapokeo',
+          mythDesc: item.tradition || 'Hakuna taarifa',
+          truth: 'Biblia Inasema',
+          truthDesc: item.scripture || 'Hakuna taarifa',
+          ref: item.reference || 'Hakuna marejeo',
+          risk: item.threatLevel || 'MODERATE',
+        }));
+        if (mapped.length > 0) {
+          setDeceptions(mapped);
+        }
+      } catch {
+        setLoadError('Imeshindikana kupakua data ya udanganyifu. Tunaonyesha ya msingi.');
+      } finally {
+        setHasLoaded(true);
+      }
+    };
+
+    loadDeceptions();
+  }, [hasLoaded, isOpen]);
+
+  const activeDeceptions = deceptions.length > 0 ? deceptions : DECEPTIONS;
+
+  useEffect(() => {
+    if (activeTab >= activeDeceptions.length) {
+      setActiveTab(0);
+    }
+  }, [activeDeceptions.length, activeTab]);
+
+  const nextDeception = () => setActiveTab((prev) => (prev + 1) % activeDeceptions.length);
+  const prevDeception = () => setActiveTab((prev) => (prev - 1 + activeDeceptions.length) % activeDeceptions.length);
 
   return (
     <>
@@ -104,7 +146,7 @@ export const DeceptionTool: React.FC<Props> = ({ onGoToVault }) => {
 
                 {/* Tabs */}
                 <div className="flex border-b border-white/5 bg-black/20 overflow-x-auto scrollbar-hide flex-shrink-0">
-                  {DECEPTIONS.map((d, i) => (
+                  {activeDeceptions.map((d, i) => (
                     <button 
                       key={i}
                       onClick={() => setActiveTab(i)}
@@ -127,15 +169,15 @@ export const DeceptionTool: React.FC<Props> = ({ onGoToVault }) => {
                             <AlertTriangle size={16} />
                             <h4 className="text-[10px] font-black uppercase tracking-[0.2em]">Mapokeo (Uongo)</h4>
                          </div>
-                         <h3 className="text-lg font-black text-red-200 uppercase leading-none mb-3">{DECEPTIONS[activeTab].myth}</h3>
-                         <p className="text-xs text-slate-400 leading-relaxed font-medium">"{DECEPTIONS[activeTab].mythDesc}"</p>
-                         
-                         <div className="mt-auto pt-4 flex justify-end">
-                            <span className="px-2 py-1 bg-red-500/10 text-red-500 rounded text-[8px] font-black uppercase tracking-widest border border-red-500/20">
-                               {DECEPTIONS[activeTab].risk} Risk
-                            </span>
-                         </div>
-                      </div>
+                          <h3 className="text-lg font-black text-red-200 uppercase leading-none mb-3">{activeDeceptions[activeTab].myth}</h3>
+                          <p className="text-xs text-slate-400 leading-relaxed font-medium">"{activeDeceptions[activeTab].mythDesc}"</p>
+                          
+                          <div className="mt-auto pt-4 flex justify-end">
+                             <span className="px-2 py-1 bg-red-500/10 text-red-500 rounded text-[8px] font-black uppercase tracking-widest border border-red-500/20">
+                               {activeDeceptions[activeTab].risk} Risk
+                             </span>
+                          </div>
+                       </div>
 
                       {/* TRUTH */}
                       <div className="bg-emerald-500/5 border border-emerald-500/10 rounded-xl p-6 flex flex-col relative group hover:border-emerald-500/20 transition-all shadow-[0_0_30px_rgba(16,185,129,0.05)] h-full">
@@ -143,18 +185,23 @@ export const DeceptionTool: React.FC<Props> = ({ onGoToVault }) => {
                             <ShieldCheck size={16} />
                             <h4 className="text-[10px] font-black uppercase tracking-[0.2em]">Biblia (Ukweli)</h4>
                          </div>
-                         <h3 className="text-lg font-black text-emerald-200 uppercase leading-none mb-3">{DECEPTIONS[activeTab].truth}</h3>
-                         <p className="text-xs text-slate-300 leading-relaxed font-medium">"{DECEPTIONS[activeTab].truthDesc}"</p>
-                         
-                         <div className="mt-auto pt-4 flex justify-start">
-                            <span className="flex items-center gap-1.5 px-2 py-1 bg-emerald-500/10 text-emerald-400 rounded text-[8px] font-black uppercase tracking-widest border border-emerald-500/20">
-                               <BookOpen size={8} /> {DECEPTIONS[activeTab].ref}
-                            </span>
-                         </div>
-                      </div>
+                          <h3 className="text-lg font-black text-emerald-200 uppercase leading-none mb-3">{activeDeceptions[activeTab].truth}</h3>
+                          <p className="text-xs text-slate-300 leading-relaxed font-medium">"{activeDeceptions[activeTab].truthDesc}"</p>
+                          
+                          <div className="mt-auto pt-4 flex justify-start">
+                             <span className="flex items-center gap-1.5 px-2 py-1 bg-emerald-500/10 text-emerald-400 rounded text-[8px] font-black uppercase tracking-widest border border-emerald-500/20">
+                               <BookOpen size={8} /> {activeDeceptions[activeTab].ref}
+                             </span>
+                          </div>
+                       </div>
 
-                   </div>
-                </div>
+                    </div>
+                    {loadError && (
+                      <div className="mt-4 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-[10px] font-black uppercase tracking-widest text-amber-300">
+                        {loadError}
+                      </div>
+                    )}
+                 </div>
 
                 {/* Footer */}
                 <div className="p-5 bg-slate-900/50 border-t border-white/5 flex justify-between items-center flex-shrink-0">

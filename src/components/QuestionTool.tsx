@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
 import { Send, HelpCircle, X, MessageSquare, CheckCircle2, ShieldCheck, Mail, ArrowRight } from 'lucide-react';
+import { submitQuestionVaultQuestion } from '../services/vaultService';
 
 interface Props {
   onGoToVault?: () => void;
@@ -11,13 +12,23 @@ export const QuestionTool: React.FC<Props> = ({ onGoToVault }) => {
   const [question, setQuestion] = useState('');
   const [email, setEmail] = useState('');
   const [view, setView] = useState<'ASK' | 'SENDING' | 'SENT'>('ASK');
+  const [submitError, setSubmitError] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!question.trim()) return;
+    setSubmitError('');
     setView('SENDING');
-    // Simulate Secure Transmission to Backend Team
-    setTimeout(() => { setView('SENT'); }, 2000);
+    try {
+      await submitQuestionVaultQuestion({
+        email: email.trim(),
+        question: question.trim(),
+      });
+      setView('SENT');
+    } catch (error) {
+      setSubmitError(error instanceof Error ? error.message : 'Imeshindikana kutuma swali.');
+      setView('ASK');
+    }
   };
 
   const reset = () => {
@@ -26,6 +37,7 @@ export const QuestionTool: React.FC<Props> = ({ onGoToVault }) => {
         setView('ASK');
         setQuestion('');
         setEmail('');
+        setSubmitError('');
     }, 300);
   };
 
@@ -64,6 +76,11 @@ export const QuestionTool: React.FC<Props> = ({ onGoToVault }) => {
                 <div className="p-8 min-h-[350px] flex flex-col justify-center relative z-10 bg-[#0f172a]">
                   {view === 'ASK' && (
                     <form onSubmit={handleSubmit} className="space-y-5 animate-fade-in">
+                       {submitError && (
+                         <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-[10px] font-black uppercase tracking-widest text-amber-300">
+                           {submitError}
+                         </div>
+                       )}
                        <div className="space-y-2">
                           <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Swali Lako</label>
                           <textarea 

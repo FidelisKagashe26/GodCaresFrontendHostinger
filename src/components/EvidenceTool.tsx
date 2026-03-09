@@ -1,7 +1,7 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 import { Microscope, ChevronRight, ChevronLeft, X, Fingerprint, MapPin, Lightbulb, Info, CheckCircle2, Loader2 } from 'lucide-react';
-import { EvidenceItemApi, getEvidenceItems } from '../services/vaultService';
+import { EvidenceHighlightApi, getEvidenceHighlights } from '../services/globalToolService';
 
 interface EvidenceFact {
   id: number;
@@ -61,30 +61,17 @@ const FALLBACK_FACTS: EvidenceFact[] = [
 
 const DEFAULT_EVIDENCE_IMAGE = 'https://images.unsplash.com/photo-1548013146-72479768bbaa?q=80&w=1600';
 
-const mapEvidenceToFact = (item: EvidenceItemApi, index: number): EvidenceFact => {
-  const sourceHints = Array.isArray(item.evidenceData?.annotations)
-    ? item.evidenceData.annotations
-        .map((annotation) => (annotation.text || '').trim())
-        .filter((text) => text.length > 0)
-    : [];
-
-  const backupHints = [
-    item.sourceBook ? `Chanzo: ${item.sourceBook}` : '',
-    item.publisher ? `Mchapishaji: ${item.publisher}` : '',
-    item.yearPublished ? `Mwaka: ${item.yearPublished}` : '',
-  ].filter((hint) => hint.length > 0);
-
-  const hints = [...sourceHints, ...backupHints].slice(0, 3);
-
+const mapEvidenceToFact = (item: EvidenceHighlightApi, index: number): EvidenceFact => {
+  const hints = (item.hints || []).slice(0, 3);
   return {
     id: Number(item.id) || index + 1,
-    title: item.swahiliTitle || item.title || 'Ushahidi wa Kihistoria',
-    evidence: item.description || item.fact || 'Hakuna maelezo ya ushahidi kwa sasa.',
-    didYouKnow: item.fact || item.translations?.sw || item.description || 'Hakuna dondoo ya ziada kwa sasa.',
+    title: item.title || 'Ushahidi wa Kihistoria',
+    evidence: item.evidence || 'Hakuna maelezo ya ushahidi kwa sasa.',
+    didYouKnow: item.did_you_know || item.evidence || 'Hakuna dondoo ya ziada kwa sasa.',
     hints: hints.length > 0 ? hints : ['Ushahidi huu umetolewa kwenye hazina ya ushahidi ya mfumo.'],
-    image: item.heroImage || DEFAULT_EVIDENCE_IMAGE,
-    year: item.yearPublished || 'N/A',
-    location: item.author?.organization || item.category || 'Haijajulikana',
+    image: item.image || DEFAULT_EVIDENCE_IMAGE,
+    year: item.year_label || 'N/A',
+    location: item.location || 'Haijajulikana',
   };
 };
 
@@ -113,11 +100,11 @@ export const EvidenceTool: React.FC<Props> = ({ onGoToVault }) => {
     setIsLoadingFacts(true);
     setFactsError('');
     try {
-      const payload = await getEvidenceItems();
+      const payload = await getEvidenceHighlights();
       const mapped = payload.map((item, index) => mapEvidenceToFact(item, index));
       setFacts(mapped.length > 0 ? mapped : FALLBACK_FACTS);
     } catch {
-      setFactsError('Imeshindikana kupakua dondoo za ushahidi. Tunaonyesha data ya msingi.');
+      setFactsError('Imeshindikana kupakua Did You Know. Tunaonyesha data ya msingi.');
       setFacts(FALLBACK_FACTS);
     } finally {
       setIsLoadingFacts(false);
@@ -253,9 +240,9 @@ export const EvidenceTool: React.FC<Props> = ({ onGoToVault }) => {
                            onClick={() => { setIsOpen(false); onGoToVault(); }} 
                            className="px-6 py-3 bg-emerald-600/20 hover:bg-emerald-600 text-emerald-400 hover:text-white text-[10px] font-black uppercase tracking-widest rounded-lg transition-all shadow-lg border border-emerald-500/30 hover:border-emerald-500 flex items-center gap-2"
                          >
-                           Makumbusho Kamili <ChevronRight size={12} />
-                         </button>
-                       )}
+                            Tazama Zaidi <ChevronRight size={12} />
+                          </button>
+                        )}
                     </div>
                   </>
                 )}

@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { CalendarClock, ChevronRight, ChevronLeft, ArrowRight, X, MapPin, Layers, Loader2, Calendar as CalendarIcon } from 'lucide-react';
 import { LanguageCode } from '../types';
-import { EventApi, getEvents } from '../services/eventService';
+import { HistoryMomentApi, getHistoryMoments } from '../services/globalToolService';
 
 interface HistoryEvent {
   id: string;
@@ -20,7 +20,7 @@ interface HistoryEvent {
 const FALLBACK_HISTORY_EVENTS: HistoryEvent[] = [
   {
     id: '1',
-    month: 2,
+    month: 3,
     day: 7,
     year: '321 B.K',
     title: 'Amri ya Jumapili',
@@ -32,7 +32,7 @@ const FALLBACK_HISTORY_EVENTS: HistoryEvent[] = [
   },
   {
     id: '2',
-    month: 9,
+    month: 10,
     day: 31,
     year: '1517',
     title: 'Matengenezo Makuu',
@@ -44,7 +44,7 @@ const FALLBACK_HISTORY_EVENTS: HistoryEvent[] = [
   },
   {
     id: '3',
-    month: 9,
+    month: 10,
     day: 22,
     year: '1844',
     title: 'Kukatishwa Tamaa Kuu',
@@ -58,25 +58,17 @@ const FALLBACK_HISTORY_EVENTS: HistoryEvent[] = [
 
 const GENERIC_EVENT_IMAGE = 'https://images.unsplash.com/photo-1461360370896-922624d12aa1?q=80&w=1600';
 
-const mapBackendEvent = (item: EventApi): HistoryEvent | null => {
-  const parsed = new Date(item.starts_at);
-  if (Number.isNaN(parsed.getTime())) {
-    return null;
-  }
-
+const mapBackendEvent = (item: HistoryMomentApi): HistoryEvent => {
   return {
-    id: `event-${item.id}`,
-    month: parsed.getMonth(),
-    day: parsed.getDate(),
-    year: String(parsed.getFullYear()),
-    title: item.title || 'Tukio la Kanisa',
-    description: item.description || `Tukio la ${item.title} limepangwa kwenye kalenda ya huduma.`,
-    significance:
-      item.event_type === 'Virtual'
-        ? 'Tukio hili linafanyika mtandaoni kwa ushiriki mpana wa waumini.'
-        : 'Tukio hili linafanyika kwa kuhudhuria ana kwa ana kwa ajili ya ushirika wa karibu.',
+    id: `history-${item.id}`,
+    month: Number(item.month) || 1,
+    day: Number(item.day) || 1,
+    year: item.year_label || 'Historia',
+    title: item.title || 'Tukio la Kihistoria',
+    description: item.description || `Tukio la ${item.title} limehifadhiwa kwenye mfumo wa historia.`,
+    significance: item.significance || 'Tukio hili lina mchango kwenye mkondo wa historia ya wokovu.',
     image: item.image || GENERIC_EVENT_IMAGE,
-    tag: `${item.category || 'MATUKIO'} / ${item.event_type || 'GENERAL'}`.toUpperCase(),
+    tag: (item.tag || 'KUMBUKUMBU').toUpperCase(),
     location: item.location || 'Mahali pa tukio',
   };
 };
@@ -89,7 +81,7 @@ const formatDateInput = (date: Date) => {
 };
 
 const resolveEventByDate = (date: Date, events: HistoryEvent[]) => {
-  const month = date.getMonth();
+  const month = date.getMonth() + 1;
   const day = date.getDate();
 
   const found = events.find((event) => event.month === month && event.day === day);
@@ -136,17 +128,16 @@ export const HistoryTool: React.FC<Props> = ({ onGoToTimeline }) => {
     setLoading(true);
     setEventsError('');
     try {
-      const backendEvents = await getEvents();
+      const backendEvents = await getHistoryMoments();
       const mapped = backendEvents
-        .map(mapBackendEvent)
-        .filter((event): event is HistoryEvent => Boolean(event));
+        .map(mapBackendEvent);
 
       const sourceEvents = mapped.length > 0 ? mapped : FALLBACK_HISTORY_EVENTS;
       setHistoryEvents(sourceEvents);
       setHasLoadedEvents(true);
       fetchHistoryForDate(targetDate, sourceEvents);
     } catch {
-      setEventsError('Imeshindikana kupakua matukio. Tunaonyesha data ya msingi.');
+      setEventsError('Imeshindikana kupakua This Day in History. Tunaonyesha data ya msingi.');
       setHistoryEvents(FALLBACK_HISTORY_EVENTS);
       setHasLoadedEvents(true);
       fetchHistoryForDate(targetDate, FALLBACK_HISTORY_EVENTS);

@@ -1,6 +1,7 @@
 ﻿
 import React, { useState, useEffect, useRef } from 'react';
 import { StageId } from '../types';
+import { DEFAULT_SITE_SETTINGS, SiteSettings } from '../services/siteSettingsService';
 import { 
   ArrowRight, BookOpen, ShieldCheck, Microscope, PlayCircle, 
   Clock, ChevronDown, Compass, AlertTriangle, 
@@ -10,6 +11,7 @@ import {
 
 interface HomeProps {
   onNavigate: (id: StageId) => void;
+  siteSettings?: SiteSettings;
 }
 
 const ScrollReveal: React.FC<{ children: React.ReactNode; className?: string; threshold?: number }> = ({ children, className = "", threshold = 0.1 }) => {
@@ -41,9 +43,10 @@ const ScrollReveal: React.FC<{ children: React.ReactNode; className?: string; th
   );
 };
 
-export const Home: React.FC<HomeProps> = ({ onNavigate }) => {
+export const Home: React.FC<HomeProps> = ({ onNavigate, siteSettings }) => {
   const [activeQuestion, setActiveQuestion] = useState<number | null>(0);
   const [activeDef, setActiveDef] = useState<'ukweli' | 'uongo' | null>(null);
+  const resolvedSiteSettings = siteSettings || DEFAULT_SITE_SETTINGS;
 
   const QUESTIONS = [
     { id: 0, q: "Nimetoka Wapi?", a: "Sisi si ajali ya kibiolojia. Mungu alisema, 'Na tumfanye mtu kwa mfano wetu, kwa sura yetu.' Tumeumbwa kwa mfano wa Mungu (Mwanzo 1:26-27). Asili yako ni Mbinguni.", icon: <Fingerprint /> },
@@ -60,6 +63,23 @@ export const Home: React.FC<HomeProps> = ({ onNavigate }) => {
     { id: StageId.EVIDENCE, title: "Ushahidi", desc: "Sayansi.", icon: <Microscope size={18} />, color: "text-green-400" },
     { id: StageId.QUESTION_VAULT, title: "Majibu", desc: "Maswali.", icon: <HelpCircle size={18} />, color: "text-purple-400" },
     { id: StageId.MEDIA, title: "Media", desc: "Video.", icon: <PlayCircle size={18} />, color: "text-pink-400" }
+  ];
+
+  const truthSteps = [
+    { id: 1, tag: "Mwaka 31 B.K. - Yerusalemu", h2: "Pilato Anauliza Swali la Milenia.", h3: "KWELI NI NINI?", p: <><span className="text-gold-400 font-medium">Swali hili la miaka 2,000, lililoulizwa na gavana wa Kirumi, limesafiri katika korido za wakati na bado linasumbua hadi leo. Katika zama zetu za AI, ukweli umechakachuliwa, umeburuzwa, umepuuzwa, umefifishwa, na katika sehemu nyingine umeangamizwa kabisa.</span></>, img: resolvedSiteSettings.home_truth_story_1_image || "https://images.unsplash.com/photo-1548013146-72479768bbaa?q=80&w=2000" },
+    { id: 2, tag: "Jibu la Mfalme", h2: "Yesu Anamjibu Pilato.", h3: "NIMEKUJA NIISHUHUDIE KWELI.", p: <>"Mimi nimezaliwa kwa ajili ya haya, na kwa ajili ya haya mimi nalikuja ulimwenguni, ili niishuhudie kweli. Kila aliye wa hiyo kweli hunisikia sauti yangu." - <span className="text-gold-400 font-black">Yohana 18:37</span></>, img: resolvedSiteSettings.home_truth_story_2_image || "https://images.unsplash.com/photo-1512117187123-f365d9c227ba?q=80&w=2000" },
+    { id: 3, tag: "Dhana Moja", h2: "Kweli Zipo Ngapi?", h3: "UKWELI UPO MMOJA TU.", p: <>"Yesu akamwambia, Mimi ndimi njia, na kweli, na uzima; mtu haji kwa Baba, ila kwa njia ya mimi." - <span className="text-gold-400 font-black">Yohana 14:6</span> <br/><br/> <span className="text-gold-400 font-medium">Kwa kuwa ukweli ni msingi wa kile tunachoamini, lazima uwe mmoja.</span></>, img: resolvedSiteSettings.home_truth_story_3_image || "https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2000" }
+  ];
+
+  const deceptionSteps = [
+    { id: 1, tag: "Utabiri", h2: "Siku za Mwisho Zitakuwaje?", h3: "WATU WENGI WATADANGANYWA.", p: <>"Yesu akajibu, akawaambia, Angalieni, mtu asiwadanganye." - <span className="text-red-500 font-black">Mathayo 24:6</span> <br/><br/> <span className="text-red-500 font-medium italic">Yesu alionya kuhusu udanganyifu na fikra kwamba kila mtu ana ukweli wake.</span></>, img: resolvedSiteSettings.home_deception_story_1_image || "https://images.unsplash.com/photo-1463130436662-3162799c0a37?q=80&w=2000" },
+    { id: 2, tag: "Asili ya Uongo", h2: "Shetani Ndiye Muongo.", h3: "YESU ALISEMA.", p: <>"Ninyi ni wa baba yenu, Ibilisi, na tamaa za baba yenu ndizo mpendazo kuzitenda. Yeye alikuwa mwuaji tangu mwanzo; wala hakusimama katika kweli, kwa kuwa hamna hiyo kweli ndani yake. Asemapo uongo, husema yaliyo yake mwenyewe; kwa sababu yeye ni mwongo, na baba wa huo." - <span className="text-red-500 font-black">Yohana 8:44</span></>, img: resolvedSiteSettings.home_deception_story_2_image || "https://images.unsplash.com/photo-1519074069444-1ba4fff66d16?q=80&w=2000" },
+    { id: 3, tag: "Kilele cha Udanganyifu", h2: "Shetani Ameudanganya Ulimwengu Wote.", h3: "KILA MTU AMEDANGANYWA.", p: <>"Yule joka akatupwa, yule mkubwa, nyoka wa zamani, aitwaye Ibilisi na Shetani, audanganyaye ulimwengu wote; akatupwa hata nchi, na malaika zake wakatupwa pamoja naye." - <span className="text-red-500 font-black">Ufunuo 12:9</span></>, img: resolvedSiteSettings.home_deception_story_3_image || "https://images.unsplash.com/photo-1533105079780-92b9be482077?q=80&w=2000" }
+  ];
+
+  const hopeSteps = [
+    { id: 1, tag: "Tumaini Limerejea", h2: "Tunalo Tumaini", h3: "TUNAWEZA KUUJUA UKWELI", p: <>"Tena mtaifahamu kweli, nayo hiyo kweli itawaweka huru." - <span className="text-emerald-400 font-black">Yohana 8:32</span> <br/><br/> <span className="text-emerald-400 font-medium italic">Ukweli unaweza kufichwa kwa muda, lakini hauwezi kufichwa milele.</span></>, img: resolvedSiteSettings.home_hope_story_1_image || "https://images.unsplash.com/photo-1491466424936-e304919aada7?q=80&w=2000" },
+    { id: 2, tag: "Njia ya Mafanikio", h2: "Kuutafuta Ukweli", h3: "UKWELI UNAPATIKANA", p: <>"Tafuteni, nanyi mtaona;" - <span className="text-emerald-400 font-black">Mathayo 7:7</span> <br/> "Mtafuteni Bwana, maadamu anapatikana; mwiteni, maadamu yu karibu;" - <span className="text-emerald-400 font-black">Isaya 55:6</span> <br/><br/> <span className="text-emerald-400 font-medium italic">Tukiutafuta ukweli, tutaupata. Hili ni jukumu letu: kuutafuta ukweli.</span></>, img: resolvedSiteSettings.home_hope_story_2_image || "https://images.unsplash.com/photo-1454165833767-02638a5996bc?q=80&w=2000" },
   ];
 
   return (
@@ -97,11 +117,7 @@ export const Home: React.FC<HomeProps> = ({ onNavigate }) => {
             <div className="h-1 w-20 bg-gold-500 mx-auto mt-4 rounded-full"></div>
          </div>
 
-        {[
-          { id: 1, tag: "Mwaka 31 B.K. - Yerusalemu", h2: "Pilato Anauliza Swali la Milenia.", h3: "KWELI NI NINI?", p: <><span className="text-gold-400 font-medium">Swali hili la miaka 2,000, lililoulizwa na gavana wa Kirumi, limesafiri katika korido za wakati na bado linasumbua hadi leo. Katika zama zetu za AI, ukweli umechakachuliwa, umeburuzwa, umepuuzwa, umefifishwa, na katika sehemu nyingine umeangamizwa kabisa.</span></>, img: "https://images.unsplash.com/photo-1548013146-72479768bbaa?q=80&w=2000" },
-          { id: 2, tag: "Jibu la Mfalme", h2: "Yesu Anamjibu Pilato.", h3: "NIMEKUJA NIISHUHUDIE KWELI.", p: <>"Mimi nimezaliwa kwa ajili ya haya, na kwa ajili ya haya mimi nalikuja ulimwenguni, ili niishuhudie kweli. Kila aliye wa hiyo kweli hunisikia sauti yangu." - <span className="text-gold-400 font-black">Yohana 18:37</span></>, img: "https://images.unsplash.com/photo-1512117187123-f365d9c227ba?q=80&w=2000" },
-          { id: 3, tag: "Dhana Moja", h2: "Kweli Zipo Ngapi?", h3: "UKWELI UPO MMOJA TU.", p: <>"Yesu akamwambia, Mimi ndimi njia, na kweli, na uzima; mtu haji kwa Baba, ila kwa njia ya mimi." - <span className="text-gold-400 font-black">Yohana 14:6</span> <br/><br/> <span className="text-gold-400 font-medium">Kwa kuwa ukweli ni msingi wa kile tunachoamini, lazima uwe mmoja.</span></>, img: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2000" }
-        ].map((step, i) => (
+        {truthSteps.map((step, i) => (
           <div key={i} className="relative min-h-[58vh] sm:min-h-[64vh] md:min-h-[75vh] flex items-center overflow-hidden border-b border-slate-200 dark:border-white/5">
             <img src={step.img} loading="lazy" className="absolute inset-0 w-full h-full object-cover opacity-25 dark:opacity-20 transition-transform duration-[5s] ease-out md:hover:scale-105" alt="" />
             <div className="absolute inset-0 bg-gradient-to-r from-emerald-100/85 via-emerald-100/60 to-transparent dark:from-[#020617] dark:via-[#020617]/90"></div>
@@ -129,11 +145,7 @@ export const Home: React.FC<HomeProps> = ({ onNavigate }) => {
             <div className="h-1 w-20 bg-red-600 mx-auto mt-4 rounded-full"></div>
          </div>
 
-        {[
-          { id: 1, tag: "Utabiri", h2: "Siku za Mwisho Zitakuwaje?", h3: "WATU WENGI WATADANGANYWA.", p: <>"Yesu akajibu, akawaambia, Angalieni, mtu asiwadanganye." - <span className="text-red-500 font-black">Mathayo 24:6</span> <br/><br/> <span className="text-red-500 font-medium italic">Yesu alionya kuhusu udanganyifu na fikra kwamba kila mtu ana ukweli wake.</span></>, img: "https://images.unsplash.com/photo-1463130436662-3162799c0a37?q=80&w=2000" },
-          { id: 2, tag: "Asili ya Uongo", h2: "Shetani Ndiye Muongo.", h3: "YESU ALISEMA.", p: <>"Ninyi ni wa baba yenu, Ibilisi, na tamaa za baba yenu ndizo mpendazo kuzitenda. Yeye alikuwa mwuaji tangu mwanzo; wala hakusimama katika kweli, kwa kuwa hamna hiyo kweli ndani yake. Asemapo uongo, husema yaliyo yake mwenyewe; kwa sababu yeye ni mwongo, na baba wa huo." - <span className="text-red-500 font-black">Yohana 8:44</span></>, img: "https://images.unsplash.com/photo-1519074069444-1ba4fff66d16?q=80&w=2000" },
-          { id: 3, tag: "Kilele cha Udanganyifu", h2: "Shetani Ameudanganya Ulimwengu Wote.", h3: "KILA MTU AMEDANGANYWA.", p: <>"Yule joka akatupwa, yule mkubwa, nyoka wa zamani, aitwaye Ibilisi na Shetani, audanganyaye ulimwengu wote; akatupwa hata nchi, na malaika zake wakatupwa pamoja naye." - <span className="text-red-500 font-black">Ufunuo 12:9</span></>, img: "https://images.unsplash.com/photo-1533105079780-92b9be482077?q=80&w=2000" }
-        ].map((step, i) => (
+        {deceptionSteps.map((step, i) => (
           <div key={i} className="relative min-h-[58vh] sm:min-h-[64vh] md:min-h-[75vh] flex items-center overflow-hidden border-b border-slate-200 dark:border-white/5">
             <img src={step.img} loading="lazy" className="absolute inset-0 w-full h-full object-cover opacity-25 dark:opacity-20" alt="" />
             <div className="absolute inset-0 bg-gradient-to-r from-emerald-100/85 via-emerald-100/60 to-transparent dark:from-[#050b1d] dark:via-[#050b1d]/90"></div>
@@ -161,10 +173,7 @@ export const Home: React.FC<HomeProps> = ({ onNavigate }) => {
             <div className="h-1 w-20 bg-emerald-500 mx-auto mt-4 rounded-full"></div>
          </div>
 
-        {[
-          { id: 1, tag: "Tumaini Limerejea", h2: "Tunalo Tumaini", h3: "TUNAWEZA KUUJUA UKWELI", p: <>"Tena mtaifahamu kweli, nayo hiyo kweli itawaweka huru." - <span className="text-emerald-400 font-black">Yohana 8:32</span> <br/><br/> <span className="text-emerald-400 font-medium italic">Ukweli unaweza kufichwa kwa muda, lakini hauwezi kufichwa milele.</span></>, img: "https://images.unsplash.com/photo-1491466424936-e304919aada7?q=80&w=2000" },
-          { id: 2, tag: "Njia ya Mafanikio", h2: "Kuutafuta Ukweli", h3: "UKWELI UNAPATIKANA", p: <>"Tafuteni, nanyi mtaona;" - <span className="text-emerald-400 font-black">Mathayo 7:7</span> <br/> "Mtafuteni Bwana, maadamu anapatikana; mwiteni, maadamu yu karibu;" - <span className="text-emerald-400 font-black">Isaya 55:6</span> <br/><br/> <span className="text-emerald-400 font-medium italic">Tukiutafuta ukweli, tutaupata. Hili ni jukumu letu: kuutafuta ukweli.</span></>, img: "https://images.unsplash.com/photo-1454165833767-02638a5996bc?q=80&w=2000" },
-        ].map((step, i) => (
+        {hopeSteps.map((step, i) => (
           <div key={i} className="relative min-h-[58vh] sm:min-h-[64vh] md:min-h-[75vh] flex items-center overflow-hidden border-b border-slate-200 dark:border-white/5">
             <img src={step.img} loading="lazy" className="absolute inset-0 w-full h-full object-cover opacity-25 dark:opacity-20" alt="" />
             <div className="absolute inset-0 bg-gradient-to-r from-emerald-100/85 via-emerald-100/60 to-transparent dark:from-[#020617] dark:via-[#020617]/90"></div>

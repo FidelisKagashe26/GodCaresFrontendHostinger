@@ -428,14 +428,14 @@ const App: React.FC = () => {
 
   const renderContent = () => {
     switch (currentStage) {
-      case StageId.HOME: return <Home onNavigate={handleStageChange} />;
+      case StageId.HOME: return <Home onNavigate={handleStageChange} siteSettings={siteSettings} />;
       case StageId.BLOG: return <Blog />;
-      case StageId.FAITH_BUILDER: return user ? <FaithBuilder /> : <Home onNavigate={handleStageChange} />;
-      case StageId.BIBLE_STUDY: return user ? <BibleStudyJourney /> : <Home onNavigate={handleStageChange} />;
-      case StageId.TIMELINE: return user ? <PropheticTimeline activeTimelineId={activeTimelineId} setActiveTimelineId={setActiveTimelineId} onNavigate={handleStageChange} /> : <Home onNavigate={handleStageChange} />;
-      case StageId.EVIDENCE: return user ? <EvidenceVault /> : <Home onNavigate={handleStageChange} />;
-      case StageId.DECEPTION_VAULT: return user ? <DeceptionVault /> : <Home onNavigate={handleStageChange} />;
-      case StageId.QUESTION_VAULT: return user ? <QuestionVault /> : <Home onNavigate={handleStageChange} />;
+      case StageId.FAITH_BUILDER: return user ? <FaithBuilder /> : <Home onNavigate={handleStageChange} siteSettings={siteSettings} />;
+      case StageId.BIBLE_STUDY: return user ? <BibleStudyJourney /> : <Home onNavigate={handleStageChange} siteSettings={siteSettings} />;
+      case StageId.TIMELINE: return user ? <PropheticTimeline activeTimelineId={activeTimelineId} setActiveTimelineId={setActiveTimelineId} onNavigate={handleStageChange} /> : <Home onNavigate={handleStageChange} siteSettings={siteSettings} />;
+      case StageId.EVIDENCE: return user ? <EvidenceVault /> : <Home onNavigate={handleStageChange} siteSettings={siteSettings} />;
+      case StageId.DECEPTION_VAULT: return user ? <DeceptionVault /> : <Home onNavigate={handleStageChange} siteSettings={siteSettings} />;
+      case StageId.QUESTION_VAULT: return user ? <QuestionVault /> : <Home onNavigate={handleStageChange} siteSettings={siteSettings} />;
       case StageId.MEDIA: return <MediaProjects />;
       case StageId.TESTIMONIES: return <Testimonies />;
       case StageId.SHOP: return <Shop />;
@@ -445,7 +445,7 @@ const App: React.FC = () => {
       case StageId.PRAYERS: return <Prayers aiLanguage={aiLanguage} />;
       case StageId.DONATE: return <Donations />;
       case StageId.ABOUT: return <AboutUs />;
-      default: return <Home onNavigate={handleStageChange} />;
+      default: return <Home onNavigate={handleStageChange} siteSettings={siteSettings} />;
     }
   };
 
@@ -543,7 +543,7 @@ const App: React.FC = () => {
         style={{ bottom: 'max(0.85rem, env(safe-area-inset-bottom))' }}
       >
         <Suspense fallback={null}>
-          <div className="gc-floating-tools flex flex-col gap-2 md:gap-3 saturate-75 scale-90 md:scale-100 origin-bottom-right">
+          <div className="gc-floating-tools flex flex-col gap-2 md:gap-3 saturate-75">
             <HistoryTool aiLanguage={aiLanguage} onGoToTimeline={() => handleStageChange(StageId.TIMELINE)} />
             <QuestionTool onGoToVault={() => handleStageChange(StageId.QUESTION_VAULT)} />
             <DeceptionTool onGoToVault={() => handleStageChange(StageId.DECEPTION_VAULT)} />
