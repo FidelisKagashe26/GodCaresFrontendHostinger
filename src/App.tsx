@@ -1,38 +1,59 @@
 
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { Suspense, lazy, useState, useEffect, useMemo, useRef } from 'react';
 import { Sidebar, ProfileModal } from './components/Sidebar';
 import { Home } from './components/Home';
-import { Auth } from './components/Auth';
-import { BibleStudyJourney } from './components/BibleStudyJourney';
-import { Shop } from './components/Shop';
-import { Library } from './components/Library';
-import { Events } from './components/Events';
-import { News } from './components/News';
-import { Prayers } from './components/Prayers';
-import { Donations } from './components/Donations';
-import { AboutUs } from './components/AboutUs';
-import { MediaProjects } from './components/MediaProjects';
-import { Testimonies } from './components/Testimonies';
-import { EvidenceVault } from './components/EvidenceVault';
-import { DeceptionVault } from './components/DeceptionVault';
-import { QuestionVault } from './components/QuestionVault';
-import { PropheticTimeline } from './components/PropheticTimeline';
-import { Blog } from './components/Blog';
-import { FaithBuilder } from './components/FaithBuilder';
-import { Footer } from './components/Footer';
-import { HistoryTool } from './components/HistoryTool';
-import { QuestionTool } from './components/QuestionTool';
-import { DeceptionTool } from './components/DeceptionTool';
-import { EvidenceTool } from './components/EvidenceTool';
 import { StageConfig, StageId, ToastNotification, LanguageCode, ThemePreference } from './types';
 import { ToastContainer } from './components/ui/Toast';
-import { NotificationCenter } from './components/NotificationCenter';
-import { LanguageCenter } from './components/LanguageCenter';
-import { ThemeCenter } from './components/ThemeCenter';
 import { Sun, Moon, Menu, Bell, User, Monitor, ChevronDown, LogOut, ArrowLeft, ChevronRight } from 'lucide-react';
 import { clearTokens, getCurrentUser } from './services/authService';
 import { getSystemMessages } from './services/systemMessageService';
 import { DEFAULT_SITE_SETTINGS, getSiteSettings, SiteSettings } from './services/siteSettingsService';
+
+const lazyNamed = <T extends Record<string, unknown>, K extends keyof T>(
+  loader: () => Promise<T>,
+  exportName: K,
+) =>
+  lazy(async () => {
+    const module = await loader();
+    return {
+      default: module[exportName] as React.ComponentType<any>,
+    };
+  });
+
+const Auth = lazyNamed(() => import('./components/Auth'), 'Auth');
+const BibleStudyJourney = lazyNamed(() => import('./components/BibleStudyJourney'), 'BibleStudyJourney');
+const Shop = lazyNamed(() => import('./components/Shop'), 'Shop');
+const Library = lazyNamed(() => import('./components/Library'), 'Library');
+const Events = lazyNamed(() => import('./components/Events'), 'Events');
+const News = lazyNamed(() => import('./components/News'), 'News');
+const Prayers = lazyNamed(() => import('./components/Prayers'), 'Prayers');
+const Donations = lazyNamed(() => import('./components/Donations'), 'Donations');
+const AboutUs = lazyNamed(() => import('./components/AboutUs'), 'AboutUs');
+const MediaProjects = lazyNamed(() => import('./components/MediaProjects'), 'MediaProjects');
+const Testimonies = lazyNamed(() => import('./components/Testimonies'), 'Testimonies');
+const EvidenceVault = lazyNamed(() => import('./components/EvidenceVault'), 'EvidenceVault');
+const DeceptionVault = lazyNamed(() => import('./components/DeceptionVault'), 'DeceptionVault');
+const QuestionVault = lazyNamed(() => import('./components/QuestionVault'), 'QuestionVault');
+const PropheticTimeline = lazyNamed(() => import('./components/PropheticTimeline'), 'PropheticTimeline');
+const Blog = lazyNamed(() => import('./components/Blog'), 'Blog');
+const FaithBuilder = lazyNamed(() => import('./components/FaithBuilder'), 'FaithBuilder');
+const Footer = lazyNamed(() => import('./components/Footer'), 'Footer');
+const HistoryTool = lazyNamed(() => import('./components/HistoryTool'), 'HistoryTool');
+const QuestionTool = lazyNamed(() => import('./components/QuestionTool'), 'QuestionTool');
+const DeceptionTool = lazyNamed(() => import('./components/DeceptionTool'), 'DeceptionTool');
+const EvidenceTool = lazyNamed(() => import('./components/EvidenceTool'), 'EvidenceTool');
+const NotificationCenter = lazyNamed(() => import('./components/NotificationCenter'), 'NotificationCenter');
+const LanguageCenter = lazyNamed(() => import('./components/LanguageCenter'), 'LanguageCenter');
+const ThemeCenter = lazyNamed(() => import('./components/ThemeCenter'), 'ThemeCenter');
+
+const stageLoader = (
+  <div className="flex min-h-[40vh] items-center justify-center px-6">
+    <div className="rounded-2xl border border-[color:var(--line-strong)] bg-[color:var(--surface-2)] px-5 py-4 text-center shadow-sm">
+      <p className="text-[11px] font-black uppercase tracking-[0.28em] text-[color:var(--accent)]">Inapakia</p>
+      <p className="mt-2 text-sm text-[color:var(--text-muted)]">Tafadhali subiri kidogo.</p>
+    </div>
+  </div>
+);
 
 const stages: StageConfig[] = [
   { id: StageId.HOME, title: 'Nyumbani', description: 'Karibu katika mafundisho.', icon: 'home' },
@@ -451,80 +472,107 @@ const App: React.FC = () => {
     <div className="relative min-h-screen bg-[color:var(--page-bg)] text-[color:var(--text-primary)] font-sans transition-colors duration-500 overflow-hidden">
       <ToastContainer notifications={notifications} onDismiss={(id) => setNotifications(prev => prev.filter(n => n.id !== id))} />
       
-      <NotificationCenter 
-        isOpen={isNotificationOpen} onClose={() => setIsNotificationOpen(false)} notifications={centerNotifications}
-        onMarkAllRead={() => {
-          setCenterNotifications((prev) => {
-            const next = prev.map((n) => ({ ...n, read: true }));
-            const storageState = loadNotificationStorageState();
-            const readSet = new Set(storageState.readIds);
-            next.forEach((item) => readSet.add(item.id));
-            saveNotificationStorageState({
-              dismissedIds: storageState.dismissedIds,
-              readIds: Array.from(readSet),
-            });
-            return next;
-          });
-        }}
-        onClearAll={() => {
-          const idsToDismiss = centerNotifications.map((item) => item.id);
-          const storageState = loadNotificationStorageState();
-          const dismissedSet = new Set(storageState.dismissedIds);
-          idsToDismiss.forEach((id) => dismissedSet.add(id));
-          saveNotificationStorageState({
-            dismissedIds: Array.from(dismissedSet),
-            readIds: storageState.readIds,
-          });
-          setCenterNotifications([]);
-        }}
-        onDismiss={(id) => {
-          const storageState = loadNotificationStorageState();
-          const dismissedSet = new Set(storageState.dismissedIds);
-          dismissedSet.add(id);
-          saveNotificationStorageState({
-            dismissedIds: Array.from(dismissedSet),
-            readIds: storageState.readIds,
-          });
-          setCenterNotifications((prev) => prev.filter((n) => n.id !== id));
-        }}
-        onNavigateToEvent={() => { handleStageChange(StageId.EVENTS); setIsNotificationOpen(false); }}
-      />
+      {isNotificationOpen && (
+        <Suspense fallback={null}>
+          <NotificationCenter 
+            isOpen={isNotificationOpen} onClose={() => setIsNotificationOpen(false)} notifications={centerNotifications}
+            onMarkAllRead={() => {
+              setCenterNotifications((prev) => {
+                const next = prev.map((n) => ({ ...n, read: true }));
+                const storageState = loadNotificationStorageState();
+                const readSet = new Set(storageState.readIds);
+                next.forEach((item) => readSet.add(item.id));
+                saveNotificationStorageState({
+                  dismissedIds: storageState.dismissedIds,
+                  readIds: Array.from(readSet),
+                });
+                return next;
+              });
+            }}
+            onClearAll={() => {
+              const idsToDismiss = centerNotifications.map((item) => item.id);
+              const storageState = loadNotificationStorageState();
+              const dismissedSet = new Set(storageState.dismissedIds);
+              idsToDismiss.forEach((id) => dismissedSet.add(id));
+              saveNotificationStorageState({
+                dismissedIds: Array.from(dismissedSet),
+                readIds: storageState.readIds,
+              });
+              setCenterNotifications([]);
+            }}
+            onDismiss={(id) => {
+              const storageState = loadNotificationStorageState();
+              const dismissedSet = new Set(storageState.dismissedIds);
+              dismissedSet.add(id);
+              saveNotificationStorageState({
+                dismissedIds: Array.from(dismissedSet),
+                readIds: storageState.readIds,
+              });
+              setCenterNotifications((prev) => prev.filter((n) => n.id !== id));
+            }}
+            onNavigateToEvent={() => { handleStageChange(StageId.EVENTS); setIsNotificationOpen(false); }}
+          />
+        </Suspense>
+      )}
 
-      <LanguageCenter isOpen={isLanguageOpen} onClose={() => setIsLanguageOpen(false)} currentLanguage={aiLanguage} onLanguageChange={setAiLanguage} />
-      <ThemeCenter isOpen={isThemeOpen} onClose={() => setIsThemeOpen(false)} currentTheme={theme} onThemeChange={setTheme} />
+      {isLanguageOpen && (
+        <Suspense fallback={null}>
+          <LanguageCenter
+            isOpen={isLanguageOpen}
+            onClose={() => setIsLanguageOpen(false)}
+            currentLanguage={aiLanguage}
+            onLanguageChange={setAiLanguage}
+          />
+        </Suspense>
+      )}
+
+      {isThemeOpen && (
+        <Suspense fallback={null}>
+          <ThemeCenter
+            isOpen={isThemeOpen}
+            onClose={() => setIsThemeOpen(false)}
+            currentTheme={theme}
+            onThemeChange={setTheme}
+          />
+        </Suspense>
+      )}
 
       {/* Floating Tools - Available for everyone now to increase engagement on Homepage */}
       <div
         className="fixed right-3 md:right-6 z-[90] pointer-events-auto"
         style={{ bottom: 'max(0.85rem, env(safe-area-inset-bottom))' }}
       >
-        <div className="gc-floating-tools flex flex-col gap-2 md:gap-3 saturate-75 scale-90 md:scale-100 origin-bottom-right">
-          <HistoryTool aiLanguage={aiLanguage} onGoToTimeline={() => handleStageChange(StageId.TIMELINE)} />
-          <QuestionTool onGoToVault={() => handleStageChange(StageId.QUESTION_VAULT)} />
-          <DeceptionTool onGoToVault={() => handleStageChange(StageId.DECEPTION_VAULT)} />
-          <EvidenceTool onGoToVault={() => handleStageChange(StageId.EVIDENCE)} />
-        </div>
+        <Suspense fallback={null}>
+          <div className="gc-floating-tools flex flex-col gap-2 md:gap-3 saturate-75 scale-90 md:scale-100 origin-bottom-right">
+            <HistoryTool aiLanguage={aiLanguage} onGoToTimeline={() => handleStageChange(StageId.TIMELINE)} />
+            <QuestionTool onGoToVault={() => handleStageChange(StageId.QUESTION_VAULT)} />
+            <DeceptionTool onGoToVault={() => handleStageChange(StageId.DECEPTION_VAULT)} />
+            <EvidenceTool onGoToVault={() => handleStageChange(StageId.EVIDENCE)} />
+          </div>
+        </Suspense>
       </div>
 
       {showAuthModal && (
-        <Auth
-          logoSrc={logoSrc}
-          initialMode={authEntryMode}
-          onLogin={handleLogin}
-          onClose={() => {
-            setShowAuthModal(false);
-            setAuthEntryMode('login');
-            if (resetParams) {
+        <Suspense fallback={null}>
+          <Auth
+            logoSrc={logoSrc}
+            initialMode={authEntryMode}
+            onLogin={handleLogin}
+            onClose={() => {
+              setShowAuthModal(false);
+              setAuthEntryMode('login');
+              if (resetParams) {
+                setResetParams(null);
+                window.history.replaceState({}, '', '/');
+              }
+            }}
+            resetParams={resetParams}
+            onResetComplete={() => {
               setResetParams(null);
               window.history.replaceState({}, '', '/');
-            }
-          }}
-          resetParams={resetParams}
-          onResetComplete={() => {
-            setResetParams(null);
-            window.history.replaceState({}, '', '/');
-          }}
-        />
+            }}
+          />
+        </Suspense>
       )}
       {showProfileModal && user && (
         <ProfileModal
@@ -695,8 +743,14 @@ const App: React.FC = () => {
             ref={mainContentRef}
             className={`gc-content-scroll flex-1 overflow-y-auto scroll-smooth pb-16 ${isImmersive ? 'pt-20' : showStageBreadcrumb ? 'pt-32' : 'pt-20'}`}
           >
-            {renderContent()}
-            {!isImmersive && <Footer onNavigate={handleStageChange} siteSettings={siteSettings} />}
+            <Suspense fallback={stageLoader}>
+              {renderContent()}
+            </Suspense>
+            {!isImmersive && (
+              <Suspense fallback={null}>
+                <Footer onNavigate={handleStageChange} siteSettings={siteSettings} />
+              </Suspense>
+            )}
           </div>
         </main>
       </div>
