@@ -27,25 +27,6 @@ interface SidebarProps {
   siteSettings?: SiteSettings;
 }
 
-const TILE_IMAGES: Record<string, string> = {
-  [StageId.HOME]: "https://images.unsplash.com/photo-1462331940025-496dfbfc7564?q=80&w=400",
-  [StageId.ABOUT]: "https://images.unsplash.com/photo-1447069387593-a5de0862481e?q=80&w=400",
-  [StageId.BIBLE_STUDY]: "https://images.unsplash.com/photo-1504052434569-70ad5836ab65?q=80&w=400",
-  [StageId.FAITH_BUILDER]: "https://images.unsplash.com/photo-1509248961158-e54f6934749c?q=80&w=400",
-  [StageId.TIMELINE]: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=400",
-  [StageId.EVIDENCE]: "https://images.unsplash.com/photo-1518107612744-298f21427d35?q=80&w=400",
-  [StageId.DECEPTION_VAULT]: "https://images.unsplash.com/photo-1533105079780-92b9be482077?q=80&w=400",
-  [StageId.QUESTION_VAULT]: "https://images.unsplash.com/photo-1512412023212-f05419bb100d?q=80&w=400",
-  [StageId.LIBRARY]: "https://images.unsplash.com/photo-1544947950-fa07a98d237f?q=80&w=400",
-  [StageId.MEDIA]: "https://images.unsplash.com/photo-1599596378252-474026337f71?q=80&w=400",
-  [StageId.TESTIMONIES]: "https://images.unsplash.com/photo-1511632765486-a01980e01a18?q=80&w=400",
-  [StageId.PRAYERS]: "https://images.unsplash.com/photo-1516280440614-37939bbacd81?q=80&w=400",
-  [StageId.EVENTS]: "https://images.unsplash.com/photo-1511578314322-379afb476865?q=80&w=400",
-  [StageId.NEWS]: "https://images.unsplash.com/photo-1544531586-fde5298cdd40?q=80&w=400",
-  [StageId.SHOP]: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?q=80&w=400",
-  [StageId.DONATE]: "https://images.unsplash.com/photo-1469571486292-0ba58a3f068b?q=80&w=400",
-};
-
 export const ProfileModal: React.FC<{ user: any; onLogout: () => void; onClose: () => void; supportEmail?: string }> = ({ user, onLogout, onClose, supportEmail }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [profilePic, setProfilePic] = useState<string>(localStorage.getItem('gc365_profile_pic') || '');
@@ -222,37 +203,27 @@ interface TileProps {
 }
 
 const Tile: React.FC<TileProps> = ({ stage, isActive, onClick, index }) => {
-  const imageUrl = TILE_IMAGES[stage.id];
-  
   return (
     <button
       onClick={onClick}
       style={{ animationDelay: `${index * 60}ms` }}
-      className={`group relative flex flex-col items-start justify-between p-4 rounded-xl overflow-hidden transition-all duration-500 animate-morph-in h-28 w-full border shadow-sm ${
+      className={`group relative flex h-[108px] w-full flex-col items-center justify-center gap-3 rounded-2xl border px-4 py-5 text-center transition-all duration-300 animate-morph-in shadow-sm ${
         isActive 
-          ? 'bg-gold-500 text-[#020617] border-gold-600 shadow-[0_15px_30px_rgba(234,179,8,0.2)]' 
-          : 'bg-white/10 dark:bg-slate-900/40 border-slate-200/20 dark:border-white/5 hover:border-gold-400 dark:hover:bg-slate-800/60 backdrop-blur-md'
+          ? 'bg-[#f2c14e] text-[#1f1708] border-[#e6b64a] shadow-[0_18px_36px_rgba(242,193,78,0.24)]'
+          : 'bg-[color:var(--surface-2)]/95 dark:bg-slate-900/60 border-slate-200/70 dark:border-white/5 hover:-translate-y-1 hover:border-[#f2c14e]/60 hover:bg-[color:var(--surface-3)] dark:hover:bg-slate-800/70'
       }`}
     >
-      {/* Background Image with Overlay */}
-      {imageUrl && !isActive && (
-        <>
-          <div className="absolute inset-0 z-0">
-             <img src={imageUrl} className="w-full h-full object-cover opacity-10 group-hover:opacity-20 transition-opacity" alt="" />
-             <div className="absolute inset-0 bg-gradient-to-t from-slate-900/40 via-transparent to-transparent"></div>
-          </div>
-        </>
-      )}
-
-      <div className={`relative z-10 transition-all duration-300 mb-2 ${
-         isActive ? 'text-[#020617]' : 'text-slate-400 dark:text-slate-500 group-hover:text-gold-500'
+      <div className={`flex h-12 w-12 items-center justify-center rounded-2xl transition-all duration-300 ${
+         isActive
+           ? 'bg-white/35 text-[#1f1708]'
+           : 'bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-slate-400 group-hover:bg-[#f2c14e]/12 group-hover:text-[#f2c14e]'
       }`}>
          {getIcon(stage.id)}
       </div>
 
-      <div className="relative z-10 w-full text-left">
-        <h3 className={`text-[10px] font-black uppercase tracking-wider leading-tight transition-colors ${
-            isActive ? 'text-[#020617]' : 'text-slate-700 dark:text-slate-200 group-hover:text-gold-500'
+      <div className="w-full">
+        <h3 className={`text-[11px] sm:text-xs font-black uppercase tracking-[0.18em] leading-tight transition-colors ${
+            isActive ? 'text-[#1f1708]' : 'text-slate-700 dark:text-slate-200 group-hover:text-[#f2c14e]'
         }`}>
           {stage.title}
         </h3>
@@ -358,11 +329,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
           {/* Main Content Sections */}
           {sections.map((section, sIdx) => (
             <div key={sIdx} className="space-y-4">
-                <h3 className="text-[9px] font-black text-slate-600 dark:text-slate-400 uppercase tracking-[0.4em] px-1 flex items-center gap-4">
+                <h3 className="text-[10px] sm:text-xs font-black text-[#c79d35] uppercase tracking-[0.4em] px-1 flex items-center gap-4">
                   <span>{section.title}</span>
                   <div className="h-[1px] flex-1 bg-gradient-to-r from-slate-300 dark:from-white/10 to-transparent"></div>
                 </h3>
-                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
                   {isOpen && section.ids.map((id, idx) => {
                     const s = stages.find(st => st.id === id);
                     if (!s) return null;
@@ -376,7 +347,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
           {/* OUR WEBSITES SECTION */}
           <div className="space-y-6 pt-4 pb-12">
-             <h3 className="text-[9px] font-black text-slate-600 dark:text-slate-400 uppercase tracking-[0.4em] px-1 flex items-center gap-4">
+             <h3 className="text-[10px] sm:text-xs font-black text-[#c79d35] uppercase tracking-[0.4em] px-1 flex items-center gap-4">
                  <span>Tovuti Zetu</span>
                 <div className="h-[1px] flex-1 bg-gradient-to-r from-slate-300 dark:from-white/10 to-transparent"></div>
              </h3>

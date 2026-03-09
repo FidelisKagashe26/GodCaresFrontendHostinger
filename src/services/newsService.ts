@@ -6,6 +6,7 @@ export interface NewsItemApi {
   excerpt: string;
   content: string;
   author: string;
+  author_image?: string;
   featured: boolean;
   views?: number;
   published_at: string;
@@ -13,12 +14,24 @@ export interface NewsItemApi {
 
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || window.location.origin).replace(/\/$/, "");
 
+const toAbsoluteUrl = (value?: string | null): string => {
+  const raw = (value || "").trim();
+  if (!raw) return "";
+  if (/^(https?:)?\/\//i.test(raw) || raw.startsWith("data:")) return raw;
+  return `${API_BASE_URL}${raw.startsWith("/") ? raw : `/${raw}`}`;
+};
+
 export const getNewsItems = async (): Promise<NewsItemApi[]> => {
   const response = await fetch(`${API_BASE_URL}/api/news/`);
   if (!response.ok) {
     throw new Error("Imeshindikana kupata habari.");
   }
-  return (await response.json()) as NewsItemApi[];
+  const payload = (await response.json()) as NewsItemApi[];
+  return payload.map((item) => ({
+    ...item,
+    image: toAbsoluteUrl(item.image),
+    author_image: toAbsoluteUrl(item.author_image),
+  }));
 };
 
 export const registerNewsView = async (newsId: number): Promise<number> => {

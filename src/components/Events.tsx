@@ -71,6 +71,20 @@ const CATEGORY_LABELS: Record<'Seminar' | 'Summit' | 'Revival', string> = {
   Revival: 'Mwamsho',
 };
 
+const SpeakerAvatar: React.FC<{ speaker: Speaker; className?: string; iconSize?: number }> = ({
+  speaker,
+  className = 'w-12 h-12',
+  iconSize = 20,
+}) => (
+  <div className={`${className} shrink-0 overflow-hidden rounded-full border border-slate-200 dark:border-white/10 bg-slate-100 dark:bg-slate-900 flex items-center justify-center shadow-sm`}>
+    {speaker.img ? (
+      <img src={speaker.img} className="w-full h-full object-cover" alt={speaker.name} />
+    ) : (
+      <User size={iconSize} className="text-slate-500 dark:text-slate-400" />
+    )}
+  </div>
+);
+
 const CountdownTimer: React.FC<{ targetDate: Date }> = ({ targetDate }) => {
   const [timeLeft, setTimeLeft] = useState({ d: 0, h: 0, m: 0, s: 0 });
 
@@ -312,20 +326,25 @@ export const Events: React.FC = () => {
                   </h3>
                </div>
 
-               <div className="space-y-4">
-                  <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest border-b border-white/5 pb-1">Wazungumzaji</p>
-                  <div className="space-y-3">
+                <div className="space-y-4">
+                   <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest border-b border-white/5 pb-1">Wazungumzaji</p>
+                   <div className="space-y-3">
+                    {event.speakers.length === 0 && (
+                      <div className="rounded-2xl border border-dashed border-slate-200 dark:border-white/10 px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                        Hakuna wasemaji bado.
+                      </div>
+                    )}
                     {event.speakers.map((s, idx) => (
                       <div key={idx} className="flex items-center gap-3">
-                         <img src={s.img} className="w-9 h-9 rounded-sm object-cover grayscale group-hover:grayscale-0 transition-all border border-slate-200 dark:border-white/10" alt={s.name} />
-                         <div>
-                            <p className="text-xs font-bold text-slate-800 dark:text-slate-200 uppercase">{s.name}</p>
-                            <p className="text-[9px] text-slate-500 uppercase font-medium">{s.role}</p>
-                         </div>
+                        <SpeakerAvatar speaker={s} className="w-11 h-11" iconSize={16} />
+                        <div className="min-w-0">
+                          <p className="text-xs font-bold text-slate-800 dark:text-slate-200 uppercase truncate">{s.name}</p>
+                          <p className="text-[9px] text-slate-500 uppercase font-medium truncate">{s.role}</p>
+                        </div>
                       </div>
                     ))}
-                  </div>
-               </div>
+                   </div>
+                </div>
 
                <div className="pt-6 border-t border-slate-50 dark:border-white/5 flex items-center justify-between mt-auto">
                   <div className="flex items-center gap-2 text-slate-400">
@@ -387,21 +406,28 @@ export const Events: React.FC = () => {
                           </p>
                        </section>
 
-                       <section className="space-y-8">
-                          <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em]">Wazungumzaji Wakuu</h4>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                             {selectedEvent.speakers.map((s, i) => (
-                               <div key={i} className="flex gap-6 bg-slate-50 dark:bg-white/5 p-6 border border-slate-100 dark:border-white/5 rounded-sm">
-                                  <img src={s.img} className="w-24 h-24 rounded-sm object-cover grayscale shadow-md" alt="" />
-                                  <div className="space-y-1">
-                                     <h5 className="text-lg font-black text-slate-900 dark:text-white uppercase tracking-tight">{s.name}</h5>
-                                     <p className="text-[10px] font-black text-gold-600 uppercase tracking-widest mb-2">{s.role}</p>
-                                     <p className="text-xs text-slate-500 leading-relaxed line-clamp-3 italic">{s.bio}</p>
-                                  </div>
+                        <section className="space-y-8">
+                           <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em]">Wazungumzaji Wakuu</h4>
+                           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                             {selectedEvent.speakers.length === 0 && (
+                               <div className="md:col-span-2 rounded-3xl border border-dashed border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/[0.03] px-6 py-8 text-center text-[10px] font-black uppercase tracking-widest text-slate-400">
+                                 Hakuna taarifa za wazungumzaji kwa sasa.
                                </div>
-                             ))}
-                          </div>
-                       </section>
+                             )}
+                              {selectedEvent.speakers.map((s, i) => (
+                                <div key={i} className="flex gap-6 bg-slate-50 dark:bg-white/5 p-6 border border-slate-100 dark:border-white/5 rounded-3xl">
+                                   <SpeakerAvatar speaker={s} className="w-24 h-24" iconSize={28} />
+                                   <div className="space-y-2 min-w-0">
+                                      <h5 className="text-lg font-black text-slate-900 dark:text-white uppercase tracking-tight">{s.name}</h5>
+                                      <p className="text-[10px] font-black text-gold-600 uppercase tracking-widest">{s.role}</p>
+                                      <p className="text-xs text-slate-500 leading-relaxed italic">
+                                        {s.bio || 'Mzungumzaji mkuu wa tukio hili.'}
+                                      </p>
+                                   </div>
+                                </div>
+                              ))}
+                           </div>
+                        </section>
 
                        <section className="space-y-6">
                           <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em]">Nyenzo za Unabii</h4>

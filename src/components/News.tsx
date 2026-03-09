@@ -1,5 +1,5 @@
-﻿import React, { useEffect, useMemo, useState } from 'react';
-import { Calendar, Clock, Newspaper, ArrowRight, X, Share2, Eye } from 'lucide-react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { Calendar, Clock, Newspaper, ArrowRight, X, Share2, Eye, User } from 'lucide-react';
 import { getNewsItems, registerNewsView } from '../services/newsService';
 import { subscribeNewsletter } from '../services/newsletterService';
 
@@ -12,6 +12,7 @@ interface NewsItem {
   excerpt: string;
   content: string;
   author: string;
+  authorImage?: string;
   views: number;
   featured?: boolean;
 }
@@ -26,6 +27,21 @@ const renderImage = (image: string, title: string, className: string) => {
   }
   return <img src={image} className={className} alt={title} />;
 };
+
+const AuthorAvatar: React.FC<{ name: string; image?: string; className?: string; iconSize?: number }> = ({
+  name,
+  image,
+  className = 'w-10 h-10',
+  iconSize = 18,
+}) => (
+  <div className={`${className} shrink-0 overflow-hidden rounded-full border border-slate-200 bg-slate-100 flex items-center justify-center`}>
+    {image ? (
+      <img src={image} alt={name} className="h-full w-full object-cover" />
+    ) : (
+      <User size={iconSize} className="text-slate-500" />
+    )}
+  </div>
+);
 
 const translateCategory = (category: string): string => {
   const key = (category || '').trim().toLowerCase();
@@ -73,6 +89,7 @@ export const News: React.FC = () => {
           excerpt: item.excerpt || 'Hakuna taarifa.',
           content: item.content || '',
           author: item.author || 'Hakuna taarifa',
+          authorImage: item.author_image || '',
           views: Number(item.views || 0),
           featured: item.featured,
         }));
@@ -139,8 +156,8 @@ export const News: React.FC = () => {
     }
   };
 
-  const filteredNews = activeCategory === 'all' ? items : items.filter((n) => n.category === activeCategory);
-  const featuredNews = items.filter((n) => n.featured);
+  const filteredNews = activeCategory === 'all' ? items : items.filter((item) => item.category === activeCategory);
+  const featuredNews = items.filter((item) => item.featured);
   const topHeadline = featuredNews[0]?.title || items[0]?.title || 'Hakuna taarifa za habari kwa sasa.';
 
   return (
@@ -260,11 +277,18 @@ export const News: React.FC = () => {
                 <div className="flex items-center gap-2 text-slate-400 text-[10px] font-bold uppercase mb-1">
                   <Calendar size={12} /> {item.date}
                 </div>
-                <div className="flex items-center gap-2 text-slate-400 text-[10px] font-bold uppercase mb-3">
+                <div className="flex items-center gap-2 text-slate-400 text-[10px] font-bold uppercase mb-4">
                   <Eye size={12} /> Imeonekana {item.views}
                 </div>
                 <h3 className="text-lg font-black text-slate-900 mb-3 leading-tight group-hover:text-primary-600 transition-colors line-clamp-2">{item.title}</h3>
-                <p className="text-slate-500 text-sm leading-relaxed mb-6 flex-1 line-clamp-3 font-medium">{item.excerpt}</p>
+                <p className="text-slate-500 text-sm leading-relaxed mb-5 flex-1 line-clamp-3 font-medium">{item.excerpt}</p>
+                <div className="mb-5 flex items-center gap-3 rounded-2xl bg-slate-50 px-3 py-3 border border-slate-100">
+                  <AuthorAvatar name={item.author} image={item.authorImage} />
+                  <div className="min-w-0">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Mwandishi</p>
+                    <p className="text-sm font-bold text-slate-700 truncate">{item.author}</p>
+                  </div>
+                </div>
                 <button className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-primary-900 group-hover:text-gold-600 transition-colors mt-auto">
                   Soma Habari Kamili <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
                 </button>
@@ -336,11 +360,9 @@ export const News: React.FC = () => {
             </div>
 
             <div className="flex-1 overflow-y-auto p-8 md:p-12">
-              <div className="flex items-center justify-between border-b border-slate-100 pb-6 mb-8">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-6 mb-8 gap-4">
                 <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center font-black text-slate-500 text-xs">
-                    {selectedNews.author.charAt(0)}
-                  </div>
+                  <AuthorAvatar name={selectedNews.author} image={selectedNews.authorImage} className="w-12 h-12" iconSize={20} />
                   <div>
                     <p className="text-xs font-black text-slate-900 uppercase tracking-wide">{selectedNews.author}</p>
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
@@ -350,9 +372,9 @@ export const News: React.FC = () => {
                 </div>
                 <button
                   onClick={() => handleShare(selectedNews)}
-                  className="inline-flex items-center gap-2 px-4 py-2 text-[10px] font-black uppercase tracking-widest bg-primary-900 text-white rounded-lg hover:bg-gold-500 hover:text-primary-900 transition-all"
+                  className="inline-flex items-center gap-2 px-4 py-2 text-[10px] font-black uppercase tracking-widest bg-primary-900 text-white rounded-lg hover:bg-gold-500 hover:text-primary-900 transition-all shrink-0"
                 >
-                  <Share2 size={14} /> Share
+                  <Share2 size={14} /> Shiriki
                 </button>
               </div>
 

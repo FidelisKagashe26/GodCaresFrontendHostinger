@@ -90,6 +90,7 @@ export const AboutUs: React.FC = () => {
     () => (teamLeaders.length ? teamLeaders : DEFAULT_LEADERS),
     [teamLeaders]
   );
+  const featuredLeader = leaders[0] || DEFAULT_LEADERS[0];
 
   return (
     <div className="space-y-12 md:space-y-16 animate-fade-in pb-28 md:pb-32 max-w-7xl mx-auto px-4 md:px-6 pt-8 md:pt-12">
@@ -173,11 +174,15 @@ export const AboutUs: React.FC = () => {
              <div className="lg:col-span-3 bg-slate-50 dark:bg-black/20 p-6 sm:p-8 flex flex-col items-center justify-center border-b lg:border-b-0 lg:border-r border-slate-100 dark:border-white/5">
                 <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full p-0.5 bg-gradient-to-tr from-gold-400 to-gold-600 shadow-md mb-3">
                    <div className="w-full h-full rounded-full bg-slate-800 overflow-hidden relative flex items-center justify-center">
-                      <User size={48} className="text-white/50" />
-                   </div>
-                </div>
-                <h4 className="text-base sm:text-lg font-black text-slate-900 dark:text-white uppercase tracking-tight text-center">Frank Majibwene</h4>
-                <p className="text-[10px] sm:text-xs font-black text-gold-500 uppercase tracking-widest text-center">Rais na Mwanzilishi</p>
+                      {featuredLeader.avatarUrl ? (
+                        <img src={featuredLeader.avatarUrl} alt={featuredLeader.name} className="w-full h-full object-cover" />
+                      ) : (
+                        <User size={48} className="text-white/50" />
+                      )}
+                    </div>
+                 </div>
+                <h4 className="text-base sm:text-lg font-black text-slate-900 dark:text-white uppercase tracking-tight text-center">{featuredLeader.name}</h4>
+                <p className="text-[10px] sm:text-xs font-black text-gold-500 uppercase tracking-widest text-center">{featuredLeader.role}</p>
              </div>
 
              {/* Right Column: The Message */}

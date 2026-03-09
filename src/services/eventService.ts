@@ -29,12 +29,27 @@ export interface EventApi {
 
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || window.location.origin).replace(/\/$/, "");
 
+const toAbsoluteUrl = (value?: string | null): string => {
+  const raw = (value || "").trim();
+  if (!raw) return "";
+  if (/^(https?:)?\/\//i.test(raw) || raw.startsWith("data:")) return raw;
+  return `${API_BASE_URL}${raw.startsWith("/") ? raw : `/${raw}`}`;
+};
+
 export const getEvents = async (): Promise<EventApi[]> => {
   const response = await fetch(`${API_BASE_URL}/api/events/`);
   if (!response.ok) {
     throw new Error("Imeshindikana kupata matukio.");
   }
-  return (await response.json()) as EventApi[];
+  const payload = (await response.json()) as EventApi[];
+  return payload.map((item) => ({
+    ...item,
+    image: toAbsoluteUrl(item.image),
+    speakers: (item.speakers || []).map((speaker) => ({
+      ...speaker,
+      img: toAbsoluteUrl(speaker.img),
+    })),
+  }));
 };
 
 export const registerForEvent = async (eventId: number, payload: { name: string; email: string }) => {
