@@ -23,7 +23,7 @@ const DEFAULT_LEADERS: TeamLeader[] = [
   {
     id: 'lead-1',
     name: 'Frank Majibwene',
-    role: 'President',
+    role: 'Rais',
     email: 'president@godcares365.org',
     phone: '+255 744 780 244',
     avatarUrl: '',
@@ -32,7 +32,7 @@ const DEFAULT_LEADERS: TeamLeader[] = [
   {
     id: 'lead-2',
     name: 'Nobert Goodluck',
-    role: 'Vice President',
+    role: 'Makamu wa Rais',
     email: 'vp@godcares365.org',
     phone: '+255 655 464 655',
     avatarUrl: '',
@@ -41,7 +41,7 @@ const DEFAULT_LEADERS: TeamLeader[] = [
   {
     id: 'lead-3',
     name: 'Neema Athuman',
-    role: 'Secretary',
+    role: 'Katibu',
     email: 'secretary@godcares365.org',
     phone: '+255 713 000 000',
     avatarUrl: '',
@@ -50,7 +50,7 @@ const DEFAULT_LEADERS: TeamLeader[] = [
   {
     id: 'lead-4',
     name: 'Elson Salala',
-    role: 'Dir. Evangelism & Outreach',
+    role: 'Mkur. Uinjilisti na Uenezi',
     email: 'evangelism@godcares365.org',
     phone: '+255 700 000 000',
     avatarUrl: '',
@@ -79,7 +79,7 @@ export const AboutUs: React.FC = () => {
           setTeamLeaders(mapped);
         }
       } catch {
-        setTeamError('Imeshindikana kupakua viongozi kutoka backend. Tunaonyesha data ya msingi.');
+        setTeamError('Imeshindikana kupakua taarifa za viongozi. Tunaonyesha data ya msingi.');
       }
     };
 
@@ -104,7 +104,7 @@ export const AboutUs: React.FC = () => {
           </h2>
           <div className="space-y-4 text-slate-600 dark:text-slate-400 text-sm leading-relaxed font-medium">
              <p>
-                Tunaishi katika kipindi cha <strong>"Post-Truth"</strong>. God Cares 365 ilizaliwa kwa mzigo wa kusaidia watu wanaopotea, kuwaonyesha kuwa Mungu hakukuacha na Ukweli wake ndio uhuru pekee.
+                 Tunaishi katika kipindi ambacho ukweli unapotoshwa na kupuuzwa. God Cares 365 ilizaliwa kwa mzigo wa kuwasaidia watu wanaopotea na kuwaonyesha kwamba Mungu hajawaacha; ukweli wake ndio uhuru wa kweli.
              </p>
              <div className="inline-block px-6 py-2 border-l-2 border-r-2 border-gold-500/30 italic text-slate-500 text-xs bg-slate-50 dark:bg-white/5 rounded-lg">
                 "Hatuhubiri dini, tunahubiri Kristo na Neno lake lililo hai."
@@ -116,7 +116,7 @@ export const AboutUs: React.FC = () => {
              <div className="flex gap-2 items-center opacity-70">
                 <Church size={14} className="text-slate-400 mt-0.5 shrink-0" />
                 <p className="text-[8px] text-slate-500 dark:text-slate-500 font-bold uppercase tracking-wide leading-tight">
-                   God Cares 365 is an independent ministry following the guidelines of the Seventh-day Adventist Church.
+                   God Cares 365 ni huduma huru inayofuata miongozo ya Kanisa la Waadventista Wasabato.
                 </p>
              </div>
           </div>
@@ -177,7 +177,7 @@ export const AboutUs: React.FC = () => {
                    </div>
                 </div>
                 <h4 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-tight text-center">Frank Majibwene</h4>
-                <p className="text-[8px] font-black text-gold-500 uppercase tracking-widest text-center">President & Founder</p>
+                <p className="text-[8px] font-black text-gold-500 uppercase tracking-widest text-center">Rais na Mwanzilishi</p>
              </div>
 
              {/* Right Column: The Message */}
@@ -191,22 +191,22 @@ export const AboutUs: React.FC = () => {
                 
                 <div className="space-y-4 text-slate-600 dark:text-slate-300 text-xs md:text-sm leading-relaxed font-serif">
                    <p>
-                      "Habari rafiki! Umechanagnyikiwa? Umedanganywa? Unautafuta Ukweli? Una roho ya Udadisi? Unataka kujifunza zaidi? Je! Unajua upo ndani kabisa kwenye Moyo wa Mungu?"
+                      "Habari, rafiki! Umechanganyikiwa? Umedanganywa? Unautafuta ukweli? Una roho ya udadisi? Unataka kujifunza zaidi? Je, unajua uko ndani kabisa ya moyo wa Mungu?"
                    </p>
                    <p className="font-bold text-slate-900 dark:text-white">
-                      "Platform hii imetengenezwa Mahususi kwa ajili yako, hapa utapata kila kitu kitakachokusaidia kuujua ukweli."
+                      "Jukwaa hili limetengenezwa mahususi kwa ajili yako. Hapa utapata mambo yatakayokusaidia kuujua ukweli."
                    </p>
                    <p>
-                      "Kwenye Pambano Kuu kati ya Wema na Uovu hii ndio Changamoto kubwa Tunayopaswa kuitatua: <span className="text-gold-600 dark:text-gold-400 italic">Kuugundua ukweli, Kuuishi ukweli na Kuufuata ukweli.</span>"
+                      "Katika pambano kuu kati ya wema na uovu, hii ndiyo changamoto kubwa tunayopaswa kuitatua: <span className="text-gold-600 dark:text-gold-400 italic">kuugundua ukweli, kuuishi ukweli, na kuufuata ukweli.</span>"
                    </p>
                    <p>
-                      "Timu ya GodCares365 inakutakia safari njema unaposafiri kwenye platform hii iliyoandaliwa kwa ajili yako na kugundua Mengi yaliyofichwa nyuma ya Pazia na Gizani kupitia nuru ya Neno la Mungu."
+                      "Timu ya God Cares 365 inakutakia safari njema unapotumia jukwaa hili lililoandaliwa kwa ajili yako na kugundua mengi yaliyofichwa nyuma ya pazia kupitia nuru ya Neno la Mungu."
                    </p>
                 </div>
 
                 <div className="pt-4 border-t border-slate-100 dark:border-white/5 flex items-start justify-between gap-3">
                    <p className="text-[8px] md:text-[9px] font-black text-slate-400 uppercase tracking-widest">
-                      "Amani ya Bwana wetu Yesu Kristo na upendo wa Mungu Baba na Ushirika wa Roho Mtakatifu uwe Pamoja nawe. Amina."
+                      "Amani ya Bwana wetu Yesu Kristo, na upendo wa Mungu Baba, na ushirika wa Roho Mtakatifu uwe pamoja nawe. Amina."
                    </p>
                    <div className="text-gold-500 opacity-50">
                       <Quote size={16} />
@@ -223,7 +223,7 @@ export const AboutUs: React.FC = () => {
              {/* Section Header */}
              <div className="text-center space-y-2">
                 <div className="inline-flex items-center gap-2 text-gold-500 font-black text-[9px] uppercase tracking-[0.3em]">
-                   <Activity size={12} className="animate-pulse" /> Status
+                   <Activity size={12} className="animate-pulse" /> Hali
                 </div>
                 <h3 className="text-2xl font-black text-white uppercase tracking-tighter">
                    Takwimu & Nyenzo
@@ -235,10 +235,10 @@ export const AboutUs: React.FC = () => {
                 {/* LEFT: Compact Stats */}
                 <div className="space-y-6">
                    <div className="flex items-center justify-between border-b border-white/10 pb-2">
-                      <h4 className="text-[10px] font-black text-white uppercase tracking-[0.2em]">Impact</h4>
+                      <h4 className="text-[10px] font-black text-white uppercase tracking-[0.2em]">Mwenendo</h4>
                       <div className="flex gap-2">
                          <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></div>
-                         <span className="text-[8px] font-bold text-green-500 uppercase">Live</span>
+                         <span className="text-[8px] font-bold text-green-500 uppercase">Sasa</span>
                       </div>
                    </div>
 
@@ -304,12 +304,12 @@ export const AboutUs: React.FC = () => {
 
                    <div className="grid grid-cols-2 gap-2">
                       {[
-                         { icon: <Microscope size={14} />, title: "Analysis", desc: "Uchunguzi wa kina.", color: "text-purple-400" },
-                         { icon: <Clock size={14} />, title: "Timelines", desc: "Ramani za nyakati.", color: "text-blue-400" },
-                         { icon: <ShieldCheck size={14} />, title: "Detection", desc: "Kufichua uongo.", color: "text-red-400" },
-                         { icon: <Download size={14} />, title: "Downloads", desc: "Maktaba ya bure.", color: "text-green-400" },
+                         { icon: <Microscope size={14} />, title: "Uchambuzi", desc: "Uchunguzi wa kina.", color: "text-purple-400" },
+                         { icon: <Clock size={14} />, title: "Nyakati", desc: "Ramani za nyakati.", color: "text-blue-400" },
+                         { icon: <ShieldCheck size={14} />, title: "Ufichuzi", desc: "Kufichua uongo.", color: "text-red-400" },
+                         { icon: <Download size={14} />, title: "Upakuaji", desc: "Maktaba ya bure.", color: "text-green-400" },
                          { icon: <Target size={14} />, title: "Faith", desc: "Mashujaa wa imani.", color: "text-gold-400" },
-                         { icon: <Activity size={14} />, title: "Tracking", desc: "Maendeleo yako.", color: "text-cyan-400" }
+                         { icon: <Activity size={14} />, title: "Maendeleo", desc: "Maendeleo yako.", color: "text-cyan-400" }
                       ].map((tool, i) => (
                          <div key={i} className="bg-white/5 hover:bg-white/10 p-2 rounded-lg border border-white/5 transition-all group cursor-default">
                             <div className={`mb-1 ${tool.color} bg-white/5 w-fit p-1 rounded group-hover:scale-110 transition-transform`}>{tool.icon}</div>
@@ -328,13 +328,13 @@ export const AboutUs: React.FC = () => {
        <section className="text-center space-y-6 pt-4 pb-2">
           <div className="max-w-xl mx-auto space-y-2">
              <div className="inline-flex items-center gap-2 text-gold-500 font-black text-[9px] uppercase tracking-[0.2em] mb-1">
-                <Mail size={12} /> Weekly Updates
+                <Mail size={12} /> Taarifa za Kila Wiki
              </div>
              <h3 className="text-2xl md:text-3xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">
                 Jiunge na Jarida Letu
              </h3>
              <p className="text-slate-500 dark:text-slate-400 text-xs md:text-sm font-medium">
-                Pata uchambuzi wa unabii, habari za misheni, na mafundisho mapya moja kwa moja kwenye email yako kila wiki.
+                Pata uchambuzi wa unabii, habari za misheni, na mafundisho mapya moja kwa moja kwenye barua pepe yako kila wiki.
              </p>
           </div>
 
@@ -346,7 +346,7 @@ export const AboutUs: React.FC = () => {
                 </div>
                 <input
                   type="email"
-                  placeholder="Weka email yako hapa..."
+                  placeholder="Weka barua pepe yako hapa..."
                   className="w-full bg-transparent px-3 py-3 text-sm font-bold text-slate-900 dark:text-white placeholder:text-slate-400 outline-none"
                 />
                 <button className="bg-primary-900 text-gold-400 px-4 sm:px-6 py-2.5 rounded-lg font-black text-[10px] uppercase tracking-widest hover:bg-gold-500 hover:text-primary-950 transition-all shadow-lg shrink-0 flex items-center justify-center gap-1 group/btn w-full sm:w-auto">

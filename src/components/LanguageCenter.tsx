@@ -208,7 +208,7 @@ export const LanguageCenter: React.FC<Props> = ({ isOpen, onClose, currentLangua
                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" size={14} />
                <input 
                  type="text" 
-                 placeholder="Search languages..." 
+                 placeholder="Tafuta lugha..." 
                  value={searchTerm}
                  onChange={(e) => setSearchTerm(e.target.value)}
                  className="w-full bg-slate-900 border border-white/10 rounded-lg pl-9 pr-4 py-2 text-xs text-white placeholder:text-slate-500 focus:border-gold-400 outline-none transition-colors"
@@ -237,7 +237,7 @@ export const LanguageCenter: React.FC<Props> = ({ isOpen, onClose, currentLangua
                ))}
                {filteredLanguages.length === 0 && (
                  <div className="p-8 text-center text-slate-500 text-xs">
-                   No languages found.
+                    Hakuna lugha iliyopatikana.
                  </div>
                )}
              </div>
@@ -249,7 +249,7 @@ export const LanguageCenter: React.FC<Props> = ({ isOpen, onClose, currentLangua
               onClick={handleReset}
               className="w-full py-2 flex items-center justify-center gap-2 text-[10px] font-bold text-slate-400 hover:text-white transition-colors uppercase tracking-widest"
             >
-              <RefreshCw size={12} /> Reset to Original (English)
+              <RefreshCw size={12} /> Rudisha Lugha ya Mwanzo (Kiingereza)
             </button>
          </div>
       </div>

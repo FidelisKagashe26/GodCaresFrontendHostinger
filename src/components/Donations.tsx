@@ -243,8 +243,8 @@ export const Donations: React.FC = () => {
                     <input value={donorName} onChange={(e) => setDonorName(e.target.value)} className="w-full px-4 py-3 bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl outline-none text-sm font-bold text-slate-900 dark:text-white focus:border-gold-500 transition-all" placeholder="Mtoa Sadaka" />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Email (Hiari)</label>
-                    <input type="email" value={donorEmail} onChange={(e) => setDonorEmail(e.target.value)} className="w-full px-4 py-3 bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl outline-none text-sm font-bold text-slate-900 dark:text-white focus:border-gold-500 transition-all" placeholder="email@mfano.com" />
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Barua Pepe (Hiari)</label>
+                    <input type="email" value={donorEmail} onChange={(e) => setDonorEmail(e.target.value)} className="w-full px-4 py-3 bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl outline-none text-sm font-bold text-slate-900 dark:text-white focus:border-gold-500 transition-all" placeholder="barua.pepe@mfano.com" />
                   </div>
                 </div>
 
@@ -283,14 +283,14 @@ export const Donations: React.FC = () => {
                       className={`flex flex-col items-center gap-3 p-5 rounded-xl border transition-all ${paymentMethod === 'mobile' ? 'bg-primary-950 text-gold-400 border-primary-950 shadow-lg' : 'bg-transparent border-slate-100 dark:border-white/5 text-slate-400'}`}
                     >
                        <Smartphone size={24} />
-                       <span className="text-[10px] font-black uppercase tracking-widest">Mobile Pay</span>
+                       <span className="text-[10px] font-black uppercase tracking-widest">Malipo ya Simu</span>
                     </button>
                     <button 
                       onClick={() => setPaymentMethod('card')}
                       className={`flex flex-col items-center gap-3 p-5 rounded-xl border transition-all ${paymentMethod === 'card' ? 'bg-primary-950 text-gold-400 border-primary-950 shadow-lg' : 'bg-transparent border-slate-100 dark:border-white/5 text-slate-400'}`}
                     >
                        <CreditCard size={24} />
-                       <span className="text-[10px] font-black uppercase tracking-widest">Bank Card</span>
+                       <span className="text-[10px] font-black uppercase tracking-widest">Kadi ya Benki</span>
                     </button>
                  </div>
               </div>

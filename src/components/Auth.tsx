@@ -364,7 +364,7 @@ export const Auth: React.FC<AuthProps> = ({ onLogin, onClose, resetParams, onRes
   const submitPasswordReset = async () => {
     const localErrors: FormErrors = {};
     if (!resetParams) {
-      setErrorMessage('Link ya kubadili nenosiri haipo.');
+      setErrorMessage('Kiungo cha kubadili nenosiri hakipo.');
       return;
     }
     if (!password) {

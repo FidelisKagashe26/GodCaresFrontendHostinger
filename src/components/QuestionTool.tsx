@@ -76,7 +76,7 @@ export const QuestionTool: React.FC<Props> = ({ onGoToVault }) => {
                        </div>
 
                        <div className="space-y-2">
-                          <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Email (Kwa Majibu)</label>
+                           <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Barua Pepe (Kwa Majibu)</label>
                           <input 
                              type="email"
                              required
@@ -134,7 +134,7 @@ export const QuestionTool: React.FC<Props> = ({ onGoToVault }) => {
                         <div className="space-y-2 px-6">
                            <h4 className="text-xl font-black text-white uppercase tracking-tight">Imepokelewa</h4>
                            <p className="text-slate-400 text-xs leading-relaxed">
-                              Swali lako limefika salama. Timu yetu itakupatia majibu ya kina kupitia email yako hivi punde.
+                              Swali lako limefika salama. Timu yetu itakupatia majibu ya kina kupitia barua pepe yako hivi punde.
                            </p>
                         </div>
                         <button 

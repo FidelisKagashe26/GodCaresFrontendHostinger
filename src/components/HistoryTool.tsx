@@ -146,7 +146,7 @@ export const HistoryTool: React.FC<Props> = ({ onGoToTimeline }) => {
       setHasLoadedEvents(true);
       fetchHistoryForDate(targetDate, sourceEvents);
     } catch {
-      setEventsError('Imeshindikana kupakua matukio kutoka backend. Tunaonyesha data ya msingi.');
+      setEventsError('Imeshindikana kupakua matukio. Tunaonyesha data ya msingi.');
       setHistoryEvents(FALLBACK_HISTORY_EVENTS);
       setHasLoadedEvents(true);
       fetchHistoryForDate(targetDate, FALLBACK_HISTORY_EVENTS);

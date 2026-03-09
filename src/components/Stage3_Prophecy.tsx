@@ -44,7 +44,7 @@ const FULL_14_PROPHECIES: Lesson[] = Array.from({ length: 14 }).map((_, i) => {
   return {
     ...base,
     id: `p-${i + 1}`,
-    title: i < PROPHECY_DATA.length ? base.title : `Prophetic Vision ${i + 1}`,
+    title: i < PROPHECY_DATA.length ? base.title : `Njozi ya Unabii ${i + 1}`,
   };
 });
 
@@ -93,16 +93,16 @@ export const StageThreeProphecy: React.FC<{ onComplete: () => void }> = ({ onCom
            <div className="w-24 h-24 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto shadow-inner">
               <Trophy size={50} />
            </div>
-           <h2 className="text-4xl font-black text-slate-900 uppercase leading-none">Prophetic Master!</h2>
-           <p className="text-slate-500 italic">"Umekamilisha Level 2: Neno la Unabii. Sasa una macho ya kuona historia ya dunia kama Mungu alivyoifunua."</p>
+           <h2 className="text-4xl font-black text-slate-900 uppercase leading-none">Bingwa wa Unabii!</h2>
+           <p className="text-slate-500 italic">"Umekamilisha Ngazi ya 2: Neno la Unabii. Sasa una macho ya kuona historia ya dunia kama Mungu alivyoifunua."</p>
            <div className="p-10 border-4 border-double border-blue-500 bg-slate-50 rounded-lg">
              <GraduationCap size={40} className="mx-auto text-blue-500 mb-4" />
-             <p className="text-[10px] uppercase font-black tracking-[0.4em] text-slate-400">GC365 ACADEMY CERTIFICATE</p>
-             <h3 className="text-2xl font-serif font-bold text-primary-900 mt-2">Prophetic Analyst</h3>
-             <p className="mt-2 text-[10px] font-bold text-slate-400">Awarded for Advanced Eschatology Excellence</p>
+             <p className="text-[10px] uppercase font-black tracking-[0.4em] text-slate-400">CHETI CHA GC365 ACADEMY</p>
+             <h3 className="text-2xl font-serif font-bold text-primary-900 mt-2">Mchambuzi wa Unabii</h3>
+             <p className="mt-2 text-[10px] font-bold text-slate-400">Kimetolewa kwa umahiri katika eskatolojia ya juu</p>
            </div>
            <button onClick={() => onComplete()} className="w-full py-5 bg-blue-600 text-white rounded-2xl font-black uppercase tracking-widest hover:bg-blue-700 transition-all shadow-xl">
-             INGIA LEVEL 3 (DISCERNMENT)
+              INGIA NGAZI YA 3 (UPAMBANUZI)
            </button>
         </div>
       </div>
@@ -116,7 +116,7 @@ export const StageThreeProphecy: React.FC<{ onComplete: () => void }> = ({ onCom
           <button key={l.id} onClick={() => setActiveId(l.id)} className="group bg-slate-900 border border-white/5 p-6 rounded-2xl text-left relative overflow-hidden hover:border-blue-500/50 shadow-xl">
             <div className="absolute inset-0 opacity-10 grayscale group-hover:grayscale-0 transition-all"><img src={l.heroImage} className="w-full h-full object-cover" alt="" /></div>
             <div className="relative z-10">
-              <div className="flex justify-between mb-4"><span className="text-[10px] font-black text-blue-400 uppercase tracking-widest">Vision {idx+1}</span>{completed.includes(l.id) && <CheckCircle2 size={16} className="text-green-500" />}</div>
+              <div className="flex justify-between mb-4"><span className="text-[10px] font-black text-blue-400 uppercase tracking-widest">Njozi {idx+1}</span>{completed.includes(l.id) && <CheckCircle2 size={16} className="text-green-500" />}</div>
               <h3 className="text-lg font-bold text-white uppercase mb-2 group-hover:text-blue-400">{l.title}</h3>
               <p className="text-xs text-slate-500 line-clamp-2 italic mb-4">"{l.abstract}"</p>
               <div className="text-[9px] font-black text-slate-400 uppercase tracking-widest border-t border-white/5 pt-4">Chambua Unabii <ChevronRight size={10} className="inline ml-1" /></div>
@@ -135,7 +135,7 @@ export const StageThreeProphecy: React.FC<{ onComplete: () => void }> = ({ onCom
         </button>
         <span className="text-[10px] md:text-[11px] font-black text-blue-400 uppercase tracking-widest truncate">{lesson.title}</span>
         <button onClick={() => setSideOpen(true)} className="lg:hidden p-2 text-blue-500"><Info size={20} /></button>
-        <div className="hidden lg:flex gap-4 text-[10px] font-bold text-slate-500 uppercase">Prophetic Record #{lessonIdx + 1}</div>
+        <div className="hidden lg:flex gap-4 text-[10px] font-bold text-slate-500 uppercase">Rekodi ya Unabii #{lessonIdx + 1}</div>
       </header>
       <div className="flex-1 flex overflow-hidden">
         <main className="flex-1 overflow-y-auto scrollbar-hide bg-slate-950">
@@ -149,7 +149,7 @@ export const StageThreeProphecy: React.FC<{ onComplete: () => void }> = ({ onCom
               </div>
               <div className="max-w-4xl mx-auto py-12 px-6 space-y-12 pb-32">
                 <section className="space-y-4"><h4 className="flex items-center gap-3 text-[10px] font-black text-slate-500 uppercase tracking-widest"><History size={16} className="text-blue-500"/> Historia iliyotabiriwa</h4><p className="text-xl md:text-3xl text-slate-300 italic border-l-2 border-blue-500/20 pl-6 py-2">{lesson.abstract}</p></section>
-                <section className="space-y-6"><h4 className="flex items-center gap-3 text-[10px] font-black text-slate-500 uppercase tracking-widest"><ScrollText size={16} className="text-blue-500"/> Analysis</h4><div className="text-base md:text-xl text-slate-400 leading-relaxed space-y-4">{lesson.coreAnalysis}</div><div className="grid md:grid-cols-2 gap-4 mt-8">{lesson.symbols.map((s,i) => <div key={i} className="p-6 bg-white/5 rounded-2xl flex items-center gap-4 border border-white/5"><span className="text-3xl">{s.icon}</span><div><p className="font-black text-white text-[10px] uppercase tracking-widest">{s.name}</p><p className="text-xs text-slate-500 mt-1">{s.meaning}</p></div></div>)}</div></section>
+                <section className="space-y-6"><h4 className="flex items-center gap-3 text-[10px] font-black text-slate-500 uppercase tracking-widest"><ScrollText size={16} className="text-blue-500"/> Uchambuzi</h4><div className="text-base md:text-xl text-slate-400 leading-relaxed space-y-4">{lesson.coreAnalysis}</div><div className="grid md:grid-cols-2 gap-4 mt-8">{lesson.symbols.map((s,i) => <div key={i} className="p-6 bg-white/5 rounded-2xl flex items-center gap-4 border border-white/5"><span className="text-3xl">{s.icon}</span><div><p className="font-black text-white text-[10px] uppercase tracking-widest">{s.name}</p><p className="text-xs text-slate-500 mt-1">{s.meaning}</p></div></div>)}</div></section>
                 <div className="text-center pt-10"><button onClick={() => setShowExam(true)} className="px-12 py-5 bg-blue-600 text-white font-black text-xs uppercase tracking-[0.4em] hover:bg-white hover:text-black transition-all shadow-xl">ANZA MTIHANI (MASWALI 7)</button></div>
               </div>
             </div>
@@ -163,12 +163,12 @@ export const StageThreeProphecy: React.FC<{ onComplete: () => void }> = ({ onCom
                     <p className="text-xs font-black uppercase text-slate-400 tracking-widest mt-2">{result >= 70 ? 'UMEFAULU VEMA' : 'RUDIA TENA'}</p>
                   </div>
                   <button onClick={result >= 70 ? handleNextAction : () => {setResult(null); setAnswers({}); setShowExam(false);}} className="px-10 py-4 bg-blue-600 text-white font-black text-[10px] uppercase tracking-widest transition-all">
-                    {result >= 70 ? (lessonIdx === FULL_14_PROPHECIES.length - 1 ? 'Finish Level 2' : 'Somo Linalofuata') : 'Try Again'}
+                    {result >= 70 ? (lessonIdx === FULL_14_PROPHECIES.length - 1 ? 'Maliza Ngazi ya 2' : 'Somo Linalofuata') : 'Jaribu Tena'}
                   </button>
                 </div>
               ) : (
                 <div className="space-y-8">
-                  <h2 className="text-2xl font-black text-white uppercase text-center mb-10">Validation Quiz</h2>
+                  <h2 className="text-2xl font-black text-white uppercase text-center mb-10">Mtihani wa Uthibitisho</h2>
                   {lesson.quiz.map((q, i) => {
                     const isAnswered = answers[i] !== undefined;
                     const isEditing = editingQuestionIndex === i;

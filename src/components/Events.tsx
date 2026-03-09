@@ -54,6 +54,23 @@ const formatTimeRange = (start: Date, end: Date | null): string => {
   return `${startText} - ${endText}`;
 };
 
+const FILTER_LABELS: Record<'All' | 'Virtual' | 'Physical', string> = {
+  All: 'Zote',
+  Virtual: 'Mtandaoni',
+  Physical: 'Ana kwa ana',
+};
+
+const EVENT_TYPE_LABELS: Record<'Virtual' | 'Physical', string> = {
+  Virtual: 'Mtandaoni',
+  Physical: 'Ana kwa ana',
+};
+
+const CATEGORY_LABELS: Record<'Seminar' | 'Summit' | 'Revival', string> = {
+  Seminar: 'Semina',
+  Summit: 'Mkutano',
+  Revival: 'Mwamsho',
+};
+
 const CountdownTimer: React.FC<{ targetDate: Date }> = ({ targetDate }) => {
   const [timeLeft, setTimeLeft] = useState({ d: 0, h: 0, m: 0, s: 0 });
 
@@ -162,9 +179,9 @@ export const Events: React.FC = () => {
       return null;
     }
 
-    const email = window.prompt('Weka barua pepe yako (email):');
+    const email = window.prompt('Weka barua pepe yako:');
     if (!email || !isValidEmail(email.trim())) {
-      alert('Email uliyoingiza si sahihi.');
+      alert('Barua pepe uliyoingiza si sahihi.');
       return null;
     }
 
@@ -215,7 +232,7 @@ export const Events: React.FC = () => {
         <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
            <div className="space-y-4 max-w-xl">
               <div className="inline-flex items-center gap-2 px-3 py-1 bg-gold-500 text-primary-950 rounded-sm text-[9px] font-black uppercase tracking-widest">
-                 <Star size={12} fill="currentColor" /> UPCOMING_EVENT_URGENT
+                 <Star size={12} fill="currentColor" /> TUKIO LIJALO
               </div>
                 <h2 className="text-3xl md:text-5xl font-black tracking-tighter uppercase leading-tight">{upcomingEvent.title}</h2>
               <div className="flex items-center gap-4 text-slate-400 text-xs font-bold uppercase tracking-widest">
@@ -226,7 +243,7 @@ export const Events: React.FC = () => {
            </div>
            
            <div className="bg-white/5 backdrop-blur-md p-6 rounded-sm border border-white/10 space-y-4">
-              <p className="text-[9px] font-black text-slate-500 uppercase tracking-[0.3em] text-center">Countdown kwa Event</p>
+              <p className="text-[9px] font-black text-slate-500 uppercase tracking-[0.3em] text-center">Muda Uliosalia</p>
                 <CountdownTimer targetDate={upcomingEvent.date} />
               <button className="w-full py-3 bg-white text-primary-950 rounded-sm font-black text-[10px] uppercase tracking-widest hover:bg-gold-500 transition-all shadow-lg">Maelezo Kamili</button>
            </div>
@@ -237,19 +254,19 @@ export const Events: React.FC = () => {
       {/* 2. FILTERS */}
       <div className="flex items-center justify-between border-b border-slate-200 dark:border-white/5 pb-4">
         <div className="flex gap-2">
-           {['All', 'Virtual', 'Physical'].map(f => (
+           {(['All', 'Virtual', 'Physical'] as const).map((f) => (
              <button 
-               key={f}
-               onClick={() => setFilter(f as any)}
-               className={`px-6 py-2 rounded-sm text-[10px] font-black uppercase tracking-widest transition-all ${filter === f ? 'bg-primary-950 text-gold-400' : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'}`}
-             >
-               {f}
-             </button>
-           ))}
+                key={f}
+                onClick={() => setFilter(f as any)}
+                className={`px-6 py-2 rounded-sm text-[10px] font-black uppercase tracking-widest transition-all ${filter === f ? 'bg-primary-950 text-gold-400' : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'}`}
+              >
+                {FILTER_LABELS[f]}
+              </button>
+            ))}
         </div>
         <button className="flex items-center gap-2 text-slate-400 hover:text-primary-900 transition-colors">
           <Filter size={18} />
-          <span className="text-[10px] font-black uppercase tracking-widest">Filter</span>
+          <span className="text-[10px] font-black uppercase tracking-widest">Chuja</span>
         </button>
       </div>
 
@@ -271,8 +288,8 @@ export const Events: React.FC = () => {
                <img src={event.image} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" alt="" />
                <div className="absolute inset-0 bg-black/20"></div>
                <div className="absolute top-4 left-4 flex gap-1">
-                  <span className="px-2 py-1 bg-black/80 text-[9px] font-black text-white uppercase tracking-widest rounded-sm">{event.type}</span>
-                  <span className="px-2 py-1 bg-gold-500 text-primary-950 text-[9px] font-black uppercase tracking-widest rounded-sm">{event.category}</span>
+                  <span className="px-2 py-1 bg-black/80 text-[9px] font-black text-white uppercase tracking-widest rounded-sm">{EVENT_TYPE_LABELS[event.type]}</span>
+                  <span className="px-2 py-1 bg-gold-500 text-primary-950 text-[9px] font-black uppercase tracking-widest rounded-sm">{CATEGORY_LABELS[event.category]}</span>
                </div>
             </div>
 
@@ -281,7 +298,7 @@ export const Events: React.FC = () => {
                   <div className="flex items-center gap-2 text-gold-500">
                     <Clock size={14} />
                     <span className="text-[10px] font-black uppercase tracking-widest">
-                      {event.date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                      {event.date.toLocaleDateString('sw-TZ', { month: 'short', day: 'numeric', year: 'numeric' })}
                     </span>
                     <span className={`ml-auto text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded-sm ${daysLeft >= 0 ? 'bg-gold-500/15 text-gold-600 dark:text-gold-400' : 'bg-slate-100 text-slate-500 dark:bg-white/10 dark:text-slate-400'}`}>
                       {daysLeft > 0 ? `Siku ${daysLeft}` : daysLeft === 0 ? 'Leo' : 'Imepita'}
@@ -296,7 +313,7 @@ export const Events: React.FC = () => {
                </div>
 
                <div className="space-y-4">
-                  <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest border-b border-white/5 pb-1">Speakers</p>
+                  <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest border-b border-white/5 pb-1">Wazungumzaji</p>
                   <div className="space-y-3">
                     {event.speakers.map((s, idx) => (
                       <div key={idx} className="flex items-center gap-3">
@@ -320,7 +337,7 @@ export const Events: React.FC = () => {
                     disabled={registeringId === event.id}
                     className={`px-6 py-2.5 rounded-sm text-[10px] font-black uppercase tracking-widest transition-all ${registeredIds.includes(event.id) ? 'bg-green-600 text-white' : 'bg-primary-950 text-gold-400 hover:bg-gold-500 hover:text-primary-950'}`}
                   >
-                    {registeredIds.includes(event.id) ? 'Registered' : registeringId === event.id ? 'Inasajili...' : 'Join Now'}
+                    {registeredIds.includes(event.id) ? 'Umesajiliwa' : registeringId === event.id ? 'Inasajili...' : 'Jiunge Sasa'}
                   </button>
                </div>
             </div>
@@ -351,8 +368,8 @@ export const Events: React.FC = () => {
                     <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent"></div>
                     <div className="absolute bottom-10 left-10 space-y-4">
                        <div className="flex gap-2">
-                          <span className="px-3 py-1 bg-gold-500 text-primary-950 text-[9px] font-black uppercase tracking-widest rounded-sm">{selectedEvent.category}</span>
-                          <span className="px-3 py-1 bg-white/10 text-white text-[9px] font-black uppercase tracking-widest rounded-sm">{selectedEvent.type}</span>
+                          <span className="px-3 py-1 bg-gold-500 text-primary-950 text-[9px] font-black uppercase tracking-widest rounded-sm">{CATEGORY_LABELS[selectedEvent.category]}</span>
+                          <span className="px-3 py-1 bg-white/10 text-white text-[9px] font-black uppercase tracking-widest rounded-sm">{EVENT_TYPE_LABELS[selectedEvent.type]}</span>
                        </div>
                        <h2 className="text-4xl md:text-6xl font-black text-white uppercase tracking-tighter leading-none">{selectedEvent.title}</h2>
                     </div>
@@ -363,7 +380,7 @@ export const Events: React.FC = () => {
                     <div className="lg:col-span-8 space-y-12">
                        <section className="space-y-4">
                           <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em] flex items-center gap-2">
-                             <Info size={16} className="text-gold-500" /> Event Synthesis
+                             <Info size={16} className="text-gold-500" /> Muhtasari wa Tukio
                           </h4>
                           <p className="text-xl md:text-2xl text-slate-800 dark:text-slate-200 leading-relaxed font-medium border-l-4 border-gold-500 pl-8">
                              {selectedEvent.description}
@@ -371,7 +388,7 @@ export const Events: React.FC = () => {
                        </section>
 
                        <section className="space-y-8">
-                          <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em]">Official Speakers</h4>
+                          <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em]">Wazungumzaji Wakuu</h4>
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                              {selectedEvent.speakers.map((s, i) => (
                                <div key={i} className="flex gap-6 bg-slate-50 dark:bg-white/5 p-6 border border-slate-100 dark:border-white/5 rounded-sm">
@@ -387,7 +404,7 @@ export const Events: React.FC = () => {
                        </section>
 
                        <section className="space-y-6">
-                          <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em]">Prophetic Resources</h4>
+                          <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em]">Nyenzo za Unabii</h4>
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                              {selectedEvent.resources.map((res, i) => (
                                <div key={i} className="flex items-center justify-between p-5 bg-white dark:bg-slate-900 border border-slate-100 dark:border-white/10 rounded-sm group hover:border-gold-500/50 transition-all shadow-sm">
@@ -413,8 +430,8 @@ export const Events: React.FC = () => {
                                    <Calendar size={24} />
                                 </div>
                                 <div>
-                                   <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Time & Date</p>
-                                   <p className="text-sm font-bold text-slate-900 dark:text-white uppercase">{selectedEvent.date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}</p>
+                                   <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Tarehe na Saa</p>
+                                   <p className="text-sm font-bold text-slate-900 dark:text-white uppercase">{selectedEvent.date.toLocaleDateString('sw-TZ', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}</p>
                                    <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{formatTimeRange(selectedEvent.date, selectedEvent.endDate)}</p>
                                 </div>
                              </div>
@@ -423,7 +440,7 @@ export const Events: React.FC = () => {
                                    <MapPin size={24} />
                                 </div>
                                 <div>
-                                   <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Location Hub</p>
+                                   <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Mahali</p>
                                    <p className="text-sm font-bold text-slate-900 dark:text-white uppercase">{selectedEvent.location}</p>
                                 </div>
                              </div>
@@ -432,7 +449,7 @@ export const Events: React.FC = () => {
                           <div className="p-6 bg-white dark:bg-slate-900 border border-slate-100 dark:border-white/5 rounded-sm text-center space-y-3 shadow-inner">
                              <Users size={32} className="mx-auto text-slate-300" />
                              <h5 className="text-2xl font-black text-slate-900 dark:text-white">{selectedEvent.attendees} / {selectedEvent.maxAttendees}</h5>
-                             <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Available Spots: {selectedEvent.maxAttendees - selectedEvent.attendees}</p>
+                              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Nafasi Zilizobaki: {selectedEvent.maxAttendees - selectedEvent.attendees}</p>
                              <div className="h-1.5 w-full bg-slate-100 dark:bg-white/5 rounded-full overflow-hidden">
                                 <div className="h-full bg-gold-500" style={{ width: `${(selectedEvent.attendees / selectedEvent.maxAttendees) * 100}%` }}></div>
                              </div>
@@ -443,14 +460,14 @@ export const Events: React.FC = () => {
                             disabled={registeringId === selectedEvent.id}
                             className={`w-full py-5 rounded-sm font-black text-xs uppercase tracking-[0.2em] transition-all shadow-md ${registeredIds.includes(selectedEvent.id) ? 'bg-green-600 text-white' : 'bg-primary-950 text-gold-400 hover:bg-gold-500 hover:text-primary-950'}`}
                           >
-                             {registeredIds.includes(selectedEvent.id) ? 'Already Registered' : registeringId === selectedEvent.id ? 'Inasajili...' : 'Secure My Seat'}
+                             {registeredIds.includes(selectedEvent.id) ? 'Umesajiliwa Tayari' : registeringId === selectedEvent.id ? 'Inasajili...' : 'Hifadhi Nafasi Yangu'}
                           </button>
                        </div>
 
                        <div className="p-8 bg-gold-500 text-primary-950 rounded-sm relative overflow-hidden group shadow-lg">
                           <div className="absolute top-0 right-0 p-8 opacity-10"><AlertCircle size={80}/></div>
-                          <h5 className="text-lg font-black uppercase italic leading-none mb-3">Notice!</h5>
-                          <p className="text-xs font-bold leading-relaxed">System notifications will be sent to your verified email and Notification Center before the start.</p>
+                          <h5 className="text-lg font-black uppercase italic leading-none mb-3">Taarifa!</h5>
+                          <p className="text-xs font-bold leading-relaxed">Taarifa za mfumo zitatumwa kwenye barua pepe yako iliyothibitishwa na kwenye Kituo cha Taarifa kabla ya tukio kuanza.</p>
                        </div>
                     </div>
                  </div>
@@ -459,7 +476,7 @@ export const Events: React.FC = () => {
               <div className="p-10 border-t border-slate-100 dark:border-white/5 flex flex-col md:flex-row justify-between items-center gap-6 bg-slate-50/50 dark:bg-black/20">
                  <div className="flex items-center gap-3">
                     <Share2 size={20} className="text-slate-400" />
-                    <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest tracking-[0.2em]">Broadcast Event to Network</span>
+                    <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest tracking-[0.2em]">Shiriki Tukio Hili</span>
                  </div>
                  <div className="flex gap-4">
                     <button onClick={() => setSelectedEvent(null)} className="px-10 py-3 bg-slate-900 text-white text-[10px] font-black uppercase tracking-widest rounded-sm shadow-lg">Funga</button>

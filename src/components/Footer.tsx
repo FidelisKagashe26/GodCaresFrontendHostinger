@@ -1,4 +1,4 @@
-
+﻿
 import React from 'react';
 import { Facebook, Instagram, Youtube, Phone, Mail, Gift } from 'lucide-react';
 import { StageId } from '../types';
@@ -65,14 +65,14 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, siteSettings }) => {
            <div>
               <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-4">Misingi</h4>
               <ul className="space-y-2">
-                 <li onClick={() => onNavigate?.(StageId.ABOUT)} className="text-xs font-bold text-slate-400 hover:text-gold-400 cursor-pointer transition-colors">Maono Yetu</li>
+                 <li onClick={() => onNavigate?.(StageId.ABOUT)} className="text-xs font-bold text-slate-400 hover:text-gold-400 cursor-pointer transition-colors">Kuhusu Sisi</li>
                  <li onClick={() => onNavigate?.(StageId.BLOG)} className="text-xs font-bold text-slate-400 hover:text-gold-400 cursor-pointer transition-colors">Blog ya Imani</li>
-                 <li onClick={() => onNavigate?.(StageId.BIBLE_STUDY)} className="text-xs font-bold text-slate-400 hover:text-gold-400 cursor-pointer transition-colors">Mtaala wa Biblia</li>
+                 <li onClick={() => onNavigate?.(StageId.BIBLE_STUDY)} className="text-xs font-bold text-slate-400 hover:text-gold-400 cursor-pointer transition-colors">Darasa la Biblia</li>
                  <li onClick={() => onNavigate?.(StageId.TESTIMONIES)} className="text-xs font-bold text-slate-400 hover:text-gold-400 cursor-pointer transition-colors">Shuhuda</li>
               </ul>
            </div>
            <div>
-              <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-4">Ujasusi</h4>
+              <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-4">Uchunguzi</h4>
               <ul className="space-y-2">
                  <li onClick={() => onNavigate?.(StageId.TIMELINE)} className="text-xs font-bold text-slate-400 hover:text-gold-400 cursor-pointer transition-colors">Ramani ya Unabii</li>
                  <li onClick={() => onNavigate?.(StageId.EVIDENCE)} className="text-xs font-bold text-slate-400 hover:text-gold-400 cursor-pointer transition-colors">Hifadhi ya Ushahidi</li>
@@ -82,9 +82,9 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, siteSettings }) => {
            <div>
               <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-4">Ungana</h4>
               <ul className="space-y-2">
-                 <li onClick={() => onNavigate?.(StageId.NEWS)} className="text-xs font-bold text-slate-400 hover:text-gold-400 cursor-pointer transition-colors">Portal ya Habari</li>
-                 <li onClick={() => onNavigate?.(StageId.MEDIA)} className="text-xs font-bold text-slate-400 hover:text-gold-400 cursor-pointer transition-colors">Video Hub</li>
-                 <li onClick={() => onNavigate?.(StageId.SHOP)} className="text-xs font-bold text-slate-400 hover:text-gold-400 cursor-pointer transition-colors">Duka la Kiroho</li>
+                 <li onClick={() => onNavigate?.(StageId.NEWS)} className="text-xs font-bold text-slate-400 hover:text-gold-400 cursor-pointer transition-colors">Kituo cha Habari</li>
+                 <li onClick={() => onNavigate?.(StageId.MEDIA)} className="text-xs font-bold text-slate-400 hover:text-gold-400 cursor-pointer transition-colors">Kituo cha Video</li>
+                 <li onClick={() => onNavigate?.(StageId.SHOP)} className="text-xs font-bold text-slate-400 hover:text-gold-400 cursor-pointer transition-colors">Duka la Ukweli</li>
               </ul>
            </div>
            <div>
@@ -134,10 +134,10 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, siteSettings }) => {
         {/* Copyright */}
         <div className="flex flex-col items-center gap-2">
           <p className="text-slate-600 text-[9px] font-black uppercase tracking-[0.4em] text-center">
-            © 2026 Mradi wa Wamishenari wa Kidijitali wa God Cares 365.
+            Copyright 2026 Mradi wa Wamishenari wa Kidijitali wa God Cares 365.
           </p>
           <p className="text-slate-700 text-[8px] font-bold uppercase tracking-widest">
-            Sola Scriptura • Sola Gratia • Sola Fide
+            Sola Scriptura | Sola Gratia | Sola Fide
           </p>
         </div>
 
@@ -145,3 +145,4 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, siteSettings }) => {
     </footer>
   );
 };
+

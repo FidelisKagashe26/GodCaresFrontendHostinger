@@ -1,4 +1,4 @@
-
+﻿
 import React, { useState, useEffect, useRef } from 'react';
 import { StageId } from '../types';
 import { 
@@ -93,9 +93,9 @@ export const Home: React.FC<HomeProps> = ({ onNavigate }) => {
          </div>
 
         {[
-          { id: 1, tag: "Mwaka 31 B.K - Yerusalemu", h2: "Pilato Anauiliza swali la milenia..", h3: "KWELI NI NINI", p: <><span className="text-gold-400 font-medium">swali hili lenye umri wa miaka 2000 liloulizwa na gavana wa kirumi limesafiri kweney korido za wakati na bado linasumbua hadi leo likihitaji majibu, kwenye zama zetu za AI ukweli umechakachuliwa, umeburuzwa, umepuuziwa, umehafifishwa, kuzimwa na sehmu nyingine kuangamizwa kabisa.</span></>, img: "https://images.unsplash.com/photo-1548013146-72479768bbaa?q=80&w=2000" },
-          { id: 2, tag: "Jibu la Mfalme", h2: "Yesu Anamjibu Pilato.", h3: "NIMEKUJA NIISHUHUDIE KWELI.", p: <>"Mimi nimezaliwa kwa ajili ya haya, na kwa ajili ya haya mimi nalikuja ulimwenguni, ili niishuhudie kweli. Kila aliye wa hiyo kweli hunisikia sauti yangu." — <span className="text-gold-400 font-black">Yohana 18:37</span></>, img: "https://images.unsplash.com/photo-1512117187123-f365d9c227ba?q=80&w=2000" },
-          { id: 3, tag: "Dhana Moja", h2: "Kweli zipo Ngapi?", h3: "UKWELI UPO MMOJA TU.", p: <>"Yesu akamwambia, Mimi ndimi njia, na kweli, na uzima; mtu haji kwa Baba, ila kwa njia ya mimi." — <span className="text-gold-400 font-black">Yohana 14:6</span> <br/><br/> <span className="text-gold-400 font-medium">kwa vile ukweli ni msingi wa kile tunachoamini lazima uwe mmoja.</span></>, img: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2000" }
+          { id: 1, tag: "Mwaka 31 B.K. - Yerusalemu", h2: "Pilato Anauliza Swali la Milenia.", h3: "KWELI NI NINI?", p: <><span className="text-gold-400 font-medium">Swali hili la miaka 2,000, lililoulizwa na gavana wa Kirumi, limesafiri katika korido za wakati na bado linasumbua hadi leo. Katika zama zetu za AI, ukweli umechakachuliwa, umeburuzwa, umepuuzwa, umefifishwa, na katika sehemu nyingine umeangamizwa kabisa.</span></>, img: "https://images.unsplash.com/photo-1548013146-72479768bbaa?q=80&w=2000" },
+          { id: 2, tag: "Jibu la Mfalme", h2: "Yesu Anamjibu Pilato.", h3: "NIMEKUJA NIISHUHUDIE KWELI.", p: <>"Mimi nimezaliwa kwa ajili ya haya, na kwa ajili ya haya mimi nalikuja ulimwenguni, ili niishuhudie kweli. Kila aliye wa hiyo kweli hunisikia sauti yangu." - <span className="text-gold-400 font-black">Yohana 18:37</span></>, img: "https://images.unsplash.com/photo-1512117187123-f365d9c227ba?q=80&w=2000" },
+          { id: 3, tag: "Dhana Moja", h2: "Kweli Zipo Ngapi?", h3: "UKWELI UPO MMOJA TU.", p: <>"Yesu akamwambia, Mimi ndimi njia, na kweli, na uzima; mtu haji kwa Baba, ila kwa njia ya mimi." - <span className="text-gold-400 font-black">Yohana 14:6</span> <br/><br/> <span className="text-gold-400 font-medium">Kwa kuwa ukweli ni msingi wa kile tunachoamini, lazima uwe mmoja.</span></>, img: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2000" }
         ].map((step, i) => (
           <div key={i} className="relative min-h-[70vh] md:min-h-[75vh] flex items-center overflow-hidden border-b border-slate-200 dark:border-white/5">
             <img src={step.img} className="absolute inset-0 w-full h-full object-cover opacity-25 dark:opacity-20 transition-transform duration-[8s] ease-out hover:scale-110" alt="" />
@@ -125,9 +125,9 @@ export const Home: React.FC<HomeProps> = ({ onNavigate }) => {
          </div>
 
         {[
-          { id: 1, tag: "Utabiri", h2: "Siku za mwisho itakuwaje.", h3: "WATU WENGI WATADANGANYWA.", p: <>"Yesu akajibu, akawaambia, Angalieni, mtu asiwadanganye" — <span className="text-red-500 font-black">Mathayo 24:6</span> <br/><br/> <span className="text-red-500 font-medium italic">yesu alionya kuhusu udanganyifu and kudhani kila mtu ana ukweli wake.</span></>, img: "https://images.unsplash.com/photo-1463130436662-3162799c0a37?q=80&w=2000" },
-          { id: 2, tag: "Asili ya Uongo", h2: "Shetani ndie Muongo.", h3: "YESU ALISEMA.", p: <>"Ninyi ni wa baba yenu, Ibilisi, na tamaa za baba yenu ndizo mpendazo kuzitenda. Yeye alikuwa mwuaji tangu mwanzo; wala hakusimama katika kweli, kwa kuwa hamna hiyo kweli ndani yake. Asemapo uongo, husema yaliyo yake mwenyewe; kwa sababu yeye ni mwongo, na baba wa huo." — <span className="text-red-500 font-black">Yohana 8:44</span></>, img: "https://images.unsplash.com/photo-1519074069444-1ba4fff66d16?q=80&w=2000" },
-          { id: 3, tag: "Kilele cha Udanganyifu", h2: "Shetani ameudanganya ulimwengu wote.", h3: "KILA MTU AMEDANGANYWA.", p: <>"Yule joka akatupwa, yule mkubwa, nyoka wa zamani, aitwaye Ibilisi na Shetani, audanganyaye ulimwengu wote; akatupwa hata nchi, na malaika zake wakatupwa pamoja naye." — <span className="text-red-500 font-black">Ufunuo 12:9</span></>, img: "https://images.unsplash.com/photo-1533105079780-92b9be482077?q=80&w=2000" }
+          { id: 1, tag: "Utabiri", h2: "Siku za Mwisho Zitakuwaje?", h3: "WATU WENGI WATADANGANYWA.", p: <>"Yesu akajibu, akawaambia, Angalieni, mtu asiwadanganye." - <span className="text-red-500 font-black">Mathayo 24:6</span> <br/><br/> <span className="text-red-500 font-medium italic">Yesu alionya kuhusu udanganyifu na fikra kwamba kila mtu ana ukweli wake.</span></>, img: "https://images.unsplash.com/photo-1463130436662-3162799c0a37?q=80&w=2000" },
+          { id: 2, tag: "Asili ya Uongo", h2: "Shetani Ndiye Muongo.", h3: "YESU ALISEMA.", p: <>"Ninyi ni wa baba yenu, Ibilisi, na tamaa za baba yenu ndizo mpendazo kuzitenda. Yeye alikuwa mwuaji tangu mwanzo; wala hakusimama katika kweli, kwa kuwa hamna hiyo kweli ndani yake. Asemapo uongo, husema yaliyo yake mwenyewe; kwa sababu yeye ni mwongo, na baba wa huo." - <span className="text-red-500 font-black">Yohana 8:44</span></>, img: "https://images.unsplash.com/photo-1519074069444-1ba4fff66d16?q=80&w=2000" },
+          { id: 3, tag: "Kilele cha Udanganyifu", h2: "Shetani Ameudanganya Ulimwengu Wote.", h3: "KILA MTU AMEDANGANYWA.", p: <>"Yule joka akatupwa, yule mkubwa, nyoka wa zamani, aitwaye Ibilisi na Shetani, audanganyaye ulimwengu wote; akatupwa hata nchi, na malaika zake wakatupwa pamoja naye." - <span className="text-red-500 font-black">Ufunuo 12:9</span></>, img: "https://images.unsplash.com/photo-1533105079780-92b9be482077?q=80&w=2000" }
         ].map((step, i) => (
           <div key={i} className="relative min-h-[70vh] md:min-h-[75vh] flex items-center overflow-hidden border-b border-slate-200 dark:border-white/5">
             <img src={step.img} className="absolute inset-0 w-full h-full object-cover opacity-25 dark:opacity-20" alt="" />
@@ -157,8 +157,8 @@ export const Home: React.FC<HomeProps> = ({ onNavigate }) => {
          </div>
 
         {[
-          { id: 1, tag: "Tumaini Limerejea", h2: "Tunalo Tumaini", h3: "TUNAWEZA KUUJUA UKWELI", p: <>"tena mtaifahamu kweli, nayo hiyo kweli itawaweka huru." — <span className="text-emerald-400 font-black">Yohana 8:32</span> <br/><br/> <span className="text-emerald-400 font-medium italic">Ukweli unaweza kufichwa lakini hauwezi kufichwa milele.</span></>, img: "https://images.unsplash.com/photo-1491466424936-e304919aada7?q=80&w=2000" },
-          { id: 2, tag: "Njia ya Mafanikio", h2: "Kuutafuta Ukweli", h3: "UKWELI UNAPATIKANA", p: <>"tafuteni, nanyi mtaona;" — <span className="text-emerald-400 font-black">Mathayo 7:7</span> <br/> "Mtafuteni Bwana, maadamu anapatikana, Mwiteni, maadamu yu karibu;" — <span className="text-emerald-400 font-black">Isaya 55:6</span> <br/><br/> <span className="text-emerald-400 font-medium italic">Tukiutafuta ukweli tutaupata. hili ni jukumu letu kulifanya yaani kutafuta Ukweli</span></>, img: "https://images.unsplash.com/photo-1454165833767-02638a5996bc?q=80&w=2000" },
+          { id: 1, tag: "Tumaini Limerejea", h2: "Tunalo Tumaini", h3: "TUNAWEZA KUUJUA UKWELI", p: <>"Tena mtaifahamu kweli, nayo hiyo kweli itawaweka huru." - <span className="text-emerald-400 font-black">Yohana 8:32</span> <br/><br/> <span className="text-emerald-400 font-medium italic">Ukweli unaweza kufichwa kwa muda, lakini hauwezi kufichwa milele.</span></>, img: "https://images.unsplash.com/photo-1491466424936-e304919aada7?q=80&w=2000" },
+          { id: 2, tag: "Njia ya Mafanikio", h2: "Kuutafuta Ukweli", h3: "UKWELI UNAPATIKANA", p: <>"Tafuteni, nanyi mtaona;" - <span className="text-emerald-400 font-black">Mathayo 7:7</span> <br/> "Mtafuteni Bwana, maadamu anapatikana; mwiteni, maadamu yu karibu;" - <span className="text-emerald-400 font-black">Isaya 55:6</span> <br/><br/> <span className="text-emerald-400 font-medium italic">Tukiutafuta ukweli, tutaupata. Hili ni jukumu letu: kuutafuta ukweli.</span></>, img: "https://images.unsplash.com/photo-1454165833767-02638a5996bc?q=80&w=2000" },
         ].map((step, i) => (
           <div key={i} className="relative min-h-[70vh] md:min-h-[75vh] flex items-center overflow-hidden border-b border-slate-200 dark:border-white/5">
             <img src={step.img} className="absolute inset-0 w-full h-full object-cover opacity-25 dark:opacity-20" alt="" />
@@ -190,16 +190,16 @@ export const Home: React.FC<HomeProps> = ({ onNavigate }) => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
                <ScrollReveal className="bg-[color:var(--surface-2)] dark:bg-white/[0.02] border border-slate-200 dark:border-white/5 p-6 sm:p-12 rounded-xl shadow-inner group hover:bg-[color:var(--surface-3)] dark:hover:bg-white/[0.04] transition-all">
-                  <h3 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white uppercase tracking-tight mb-6 sm:mb-8">Dilema ya Leo.</h3>
+                  <h3 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white uppercase tracking-tight mb-6 sm:mb-8">Dilema ya Leo</h3>
                   <p className="text-slate-600 dark:text-slate-400 text-base sm:text-lg leading-relaxed mb-8 sm:mb-10 font-light">
-                    <span className="text-gold-400 font-medium italic">wakristo wengi wanapenda Neema ya Mungu lakini wanakata ukweli aliomtuma Yesu kushuhudia, wansahau huwezi kutenganisha neema na kweli maan yesu amejaa vyote viwii</span>
+                    <span className="text-gold-400 font-medium italic">Wakristo wengi wanapenda neema ya Mungu, lakini wanaukataa ukweli aliomtuma Yesu kuushuhudia. Wanasahau kuwa huwezi kutenganisha neema na kweli, maana Yesu amejaa vyote viwili.</span>
                   </p>
                   <div className="space-y-6">
                      <div className="p-6 bg-[color:var(--surface-1)] dark:bg-white/5 border-l-2 border-gold-500 italic text-sm text-slate-700 dark:text-slate-300">
-                        "Kwa kuwa torati ilitolewa kwa mkono wa Musa; neema na kweli zilikuja kwa mkono wa Yesu Kristo." — <span className="text-gold-500 font-black">Yohana 1:17</span>
+                        "Kwa kuwa torati ilitolewa kwa mkono wa Musa; neema na kweli zilikuja kwa mkono wa Yesu Kristo." - <span className="text-gold-500 font-black">Yohana 1:17</span>
                      </div>
                      <div className="p-6 bg-[color:var(--surface-1)] dark:bg-white/5 border-l-2 border-gold-500 italic text-sm text-slate-700 dark:text-slate-300">
-                        "Naye Neno alifanyika mwili, akakaa kwetu; nasi tukauona utukufu wake, utukufu kama wa Mwana pekee atokaye kwa Baba; amejaa neema na kweli." — <span className="text-gold-500 font-black">Yohana 1:14</span>
+                        "Naye Neno alifanyika mwili, akakaa kwetu; nasi tukauona utukufu wake, utukufu kama wa Mwana pekee atokaye kwa Baba; amejaa neema na kweli." - <span className="text-gold-500 font-black">Yohana 1:14</span>
                      </div>
                   </div>
                </ScrollReveal>
@@ -209,10 +209,10 @@ export const Home: React.FC<HomeProps> = ({ onNavigate }) => {
                   <div className="p-6 sm:p-12 bg-primary-50 dark:bg-primary-950/20 border border-primary-200 dark:border-primary-500/20 rounded-lg text-center space-y-6 mb-8 sm:mb-10">
                      <div className="w-14 h-14 sm:w-16 sm:h-16 bg-primary-100 dark:bg-primary-500/20 rounded-full flex items-center justify-center mx-auto text-primary-700 dark:text-primary-400 mb-4"><Search size={28}/></div>
                      <h5 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white uppercase tracking-widest">KWENYE NENO LA MUNGU</h5>
-                     <p className="text-primary-800 dark:text-primary-200 text-base sm:text-lg italic">"Uwatakase kwa ile kweli; neno lako ndiyo kweli" — <span className="text-gold-500 font-black">Yohana 17:17</span></p>
+                     <p className="text-primary-800 dark:text-primary-200 text-base sm:text-lg italic">"Uwatakase kwa ile kweli; neno lako ndiyo kweli" - <span className="text-gold-500 font-black">Yohana 17:17</span></p>
                   </div>
                   <p className="text-slate-600 dark:text-slate-500 text-sm italic">
-                    <span className="text-primary-400 font-medium italic">Bila neno la Mungu hatuwezi kutofautisha kati ya ukweli na uongo</span>
+                     <span className="text-primary-400 font-medium italic">Bila Neno la Mungu, hatuwezi kutofautisha kati ya ukweli na uongo.</span>
                   </p>
                </ScrollReveal>
             </div>
@@ -228,7 +228,7 @@ export const Home: React.FC<HomeProps> = ({ onNavigate }) => {
                      </button>
                      <div className={`px-10 overflow-hidden transition-all duration-500 ${activeDef === 'ukweli' ? 'max-h-96 pb-10 opacity-100' : 'max-h-0 opacity-0'}`}>
                         <p className="text-slate-700 dark:text-slate-300 text-base sm:text-lg leading-relaxed italic border-l-2 border-gold-500/30 pl-6 font-serif">
-                           Ukweli si hisia au kile ambacho watu wengi wanakikubali. Ukweli ni halisi, hautikisiki, na asili yake ni Mungu mwenweye kupitia Neno lake. Ni kioo kinachoonyesha hali halisi ya roho.
+                           Ukweli si hisia au kile ambacho watu wengi wanakikubali. Ukweli ni halisi, hautikisiki, na asili yake ni Mungu mwenyewe kupitia Neno lake. Ni kioo kinachoonyesha hali halisi ya roho.
                         </p>
                      </div>
                   </div>
@@ -256,8 +256,8 @@ export const Home: React.FC<HomeProps> = ({ onNavigate }) => {
             {/* Questions Section - Moved below CTAs */}
             <div className="pt-10 sm:pt-14 space-y-8 sm:space-y-12">
                <ScrollReveal className="text-center space-y-4 sm:space-y-6">
-                  <h2 className="text-2xl sm:text-3xl md:text-4xl font-medium text-gold-500 tracking-tight leading-none lowercase">
-                    Bila ukweli ni vigumu kuyajibu maswali makuu matano ya maisha.
+                  <h2 className="text-2xl sm:text-3xl md:text-4xl font-medium text-gold-500 tracking-tight leading-none">
+                    Bila ukweli, ni vigumu kujibu maswali makuu matano ya maisha.
                   </h2>
                </ScrollReveal>
 
@@ -333,3 +333,4 @@ export const Home: React.FC<HomeProps> = ({ onNavigate }) => {
     </div>
   );
 };
+

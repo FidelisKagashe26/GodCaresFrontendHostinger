@@ -11,15 +11,16 @@ export const Certificate: React.FC<Props> = ({ userName, date }) => {
     if (navigator.share) {
       try {
         await navigator.share({
-          title: 'Missionary Certificate',
-          text: `I have completed the God Cares 365 journey and am now a certified Digital Missionary!`,
+          title: 'Cheti cha Mmishenari',
+          text: 'Nimekamilisha safari ya God Cares 365 na sasa nimetunukiwa kuwa Mmishenari wa Kidijitali!',
           url: window.location.href,
         });
       } catch (err) {
         // Fallback or ignore
       }
     } else {
-      alert("Link copied to clipboard!");
+      navigator.clipboard?.writeText(window.location.href);
+      alert("Kiungo kimenakiliwa kwenye clipboard!");
     }
   };
 
@@ -39,30 +40,30 @@ export const Certificate: React.FC<Props> = ({ userName, date }) => {
                 </div>
              </div>
              
-             <h1 className="text-4xl md:text-5xl font-serif text-slate-800 font-bold mb-2">Certificate of Completion</h1>
-             <p className="text-slate-500 uppercase tracking-widest text-sm mb-12">God Cares 365 Academy</p>
+             <h1 className="text-4xl md:text-5xl font-serif text-slate-800 font-bold mb-2">Cheti cha Kuhitimu</h1>
+             <p className="text-slate-500 uppercase tracking-widest text-sm mb-12">Akademia ya God Cares 365</p>
              
-             <p className="text-xl text-slate-600 mb-2">This certifies that</p>
+             <p className="text-xl text-slate-600 mb-2">Hiki kinathibitisha kuwa</p>
              <h2 className="text-3xl md:text-4xl font-serif text-primary-700 font-bold mb-2 border-b-2 border-slate-200 inline-block px-8 pb-2">
                {userName}
              </h2>
              <p className="text-xl text-slate-600 mt-8 mb-8">
-               Has successfully completed the journey from discovery to truth, demonstrating a commitment to Biblical understanding and the Great Commission.
+               Amekamilisha kwa mafanikio safari kutoka ugunduzi hadi ukweli, akionyesha kujitoa kwa uelewa wa Biblia na Utume Mkuu.
              </p>
 
              <div className="flex justify-between items-end mt-16 px-10">
                <div className="text-center">
                  <div className="w-40 border-b border-slate-400 mb-2"></div>
-                 <p className="text-sm text-slate-500 font-serif">Date: {date}</p>
+                 <p className="text-sm text-slate-500 font-serif">Tarehe: {date}</p>
                </div>
                <div className="text-center">
                   <div className="w-24 h-24 bg-gold-400 rounded-full flex items-center justify-center text-white font-bold shadow-lg mx-auto mb-2">
-                    SEAL
+                    MHURI
                   </div>
                </div>
                <div className="text-center">
                  <div className="w-40 border-b border-slate-400 mb-2"></div>
-                 <p className="text-sm text-slate-500 font-serif">Program Director</p>
+                 <p className="text-sm text-slate-500 font-serif">Mkurugenzi wa Programu</p>
                </div>
              </div>
            </div>
@@ -71,10 +72,10 @@ export const Certificate: React.FC<Props> = ({ userName, date }) => {
 
       <div className="flex gap-4 mt-8">
         <button className="flex items-center gap-2 px-6 py-3 bg-slate-900 text-white rounded-xl hover:bg-slate-800 transition-colors">
-          <Download size={20} /> Download PDF
+          <Download size={20} /> Pakua PDF
         </button>
         <button onClick={handleShare} className="flex items-center gap-2 px-6 py-3 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition-colors">
-          <Share2 size={20} /> Share Achievement
+          <Share2 size={20} /> Shiriki Mafanikio
         </button>
       </div>
     </div>

@@ -426,7 +426,7 @@ const EvidenceSummary: React.FC<{
                        "{item.translations.original}"
                     </p>
                     <p className="text-xs text-slate-500 mt-2 font-mono uppercase tracking-widest text-right">
-                       â€” {item.sourceBook}, Pg. {item.evidenceData.page}
+                       - {item.sourceBook}, Uk. {item.evidenceData.page}
                     </p>
                  </div>
               </div>
@@ -871,7 +871,7 @@ const DocumentPreview: React.FC<{ item: EvidenceItem; onBack: () => void; onClos
               <div className="w-full max-w-3xl rounded-2xl border border-white/10 bg-[#0b1120] p-8 md:p-10 space-y-6 shadow-2xl">
                 <div className="flex items-center gap-3 text-gold-400">
                   <Activity size={20} />
-                  <p className="text-xs font-black uppercase tracking-[0.2em]">Audio Evidence</p>
+                  <p className="text-xs font-black uppercase tracking-[0.2em]">Ushahidi wa Sauti</p>
                 </div>
                 <h3 className="text-2xl font-black text-white uppercase tracking-tight">{item.title}</h3>
                 <p className="text-sm text-slate-400">{item.description || 'Sikiliza ushahidi huu wa sauti moja kwa moja.'}</p>
@@ -883,7 +883,7 @@ const DocumentPreview: React.FC<{ item: EvidenceItem; onBack: () => void; onClos
           {!isPdfDocument && !isImageDocument && !isVideoDocument && !isAudioDocument && (
             <div className="w-full max-w-2xl p-8 rounded-xl border border-white/10 bg-white/5 text-center space-y-3">
               <AlertTriangle size={24} className="mx-auto text-gold-400" />
-              <p className="text-sm text-slate-300">Aina ya media haijatambulika. Tafadhali hakikisha source URL ni sahihi.</p>
+              <p className="text-sm text-slate-300">Aina ya media haijatambulika. Tafadhali hakikisha kiungo cha chanzo ni sahihi.</p>
             </div>
           )}
         </div>
@@ -993,7 +993,7 @@ const DocumentPreview: React.FC<{ item: EvidenceItem; onBack: () => void; onClos
             </>
           )}
 
-          <button onClick={handleReset} className="p-2 md:p-3 hover:bg-white/10 rounded-lg text-slate-300 transition-colors" title={isPdfDocument ? 'Rudi Citation Page' : 'Reset View'}>
+          <button onClick={handleReset} className="p-2 md:p-3 hover:bg-white/10 rounded-lg text-slate-300 transition-colors" title={isPdfDocument ? 'Rudi kwenye Ukurasa wa Nukuu' : 'Anzisha Upya Mwonekano'}>
             <RotateCcw size={18} />
           </button>
 
@@ -1001,7 +1001,7 @@ const DocumentPreview: React.FC<{ item: EvidenceItem; onBack: () => void; onClos
             <button
               onClick={handleJumpToCitationPage}
               className="p-2 md:p-3 hover:bg-white/10 rounded-lg text-slate-300 hover:text-gold-400 transition-colors"
-              title={`Nenda moja kwa moja kwenye page ${citedPage}`}
+              title={`Nenda moja kwa moja kwenye ukurasa ${citedPage}`}
             >
               <BookOpen size={18} />
             </button>
@@ -1011,7 +1011,7 @@ const DocumentPreview: React.FC<{ item: EvidenceItem; onBack: () => void; onClos
             <button
               onClick={() => setShowVideo(true)}
               className="p-2 md:p-3 hover:bg-white/10 rounded-lg text-slate-300 hover:text-gold-500 transition-colors"
-              title="Tazama Analysis Video"
+              title="Tazama Video ya Uchambuzi"
             >
               <PlayCircle size={18} />
             </button>
@@ -1099,7 +1099,7 @@ export const EvidenceVault: React.FC = () => {
         setVaultItems(mapped);
       } catch (error: any) {
         setVaultItems([]);
-        setVaultError(error?.message || 'Imeshindikana kupakua evidence vault.');
+        setVaultError(error?.message || 'Imeshindikana kupakua hazina ya ushahidi.');
       } finally {
         setLoadingVault(false);
       }
@@ -1219,7 +1219,7 @@ export const EvidenceVault: React.FC = () => {
                 onClick={() => setActiveFolder(null)}
                 className="p-2 hover:bg-white/10 rounded-lg text-slate-400 hover:text-white transition-all flex items-center gap-2"
               >
-                 <ArrowLeft size={18} /> <span className="text-xs font-bold uppercase">Back to Folders</span>
+                 <ArrowLeft size={18} /> <span className="text-xs font-bold uppercase">Rudi Kwenye Folda</span>
               </button>
               <div className="h-6 w-px bg-white/10"></div>
               <div className="flex items-center gap-2 text-gold-500">
@@ -1290,5 +1290,6 @@ export const EvidenceVault: React.FC = () => {
     </div>
   );
 };
+
 
 

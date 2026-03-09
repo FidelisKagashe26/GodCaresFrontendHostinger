@@ -425,7 +425,7 @@ export const Testimonies: React.FC = () => {
         <div className="max-w-2xl mx-auto space-y-2">
           <h4 className="text-lg font-black uppercase text-slate-900 dark:text-white">Mfumo wa Uhakiki</h4>
           <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed font-medium uppercase tracking-widest">
-            Shuhuda zote zinazowasilishwa hupokelewa na Timu ya Uhariri ya God Cares 365. Tunazipitia kwa ajili ya usiri na usahihi wa mafundisho kabla ya kuzipublish kwenye platform ili kuwatia wengine moyo.
+            Shuhuda zote zinazowasilishwa hupokelewa na Timu ya Uhariri ya God Cares 365. Tunazipitia kwa ajili ya usiri na usahihi wa mafundisho kabla ya kuzichapisha kwenye jukwaa ili kuwatia wengine moyo.
           </p>
         </div>
       </section>
@@ -448,7 +448,7 @@ export const Testimonies: React.FC = () => {
                 <div className="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center text-white mx-auto shadow-2xl animate-bounce"><CheckCircle size={40} /></div>
                 <div className="space-y-2">
                   <h4 className="text-2xl font-black uppercase text-slate-900 dark:text-white">Imepokelewa Vema</h4>
-                  <p className="text-slate-500 text-sm">Ushuhuda wako umetumwa kwa Timu ya Uhariri. Utapokea taarifa punde utakapokuwa Live.</p>
+                  <p className="text-slate-500 text-sm">Ushuhuda wako umetumwa kwa Timu ya Uhariri. Utapokea taarifa punde utakapochapishwa.</p>
                 </div>
               </div>
             ) : (
@@ -465,7 +465,7 @@ export const Testimonies: React.FC = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Picha ya Profile (Hiari)</label>
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Picha ya Wasifu (Hiari)</label>
                   <label className="w-full flex items-center gap-3 px-4 py-4 bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl cursor-pointer hover:border-gold-500 transition-all">
                     <div className="w-10 h-10 rounded-lg bg-primary-950 text-gold-400 flex items-center justify-center shrink-0">
                       <Camera size={16} />
@@ -491,14 +491,14 @@ export const Testimonies: React.FC = () => {
                       <FileText size={16} /> Maandishi
                     </button>
                     <button type="button" onClick={() => setFormData({ ...formData, type: 'video' })} className={`flex items-center justify-center gap-2 py-4 rounded-xl border font-black text-[10px] uppercase tracking-widest transition-all ${formData.type === 'video' ? 'bg-primary-950 text-gold-400 border-primary-950 shadow-lg' : 'bg-transparent border-slate-200 text-slate-400'}`}>
-                      <Video size={16} /> Video Link
+                      <Video size={16} /> Kiungo cha Video
                     </button>
                   </div>
                 </div>
 
                 {formData.type === 'video' && (
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Link ya Video</label>
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Kiungo cha Video</label>
                     <input type="url" value={formData.videoUrl} onChange={(e) => setFormData({ ...formData, videoUrl: e.target.value })} className="w-full px-5 py-4 bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl outline-none text-sm font-bold text-slate-900 dark:text-white focus:border-gold-500 transition-all" placeholder="https://youtube.com/..." />
                   </div>
                 )}
@@ -513,7 +513,7 @@ export const Testimonies: React.FC = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Habari Yako / Maelezo</label>
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Ushuhuda Wako / Maelezo</label>
                   <textarea required value={formData.story} onChange={(e) => setFormData({ ...formData, story: e.target.value })} className="w-full h-40 p-5 bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl outline-none text-sm leading-relaxed text-slate-800 dark:text-slate-200 focus:border-gold-500 transition-all resize-none" placeholder="Elezea kwa ufupi kile Bwana alichokufanyia..." />
                 </div>
 

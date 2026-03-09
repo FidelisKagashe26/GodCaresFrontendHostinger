@@ -281,14 +281,14 @@ export const News: React.FC = () => {
         <div className="relative z-10 max-w-xl mx-auto space-y-6">
           <h2 className="text-3xl font-black text-white tracking-tight uppercase">Pata Habari Kwanza</h2>
           <p className="text-slate-400 text-sm font-medium">
-            Pokea habari za huduma kila wiki kwenye email yako.
+            Pokea habari za huduma kila wiki kwenye barua pepe yako.
           </p>
           <div className="flex gap-2 p-1 bg-white/10 rounded-xl border border-white/10">
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="Weka email yako..."
+              placeholder="Weka barua pepe yako..."
               className="flex-1 bg-transparent px-4 py-3 text-white text-sm outline-none placeholder:text-slate-400"
             />
             <button

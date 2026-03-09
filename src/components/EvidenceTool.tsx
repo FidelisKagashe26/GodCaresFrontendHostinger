@@ -81,10 +81,10 @@ const mapEvidenceToFact = (item: EvidenceItemApi, index: number): EvidenceFact =
     title: item.swahiliTitle || item.title || 'Ushahidi wa Kihistoria',
     evidence: item.description || item.fact || 'Hakuna maelezo ya ushahidi kwa sasa.',
     didYouKnow: item.fact || item.translations?.sw || item.description || 'Hakuna dondoo ya ziada kwa sasa.',
-    hints: hints.length > 0 ? hints : ['Ushahidi huu umetolewa kwenye backend ya makumbusho ya ushahidi.'],
+    hints: hints.length > 0 ? hints : ['Ushahidi huu umetolewa kwenye hazina ya ushahidi ya mfumo.'],
     image: item.heroImage || DEFAULT_EVIDENCE_IMAGE,
     year: item.yearPublished || 'N/A',
-    location: item.author?.organization || item.category || 'Unknown',
+    location: item.author?.organization || item.category || 'Haijajulikana',
   };
 };
 
@@ -117,7 +117,7 @@ export const EvidenceTool: React.FC<Props> = ({ onGoToVault }) => {
       const mapped = payload.map((item, index) => mapEvidenceToFact(item, index));
       setFacts(mapped.length > 0 ? mapped : FALLBACK_FACTS);
     } catch {
-      setFactsError('Imeshindikana kupakua data ya did you know kutoka backend. Tunaonyesha data ya msingi.');
+      setFactsError('Imeshindikana kupakua dondoo za ushahidi. Tunaonyesha data ya msingi.');
       setFacts(FALLBACK_FACTS);
     } finally {
       setIsLoadingFacts(false);

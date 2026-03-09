@@ -40,7 +40,7 @@ const safeFetch = async (url: string) => {
   try {
     return await fetch(url);
   } catch {
-    throw new Error('Hakuna mawasiliano ya mtandao kwa sasa. Tafadhali angalia internet yako kisha ujaribu tena.');
+    throw new Error('Hakuna mawasiliano ya mtandao kwa sasa. Tafadhali angalia muunganisho wako wa mtandao kisha ujaribu tena.');
   }
 };
 

@@ -76,14 +76,14 @@ export const ProfileModal: React.FC<{ user: any; onLogout: () => void; onClose: 
 
   const handleFeatureClick = (feature: string) => {
     if (feature === 'Privacy') {
-      alert("Mpangilio wa Faragha: Data zako zimesimbwa. Unaweza kufuta historia yako ya masomo hapa.");
+      alert("Mpangilio wa faragha: Data zako zimesimbwa. Unaweza kufuta historia yako ya masomo hapa.");
     } else if (feature === 'Security') {
-      alert("Hali ya Ulinzi: Akaunti yako imelindwa na Itifaki ya GC-Shield. Hakuna uingiaji mgeni uliogundulika.");
+      alert("Hali ya ulinzi: Akaunti yako imelindwa na itifaki ya GC-Shield. Hakuna uingiaji mgeni uliogundulika.");
     } else if (feature === 'Support') {
       const email = supportEmail || "support@godcares365.org";
       window.location.href = `mailto:${email}?subject=Msaada wa Akaunti`;
     } else if (feature === 'Settings') {
-      alert("Mipangilio ya Mfumo: Unaweza kubadili lugha na rangi (Theme) kupitia toolbar iliyo juu ya ukurasa.");
+      alert("Mipangilio ya mfumo: Unaweza kubadili lugha na mandhari kupitia sehemu ya juu ya ukurasa.");
     }
   };
 
@@ -104,7 +104,7 @@ export const ProfileModal: React.FC<{ user: any; onLogout: () => void; onClose: 
                   <img 
                     src={profilePic || `https://ui-avatars.com/api/?name=${user.name}&background=020617&color=eab308&bold=true&size=128`} 
                     className="w-full h-full object-cover" 
-                    alt="User"
+                    alt="Wasifu wa mtumiaji"
                   />
                   <button 
                     onClick={() => fileInputRef.current?.click()}
@@ -141,7 +141,7 @@ export const ProfileModal: React.FC<{ user: any; onLogout: () => void; onClose: 
               <p className="text-xs font-bold text-white">{streak} <span className="text-[8px] text-orange-500">Siku</span></p>
             </div>
             <div className="bg-white/5 p-3 rounded-xl border border-white/5 text-center">
-              <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1">Level</p>
+              <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1">Ngazi</p>
               <p className="text-xs font-bold text-white">{completedModulesCount + 1}</p>
             </div>
           </div>
@@ -183,7 +183,7 @@ export const ProfileModal: React.FC<{ user: any; onLogout: () => void; onClose: 
 
         <div className="p-5 pt-2 flex flex-col gap-3 bg-black/20 border-t border-white/5">
           <button onClick={onLogout} className="w-full py-4 bg-red-500/10 rounded-xl text-xs font-black uppercase tracking-widest text-red-500 border border-red-500/20 flex items-center justify-center gap-2 hover:bg-red-500 hover:text-white transition-all shadow-lg shadow-red-500/5">
-            <LogOut size={16} /> Ondoka Akauntini
+            <LogOut size={16} /> Toka Kwenye Akaunti
           </button>
         </div>
       </div>
@@ -308,11 +308,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   const sections = [
     {
-      title: "Mitaala ya Msingi",
+      title: "Sehemu za Msingi",
       ids: [StageId.HOME, StageId.BLOG, StageId.ABOUT, StageId.BIBLE_STUDY, StageId.FAITH_BUILDER]
     },
     {
-      title: "Ujasusi wa Kiungu",
+      title: "Uchunguzi wa Kiungu",
       ids: [StageId.TIMELINE, StageId.EVIDENCE, StageId.DECEPTION_VAULT, StageId.QUESTION_VAULT, StageId.LIBRARY]
     },
     {
@@ -377,7 +377,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           {/* OUR WEBSITES SECTION */}
           <div className="space-y-6 pt-4 pb-12">
              <h3 className="text-[9px] font-black text-slate-600 dark:text-slate-400 uppercase tracking-[0.4em] px-1 flex items-center gap-4">
-                <span>Mtandao Wetu (Our Websites)</span>
+                 <span>Tovuti Zetu</span>
                 <div className="h-[1px] flex-1 bg-gradient-to-r from-slate-300 dark:from-white/10 to-transparent"></div>
              </h3>
              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pb-12">

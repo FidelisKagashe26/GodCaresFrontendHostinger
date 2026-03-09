@@ -55,7 +55,7 @@ const normalizeSettings = (input: Partial<SiteSettings>): SiteSettings => ({
 export const getSiteSettings = async (): Promise<SiteSettings> => {
   const response = await fetch(`${API_BASE_URL}/api/site-settings/`);
   if (!response.ok) {
-    throw new Error("Imeshindikana kupata site settings.");
+    throw new Error("Imeshindikana kupata mipangilio ya tovuti.");
   }
   const data = (await response.json()) as Partial<SiteSettings>;
   return normalizeSettings(data);

@@ -117,7 +117,7 @@ export const MediaProjects: React.FC = () => {
         }));
         setPlaylists(mapped);
       } catch (err: any) {
-        setError(err?.message || 'Imeshindikana kupata playlists.');
+        setError(err?.message || 'Imeshindikana kupata orodha za video.');
       } finally {
         setLoading(false);
       }
@@ -135,7 +135,7 @@ export const MediaProjects: React.FC = () => {
            <button onClick={() => { setSelectedPlaylist(null); setPlayingVideo(null); }} className="p-2 hover:bg-slate-100 dark:hover:bg-white/10 rounded-full transition-colors text-slate-600 dark:text-slate-200"><ChevronLeft size={24} /></button>
            <div>
              <h2 className="text-xl font-black text-slate-900 dark:text-white">{selectedPlaylist.title}</h2>
-             <p className="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest">{selectedPlaylist.videoCount} Videos</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest">Video {selectedPlaylist.videoCount}</p>
            </div>
         </div>
         <div className="max-w-[1400px] mx-auto p-4 md:p-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
@@ -156,7 +156,7 @@ export const MediaProjects: React.FC = () => {
                             <div className="w-10 h-10 rounded-full bg-gold-500 flex items-center justify-center text-primary-950 font-black text-sm">GC</div>
                             <div>
                                <h4 className="font-bold text-sm text-slate-900 dark:text-white">God Cares 365</h4>
-                               <p className="text-xs text-slate-500 dark:text-slate-400">Official Publisher</p>
+                                <p className="text-xs text-slate-500 dark:text-slate-400">Mchapishaji Rasmi</p>
                             </div>
                          </div>
                          <div className="flex gap-2">
@@ -180,7 +180,7 @@ export const MediaProjects: React.FC = () => {
                <div className="max-h-[600px] overflow-y-auto scrollbar-hide">
                  {selectedPlaylist.videos.length === 0 && (
                    <div className="p-6 text-center text-xs font-black uppercase tracking-widest text-slate-400">
-                     Hakuna video kwenye playlist hii.
+                      Hakuna video kwenye orodha hii.
                    </div>
                  )}
                  {selectedPlaylist.videos.map((v, idx) => (
@@ -201,7 +201,7 @@ export const MediaProjects: React.FC = () => {
                        </div>
                        <div className="flex-1 min-w-0">
                           <h4 className={`text-xs font-bold leading-tight line-clamp-2 ${playingVideo?.id === v.id ? 'text-blue-600 dark:text-blue-400' : 'text-slate-800 dark:text-slate-200'}`}>{v.title}</h4>
-                          <p className="text-[10px] text-slate-400 mt-1">{v.views} views</p>
+                          <p className="text-[10px] text-slate-400 mt-1">Mionekano {v.views}</p>
                        </div>
                     </div>
                  ))}
@@ -216,7 +216,7 @@ export const MediaProjects: React.FC = () => {
     <div className="bg-slate-50 dark:bg-[#020617] min-h-screen text-slate-900 dark:text-white pb-20 animate-fade-in pt-8 transition-colors duration-500">
       <div className="max-w-[1600px] mx-auto px-4 md:px-8 space-y-12">
         <section className="space-y-4">
-           <h1 className="text-3xl md:text-5xl font-black tracking-tight uppercase border-l-8 border-red-600 pl-6 text-slate-900 dark:text-white">GC365 <span className="text-gold-500">Playlists</span></h1>
+           <h1 className="text-3xl md:text-5xl font-black tracking-tight uppercase border-l-8 border-red-600 pl-6 text-slate-900 dark:text-white">GC365 <span className="text-gold-500">Orodha za Video</span></h1>
            <div className="flex gap-3 overflow-x-auto scrollbar-hide py-2">
               {categories.map(cat => (
                 <button 
@@ -235,14 +235,14 @@ export const MediaProjects: React.FC = () => {
         </section>
 
         {loading && (
-          <div className="py-4 text-center text-xs font-black uppercase tracking-widest text-slate-400">Inapakia playlists...</div>
+          <div className="py-4 text-center text-xs font-black uppercase tracking-widest text-slate-400">Inapakia orodha za video...</div>
         )}
         {error && (
           <div className="py-2 text-center text-xs font-black uppercase tracking-widest text-red-500">{error}</div>
         )}
         {!loading && filteredPlaylists.length === 0 && (
           <div className="py-6 text-center text-xs font-black uppercase tracking-widest text-slate-400">
-            Hakuna taarifa za playlists kwa sasa.
+            Hakuna orodha za video kwa sasa.
           </div>
         )}
         

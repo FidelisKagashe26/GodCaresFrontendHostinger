@@ -111,7 +111,7 @@ const toAbsoluteUrl = (value: string): string => {
 export const getEvidenceItems = async (): Promise<EvidenceItemApi[]> => {
   const response = await fetch(`${API_BASE_URL}/api/evidence-vault/`);
   if (!response.ok) {
-    throw new Error("Imeshindikana kupata evidence vault.");
+    throw new Error("Imeshindikana kupata hazina ya ushahidi.");
   }
   const payload = (await response.json()) as EvidenceItemApi[];
   if (!Array.isArray(payload)) {
@@ -131,7 +131,7 @@ export const getEvidenceItems = async (): Promise<EvidenceItemApi[]> => {
 export const getDeceptionCases = async (): Promise<DeceptionCaseApi[]> => {
   const response = await fetch(`${API_BASE_URL}/api/deception-cases/`);
   if (!response.ok) {
-    throw new Error("Imeshindikana kupata deception cases.");
+    throw new Error("Imeshindikana kupata kesi za udanganyifu.");
   }
   const payload = (await response.json()) as DeceptionCaseApi[];
   if (!Array.isArray(payload)) {
@@ -146,7 +146,7 @@ export const getDeceptionCases = async (): Promise<DeceptionCaseApi[]> => {
 export const getQuestionVaultItems = async (): Promise<QuestionVaultItemApi[]> => {
   const response = await fetch(`${API_BASE_URL}/api/question-vault/`);
   if (!response.ok) {
-    throw new Error("Imeshindikana kupata question vault.");
+    throw new Error("Imeshindikana kupata hazina ya maswali.");
   }
   const payload = (await response.json()) as QuestionVaultItemApi[];
   if (!Array.isArray(payload)) {

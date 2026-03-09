@@ -119,7 +119,7 @@ export const DeceptionVault: React.FC = () => {
         })));
       } catch (error: any) {
         setCases([]);
-        setCasesError(error?.message || 'Imeshindikana kupakua deception cases.');
+        setCasesError(error?.message || 'Imeshindikana kupakua kesi za udanganyifu.');
       } finally {
         setLoadingCases(false);
       }
@@ -154,7 +154,7 @@ export const DeceptionVault: React.FC = () => {
         <div className="flex flex-col md:flex-row justify-between items-end gap-6 border-b border-white/5 pb-12">
            <div className="space-y-4">
               <div className="inline-flex items-center gap-2 px-3 py-1 bg-red-500/10 rounded-lg text-red-500 border border-red-500/20 text-[9px] font-black uppercase tracking-widest">
-                 <ShieldAlert size={14} /> Counter-Deception Lab
+                 <ShieldAlert size={14} /> Maabara ya Kufichua Udanganyifu
               </div>
               <h1 className="text-4xl md:text-7xl font-black text-white uppercase tracking-tighter italic leading-none">
                 Ukweli vs <span className="text-red-600">Uongo</span>
@@ -284,7 +284,7 @@ export const DeceptionVault: React.FC = () => {
                        <div className="space-y-4">
                           <div className="flex items-center gap-3">
                              <ShieldCheck size={24} className="text-emerald-500" />
-                             <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-white italic">Ukweli (Scripture)</h3>
+                             <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-white italic">Ukweli wa Maandiko</h3>
                           </div>
                           <p className="text-xl md:text-2xl font-bold text-white leading-tight">{activeCase.scripture}</p>
                        </div>
@@ -304,7 +304,7 @@ export const DeceptionVault: React.FC = () => {
                                 <PlayCircle size={16} />
                                 <h3 className="text-[8px] font-black uppercase tracking-[0.4em]">Ushahidi wa Video</h3>
                              </div>
-                             <span className="text-[8px] font-bold text-slate-600 uppercase">Analysis Portal v2</span>
+                             <span className="text-[8px] font-bold text-slate-600 uppercase">Kituo cha Uchambuzi</span>
                           </div>
                           <div className="aspect-video bg-black rounded-xl overflow-hidden relative border border-white/5">
                              {activeCase.videoUrl ? (
@@ -330,7 +330,7 @@ export const DeceptionVault: React.FC = () => {
                        <div className="p-8 bg-white/5 rounded-2xl border border-white/5 shadow-inner">
                           <div className="flex items-center gap-2 mb-4">
                              <div className="w-1.5 h-1.5 rounded-full bg-gold-500 animate-pulse"></div>
-                             <h4 className="text-[9px] font-black text-gold-500 uppercase tracking-[0.4em]">Maelezo ya Kina (In-Depth Analysis)</h4>
+                             <h4 className="text-[9px] font-black text-gold-500 uppercase tracking-[0.4em]">Maelezo ya Kina</h4>
                           </div>
                           <p className="text-slate-300 text-sm md:text-base leading-relaxed font-medium italic">
                              {activeCase.detailedDescription}

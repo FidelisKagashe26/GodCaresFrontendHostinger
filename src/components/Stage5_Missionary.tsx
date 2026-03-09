@@ -137,13 +137,13 @@ export const StageFiveMissionary: React.FC<{ onComplete: () => void }> = ({ onCo
 
               <div className="p-6 space-y-6">
                 <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 text-sm">
-                   <p className="text-[10px] font-bold text-slate-400 uppercase mb-1">Last Memory</p>
+                   <p className="text-[10px] font-bold text-slate-400 uppercase mb-1">Kumbukumbu ya Mwisho</p>
                    <p className="font-bold text-slate-800 italic">"Aliishia: {selectedHouse.lastTopic}"</p>
                 </div>
 
                 <div className="space-y-3">
                    <div className="flex justify-between items-end">
-                      <h4 className="text-xs font-bold text-slate-400 uppercase">Imani Progress</h4>
+                      <h4 className="text-xs font-bold text-slate-400 uppercase">Maendeleo ya Imani</h4>
                       <span className="text-primary-600 font-bold">{selectedHouse.progress}%</span>
                    </div>
                    <div className="h-2 bg-slate-100 rounded-full overflow-hidden">

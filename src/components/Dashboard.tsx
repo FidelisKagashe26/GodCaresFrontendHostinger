@@ -192,7 +192,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 <h3 className="text-2xl font-black text-primary-900 dark:text-white">Ushiriki wa Wanafunzi</h3>
               </div>
               <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-gold-500">
-                Live <span className="w-2 h-2 rounded-full bg-gold-500 animate-pulse"></span>
+                Sasa <span className="w-2 h-2 rounded-full bg-gold-500 animate-pulse"></span>
               </div>
             </div>
             <div className="relative h-48">
@@ -242,7 +242,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 <p className="text-base font-black">2,410</p>
               </div>
               <div className="rounded-lg border border-white/10 px-3 py-2">
-                <p className="text-slate-400">Live</p>
+                <p className="text-slate-400">Sasa</p>
                 <p className="text-base font-black">128</p>
               </div>
               <div className="rounded-lg border border-white/10 px-3 py-2">
@@ -258,7 +258,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
             <div className="flex items-center justify-between mb-6">
               <div>
                 <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 dark:text-slate-500">Muhtasari wa Vyanzo</p>
-                <h3 className="text-2xl font-black text-primary-900 dark:text-white">Maktaba dhidi ya Media</h3>
+                <h3 className="text-2xl font-black text-primary-900 dark:text-white">Maktaba dhidi ya Video</h3>
               </div>
               <BookOpen size={18} className="text-gold-500" />
             </div>
@@ -320,9 +320,9 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {[
-              { id: StageId.BIBLE_STUDY, title: "Misingi ya Imani", desc: "Anza na maswali ya asili ya Biblia.", icon: <BookCheck size={32} /> },
+              { id: StageId.BIBLE_STUDY, title: "Misingi ya Imani", desc: "Anza na maswali ya msingi ya Biblia.", icon: <BookCheck size={32} /> },
               { id: StageId.BIBLE_STUDY, title: "Unabii wa Nyakati", desc: "Zijue siri za Danieli na Ufunuo.", icon: <Search size={32} /> },
-              { id: StageId.LIBRARY, title: "Maktaba ya Roho", desc: "Pakua vitabu vya bure vya unabii.", icon: <BookOpen size={32} /> }
+              { id: StageId.LIBRARY, title: "Maktaba ya Ukweli", desc: "Pakua vitabu vya bure vya unabii.", icon: <BookOpen size={32} /> }
             ].map((item, i) => (
               <div 
                 key={i} 

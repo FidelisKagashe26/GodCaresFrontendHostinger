@@ -147,7 +147,7 @@ const safeFetch = async (input: RequestInfo | URL, init?: RequestInit) => {
     return await fetch(input, init);
   } catch {
     throw new AuthRequestError(
-      "Hakuna mawasiliano ya mtandao kwa sasa. Tafadhali angalia internet yako kisha ujaribu tena.",
+      "Hakuna mawasiliano ya mtandao kwa sasa. Tafadhali angalia muunganisho wako wa mtandao kisha ujaribu tena.",
       { code: "network_unavailable" }
     );
   }
@@ -335,7 +335,7 @@ export const forgotPassword = async (email: string): Promise<void> => {
   });
 
   if (!response.ok) {
-    throw await toAuthRequestError(response, "Imeshindikana kutuma link ya kubadili nenosiri.");
+    throw await toAuthRequestError(response, "Imeshindikana kutuma kiungo cha kubadili nenosiri.");
   }
 };
 

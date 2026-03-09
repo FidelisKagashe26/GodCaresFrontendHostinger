@@ -117,13 +117,13 @@ export const Shop: React.FC = () => {
     if (!selectedProduct || isPlacingOrder) return;
 
     if (!checkoutForm.fullName.trim() || !checkoutForm.email.trim() || !checkoutForm.phone.trim() || !checkoutForm.address.trim()) {
-      setOrderSubmitError('Jaza jina, email, simu na anwani kabla ya kulipa.');
+      setOrderSubmitError('Jaza jina, barua pepe, simu, na anwani kabla ya kulipa.');
       return;
     }
 
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailPattern.test(checkoutForm.email.trim())) {
-      setOrderSubmitError('Tafadhali weka email sahihi.');
+      setOrderSubmitError('Tafadhali weka barua pepe sahihi.');
       return;
     }
 
@@ -264,7 +264,7 @@ export const Shop: React.FC = () => {
       <section className="flex flex-col md:flex-row justify-between items-center gap-8 py-12 border-b border-slate-200 dark:border-white/5">
         <div className="space-y-2 text-center md:text-left">
           <div className="inline-flex items-center gap-2 px-3 py-1 bg-gold-500/10 text-gold-600 dark:text-gold-400 rounded-lg text-[10px] font-black uppercase tracking-[0.3em]">
-             <ShoppingBag size={12} /> Official Store
+             <ShoppingBag size={12} /> Duka Rasmi
           </div>
           <h1 className="text-4xl md:text-7xl font-black text-slate-900 dark:text-white tracking-tighter uppercase leading-none">
             Duka la <span className="text-gold-500">Ukweli</span>
@@ -280,7 +280,7 @@ export const Shop: React.FC = () => {
               <button 
                 onClick={() => setActiveTab('Tracking')}
                 className={`px-8 py-2.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'Tracking' ? 'bg-white dark:bg-slate-800 shadow-lg text-primary-900 dark:text-white' : 'text-slate-500'}`}
-              >Track</button>
+              >Fuatilia</button>
            </div>
            <button className="relative p-5 bg-primary-950 text-gold-400 rounded-xl hover:bg-gold-500 hover:text-primary-950 transition-all shadow-2xl group active:scale-90">
               <ShoppingCart size={24} />
@@ -338,7 +338,7 @@ export const Shop: React.FC = () => {
                   
                   {/* Floating Badges - Smaller */}
                   <div className="absolute top-2 left-2 flex flex-col gap-1 z-10">
-                    {product.isChoice && <div className="px-2 py-1 bg-primary-950 text-gold-400 text-[7px] font-black uppercase tracking-widest rounded flex items-center gap-1 shadow-lg"><Star size={8} fill="currentColor" /> CHOICE</div>}
+                    {product.isChoice && <div className="px-2 py-1 bg-primary-950 text-gold-400 text-[7px] font-black uppercase tracking-widest rounded flex items-center gap-1 shadow-lg"><Star size={8} fill="currentColor" /> CHAGUO</div>}
                   </div>
 
                   {/* Hover Quick Actions - Compact */}
@@ -347,7 +347,7 @@ export const Shop: React.FC = () => {
                        onClick={addToCartAction}
                        className="flex-1 bg-white text-primary-950 py-2 rounded-lg font-black text-[8px] uppercase tracking-widest flex items-center justify-center gap-1.5 hover:bg-gold-500 transition-all shadow-xl active:scale-95"
                      >
-                       <ShoppingCart size={12} /> Add
+                        <ShoppingCart size={12} /> Ongeza
                      </button>
                      <button 
                        onClick={(e) => toggleWishlist(e, product.id)}
@@ -368,7 +368,7 @@ export const Shop: React.FC = () => {
                   </div>
                   <div className="flex items-center justify-between pt-2 border-t border-slate-50 dark:border-white/5">
                      <p className="text-sm font-black text-primary-950 dark:text-white">{formatPrice(product.price)}</p>
-                     <p className="text-[8px] font-bold text-slate-500 uppercase tracking-tighter">{product.sold} Sold</p>
+                     <p className="text-[8px] font-bold text-slate-500 uppercase tracking-tighter">Zimeuzwa {product.sold}</p>
                   </div>
                 </div>
               </div>
@@ -412,7 +412,7 @@ export const Shop: React.FC = () => {
                             <div className="flex items-center gap-2 text-gold-500">
                                <Star size={16} fill="currentColor" />
                                <span className="text-sm font-black">{selectedProduct.rating}</span>
-                               <span className="text-[10px] text-slate-400 font-medium">({selectedProduct.reviews} reviews)</span>
+                               <span className="text-[10px] text-slate-400 font-medium">({selectedProduct.reviews} maoni)</span>
                             </div>
                          </div>
                          <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed font-medium italic border-l-2 border-gold-500 pl-4 line-clamp-3">
@@ -454,7 +454,7 @@ export const Shop: React.FC = () => {
                       <div className="pt-6 mt-auto border-t border-slate-100 dark:border-white/5 flex flex-col gap-3">
                          <div className="flex items-center gap-2 text-xs">
                             <Truck size={16} className="text-gold-500" />
-                            <span className="font-bold">{selectedProduct.freeShipping ? 'Free Shipping' : 'Standard Shipping'}</span>
+                            <span className="font-bold">{selectedProduct.freeShipping ? 'Usafirishaji Bure' : 'Usafirishaji wa Kawaida'}</span>
                             <span className="text-slate-500 text-[10px] ml-auto">2-5 Siku za Kazi</span>
                          </div>
                          <button 
@@ -479,7 +479,7 @@ export const Shop: React.FC = () => {
                                <span>{formatPrice(selectedProduct.price * orderQuantity)}</span>
                             </div>
                             <div className="flex justify-between items-center text-[10px] font-black text-slate-500 uppercase tracking-widest">
-                               <span>Shipping</span>
+                               <span>Usafirishaji</span>
                                <span className={selectedProduct.freeShipping ? 'text-green-600' : ''}>{selectedProduct.freeShipping ? 'BURE' : formatPrice(5000)}</span>
                             </div>
                             <div className="pt-3 border-t border-slate-200 dark:border-white/10 flex justify-between items-center">
@@ -505,7 +505,7 @@ export const Shop: React.FC = () => {
                                     type="email"
                                     value={checkoutForm.email}
                                     onChange={(e) => setCheckoutForm((prev) => ({ ...prev, email: e.target.value }))}
-                                    placeholder="barua pepe (email)"
+                                    placeholder="Barua pepe"
                                     className="bg-transparent border-none outline-none text-xs font-bold w-full text-slate-900 dark:text-white"
                                   />
                                </div>
@@ -555,11 +555,11 @@ export const Shop: React.FC = () => {
                             <div className="grid grid-cols-2 gap-3">
                                <button className="p-4 border-2 border-primary-950 rounded-xl flex flex-col items-center gap-2 bg-primary-950/5 shadow-sm active:scale-95 transition-all">
                                   <Smartphone size={20} className="text-primary-950 dark:text-gold-500" />
-                                  <span className="text-[9px] font-black uppercase tracking-wider">Mobile</span>
+                                  <span className="text-[9px] font-black uppercase tracking-wider">Simu</span>
                                </button>
                                <button className="p-4 border border-slate-200 dark:border-white/10 rounded-xl flex flex-col items-center gap-2 active:scale-95 transition-all opacity-60">
                                   <CreditCard size={20} className="text-slate-400" />
-                                  <span className="text-[9px] font-black uppercase tracking-wider text-slate-400">Card</span>
+                                  <span className="text-[9px] font-black uppercase tracking-wider text-slate-400">Kadi</span>
                                </button>
                             </div>
                          </section>
@@ -587,7 +587,7 @@ export const Shop: React.FC = () => {
                          <p className="text-slate-500 text-xs max-w-xs mx-auto font-medium">Oda yako inashughulikiwa. Utapokea ujumbe mfupi hivi punde.</p>
                       </div>
                       <div className="p-6 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl w-full max-w-xs shadow-inner">
-                         <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1">Tracking ID</p>
+                         <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1">Namba ya Ufuatiliaji</p>
                          <p className="text-2xl font-black text-primary-950 dark:text-gold-500 font-mono tracking-tight">{lastTrackingCode || trackingId || 'Hakuna'}</p>
                          <p className="text-[9px] text-slate-500 mt-2 italic font-bold">Tumia namba hii kufuatilia.</p>
                       </div>

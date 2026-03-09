@@ -199,8 +199,8 @@ export const BibleStudyJourney: React.FC = () => {
           <div className="w-14 h-14 rounded-full p-0.5 bg-gradient-to-tr from-gold-600 to-gold-300">
             <div className="w-full h-full rounded-full bg-slate-900 overflow-hidden">
               <img
-                src={localStorage.getItem('gc365_profile_pic') || `https://ui-avatars.com/api/?name=${userProfile?.name || 'User'}&background=0f172a&color=eab308`}
-                alt="Profile"
+                src={localStorage.getItem('gc365_profile_pic') || `https://ui-avatars.com/api/?name=${userProfile?.name || 'Mwanafunzi'}&background=0f172a&color=eab308`}
+                alt="Wasifu"
                 className="w-full h-full object-cover"
               />
             </div>
@@ -218,7 +218,7 @@ export const BibleStudyJourney: React.FC = () => {
           </div>
           <div className="space-y-1">
             <div className="flex justify-between text-[8px] font-bold text-slate-500 uppercase">
-              <span>Next Rank Progress</span>
+              <span>Maendeleo ya Ngazi Inayofuata</span>
               <span>{Math.round(progressToNextRank)}%</span>
             </div>
             <div className="h-1 w-full bg-slate-200 dark:bg-black rounded-full overflow-hidden">
@@ -283,7 +283,7 @@ export const BibleStudyJourney: React.FC = () => {
 
       <div className="p-4 bg-slate-50 dark:bg-black/20 border-t border-slate-200 dark:border-white/5">
         <p className="text-[10px] text-slate-600 dark:text-slate-400 leading-relaxed">
-          Darasa hili linaendeshwa na data kutoka backend. Hakikisha moduli na masomo vimejazwa kwenye admin panel.
+          Darasa hili linatumia taarifa kutoka kwenye mfumo. Hakikisha moduli na masomo vimejazwa kwenye paneli ya usimamizi.
         </p>
       </div>
     </div>
@@ -294,7 +294,7 @@ export const BibleStudyJourney: React.FC = () => {
       <div className="min-h-screen bg-slate-50 dark:bg-[#020617] animate-fade-in flex items-center justify-center px-4">
         <div className="text-center space-y-3">
           <div className="inline-flex h-10 w-10 items-center justify-center rounded-full border-2 border-gold-500 border-t-transparent animate-spin" />
-          <p className="text-sm font-semibold text-slate-600 dark:text-slate-300">Inapakua darasa la Biblia kutoka backend...</p>
+          <p className="text-sm font-semibold text-slate-600 dark:text-slate-300">Inapakua darasa la Biblia...</p>
         </div>
       </div>
     );
@@ -306,7 +306,7 @@ export const BibleStudyJourney: React.FC = () => {
         <div className="max-w-xl w-full rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-950 p-6 text-center space-y-4">
           <h2 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-tight">Hakuna Moduli Zilizopatikana</h2>
           <p className="text-sm text-slate-600 dark:text-slate-400">
-            {modulesError || 'Tafadhali ongeza moduli za Darasa la Biblia kwenye admin panel, kisha jaribu tena.'}
+            {modulesError || 'Tafadhali ongeza moduli za Darasa la Biblia kwenye paneli ya usimamizi, kisha jaribu tena.'}
           </p>
           <button
             onClick={() => {

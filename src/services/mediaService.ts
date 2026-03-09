@@ -35,7 +35,7 @@ const toAbsoluteUrl = (value: string): string => {
 export const getMediaPlaylists = async (): Promise<MediaPlaylistApi[]> => {
   const response = await fetch(`${API_BASE_URL}/api/media/playlists/`);
   if (!response.ok) {
-    throw new Error("Imeshindikana kupata playlists.");
+    throw new Error("Imeshindikana kupata orodha za video.");
   }
   const payload = (await response.json()) as MediaPlaylistApi[];
   if (!Array.isArray(payload)) {

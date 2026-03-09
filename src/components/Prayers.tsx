@@ -303,7 +303,7 @@ export const Prayers: React.FC<Props> = ({ aiLanguage = 'en' }) => {
                         </div>
                         <p className="text-slate-700 dark:text-slate-200 text-base md:text-lg font-serif italic leading-relaxed">"{ans.request}"</p>
                         <div className="flex items-center justify-between pt-4 border-t border-green-500/10">
-                           <span className="text-[9px] font-bold text-slate-500 uppercase">Imepublishwa: {ans.timeAgo}</span>
+                           <span className="text-[9px] font-bold text-slate-500 uppercase">Imechapishwa: {ans.timeAgo}</span>
                            <button className="text-green-600 hover:text-green-700 transition-colors"><Share2 size={16}/></button>
                         </div>
                      </div>

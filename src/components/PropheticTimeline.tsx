@@ -273,7 +273,7 @@ const mapModulesToTimelineSections = (modules: JourneyModule[]): TimelineSection
           getPayloadString(payload, ['didYouKnow', 'did_you_know', 'fact']) ||
           lesson.focus ||
           lesson.summary ||
-          'Dondoo la somo hili lipo ndani ya maudhui ya backend.';
+          'Dondoo la somo hili limo kwenye maudhui ya mfumo.';
 
         const deepStory =
           getPayloadString(payload, ['swahiliDeep', 'swahili_deep', 'deepStory']) ||
@@ -299,7 +299,7 @@ const mapModulesToTimelineSections = (modules: JourneyModule[]): TimelineSection
         return {
           id: `${module.code}-${lesson.id}`,
           year: yearLabel,
-          title: lesson.title || `Lesson ${lessonIndex + 1}`,
+          title: lesson.title || `Somo ${lessonIndex + 1}`,
           swahiliTitle: lesson.swahili_title || lesson.title || `Somo ${lessonIndex + 1}`,
           description: lesson.summary || lesson.focus || 'Somo la safari ya imani.',
           category: inferMilestoneCategory(lesson),
@@ -318,7 +318,7 @@ const mapModulesToTimelineSections = (modules: JourneyModule[]): TimelineSection
         swahiliName: `${moduleIndex + 1}. ${module.swahili_title || module.title}`,
         icon: getModuleIcon(module.component_key),
         color: MODULE_COLOR_MAP[module.component_key] || '#14b8a6',
-        description: module.description || 'Timeline kutoka backend.',
+        description: module.description || 'Mtiririko wa unabii kutoka kwenye mfumo.',
         milestones,
       };
     })
@@ -360,7 +360,7 @@ export const PropheticTimeline: React.FC<PropheticTimelineProps> = ({ activeTime
         if (!isMounted) {
           return;
         }
-        setTimelineError('Timeline ya backend haijapatikana kwa sasa. Tunaonyesha timeline ya msingi.');
+        setTimelineError('Mtiririko wa unabii kutoka kwenye mfumo haujapatikana kwa sasa. Tunaonyesha wa msingi.');
       }
     };
 

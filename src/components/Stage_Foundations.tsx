@@ -204,13 +204,13 @@ export const StageFoundations: React.FC<{ onComplete: () => void }> = ({ onCompl
           <div>
             <h2 className="text-3xl md:text-4xl font-black text-slate-900 dark:text-white uppercase tracking-tight">Hongera!</h2>
             <p className="text-slate-500 dark:text-slate-400 mt-2">
-              Umehitimisha Academic Level I: Foundations. Sasa umejenga msingi imara wa imani.
+              Umehitimisha Ngazi ya Kwanza ya Mafunzo: Misingi. Sasa umejenga msingi imara wa imani.
             </p>
           </div>
           <div className="p-8 bg-slate-50 dark:bg-black/40 rounded-2xl border border-slate-200 dark:border-white/10">
             <GraduationCap size={40} className="mx-auto text-gold-500 mb-3" />
-            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">GC365 ACADEMY CERTIFICATE</p>
-            <h3 className="text-2xl font-serif font-bold text-slate-900 dark:text-white mt-2">Foundation Scholar</h3>
+            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">CHETI CHA GC365 ACADEMY</p>
+            <h3 className="text-2xl font-serif font-bold text-slate-900 dark:text-white mt-2">Mwanafunzi wa Misingi</h3>
             <p className="text-[10px] font-bold uppercase text-slate-400 mt-2">Imani, uaminifu, na utayari</p>
           </div>
           <button
@@ -220,7 +220,7 @@ export const StageFoundations: React.FC<{ onComplete: () => void }> = ({ onCompl
             }}
             className="w-full py-5 bg-gold-500 text-slate-900 rounded-2xl font-black uppercase tracking-widest hover:bg-slate-900 hover:text-white transition-all shadow-xl"
           >
-            ENDELEA LEVEL II (UNABII)
+            ENDELEA NGAZI YA PILI (UNABII)
           </button>
         </div>
       </div>
@@ -243,14 +243,14 @@ export const StageFoundations: React.FC<{ onComplete: () => void }> = ({ onCompl
           <span className="text-[10px] md:text-[11px] font-black text-gold-400 uppercase tracking-widest">
             Foundations {activeIndex + 1}/{totalLessons}
           </span>
-          <div className="hidden md:flex text-[10px] font-bold uppercase text-slate-500">Lesson Focus</div>
+          <div className="hidden md:flex text-[10px] font-bold uppercase text-slate-500">Lengo la Somo</div>
         </header>
 
         <div className="flex-1 overflow-y-auto scrollbar-hide">
           <div className="max-w-4xl mx-auto py-10 px-6 space-y-10">
             <div className="rounded-3xl p-8 bg-gradient-to-br from-slate-900 via-slate-900 to-black border border-white/10">
               <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/10 rounded-full text-[10px] font-black uppercase tracking-widest text-slate-300">
-                Academic Level I
+                Ngazi ya Kwanza ya Mafunzo
               </div>
               <h1 className="text-3xl md:text-5xl font-black uppercase tracking-tight mt-4">{activeLesson.title}</h1>
               <p className="text-slate-300 mt-3 text-lg">{activeLesson.focus}</p>
@@ -316,7 +316,7 @@ export const StageFoundations: React.FC<{ onComplete: () => void }> = ({ onCompl
         <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-8 bg-white dark:bg-slate-950 border border-slate-200 dark:border-white/5 rounded-3xl p-6 md:p-10 shadow-xl">
           <div className="space-y-3">
             <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-gold-500/10 text-gold-500 border border-gold-500/20 rounded-full text-[10px] font-black uppercase tracking-widest">
-              Academic Level I
+              Ngazi ya Kwanza ya Mafunzo
             </div>
             <h2 className="text-3xl md:text-5xl font-black text-slate-900 dark:text-white uppercase tracking-tight">Misingi ya Imani</h2>
             <p className="text-slate-600 dark:text-slate-400 max-w-2xl">
@@ -325,14 +325,14 @@ export const StageFoundations: React.FC<{ onComplete: () => void }> = ({ onCompl
           </div>
           <div className="w-full lg:w-72 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl p-4 space-y-4">
             <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">
-              <span>Progress</span>
+              <span>Maendeleo</span>
               <span>{completed.length}/{totalLessons}</span>
             </div>
             <div className="h-2 bg-slate-200 dark:bg-black/40 rounded-full overflow-hidden">
               <div className="h-full bg-gradient-to-r from-gold-500 to-gold-300" style={{ width: `${progress}%` }}></div>
             </div>
             <div className="text-[11px] text-slate-600 dark:text-slate-400 font-medium">
-              Maliza masomo yote ili kufungua Level II.
+              Maliza masomo yote ili kufungua Ngazi ya Pili.
             </div>
           </div>
         </div>
