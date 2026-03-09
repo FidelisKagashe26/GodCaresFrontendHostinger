@@ -17,7 +17,7 @@ import {
   PlayCircle, Video, ChevronLeft
 } from 'lucide-react';
 import { StageId } from '../types';
-import { JourneyLesson, JourneyModule, getJourneyModules } from '../services/journeyService';
+import { TimelineMilestoneApi, TimelineSectionApi, getTimelineSections } from '../services/timelineService';
 
 interface Milestone {
   id: string;
@@ -223,103 +223,73 @@ const TIMELINES: TimelineSection[] = [
 
 const FALLBACK_TIMELINE_IMAGE = 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2000';
 
-const MODULE_COLOR_MAP: Record<JourneyModule['component_key'], string> = {
-  foundations: '#10b981',
-  prophecy: '#6366f1',
-  deception: '#ef4444',
-  custom: '#14b8a6',
-};
-
-const getModuleIcon = (componentKey: JourneyModule['component_key']) => {
-  if (componentKey === 'foundations') {
-    return <BookOpen size={20} />;
-  }
-  if (componentKey === 'prophecy') {
-    return <Clock size={20} />;
-  }
-  if (componentKey === 'deception') {
-    return <Shield size={20} />;
-  }
-  return <Compass size={20} />;
-};
-
-const getPayloadString = (payload: Record<string, unknown>, keys: string[]) => {
-  for (const key of keys) {
-    const value = payload?.[key];
-    if (typeof value === 'string' && value.trim()) {
-      return value.trim();
-    }
-  }
-  return '';
-};
-
-const inferMilestoneCategory = (lesson: JourneyLesson): Milestone['category'] => {
-  const searchable = `${lesson.title} ${lesson.swahili_title} ${lesson.summary} ${lesson.focus}`.toLowerCase();
-  if (/(future|mwisho|kurudi|kuja|second coming|eshatology|coming)/.test(searchable)) {
-    return 'Future';
-  }
-  if (/(present|leo|today|sasa|current)/.test(searchable)) {
-    return 'Present';
+const normalizeMilestoneCategory = (category: string): Milestone['category'] => {
+  if (category === 'Present' || category === 'Future') {
+    return category;
   }
   return 'Past';
 };
 
-const mapModulesToTimelineSections = (modules: JourneyModule[]): TimelineSection[] => {
-  return modules
-    .map((module, moduleIndex) => {
-      const milestones: Milestone[] = (module.lessons || []).map((lesson, lessonIndex) => {
-        const payload = lesson.payload || {};
-        const didYouKnow =
-          getPayloadString(payload, ['didYouKnow', 'did_you_know', 'fact']) ||
-          lesson.focus ||
-          lesson.summary ||
-          'Dondoo la somo hili limo kwenye maudhui ya mfumo.';
+const getTimelineIcon = (iconKey: string) => {
+  switch ((iconKey || '').toLowerCase()) {
+    case 'sunrise':
+      return <Sunrise size={20} />;
+    case 'waves':
+      return <Waves size={20} />;
+    case 'anchor':
+      return <Anchor size={20} />;
+    case 'scroll':
+      return <ScrollText size={20} />;
+    case 'cross':
+      return <Cross size={20} />;
+    case 'crown':
+      return <Crown size={20} />;
+    case 'church':
+      return <Church size={20} />;
+    case 'shield':
+      return <Shield size={20} />;
+    case 'compass':
+      return <Compass size={20} />;
+    case 'star':
+      return <Star size={20} />;
+    case 'globe':
+      return <Globe size={20} />;
+    case 'clock':
+    default:
+      return <Clock size={20} />;
+  }
+};
 
-        const deepStory =
-          getPayloadString(payload, ['swahiliDeep', 'swahili_deep', 'deepStory']) ||
-          lesson.summary ||
-          lesson.focus ||
-          lesson.content ||
-          '';
+const mapTimelineMilestone = (milestone: TimelineMilestoneApi, milestoneIndex: number): Milestone => ({
+  id: milestone.code || `milestone-${milestone.id || milestoneIndex + 1}`,
+  year: milestone.year_label || `Hatua ${milestoneIndex + 1}`,
+  title: milestone.title || `Milestone ${milestoneIndex + 1}`,
+  swahiliTitle: milestone.swahili_title || milestone.title || `Milestone ${milestoneIndex + 1}`,
+  description: milestone.summary || 'Hatua ya timeline ya mfumo.',
+  category: normalizeMilestoneCategory(milestone.category),
+  image: milestone.image || FALLBACK_TIMELINE_IMAGE,
+  verse: milestone.verse || 'Marejeo ya Biblia',
+  fullStory: milestone.full_story || milestone.summary || '',
+  swahiliDeep: milestone.swahili_deep || milestone.summary || '',
+  didYouKnow: milestone.did_you_know || milestone.summary || 'Hakuna dondoo la ziada kwa sasa.',
+  evidenceId: milestone.evidence_id || undefined,
+  videoUrl: milestone.video_url || undefined,
+});
 
-        const fullStory =
-          getPayloadString(payload, ['fullStory', 'full_story']) ||
-          lesson.content ||
-          lesson.summary ||
-          lesson.focus ||
-          '';
-
-        const yearLabel =
-          getPayloadString(payload, ['year', 'timelineYear', 'timeline_year']) ||
-          lesson.code ||
-          `Somo ${lessonIndex + 1}`;
-
-        const videoUrl = getPayloadString(payload, ['videoUrl', 'video_url']) || undefined;
-
-        return {
-          id: `${module.code}-${lesson.id}`,
-          year: yearLabel,
-          title: lesson.title || `Somo ${lessonIndex + 1}`,
-          swahiliTitle: lesson.swahili_title || lesson.title || `Somo ${lessonIndex + 1}`,
-          description: lesson.summary || lesson.focus || 'Somo la safari ya imani.',
-          category: inferMilestoneCategory(lesson),
-          image: lesson.hero_image || FALLBACK_TIMELINE_IMAGE,
-          verse: lesson.scripture || 'Somo la Biblia',
-          fullStory,
-          swahiliDeep: deepStory,
-          didYouKnow,
-          videoUrl,
-        };
-      });
+const mapApiTimelinesToSections = (sections: TimelineSectionApi[]): TimelineSection[] => {
+  return sections
+    .map((section, sectionIndex) => {
+      const swahiliName = (section.swahili_title || section.title || '').trim();
+      const prefixedName = /^\d+\./.test(swahiliName) ? swahiliName : `${sectionIndex + 1}. ${swahiliName || section.title}`;
 
       return {
-        id: module.code,
-        name: module.title,
-        swahiliName: `${moduleIndex + 1}. ${module.swahili_title || module.title}`,
-        icon: getModuleIcon(module.component_key),
-        color: MODULE_COLOR_MAP[module.component_key] || '#14b8a6',
-        description: module.description || 'Mtiririko wa unabii kutoka kwenye mfumo.',
-        milestones,
+        id: section.code || `timeline-${section.id}`,
+        name: section.title || `Timeline ${sectionIndex + 1}`,
+        swahiliName: prefixedName,
+        icon: getTimelineIcon(section.icon_key),
+        color: section.accent_color || '#14b8a6',
+        description: section.description || 'Mtiririko wa unabii kutoka kwenye mfumo.',
+        milestones: (section.milestones || []).map(mapTimelineMilestone),
       };
     })
     .filter((section) => section.milestones.length > 0);
@@ -350,8 +320,8 @@ export const PropheticTimeline: React.FC<PropheticTimelineProps> = ({ activeTime
 
     const loadTimelineFromBackend = async () => {
       try {
-        const modules = await getJourneyModules();
-        const mapped = mapModulesToTimelineSections(modules);
+        const sections = await getTimelineSections();
+        const mapped = mapApiTimelinesToSections(sections);
         if (!isMounted || mapped.length === 0) {
           return;
         }
@@ -360,7 +330,7 @@ export const PropheticTimeline: React.FC<PropheticTimelineProps> = ({ activeTime
         if (!isMounted) {
           return;
         }
-        setTimelineError('Mtiririko wa unabii kutoka kwenye mfumo haujapatikana kwa sasa. Tunaonyesha wa msingi.');
+        setTimelineError('Timeline ya mfumo haijapatikana kwa sasa. Tunaonyesha ya msingi.');
       }
     };
 
