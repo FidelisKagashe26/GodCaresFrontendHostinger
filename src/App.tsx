@@ -1,13 +1,21 @@
-
-import React, { Suspense, lazy, useState, useEffect, useMemo, useRef } from 'react';
-import { Sidebar, ProfileModal } from './components/Sidebar';
-import { Home } from './components/Home';
-import { StageConfig, StageId, ToastNotification, LanguageCode, ThemePreference } from './types';
+import React, { Suspense, lazy, useEffect, useMemo, useRef, useState } from 'react';
+import { Navigate, Route, Routes, useLocation, useNavigate, useNavigationType } from 'react-router-dom';
+import { Sidebar, ProfileModal } from './components/layout/Sidebar';
+import { Home } from './components/layout/Home';
+import { StageId, ToastNotification, LanguageCode, ThemePreference } from './types';
 import { ToastContainer } from './components/ui/Toast';
 import { Sun, Moon, Menu, Bell, User, Monitor, ChevronDown, LogOut, ArrowLeft, ChevronRight } from 'lucide-react';
-import { clearTokens, getCurrentUser } from './services/authService';
-import { getSystemMessages } from './services/systemMessageService';
-import { DEFAULT_SITE_SETTINGS, getSiteSettings, SiteSettings } from './services/siteSettingsService';
+import { clearTokens, getCurrentUser } from './services/core/authService';
+import { getSystemMessages } from './services/core/systemMessageService';
+import { DEFAULT_SITE_SETTINGS, getSiteSettings, SiteSettings } from './services/core/siteSettingsService';
+import {
+  STAGES,
+  STAGE_ROUTE_ENTRIES,
+  getStageFromPath,
+  getStagePath,
+  isRestrictedStage,
+  normalizePath,
+} from './routes/stageRoutes';
 
 const lazyNamed = <T extends Record<string, unknown>, K extends keyof T>(
   loader: () => Promise<T>,
@@ -20,31 +28,31 @@ const lazyNamed = <T extends Record<string, unknown>, K extends keyof T>(
     };
   });
 
-const Auth = lazyNamed(() => import('./components/Auth'), 'Auth');
-const BibleStudyJourney = lazyNamed(() => import('./components/BibleStudyJourney'), 'BibleStudyJourney');
-const Shop = lazyNamed(() => import('./components/Shop'), 'Shop');
-const Library = lazyNamed(() => import('./components/Library'), 'Library');
-const Events = lazyNamed(() => import('./components/Events'), 'Events');
-const News = lazyNamed(() => import('./components/News'), 'News');
-const Prayers = lazyNamed(() => import('./components/Prayers'), 'Prayers');
-const Donations = lazyNamed(() => import('./components/Donations'), 'Donations');
-const AboutUs = lazyNamed(() => import('./components/AboutUs'), 'AboutUs');
-const MediaProjects = lazyNamed(() => import('./components/MediaProjects'), 'MediaProjects');
-const Testimonies = lazyNamed(() => import('./components/Testimonies'), 'Testimonies');
-const EvidenceVault = lazyNamed(() => import('./components/EvidenceVault'), 'EvidenceVault');
-const DeceptionVault = lazyNamed(() => import('./components/DeceptionVault'), 'DeceptionVault');
-const QuestionVault = lazyNamed(() => import('./components/QuestionVault'), 'QuestionVault');
-const PropheticTimeline = lazyNamed(() => import('./components/PropheticTimeline'), 'PropheticTimeline');
-const Blog = lazyNamed(() => import('./components/Blog'), 'Blog');
-const FaithBuilder = lazyNamed(() => import('./components/FaithBuilder'), 'FaithBuilder');
-const Footer = lazyNamed(() => import('./components/Footer'), 'Footer');
-const HistoryTool = lazyNamed(() => import('./components/HistoryTool'), 'HistoryTool');
-const QuestionTool = lazyNamed(() => import('./components/QuestionTool'), 'QuestionTool');
-const DeceptionTool = lazyNamed(() => import('./components/DeceptionTool'), 'DeceptionTool');
-const EvidenceTool = lazyNamed(() => import('./components/EvidenceTool'), 'EvidenceTool');
-const NotificationCenter = lazyNamed(() => import('./components/NotificationCenter'), 'NotificationCenter');
-const LanguageCenter = lazyNamed(() => import('./components/LanguageCenter'), 'LanguageCenter');
-const ThemeCenter = lazyNamed(() => import('./components/ThemeCenter'), 'ThemeCenter');
+const Auth = lazyNamed(() => import('./components/auth/Auth'), 'Auth');
+const BibleStudyJourney = lazyNamed(() => import('./components/journey/BibleStudyJourney'), 'BibleStudyJourney');
+const Shop = lazyNamed(() => import('./components/content/Shop'), 'Shop');
+const Library = lazyNamed(() => import('./components/content/Library'), 'Library');
+const Events = lazyNamed(() => import('./components/content/Events'), 'Events');
+const News = lazyNamed(() => import('./components/content/News'), 'News');
+const Prayers = lazyNamed(() => import('./components/content/Prayers'), 'Prayers');
+const Donations = lazyNamed(() => import('./components/content/Donations'), 'Donations');
+const AboutUs = lazyNamed(() => import('./components/content/AboutUs'), 'AboutUs');
+const MediaProjects = lazyNamed(() => import('./components/content/MediaProjects'), 'MediaProjects');
+const Testimonies = lazyNamed(() => import('./components/content/Testimonies'), 'Testimonies');
+const EvidenceVault = lazyNamed(() => import('./components/vault/EvidenceVault'), 'EvidenceVault');
+const DeceptionVault = lazyNamed(() => import('./components/vault/DeceptionVault'), 'DeceptionVault');
+const QuestionVault = lazyNamed(() => import('./components/vault/QuestionVault'), 'QuestionVault');
+const PropheticTimeline = lazyNamed(() => import('./components/journey/PropheticTimeline'), 'PropheticTimeline');
+const Blog = lazyNamed(() => import('./components/content/Blog'), 'Blog');
+const FaithBuilder = lazyNamed(() => import('./components/journey/FaithBuilder'), 'FaithBuilder');
+const Footer = lazyNamed(() => import('./components/layout/Footer'), 'Footer');
+const HistoryTool = lazyNamed(() => import('./components/tools/HistoryTool'), 'HistoryTool');
+const QuestionTool = lazyNamed(() => import('./components/tools/QuestionTool'), 'QuestionTool');
+const DeceptionTool = lazyNamed(() => import('./components/tools/DeceptionTool'), 'DeceptionTool');
+const EvidenceTool = lazyNamed(() => import('./components/tools/EvidenceTool'), 'EvidenceTool');
+const NotificationCenter = lazyNamed(() => import('./components/system/NotificationCenter'), 'NotificationCenter');
+const LanguageCenter = lazyNamed(() => import('./components/system/LanguageCenter'), 'LanguageCenter');
+const ThemeCenter = lazyNamed(() => import('./components/system/ThemeCenter'), 'ThemeCenter');
 
 const stageLoader = (
   <div className="flex min-h-[40vh] items-center justify-center px-6">
@@ -55,45 +63,13 @@ const stageLoader = (
   </div>
 );
 
-const stages: StageConfig[] = [
-  { id: StageId.HOME, title: 'Nyumbani', description: 'Karibu katika mafundisho.', icon: 'home' },
-  { id: StageId.BLOG, title: 'Blog', description: 'Makala na Maarifa', icon: 'book-open' },
-  { id: StageId.FAITH_BUILDER, title: 'Kuza Imani Yako', description: 'Hadithi za Mashujaa', icon: 'book-open' },
-  { id: StageId.BIBLE_STUDY, title: 'Darasa la Biblia', description: 'Misingi, Unabii na Pambano Kuu.', icon: 'book-check' },
-  { id: StageId.TIMELINE, title: 'Ramani ya Unabii', description: 'Historia ya Kale na Ijayo.', icon: 'clock' },
-  { id: StageId.EVIDENCE, title: 'Hifadhi ya Ushahidi', description: 'Sayansi na Historia', icon: 'microscope' },
-  { id: StageId.DECEPTION_VAULT, title: 'Ukweli vs Uongo', description: 'Fichua Udanganyifu', icon: 'shield-alert' },
-  { id: StageId.QUESTION_VAULT, title: 'Maswali & Majibu', description: 'Majibu ya Biblia', icon: 'message-square' },
-  { id: StageId.MEDIA, title: 'Media Hub', description: 'Video na Mafundisho', icon: 'play-circle' },
-  { id: StageId.TESTIMONIES, title: 'Shuhuda', description: 'Matendo ya Mungu', icon: 'message-square-quote' },
-  { id: StageId.SHOP, title: 'Duka', description: 'Vitabu na Vifaa', icon: 'shopping-bag' },
-  { id: StageId.LIBRARY, title: 'Maktaba', description: 'Nyaraka za Bure', icon: 'library' },
-  { id: StageId.EVENTS, title: 'Matukio', description: 'Mikutano Ijayo', icon: 'calendar' },
-  { id: StageId.NEWS, title: 'Habari', description: 'Taarifa za Huduma', icon: 'newspaper' },
-  { id: StageId.PRAYERS, title: 'Maombi', description: 'Omba na Uombewe', icon: 'heart' },
-  { id: StageId.DONATE, title: 'Changia', description: 'Saidia Injili', icon: 'gift' },
-  { id: StageId.ABOUT, title: 'Kuhusu Sisi', description: 'Lengo Letu', icon: 'info' },
-];
-
 const NOTIFICATION_STATE_KEY = 'gc365_center_notification_state_v1';
-const STAGE_HASH_PREFIX = '#/';
-const STAGE_ID_SET = new Set(Object.values(StageId) as StageId[]);
+const RESET_PASSWORD_PATH = '/reset-password';
 
 type StageNavigationOptions = {
-  pushHistory?: boolean;
-  trackHistory?: boolean;
+  replace?: boolean;
   scrollBehavior?: ScrollBehavior;
 };
-
-const getStageFromHash = (hashValue: string): StageId | null => {
-  const normalized = (hashValue || '').replace(/^#\/?/, '').trim() as StageId;
-  if (!normalized) {
-    return null;
-  }
-  return STAGE_ID_SET.has(normalized) ? normalized : null;
-};
-
-const buildStageHash = (stage: StageId) => `${STAGE_HASH_PREFIX}${stage}`;
 
 interface NotificationStorageState {
   dismissedIds: string[];
@@ -121,11 +97,19 @@ const saveNotificationStorageState = (state: NotificationStorageState) => {
 };
 
 const App: React.FC = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const navigationType = useNavigationType();
+
+  const currentPath = normalizePath(location.pathname);
+  const matchedStage = getStageFromPath(currentPath);
+  const currentStage = matchedStage || StageId.HOME;
+
   const [user, setUser] = useState<{ name: string; email: string } | null>(null);
-  const [currentStage, setCurrentStage] = useState<StageId>(StageId.HOME);
+  const [isAuthBootstrapComplete, setIsAuthBootstrapComplete] = useState(false);
   const [activeTimelineId, setActiveTimelineId] = useState('creation');
   const [notifications, setNotifications] = useState<ToastNotification[]>([]);
-  
+
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [isLanguageOpen, setIsLanguageOpen] = useState(false);
   const [isThemeOpen, setIsThemeOpen] = useState(false);
@@ -135,10 +119,10 @@ const App: React.FC = () => {
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [authEntryMode, setAuthEntryMode] = useState<'login' | 'register'>('login');
   const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false);
-  
+
   const mainContentRef = useRef<HTMLDivElement>(null);
   const accountMenuRef = useRef<HTMLDivElement>(null);
-  const stageHistoryRef = useRef<StageId[]>([StageId.HOME]);
+  const routeHistoryRef = useRef<string[]>([]);
 
   const [centerNotifications, setCenterNotifications] = useState<ToastNotification[]>([]);
   const [canGoBack, setCanGoBack] = useState(false);
@@ -152,9 +136,91 @@ const App: React.FC = () => {
   const fallbackLogoSrc = `${import.meta.env.BASE_URL}Logo.png`;
   const logoSrc = siteSettings.logo_url || fallbackLogoSrc;
 
+  const openAuthModal = (mode: 'login' | 'register' = 'login') => {
+    setAuthEntryMode(mode);
+    setShowAuthModal(true);
+    setIsAccountMenuOpen(false);
+  };
+
+  const navigateToStage = (
+    id: StageId,
+    options: StageNavigationOptions = {},
+  ) => {
+    const { replace = false, scrollBehavior = 'smooth' } = options;
+    const targetPath = normalizePath(getStagePath(id));
+
+    if (isRestrictedStage(id) && !user) {
+      openAuthModal('login');
+      if (currentPath !== getStagePath(StageId.HOME)) {
+        navigate(getStagePath(StageId.HOME), { replace: true });
+      }
+      return;
+    }
+
+    setIsAccountMenuOpen(false);
+    setIsMenuOpen(false);
+
+    if (currentPath === targetPath) {
+      if (mainContentRef.current) {
+        mainContentRef.current.scrollTo({ top: 0, behavior: scrollBehavior });
+      }
+      return;
+    }
+
+    navigate(targetPath, { replace });
+  };
+
+  const handleStageChange = (id: StageId) => {
+    navigateToStage(id, { replace: false, scrollBehavior: 'smooth' });
+  };
+
+  const handleLogin = (userData: { name: string; email: string }) => {
+    setUser(userData);
+    localStorage.setItem('gc365_user', JSON.stringify(userData));
+    setShowAuthModal(false);
+    setAuthEntryMode('login');
+    setIsAccountMenuOpen(false);
+    setNotifications((prev) => [
+      {
+        id: `verify-${Date.now()}`,
+        title: 'Karibu God Cares 365!',
+        message: 'Hongera kwa kuingia! Tafadhali nenda kwenye Profile ukamilishe verification ya email yako.',
+        type: 'info',
+        timestamp: new Date().toLocaleTimeString(),
+      },
+      ...prev,
+    ]);
+  };
+
+  const handleLogout = () => {
+    setUser(null);
+    localStorage.removeItem('gc365_user');
+    clearTokens();
+    routeHistoryRef.current = [getStagePath(StageId.HOME)];
+    setCanGoBack(false);
+    setIsMenuOpen(false);
+    setShowProfileModal(false);
+    setIsAccountMenuOpen(false);
+    setAuthEntryMode('login');
+    navigate(getStagePath(StageId.HOME), { replace: true });
+  };
+
+  useEffect(() => {
+    if (!matchedStage && currentPath !== RESET_PASSWORD_PATH) {
+      navigate(getStagePath(StageId.HOME), { replace: true });
+    }
+  }, [currentPath, matchedStage, navigate]);
+
   useEffect(() => {
     const savedUser = localStorage.getItem('gc365_user');
-    if (savedUser) setUser(JSON.parse(savedUser));
+    if (savedUser) {
+      try {
+        setUser(JSON.parse(savedUser));
+      } catch {
+        localStorage.removeItem('gc365_user');
+      }
+    }
+
     const savedTheme = localStorage.getItem('gc365_theme') as ThemePreference;
     setTheme(savedTheme || 'system');
 
@@ -163,31 +229,34 @@ const App: React.FC = () => {
         const currentUser = await getCurrentUser();
         setUser(currentUser);
         localStorage.setItem('gc365_user', JSON.stringify(currentUser));
-      } catch (error) {
+      } catch {
         clearTokens();
         localStorage.removeItem('gc365_user');
+      } finally {
+        setIsAuthBootstrapComplete(true);
       }
     };
 
     if (localStorage.getItem('gc365_access_token')) {
-      bootstrapUser();
+      void bootstrapUser();
+      return;
     }
+
+    setIsAuthBootstrapComplete(true);
   }, []);
 
   useEffect(() => {
-    const stageFromUrl = getStageFromHash(window.location.hash) || StageId.HOME;
-    setCurrentStage(stageFromUrl);
-    stageHistoryRef.current = [stageFromUrl];
-    setCanGoBack(false);
-
-    const targetHash = buildStageHash(stageFromUrl);
-    const targetUrl = `${window.location.pathname}${window.location.search}${targetHash}`;
-    if (window.location.hash !== targetHash) {
-      window.history.replaceState({ gcStage: stageFromUrl }, '', targetUrl);
-    } else {
-      window.history.replaceState({ ...(window.history.state || {}), gcStage: stageFromUrl }, '', window.location.href);
+    if (!isAuthBootstrapComplete) {
+      return;
     }
-  }, []);
+
+    if (!user && isRestrictedStage(currentStage)) {
+      openAuthModal('login');
+      if (currentPath !== getStagePath(StageId.HOME)) {
+        navigate(getStagePath(StageId.HOME), { replace: true });
+      }
+    }
+  }, [currentPath, currentStage, isAuthBootstrapComplete, navigate, user]);
 
   useEffect(() => {
     const loadMessages = async () => {
@@ -204,19 +273,19 @@ const App: React.FC = () => {
           .filter((msg) => !dismissedSet.has(String(msg.id)))
           .map((msg) => ({
             id: String(msg.id),
-          title: msg.title,
-          message: msg.body,
-          type: msg.level === 'success' ? 'success' : msg.level === 'warning' ? 'error' : 'info',
-          timestamp: new Date(msg.created_at).toLocaleDateString(),
+            title: msg.title,
+            message: msg.body,
+            type: msg.level === 'success' ? 'success' : msg.level === 'warning' ? 'error' : 'info',
+            timestamp: new Date(msg.created_at).toLocaleDateString(),
             read: readSet.has(String(msg.id)),
           }));
         setCenterNotifications(mapped);
-      } catch (error) {
+      } catch {
         setCenterNotifications([]);
       }
     };
 
-    loadMessages();
+    void loadMessages();
   }, [currentStage, user?.email]);
 
   useEffect(() => {
@@ -224,12 +293,12 @@ const App: React.FC = () => {
       try {
         const settings = await getSiteSettings();
         setSiteSettings(settings);
-      } catch (error) {
+      } catch {
         // Keep defaults when API is unavailable.
       }
     };
 
-    loadSiteSettings();
+    void loadSiteSettings();
   }, []);
 
   useEffect(() => {
@@ -258,14 +327,21 @@ const App: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    const url = new URL(window.location.href);
-    const uid = url.searchParams.get('uid');
-    const token = url.searchParams.get('token');
-    if (url.pathname.includes('/reset-password') && uid && token) {
+    const searchParams = new URLSearchParams(location.search);
+    const uid = searchParams.get('uid');
+    const token = searchParams.get('token');
+    const isResetPasswordRoute = currentPath === RESET_PASSWORD_PATH;
+
+    if (isResetPasswordRoute && uid && token) {
       setResetParams({ uid, token });
       setShowAuthModal(true);
+      return;
     }
-  }, []);
+
+    if (!isResetPasswordRoute) {
+      setResetParams(null);
+    }
+  }, [currentPath, location.search]);
 
   useEffect(() => {
     const root = document.documentElement;
@@ -307,153 +383,36 @@ const App: React.FC = () => {
     };
   }, []);
 
-  const openAuthModal = (mode: 'login' | 'register' = 'login') => {
-    setAuthEntryMode(mode);
-    setShowAuthModal(true);
-    setIsAccountMenuOpen(false);
-  };
-
-  const handleLogin = (userData: { name: string; email: string }) => {
-    setUser(userData);
-    localStorage.setItem('gc365_user', JSON.stringify(userData));
-    setShowAuthModal(false);
-    setAuthEntryMode('login');
-    setIsAccountMenuOpen(false);
-    setNotifications((prev) => [
-      {
-        id: `verify-${Date.now()}`,
-        title: 'Karibu God Cares 365 🎉',
-        message: 'Hongera kwa kuingia! Tafadhali nenda kwenye Profile ukamilishe verification ya email yako.',
-        type: 'info',
-        timestamp: new Date().toLocaleTimeString(),
-      },
-      ...prev,
-    ]);
-  };
-
-  const handleLogout = () => {
-    setUser(null);
-    localStorage.removeItem('gc365_user');
-    clearTokens();
-    const homeHash = buildStageHash(StageId.HOME);
-    window.history.replaceState({ gcStage: StageId.HOME }, '', `${window.location.pathname}${window.location.search}${homeHash}`);
-    stageHistoryRef.current = [StageId.HOME];
-    setCanGoBack(false);
-    setCurrentStage(StageId.HOME);
-    setIsMenuOpen(false);
-    setShowProfileModal(false);
-    setIsAccountMenuOpen(false);
-    setAuthEntryMode('login');
-  };
-
-  const navigateToStage = (
-    id: StageId,
-    options: StageNavigationOptions = {},
-  ) => {
-    const {
-      pushHistory = true,
-      trackHistory = true,
-      scrollBehavior = 'smooth',
-    } = options;
-
-    const restrictedStages = [
-      StageId.BIBLE_STUDY,
-      StageId.FAITH_BUILDER,
-      StageId.TIMELINE,
-      StageId.EVIDENCE,
-      StageId.DECEPTION_VAULT,
-      StageId.QUESTION_VAULT,
-    ];
-
-    if (restrictedStages.includes(id) && !user) {
-      openAuthModal('login');
-      if (currentStage !== StageId.HOME) {
-        setCurrentStage(StageId.HOME);
-      }
-      if (window.location.hash !== buildStageHash(StageId.HOME)) {
-        window.history.replaceState(
-          { gcStage: StageId.HOME },
-          '',
-          `${window.location.pathname}${window.location.search}${buildStageHash(StageId.HOME)}`,
-        );
-      }
-      stageHistoryRef.current = [StageId.HOME];
+  useEffect(() => {
+    const historyTrail = routeHistoryRef.current;
+    if (historyTrail.length === 0) {
+      routeHistoryRef.current = [currentPath];
       setCanGoBack(false);
       return;
     }
 
-    setIsAccountMenuOpen(false);
-    setIsMenuOpen(false);
-    setCurrentStage(id);
-
-    const targetHash = buildStageHash(id);
-    if (pushHistory && window.location.hash !== targetHash) {
-      window.history.pushState(
-        { gcStage: id },
-        '',
-        `${window.location.pathname}${window.location.search}${targetHash}`,
-      );
-    }
-
-    if (trackHistory) {
-      const lastStage = stageHistoryRef.current[stageHistoryRef.current.length - 1];
-      if (lastStage !== id) {
-        stageHistoryRef.current = [...stageHistoryRef.current, id];
+    const lastPath = historyTrail[historyTrail.length - 1];
+    if (lastPath !== currentPath) {
+      if (navigationType === 'POP' && historyTrail.length > 1 && historyTrail[historyTrail.length - 2] === currentPath) {
+        routeHistoryRef.current = historyTrail.slice(0, -1);
+      } else {
+        routeHistoryRef.current = [...historyTrail, currentPath];
       }
-      setCanGoBack(stageHistoryRef.current.length > 1);
     }
 
-    if (mainContentRef.current) {
-      mainContentRef.current.scrollTo({ top: 0, behavior: scrollBehavior });
-    }
-  };
-
-  const handleStageChange = (id: StageId) => {
-    if (id === currentStage) {
-      setIsMenuOpen(false);
-      setIsAccountMenuOpen(false);
-      if (mainContentRef.current) {
-        mainContentRef.current.scrollTo({ top: 0, behavior: 'smooth' });
-      }
-      return;
-    }
-    navigateToStage(id, { pushHistory: true, trackHistory: true, scrollBehavior: 'smooth' });
-  };
+    setCanGoBack(routeHistoryRef.current.length > 1);
+  }, [currentPath, navigationType]);
 
   useEffect(() => {
-    const syncStageFromUrl = () => {
-      const stageFromUrl = getStageFromHash(window.location.hash) || StageId.HOME;
-      const historyTrail = stageHistoryRef.current;
-      const lastStage = historyTrail[historyTrail.length - 1];
+    setIsMenuOpen(false);
+    setIsAccountMenuOpen(false);
+    if (mainContentRef.current) {
+      mainContentRef.current.scrollTo({ top: 0, behavior: 'auto' });
+    }
+  }, [currentPath]);
 
-      if (lastStage !== stageFromUrl) {
-        if (historyTrail.length > 1 && historyTrail[historyTrail.length - 2] === stageFromUrl) {
-          stageHistoryRef.current = historyTrail.slice(0, -1);
-        } else {
-          stageHistoryRef.current = [...historyTrail, stageFromUrl];
-        }
-      }
-      setCanGoBack(stageHistoryRef.current.length > 1);
-
-      if (stageFromUrl !== currentStage) {
-        navigateToStage(stageFromUrl, {
-          pushHistory: false,
-          trackHistory: false,
-          scrollBehavior: 'auto',
-        });
-      }
-    };
-
-    window.addEventListener('hashchange', syncStageFromUrl);
-    window.addEventListener('popstate', syncStageFromUrl);
-    return () => {
-      window.removeEventListener('hashchange', syncStageFromUrl);
-      window.removeEventListener('popstate', syncStageFromUrl);
-    };
-  }, [currentStage, user]);
-
-  const renderContent = () => {
-    switch (currentStage) {
+  const renderStageContent = (stage: StageId) => {
+    switch (stage) {
       case StageId.HOME: return <Home onNavigate={handleStageChange} siteSettings={siteSettings} />;
       case StageId.BLOG: return <Blog />;
       case StageId.FAITH_BUILDER: return user ? <FaithBuilder /> : <Home onNavigate={handleStageChange} siteSettings={siteSettings} />;
@@ -475,33 +434,35 @@ const App: React.FC = () => {
     }
   };
 
-  const unreadCount = centerNotifications.filter(n => !n.read).length;
+  const unreadCount = centerNotifications.filter((n) => !n.read).length;
   const isImmersive = currentStage === StageId.TIMELINE && user;
   const showStageBreadcrumb = !isImmersive && currentStage !== StageId.HOME;
   const currentStageLabel = useMemo(
-    () => stages.find((stage) => stage.id === currentStage)?.title || 'Nyumbani',
+    () => STAGES.find((stage) => stage.id === currentStage)?.title || 'Nyumbani',
     [currentStage],
   );
 
   const handleGlobalBack = () => {
     if (canGoBack) {
-      window.history.back();
+      navigate(-1);
       return;
     }
 
-    if (currentStage !== StageId.HOME) {
-      navigateToStage(StageId.HOME, { pushHistory: true, trackHistory: true, scrollBehavior: 'smooth' });
+    if (currentPath !== getStagePath(StageId.HOME)) {
+      navigateToStage(StageId.HOME, { replace: true, scrollBehavior: 'smooth' });
     }
   };
-  
+
   return (
     <div className="relative min-h-screen bg-[color:var(--page-bg)] text-[color:var(--text-primary)] font-sans transition-colors duration-500 overflow-hidden">
-      <ToastContainer notifications={notifications} onDismiss={(id) => setNotifications(prev => prev.filter(n => n.id !== id))} />
-      
+      <ToastContainer notifications={notifications} onDismiss={(id) => setNotifications((prev) => prev.filter((n) => n.id !== id))} />
+
       {isNotificationOpen && (
         <Suspense fallback={null}>
-          <NotificationCenter 
-            isOpen={isNotificationOpen} onClose={() => setIsNotificationOpen(false)} notifications={centerNotifications}
+          <NotificationCenter
+            isOpen={isNotificationOpen}
+            onClose={() => setIsNotificationOpen(false)}
+            notifications={centerNotifications}
             onMarkAllRead={() => {
               setCenterNotifications((prev) => {
                 const next = prev.map((n) => ({ ...n, read: true }));
@@ -590,13 +551,13 @@ const App: React.FC = () => {
               setAuthEntryMode('login');
               if (resetParams) {
                 setResetParams(null);
-                window.history.replaceState({}, '', '/');
+                navigate(getStagePath(StageId.HOME), { replace: true });
               }
             }}
             resetParams={resetParams}
             onResetComplete={() => {
               setResetParams(null);
-              window.history.replaceState({}, '', '/');
+              navigate(getStagePath(StageId.HOME), { replace: true });
             }}
           />
         </Suspense>
@@ -610,11 +571,16 @@ const App: React.FC = () => {
         />
       )}
 
-      <Sidebar 
-        currentStage={currentStage} onStageChange={handleStageChange} stages={stages}
+      <Sidebar
+        currentStage={currentStage}
+        onStageChange={handleStageChange}
+        stages={STAGES}
         logoSrc={logoSrc}
         siteSettings={siteSettings}
-        isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} user={user} onLogout={handleLogout}
+        isOpen={isMenuOpen}
+        onClose={() => setIsMenuOpen(false)}
+        user={user}
+        onLogout={handleLogout}
         onShowProfile={() => { setIsMenuOpen(false); setShowProfileModal(true); }}
         onShowAuth={() => { setIsMenuOpen(false); openAuthModal('login'); }}
       />
@@ -641,95 +607,94 @@ const App: React.FC = () => {
               </div>
 
               <div className="flex items-center gap-1.5 md:gap-3">
-                 {/* <button onClick={() => setIsLanguageOpen(!isLanguageOpen)} className="p-3.5 rounded-full bg-white/90 dark:bg-black/40 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-white transition-all shadow-xl hover:bg-gold-400/10"><Languages size={18} /></button> */}
-                 <button
-                   onClick={() => setIsThemeOpen(!isThemeOpen)}
-                   className="gc-icon-button p-2.5 md:p-3.5 rounded-full"
-                   aria-label="Theme"
-                 >
-                   {theme === 'light' ? <Sun size={16} /> : theme === 'dark' ? <Moon size={16} /> : <Monitor size={16} />}
-                 </button>
-                 <button
-                   onClick={() => setIsNotificationOpen(!isNotificationOpen)}
-                   className={`relative gc-icon-button p-2.5 md:p-3.5 rounded-full ${isNotificationOpen ? 'is-active' : ''}`}
-                   aria-label="Notifications"
-                 >
-                   <Bell size={16} />
-                   {unreadCount > 0 && (
-                     <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-[color:var(--accent)] rounded-full"></span>
-                   )}
-                 </button>
-                 <div ref={accountMenuRef} className="relative">
-                   <button
-                     onClick={() => {
-                       setIsAccountMenuOpen((prev) => !prev);
-                     }}
-                     className={`gc-icon-button rounded-full pl-1.5 pr-2 py-1.5 flex items-center gap-2 ${isAccountMenuOpen ? 'is-active' : ''}`}
-                     aria-label={user ? 'Akaunti yako' : 'Menyu ya akaunti'}
-                     aria-expanded={isAccountMenuOpen}
-                   >
-                     <span className="w-10 h-10 rounded-full bg-gradient-to-tr from-gold-500 to-gold-700 text-[#020617] flex items-center justify-center overflow-hidden shadow-sm">
-                       {user ? (
-                         <img
-                           src={localStorage.getItem('gc365_profile_pic') || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=eab308&color=020617&bold=true`}
-                           alt="Akaunti"
-                           className="w-full h-full object-cover"
-                         />
-                       ) : (
-                         <User size={18} />
-                       )}
-                     </span>
-                     <div className="hidden md:flex flex-col items-start leading-none pr-1">
-                       <span className="text-[10px] font-black uppercase tracking-[0.16em] text-[color:var(--text-primary)]">
-                         {user ? user.name.split(' ')[0] : 'Mgeni'}
-                       </span>
-                       <span className="text-[8px] font-bold uppercase tracking-[0.24em] text-[color:var(--text-muted)]">
-                         {user ? 'Akaunti' : 'Ingia/Jisajili'}
-                       </span>
-                     </div>
-                     <ChevronDown size={14} className={`text-[color:var(--text-muted)] transition-transform ${isAccountMenuOpen ? 'rotate-180' : ''}`} />
-                   </button>
+                <button
+                  onClick={() => setIsThemeOpen(!isThemeOpen)}
+                  className="gc-icon-button p-2.5 md:p-3.5 rounded-full"
+                  aria-label="Theme"
+                >
+                  {theme === 'light' ? <Sun size={16} /> : theme === 'dark' ? <Moon size={16} /> : <Monitor size={16} />}
+                </button>
+                <button
+                  onClick={() => setIsNotificationOpen(!isNotificationOpen)}
+                  className={`relative gc-icon-button p-2.5 md:p-3.5 rounded-full ${isNotificationOpen ? 'is-active' : ''}`}
+                  aria-label="Notifications"
+                >
+                  <Bell size={16} />
+                  {unreadCount > 0 && (
+                    <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-[color:var(--accent)] rounded-full"></span>
+                  )}
+                </button>
+                <div ref={accountMenuRef} className="relative">
+                  <button
+                    onClick={() => {
+                      setIsAccountMenuOpen((prev) => !prev);
+                    }}
+                    className={`gc-icon-button rounded-full pl-1.5 pr-2 py-1.5 flex items-center gap-2 ${isAccountMenuOpen ? 'is-active' : ''}`}
+                    aria-label={user ? 'Akaunti yako' : 'Menyu ya akaunti'}
+                    aria-expanded={isAccountMenuOpen}
+                  >
+                    <span className="w-10 h-10 rounded-full bg-gradient-to-tr from-gold-500 to-gold-700 text-[#020617] flex items-center justify-center overflow-hidden shadow-sm">
+                      {user ? (
+                        <img
+                          src={localStorage.getItem('gc365_profile_pic') || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=eab308&color=020617&bold=true`}
+                          alt="Akaunti"
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <User size={18} />
+                      )}
+                    </span>
+                    <div className="hidden md:flex flex-col items-start leading-none pr-1">
+                      <span className="text-[10px] font-black uppercase tracking-[0.16em] text-[color:var(--text-primary)]">
+                        {user ? user.name.split(' ')[0] : 'Mgeni'}
+                      </span>
+                      <span className="text-[8px] font-bold uppercase tracking-[0.24em] text-[color:var(--text-muted)]">
+                        {user ? 'Akaunti' : 'Ingia/Jisajili'}
+                      </span>
+                    </div>
+                    <ChevronDown size={14} className={`text-[color:var(--text-muted)] transition-transform ${isAccountMenuOpen ? 'rotate-180' : ''}`} />
+                  </button>
 
-                   {isAccountMenuOpen && (
-                     <div className="absolute right-0 mt-2 w-48 rounded-2xl border border-[color:var(--line-strong)] bg-[color:var(--surface-2)] shadow-2xl overflow-hidden z-[80]">
-                       {user ? (
-                         <>
-                           <button
-                             onClick={() => {
-                               setShowProfileModal(true);
-                               setIsAccountMenuOpen(false);
-                             }}
-                             className="w-full text-left px-4 py-3 text-xs font-black uppercase tracking-[0.2em] text-[color:var(--text-primary)] hover:bg-[color:var(--surface-3)] transition-colors"
-                           >
-                             Akaunti Yangu
-                           </button>
-                           <button
-                             onClick={handleLogout}
-                             className="w-full text-left px-4 py-3 text-xs font-black uppercase tracking-[0.2em] text-red-500 hover:bg-[color:var(--surface-3)] transition-colors inline-flex items-center gap-2"
-                           >
-                             <LogOut size={14} />
-                             Ondoka
-                           </button>
-                         </>
-                       ) : (
-                         <>
-                           <button
-                             onClick={() => openAuthModal('login')}
-                             className="w-full text-left px-4 py-3 text-xs font-black uppercase tracking-[0.2em] text-[color:var(--text-primary)] hover:bg-[color:var(--surface-3)] transition-colors"
-                           >
-                             Ingia
-                           </button>
-                           <button
-                             onClick={() => openAuthModal('register')}
-                             className="w-full text-left px-4 py-3 text-xs font-black uppercase tracking-[0.2em] text-[color:var(--accent)] hover:bg-[color:var(--surface-3)] transition-colors"
-                           >
-                             Jisajili
-                           </button>
-                         </>
-                       )}
-                     </div>
-                   )}
-                 </div>
+                  {isAccountMenuOpen && (
+                    <div className="absolute right-0 mt-2 w-48 rounded-2xl border border-[color:var(--line-strong)] bg-[color:var(--surface-2)] shadow-2xl overflow-hidden z-[80]">
+                      {user ? (
+                        <>
+                          <button
+                            onClick={() => {
+                              setShowProfileModal(true);
+                              setIsAccountMenuOpen(false);
+                            }}
+                            className="w-full text-left px-4 py-3 text-xs font-black uppercase tracking-[0.2em] text-[color:var(--text-primary)] hover:bg-[color:var(--surface-3)] transition-colors"
+                          >
+                            Akaunti Yangu
+                          </button>
+                          <button
+                            onClick={handleLogout}
+                            className="w-full text-left px-4 py-3 text-xs font-black uppercase tracking-[0.2em] text-red-500 hover:bg-[color:var(--surface-3)] transition-colors inline-flex items-center gap-2"
+                          >
+                            <LogOut size={14} />
+                            Ondoka
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          <button
+                            onClick={() => openAuthModal('login')}
+                            className="w-full text-left px-4 py-3 text-xs font-black uppercase tracking-[0.2em] text-[color:var(--text-primary)] hover:bg-[color:var(--surface-3)] transition-colors"
+                          >
+                            Ingia
+                          </button>
+                          <button
+                            onClick={() => openAuthModal('register')}
+                            className="w-full text-left px-4 py-3 text-xs font-black uppercase tracking-[0.2em] text-[color:var(--accent)] hover:bg-[color:var(--surface-3)] transition-colors"
+                          >
+                            Jisajili
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  )}
+                </div>
               </div>
             </header>
           )}
@@ -741,7 +706,7 @@ const App: React.FC = () => {
                   type="button"
                   onClick={handleGlobalBack}
                   className="w-8 h-8 md:w-9 md:h-9 rounded-full border border-[color:var(--line-strong)] bg-[color:var(--surface-2)] text-[color:var(--text-primary)] inline-flex items-center justify-center hover:border-[color:var(--accent)] hover:text-[color:var(--accent)] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-                  disabled={!canGoBack && currentStage === StageId.HOME}
+                  disabled={!canGoBack && currentPath === getStagePath(StageId.HOME)}
                   aria-label="Rudi hatua moja nyuma"
                 >
                   <ArrowLeft size={16} />
@@ -755,23 +720,29 @@ const App: React.FC = () => {
                   >
                     Nyumbani
                   </button>
-                  {currentStage !== StageId.HOME && (
-                    <>
-                      <ChevronRight size={12} />
-                      <span className="text-[color:var(--text-primary)] truncate">{currentStageLabel}</span>
-                    </>
-                  )}
+                  <ChevronRight size={12} />
+                  <span className="text-[color:var(--text-primary)] truncate">{currentStageLabel}</span>
                 </div>
               </div>
             </div>
           )}
 
-          <div 
+          <div
             ref={mainContentRef}
             className={`gc-content-scroll flex-1 overflow-y-auto scroll-smooth pb-16 ${isImmersive ? 'pt-20' : showStageBreadcrumb ? 'pt-32' : 'pt-20'}`}
           >
             <Suspense fallback={stageLoader}>
-              {renderContent()}
+              <Routes>
+                {STAGE_ROUTE_ENTRIES.map(([stage, path]) => (
+                  <Route
+                    key={stage}
+                    path={path}
+                    element={renderStageContent(stage)}
+                  />
+                ))}
+                <Route path={RESET_PASSWORD_PATH} element={renderStageContent(StageId.HOME)} />
+                <Route path="*" element={<Navigate to={getStagePath(StageId.HOME)} replace />} />
+              </Routes>
             </Suspense>
             {!isImmersive && (
               <Suspense fallback={null}>
