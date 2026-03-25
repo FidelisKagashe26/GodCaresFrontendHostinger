@@ -1,3 +1,5 @@
+import { invalidateCachedResult, withCachedResult } from "./cacheService";
+
 export interface PrayerRequestPublic {
   id: number;
   name: string;
@@ -10,19 +12,31 @@ export interface PrayerRequestPublic {
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || window.location.origin).replace(/\/$/, "");
 
 export const getPublicPrayers = async (): Promise<PrayerRequestPublic[]> => {
-  const response = await fetch(`${API_BASE_URL}/api/prayers/public/`);
-  if (!response.ok) {
-    throw new Error("Imeshindikana kupata maombi.");
-  }
-  return (await response.json()) as PrayerRequestPublic[];
+  return withCachedResult(
+    "prayers_public_v1",
+    async () => {
+      const response = await fetch(`${API_BASE_URL}/api/prayers/public/`);
+      if (!response.ok) {
+        throw new Error("Imeshindikana kupata maombi.");
+      }
+      return (await response.json()) as PrayerRequestPublic[];
+    },
+    { ttlMs: 60 * 1000, persist: false },
+  );
 };
 
 export const getAnsweredPrayers = async (): Promise<PrayerRequestPublic[]> => {
-  const response = await fetch(`${API_BASE_URL}/api/prayers/answered/`);
-  if (!response.ok) {
-    throw new Error("Imeshindikana kupata maombi yaliyojibiwa.");
-  }
-  return (await response.json()) as PrayerRequestPublic[];
+  return withCachedResult(
+    "prayers_answered_v1",
+    async () => {
+      const response = await fetch(`${API_BASE_URL}/api/prayers/answered/`);
+      if (!response.ok) {
+        throw new Error("Imeshindikana kupata maombi yaliyojibiwa.");
+      }
+      return (await response.json()) as PrayerRequestPublic[];
+    },
+    { ttlMs: 60 * 1000, persist: false },
+  );
 };
 
 export const submitPrayer = async (payload: {
@@ -43,6 +57,8 @@ export const submitPrayer = async (payload: {
     throw new Error(error?.detail || "Imeshindikana kutuma ombi.");
   }
 
-  return (await response.json()) as PrayerRequestPublic;
+  const result = (await response.json()) as PrayerRequestPublic;
+  invalidateCachedResult("prayers_public_v1");
+  return result;
 };
 

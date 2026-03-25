@@ -1,3 +1,5 @@
+import { withCachedResult } from "./cacheService";
+
 export interface ShopProductApi {
   id: number;
   title: string;
@@ -48,11 +50,17 @@ export interface ShopOrderCreatePayload {
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || window.location.origin).replace(/\/$/, "");
 
 export const getShopProducts = async (): Promise<ShopProductApi[]> => {
-  const response = await fetch(`${API_BASE_URL}/api/shop/products/`);
-  if (!response.ok) {
-    throw new Error("Imeshindikana kupata bidhaa.");
-  }
-  return (await response.json()) as ShopProductApi[];
+  return withCachedResult(
+    "shop_products_v1",
+    async () => {
+      const response = await fetch(`${API_BASE_URL}/api/shop/products/`);
+      if (!response.ok) {
+        throw new Error("Imeshindikana kupata bidhaa.");
+      }
+      return (await response.json()) as ShopProductApi[];
+    },
+    { ttlMs: 5 * 60 * 1000, persist: true },
+  );
 };
 
 export const trackShopOrder = async (code: string): Promise<ShopOrderTrackApi> => {

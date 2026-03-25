@@ -1,3 +1,5 @@
+import { invalidateCachedResult, withCachedResult } from "./cacheService";
+
 export interface Annotation {
   x: number;
   y: number;
@@ -109,54 +111,72 @@ const toAbsoluteUrl = (value: string): string => {
 };
 
 export const getEvidenceItems = async (): Promise<EvidenceItemApi[]> => {
-  const response = await fetch(`${API_BASE_URL}/api/evidence-vault/`);
-  if (!response.ok) {
-    throw new Error("Imeshindikana kupata hazina ya ushahidi.");
-  }
-  const payload = (await response.json()) as EvidenceItemApi[];
-  if (!Array.isArray(payload)) {
-    return [];
-  }
-  return payload.map((item) => ({
-    ...item,
-    heroImage: toAbsoluteUrl(item.heroImage),
-    videoUrl: toAbsoluteUrl(item.videoUrl || ""),
-    author: {
-      ...item.author,
-      image: toAbsoluteUrl(item.author?.image || ""),
+  return withCachedResult(
+    "vault_evidence_items_v1",
+    async () => {
+      const response = await fetch(`${API_BASE_URL}/api/evidence-vault/`);
+      if (!response.ok) {
+        throw new Error("Imeshindikana kupata hazina ya ushahidi.");
+      }
+      const payload = (await response.json()) as EvidenceItemApi[];
+      if (!Array.isArray(payload)) {
+        return [];
+      }
+      return payload.map((item) => ({
+        ...item,
+        heroImage: toAbsoluteUrl(item.heroImage),
+        videoUrl: toAbsoluteUrl(item.videoUrl || ""),
+        author: {
+          ...item.author,
+          image: toAbsoluteUrl(item.author?.image || ""),
+        },
+      }));
     },
-  }));
+    { ttlMs: 10 * 60 * 1000, persist: true },
+  );
 };
 
 export const getDeceptionCases = async (): Promise<DeceptionCaseApi[]> => {
-  const response = await fetch(`${API_BASE_URL}/api/deception-cases/`);
-  if (!response.ok) {
-    throw new Error("Imeshindikana kupata kesi za udanganyifu.");
-  }
-  const payload = (await response.json()) as DeceptionCaseApi[];
-  if (!Array.isArray(payload)) {
-    return [];
-  }
-  return payload.map((item) => ({
-    ...item,
-    videoUrl: toAbsoluteUrl(item.videoUrl),
-  }));
+  return withCachedResult(
+    "vault_deception_cases_v1",
+    async () => {
+      const response = await fetch(`${API_BASE_URL}/api/deception-cases/`);
+      if (!response.ok) {
+        throw new Error("Imeshindikana kupata kesi za udanganyifu.");
+      }
+      const payload = (await response.json()) as DeceptionCaseApi[];
+      if (!Array.isArray(payload)) {
+        return [];
+      }
+      return payload.map((item) => ({
+        ...item,
+        videoUrl: toAbsoluteUrl(item.videoUrl),
+      }));
+    },
+    { ttlMs: 10 * 60 * 1000, persist: true },
+  );
 };
 
 export const getQuestionVaultItems = async (): Promise<QuestionVaultItemApi[]> => {
-  const response = await fetch(`${API_BASE_URL}/api/question-vault/`);
-  if (!response.ok) {
-    throw new Error("Imeshindikana kupata hazina ya maswali.");
-  }
-  const payload = (await response.json()) as QuestionVaultItemApi[];
-  if (!Array.isArray(payload)) {
-    return [];
-  }
-  return payload.map((item) => ({
-    ...item,
-    videoUrl: toAbsoluteUrl(item.videoUrl || ""),
-    videoThumbnail: toAbsoluteUrl(item.videoThumbnail || ""),
-  }));
+  return withCachedResult(
+    "vault_question_items_v1",
+    async () => {
+      const response = await fetch(`${API_BASE_URL}/api/question-vault/`);
+      if (!response.ok) {
+        throw new Error("Imeshindikana kupata hazina ya maswali.");
+      }
+      const payload = (await response.json()) as QuestionVaultItemApi[];
+      if (!Array.isArray(payload)) {
+        return [];
+      }
+      return payload.map((item) => ({
+        ...item,
+        videoUrl: toAbsoluteUrl(item.videoUrl || ""),
+        videoThumbnail: toAbsoluteUrl(item.videoThumbnail || ""),
+      }));
+    },
+    { ttlMs: 10 * 60 * 1000, persist: true },
+  );
 };
 
 export const submitQuestionVaultQuestion = async (
@@ -171,5 +191,7 @@ export const submitQuestionVaultQuestion = async (
     const error = await response.json().catch(() => ({}));
     throw new Error(error?.detail || "Imeshindikana kutuma swali.");
   }
-  return (await response.json()) as QuestionVaultSubmissionApi;
+  const result = (await response.json()) as QuestionVaultSubmissionApi;
+  invalidateCachedResult("vault_question_items_v1");
+  return result;
 };

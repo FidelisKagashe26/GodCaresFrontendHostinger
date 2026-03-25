@@ -1,3 +1,5 @@
+import { invalidateCachedResult, withCachedResult } from "./cacheService";
+
 export interface NewsItemApi {
   id: number;
   title: string;
@@ -22,16 +24,22 @@ const toAbsoluteUrl = (value?: string | null): string => {
 };
 
 export const getNewsItems = async (): Promise<NewsItemApi[]> => {
-  const response = await fetch(`${API_BASE_URL}/api/news/`);
-  if (!response.ok) {
-    throw new Error("Imeshindikana kupata habari.");
-  }
-  const payload = (await response.json()) as NewsItemApi[];
-  return payload.map((item) => ({
-    ...item,
-    image: toAbsoluteUrl(item.image),
-    author_image: toAbsoluteUrl(item.author_image),
-  }));
+  return withCachedResult(
+    "news_items_v1",
+    async () => {
+      const response = await fetch(`${API_BASE_URL}/api/news/`);
+      if (!response.ok) {
+        throw new Error("Imeshindikana kupata habari.");
+      }
+      const payload = (await response.json()) as NewsItemApi[];
+      return payload.map((item) => ({
+        ...item,
+        image: toAbsoluteUrl(item.image),
+        author_image: toAbsoluteUrl(item.author_image),
+      }));
+    },
+    { ttlMs: 3 * 60 * 1000, persist: true },
+  );
 };
 
 export const registerNewsView = async (newsId: number): Promise<number> => {
@@ -44,6 +52,7 @@ export const registerNewsView = async (newsId: number): Promise<number> => {
   }
 
   const data = (await response.json()) as { views?: number };
+  invalidateCachedResult("news_items_v1");
   return Number(data.views || 0);
 };
 

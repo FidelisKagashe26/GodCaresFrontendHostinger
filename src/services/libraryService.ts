@@ -1,3 +1,5 @@
+import { withCachedResult } from "./cacheService";
+
 export type LibraryItemType = "PDF" | "Audio" | "Video" | "Image";
 
 export interface LibraryItemApi {
@@ -29,18 +31,24 @@ const toAbsoluteUrl = (value: string): string => {
 };
 
 export const getLibraryItems = async (): Promise<LibraryItemApi[]> => {
-  const response = await fetch(`${API_BASE_URL}/api/library/`);
-  if (!response.ok) {
-    throw new Error("Imeshindikana kupata maktaba.");
-  }
-  const payload = (await response.json()) as LibraryItemApi[];
-  if (!Array.isArray(payload)) {
-    return [];
-  }
-  return payload.map((item) => ({
-    ...item,
-    image: toAbsoluteUrl(item.image),
-    content_url: toAbsoluteUrl(item.content_url),
-  }));
+  return withCachedResult(
+    "library_items_v1",
+    async () => {
+      const response = await fetch(`${API_BASE_URL}/api/library/`);
+      if (!response.ok) {
+        throw new Error("Imeshindikana kupata maktaba.");
+      }
+      const payload = (await response.json()) as LibraryItemApi[];
+      if (!Array.isArray(payload)) {
+        return [];
+      }
+      return payload.map((item) => ({
+        ...item,
+        image: toAbsoluteUrl(item.image),
+        content_url: toAbsoluteUrl(item.content_url),
+      }));
+    },
+    { ttlMs: 10 * 60 * 1000, persist: true },
+  );
 };
 

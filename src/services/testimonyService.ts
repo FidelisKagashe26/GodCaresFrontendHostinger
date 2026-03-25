@@ -1,3 +1,5 @@
+import { invalidateCachedResult, withCachedResult } from "./cacheService";
+
 export interface TestimonyApi {
   id: number;
   name: string;
@@ -17,11 +19,17 @@ export interface TestimonyApi {
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || window.location.origin).replace(/\/$/, "");
 
 export const getTestimonies = async (): Promise<TestimonyApi[]> => {
-  const response = await fetch(`${API_BASE_URL}/api/testimonies/`);
-  if (!response.ok) {
-    throw new Error("Imeshindikana kupata shuhuda.");
-  }
-  return (await response.json()) as TestimonyApi[];
+  return withCachedResult(
+    "testimonies_list_v1",
+    async () => {
+      const response = await fetch(`${API_BASE_URL}/api/testimonies/`);
+      if (!response.ok) {
+        throw new Error("Imeshindikana kupata shuhuda.");
+      }
+      return (await response.json()) as TestimonyApi[];
+    },
+    { ttlMs: 2 * 60 * 1000, persist: true },
+  );
 };
 
 export const submitTestimony = async (payload: {
@@ -72,7 +80,9 @@ export const submitTestimony = async (payload: {
     throw new Error(error?.detail || "Imeshindikana kutuma shuhuda.");
   }
 
-  return (await response.json()) as TestimonyApi;
+  const result = (await response.json()) as TestimonyApi;
+  invalidateCachedResult("testimonies_list_v1");
+  return result;
 };
 
 export const reactToTestimony = async (
@@ -90,6 +100,8 @@ export const reactToTestimony = async (
     throw new Error(error?.detail || "Imeshindikana kusasisha reaction.");
   }
 
-  return (await response.json()) as { id: number; reactions: { amen: number; praise: number; love: number } };
+  const result = (await response.json()) as { id: number; reactions: { amen: number; praise: number; love: number } };
+  invalidateCachedResult("testimonies_list_v1");
+  return result;
 };
 

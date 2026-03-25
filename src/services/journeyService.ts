@@ -1,4 +1,6 @@
-﻿export interface JourneyLesson {
+import { withCachedResult } from "./cacheService";
+
+export interface JourneyLesson {
   id: number;
   code: string;
   title: string;
@@ -45,24 +47,30 @@ const safeFetch = async (url: string) => {
 };
 
 export const getJourneyModules = async (): Promise<JourneyModule[]> => {
-  const response = await safeFetch(`${API_BASE_URL}/api/study/modules/`);
+  return withCachedResult(
+    'study_modules_v1',
+    async () => {
+      const response = await safeFetch(`${API_BASE_URL}/api/study/modules/`);
 
-  if (!response.ok) {
-    const message = await readFriendlyError(response, 'Imeshindikana kupakua moduli za darasa la Biblia.');
-    throw new Error(message);
-  }
+      if (!response.ok) {
+        const message = await readFriendlyError(response, 'Imeshindikana kupakua moduli za darasa la Biblia.');
+        throw new Error(message);
+      }
 
-  const payload = (await response.json()) as JourneyModule[];
-  if (!Array.isArray(payload)) {
-    return [];
-  }
+      const payload = (await response.json()) as JourneyModule[];
+      if (!Array.isArray(payload)) {
+        return [];
+      }
 
-  return [...payload].sort((a, b) => {
-    if (a.sort_order !== b.sort_order) {
-      return a.sort_order - b.sort_order;
-    }
-    return a.id - b.id;
-  });
+      return [...payload].sort((a, b) => {
+        if (a.sort_order !== b.sort_order) {
+          return a.sort_order - b.sort_order;
+        }
+        return a.id - b.id;
+      });
+    },
+    { ttlMs: 10 * 60 * 1000, persist: true },
+  );
 };
 
 export const getJourneyModuleLessons = async (moduleCode: string): Promise<JourneyLesson[]> => {
@@ -71,22 +79,28 @@ export const getJourneyModuleLessons = async (moduleCode: string): Promise<Journ
     return [];
   }
 
-  const response = await safeFetch(`${API_BASE_URL}/api/study/modules/${encodeURIComponent(normalizedCode)}/lessons/`);
+  return withCachedResult(
+    `study_module_lessons_${normalizedCode}_v1`,
+    async () => {
+      const response = await safeFetch(`${API_BASE_URL}/api/study/modules/${encodeURIComponent(normalizedCode)}/lessons/`);
 
-  if (!response.ok) {
-    const message = await readFriendlyError(response, 'Imeshindikana kupakua masomo ya moduli.');
-    throw new Error(message);
-  }
+      if (!response.ok) {
+        const message = await readFriendlyError(response, 'Imeshindikana kupakua masomo ya moduli.');
+        throw new Error(message);
+      }
 
-  const payload = (await response.json()) as JourneyLesson[];
-  if (!Array.isArray(payload)) {
-    return [];
-  }
+      const payload = (await response.json()) as JourneyLesson[];
+      if (!Array.isArray(payload)) {
+        return [];
+      }
 
-  return [...payload].sort((a, b) => {
-    if (a.sort_order !== b.sort_order) {
-      return a.sort_order - b.sort_order;
-    }
-    return a.id - b.id;
-  });
+      return [...payload].sort((a, b) => {
+        if (a.sort_order !== b.sort_order) {
+          return a.sort_order - b.sort_order;
+        }
+        return a.id - b.id;
+      });
+    },
+    { ttlMs: 10 * 60 * 1000, persist: true },
+  );
 };

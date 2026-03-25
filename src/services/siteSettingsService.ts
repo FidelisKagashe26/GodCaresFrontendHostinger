@@ -1,3 +1,5 @@
+import { withCachedResult } from "./cacheService";
+
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || window.location.origin).replace(/\/$/, "");
 
 export interface SiteSettings {
@@ -77,11 +79,17 @@ const normalizeSettings = (input: Partial<SiteSettings>): SiteSettings => ({
 });
 
 export const getSiteSettings = async (): Promise<SiteSettings> => {
-  const response = await fetch(`${API_BASE_URL}/api/site-settings/`);
-  if (!response.ok) {
-    throw new Error("Imeshindikana kupata mipangilio ya tovuti.");
-  }
-  const data = (await response.json()) as Partial<SiteSettings>;
-  return normalizeSettings(data);
+  return withCachedResult(
+    "site_settings_v1",
+    async () => {
+      const response = await fetch(`${API_BASE_URL}/api/site-settings/`);
+      if (!response.ok) {
+        throw new Error("Imeshindikana kupata mipangilio ya tovuti.");
+      }
+      const data = (await response.json()) as Partial<SiteSettings>;
+      return normalizeSettings(data);
+    },
+    { ttlMs: 10 * 60 * 1000, persist: true },
+  );
 };
 

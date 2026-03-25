@@ -50,6 +50,7 @@ export const ProfileModal: React.FC<{ user: any; onLogout: () => void; onClose: 
         const base64 = reader.result as string;
         setProfilePic(base64);
         localStorage.setItem('gc365_profile_pic', base64);
+        window.dispatchEvent(new Event('gc365_profile_pic_updated'));
       };
       reader.readAsDataURL(file);
     }
@@ -251,14 +252,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const resolvedLogoSrc = logoSrc || resolvedSettings.logo_url || `${import.meta.env.BASE_URL}Logo.png`;
 
   useEffect(() => {
-    const handleStorage = () => {
+    const handleProfilePicSync = () => {
       setProfilePic(localStorage.getItem('gc365_profile_pic') || '');
     };
-    window.addEventListener('storage', handleStorage);
-    const interval = setInterval(handleStorage, 1000);
+    window.addEventListener('storage', handleProfilePicSync);
+    window.addEventListener('gc365_profile_pic_updated', handleProfilePicSync as EventListener);
     return () => {
-      window.removeEventListener('storage', handleStorage);
-      clearInterval(interval);
+      window.removeEventListener('storage', handleProfilePicSync);
+      window.removeEventListener('gc365_profile_pic_updated', handleProfilePicSync as EventListener);
     };
   }, []);
 

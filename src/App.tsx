@@ -130,6 +130,7 @@ const App: React.FC = () => {
   const [isLanguageOpen, setIsLanguageOpen] = useState(false);
   const [isThemeOpen, setIsThemeOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [showFloatingTools, setShowFloatingTools] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [authEntryMode, setAuthEntryMode] = useState<'login' | 'register'>('login');
@@ -229,6 +230,31 @@ const App: React.FC = () => {
     };
 
     loadSiteSettings();
+  }, []);
+
+  useEffect(() => {
+    let timeoutId: number | null = null;
+    let idleId: number | null = null;
+    const win = window as any;
+
+    const revealFloatingTools = () => {
+      setShowFloatingTools(true);
+    };
+
+    if (typeof win.requestIdleCallback === 'function') {
+      idleId = win.requestIdleCallback(revealFloatingTools, { timeout: 1200 });
+    } else {
+      timeoutId = window.setTimeout(revealFloatingTools, 800);
+    }
+
+    return () => {
+      if (idleId !== null && typeof win.cancelIdleCallback === 'function') {
+        win.cancelIdleCallback(idleId);
+      }
+      if (timeoutId !== null) {
+        window.clearTimeout(timeoutId);
+      }
+    };
   }, []);
 
   useEffect(() => {
@@ -537,20 +563,21 @@ const App: React.FC = () => {
         </Suspense>
       )}
 
-      {/* Floating Tools - Available for everyone now to increase engagement on Homepage */}
-      <div
-        className="fixed right-3 md:right-6 z-[90] pointer-events-auto"
-        style={{ bottom: 'max(0.85rem, env(safe-area-inset-bottom))' }}
-      >
-        <Suspense fallback={null}>
-          <div className="gc-floating-tools flex flex-col gap-2 md:gap-3 saturate-75">
-            <HistoryTool aiLanguage={aiLanguage} onGoToTimeline={() => handleStageChange(StageId.TIMELINE)} />
-            <QuestionTool onGoToVault={() => handleStageChange(StageId.QUESTION_VAULT)} />
-            <DeceptionTool onGoToVault={() => handleStageChange(StageId.DECEPTION_VAULT)} />
-            <EvidenceTool onGoToVault={() => handleStageChange(StageId.EVIDENCE)} />
-          </div>
-        </Suspense>
-      </div>
+      {showFloatingTools && (
+        <div
+          className="fixed right-3 md:right-6 z-[90] pointer-events-auto"
+          style={{ bottom: 'max(0.85rem, env(safe-area-inset-bottom))' }}
+        >
+          <Suspense fallback={null}>
+            <div className="gc-floating-tools flex flex-col gap-2 md:gap-3 saturate-75">
+              <HistoryTool aiLanguage={aiLanguage} onGoToTimeline={() => handleStageChange(StageId.TIMELINE)} />
+              <QuestionTool onGoToVault={() => handleStageChange(StageId.QUESTION_VAULT)} />
+              <DeceptionTool onGoToVault={() => handleStageChange(StageId.DECEPTION_VAULT)} />
+              <EvidenceTool onGoToVault={() => handleStageChange(StageId.EVIDENCE)} />
+            </div>
+          </Suspense>
+        </div>
+      )}
 
       {showAuthModal && (
         <Suspense fallback={null}>

@@ -1,3 +1,5 @@
+import { withCachedResult } from "./cacheService";
+
 export interface MediaVideoApi {
   id: number;
   title: string;
@@ -33,24 +35,30 @@ const toAbsoluteUrl = (value: string): string => {
 };
 
 export const getMediaPlaylists = async (): Promise<MediaPlaylistApi[]> => {
-  const response = await fetch(`${API_BASE_URL}/api/media/playlists/`);
-  if (!response.ok) {
-    throw new Error("Imeshindikana kupata orodha za video.");
-  }
-  const payload = (await response.json()) as MediaPlaylistApi[];
-  if (!Array.isArray(payload)) {
-    return [];
-  }
-  return payload.map((playlist) => ({
-    ...playlist,
-    thumbnail: toAbsoluteUrl(playlist.thumbnail),
-    videos: Array.isArray(playlist.videos)
-      ? playlist.videos.map((video) => ({
-          ...video,
-          thumbnail: toAbsoluteUrl(video.thumbnail),
-          embed_url: toAbsoluteUrl(video.embed_url),
-        }))
-      : [],
-  }));
+  return withCachedResult(
+    "media_playlists_v1",
+    async () => {
+      const response = await fetch(`${API_BASE_URL}/api/media/playlists/`);
+      if (!response.ok) {
+        throw new Error("Imeshindikana kupata orodha za video.");
+      }
+      const payload = (await response.json()) as MediaPlaylistApi[];
+      if (!Array.isArray(payload)) {
+        return [];
+      }
+      return payload.map((playlist) => ({
+        ...playlist,
+        thumbnail: toAbsoluteUrl(playlist.thumbnail),
+        videos: Array.isArray(playlist.videos)
+          ? playlist.videos.map((video) => ({
+              ...video,
+              thumbnail: toAbsoluteUrl(video.thumbnail),
+              embed_url: toAbsoluteUrl(video.embed_url),
+            }))
+          : [],
+      }));
+    },
+    { ttlMs: 10 * 60 * 1000, persist: true },
+  );
 };
 

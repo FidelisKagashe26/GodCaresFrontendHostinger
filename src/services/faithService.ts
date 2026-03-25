@@ -1,3 +1,5 @@
+import { withCachedResult } from "./cacheService";
+
 export interface FaithHeroApi {
   id: number;
   name: string;
@@ -29,18 +31,24 @@ const toAbsoluteUrl = (value: string): string => {
 };
 
 export const getFaithHeroes = async (): Promise<FaithHeroApi[]> => {
-  const response = await fetch(`${API_BASE_URL}/api/faith/heroes/`);
-  if (!response.ok) {
-    throw new Error("Imeshindikana kupata mashujaa wa imani.");
-  }
-  const payload = (await response.json()) as FaithHeroApi[];
-  if (!Array.isArray(payload)) {
-    return [];
-  }
-  return payload.map((item) => ({
-    ...item,
-    image: toAbsoluteUrl(item.image),
-    video_url: toAbsoluteUrl(item.video_url),
-  }));
+  return withCachedResult(
+    "faith_heroes_v1",
+    async () => {
+      const response = await fetch(`${API_BASE_URL}/api/faith/heroes/`);
+      if (!response.ok) {
+        throw new Error("Imeshindikana kupata mashujaa wa imani.");
+      }
+      const payload = (await response.json()) as FaithHeroApi[];
+      if (!Array.isArray(payload)) {
+        return [];
+      }
+      return payload.map((item) => ({
+        ...item,
+        image: toAbsoluteUrl(item.image),
+        video_url: toAbsoluteUrl(item.video_url),
+      }));
+    },
+    { ttlMs: 10 * 60 * 1000, persist: true },
+  );
 };
 

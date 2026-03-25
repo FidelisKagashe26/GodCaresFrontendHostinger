@@ -1,3 +1,5 @@
+import { withCachedResult } from "./cacheService";
+
 export interface TimelineMilestoneApi {
   id: number;
   code: string;
@@ -61,39 +63,45 @@ const toAbsoluteUrl = (value: string) => {
 };
 
 export const getTimelineSections = async (): Promise<TimelineSectionApi[]> => {
-  const response = await safeFetch(`${API_BASE_URL}/api/timelines/`);
+  return withCachedResult(
+    "timeline_sections_v1",
+    async () => {
+      const response = await safeFetch(`${API_BASE_URL}/api/timelines/`);
 
-  if (!response.ok) {
-    const message = await readFriendlyError(response, "Imeshindikana kupakua timeline ya mfumo.");
-    throw new Error(message);
-  }
-
-  const payload = (await response.json()) as TimelineSectionApi[];
-  if (!Array.isArray(payload)) {
-    return [];
-  }
-
-  return [...payload]
-    .map((section) => ({
-      ...section,
-      milestones: Array.isArray(section.milestones)
-        ? [...section.milestones]
-            .map((milestone) => ({
-              ...milestone,
-              image: toAbsoluteUrl(milestone.image || ""),
-            }))
-            .sort((a, b) => {
-              if ((a.sort_order || 0) !== (b.sort_order || 0)) {
-                return (a.sort_order || 0) - (b.sort_order || 0);
-              }
-              return (a.id || 0) - (b.id || 0);
-            })
-        : [],
-    }))
-    .sort((a, b) => {
-      if ((a.sort_order || 0) !== (b.sort_order || 0)) {
-        return (a.sort_order || 0) - (b.sort_order || 0);
+      if (!response.ok) {
+        const message = await readFriendlyError(response, "Imeshindikana kupakua timeline ya mfumo.");
+        throw new Error(message);
       }
-      return (a.id || 0) - (b.id || 0);
-    });
+
+      const payload = (await response.json()) as TimelineSectionApi[];
+      if (!Array.isArray(payload)) {
+        return [];
+      }
+
+      return [...payload]
+        .map((section) => ({
+          ...section,
+          milestones: Array.isArray(section.milestones)
+            ? [...section.milestones]
+                .map((milestone) => ({
+                  ...milestone,
+                  image: toAbsoluteUrl(milestone.image || ""),
+                }))
+                .sort((a, b) => {
+                  if ((a.sort_order || 0) !== (b.sort_order || 0)) {
+                    return (a.sort_order || 0) - (b.sort_order || 0);
+                  }
+                  return (a.id || 0) - (b.id || 0);
+                })
+            : [],
+        }))
+        .sort((a, b) => {
+          if ((a.sort_order || 0) !== (b.sort_order || 0)) {
+            return (a.sort_order || 0) - (b.sort_order || 0);
+          }
+          return (a.id || 0) - (b.id || 0);
+        });
+    },
+    { ttlMs: 10 * 60 * 1000, persist: true },
+  );
 };

@@ -1,3 +1,5 @@
+import { invalidateCachedResult, withCachedResult } from "./cacheService";
+
 export interface EventResource {
   name: string;
   type: "PDF" | "Video" | "Link";
@@ -37,19 +39,25 @@ const toAbsoluteUrl = (value?: string | null): string => {
 };
 
 export const getEvents = async (): Promise<EventApi[]> => {
-  const response = await fetch(`${API_BASE_URL}/api/events/`);
-  if (!response.ok) {
-    throw new Error("Imeshindikana kupata matukio.");
-  }
-  const payload = (await response.json()) as EventApi[];
-  return payload.map((item) => ({
-    ...item,
-    image: toAbsoluteUrl(item.image),
-    speakers: (item.speakers || []).map((speaker) => ({
-      ...speaker,
-      img: toAbsoluteUrl(speaker.img),
-    })),
-  }));
+  return withCachedResult(
+    "events_list_v1",
+    async () => {
+      const response = await fetch(`${API_BASE_URL}/api/events/`);
+      if (!response.ok) {
+        throw new Error("Imeshindikana kupata matukio.");
+      }
+      const payload = (await response.json()) as EventApi[];
+      return payload.map((item) => ({
+        ...item,
+        image: toAbsoluteUrl(item.image),
+        speakers: (item.speakers || []).map((speaker) => ({
+          ...speaker,
+          img: toAbsoluteUrl(speaker.img),
+        })),
+      }));
+    },
+    { ttlMs: 3 * 60 * 1000, persist: true },
+  );
 };
 
 export const registerForEvent = async (eventId: number, payload: { name: string; email: string }) => {
@@ -64,6 +72,8 @@ export const registerForEvent = async (eventId: number, payload: { name: string;
     throw new Error(error?.detail || "Imeshindikana kusajili.");
   }
 
-  return response.json().catch(() => ({}));
+  const result = await response.json().catch(() => ({}));
+  invalidateCachedResult("events_list_v1");
+  return result;
 };
 

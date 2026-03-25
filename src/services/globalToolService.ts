@@ -1,3 +1,5 @@
+import { withCachedResult } from "./cacheService";
+
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || window.location.origin).replace(/\/$/, "");
 
 const toAbsoluteUrl = (value: string): string => {
@@ -47,36 +49,48 @@ export interface EvidenceHighlightApi {
 }
 
 export const getHistoryMoments = async (): Promise<HistoryMomentApi[]> => {
-  const response = await safeFetch(`${API_BASE_URL}/api/tools/history/`);
-  if (!response.ok) {
-    throw new Error("Imeshindikana kupata This Day in History.");
-  }
+  return withCachedResult(
+    "tool_history_moments_v1",
+    async () => {
+      const response = await safeFetch(`${API_BASE_URL}/api/tools/history/`);
+      if (!response.ok) {
+        throw new Error("Imeshindikana kupata This Day in History.");
+      }
 
-  const payload = (await response.json()) as HistoryMomentApi[];
-  if (!Array.isArray(payload)) {
-    return [];
-  }
+      const payload = (await response.json()) as HistoryMomentApi[];
+      if (!Array.isArray(payload)) {
+        return [];
+      }
 
-  return payload.map((item) => ({
-    ...item,
-    image: toAbsoluteUrl(item.image || ""),
-  }));
+      return payload.map((item) => ({
+        ...item,
+        image: toAbsoluteUrl(item.image || ""),
+      }));
+    },
+    { ttlMs: 60 * 60 * 1000, persist: true },
+  );
 };
 
 export const getEvidenceHighlights = async (): Promise<EvidenceHighlightApi[]> => {
-  const response = await safeFetch(`${API_BASE_URL}/api/tools/evidence-highlights/`);
-  if (!response.ok) {
-    throw new Error("Imeshindikana kupata dondoo za ushahidi.");
-  }
+  return withCachedResult(
+    "tool_evidence_highlights_v1",
+    async () => {
+      const response = await safeFetch(`${API_BASE_URL}/api/tools/evidence-highlights/`);
+      if (!response.ok) {
+        throw new Error("Imeshindikana kupata dondoo za ushahidi.");
+      }
 
-  const payload = (await response.json()) as EvidenceHighlightApi[];
-  if (!Array.isArray(payload)) {
-    return [];
-  }
+      const payload = (await response.json()) as EvidenceHighlightApi[];
+      if (!Array.isArray(payload)) {
+        return [];
+      }
 
-  return payload.map((item) => ({
-    ...item,
-    image: toAbsoluteUrl(item.image || ""),
-    hints: Array.isArray(item.hints) ? item.hints.filter((hint) => typeof hint === "string" && hint.trim()) : [],
-  }));
+      return payload.map((item) => ({
+        ...item,
+        image: toAbsoluteUrl(item.image || ""),
+        hints: Array.isArray(item.hints) ? item.hints.filter((hint) => typeof hint === "string" && hint.trim()) : [],
+      }));
+    },
+    { ttlMs: 60 * 60 * 1000, persist: true },
+  );
 };

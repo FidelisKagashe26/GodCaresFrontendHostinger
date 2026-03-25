@@ -1,3 +1,5 @@
+import { withCachedResult } from "./cacheService";
+
 export interface SystemMessage {
   id: number;
   title: string;
@@ -25,12 +27,20 @@ export const getSystemMessages = async (params?: {
 
   const query = search.toString();
   const url = `${API_BASE_URL}/api/messages/${query ? `?${query}` : ""}`;
-  const response = await fetch(url);
+  const key = `system_messages_${query || "all"}_v1`;
 
-  if (!response.ok) {
-    throw new Error("Imeshindikana kupata ujumbe.");
-  }
+  return withCachedResult(
+    key,
+    async () => {
+      const response = await fetch(url);
 
-  return (await response.json()) as SystemMessage[];
+      if (!response.ok) {
+        throw new Error("Imeshindikana kupata ujumbe.");
+      }
+
+      return (await response.json()) as SystemMessage[];
+    },
+    { ttlMs: 45 * 1000, persist: false },
+  );
 };
 
