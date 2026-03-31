@@ -57,18 +57,18 @@ export const Home: React.FC<HomeProps> = ({ onNavigate, siteSettings }) => {
   ];
 
   const TOOLS = [
-    { id: StageId.BIBLE_STUDY, title: "Biblia", desc: "Andiko safi.", icon: <BookOpen size={18} />, color: "text-green-700" },
+    { id: StageId.BIBLE_STUDY, title: "Biblia", desc: "Andiko safi.", icon: <BookOpen size={18} />, color: "text-green-700 dark:text-green-300" },
     { id: StageId.TIMELINE, title: "Unabii", desc: "Historia.", icon: <Clock size={18} />, color: "text-blue-400" },
-    { id: StageId.DECEPTION_VAULT, title: "Fichua", desc: "Pambanua.", icon: <ShieldCheck size={18} />, color: "text-green-600" },
-    { id: StageId.EVIDENCE, title: "Ushahidi", desc: "Sayansi.", icon: <Microscope size={18} />, color: "text-green-700" },
+    { id: StageId.DECEPTION_VAULT, title: "Fichua", desc: "Pambanua.", icon: <ShieldCheck size={18} />, color: "text-green-700 dark:text-green-300" },
+    { id: StageId.EVIDENCE, title: "Ushahidi", desc: "Sayansi.", icon: <Microscope size={18} />, color: "text-green-700 dark:text-green-300" },
     { id: StageId.QUESTION_VAULT, title: "Majibu", desc: "Maswali.", icon: <HelpCircle size={18} />, color: "text-purple-400" },
     { id: StageId.MEDIA, title: "Media", desc: "Video.", icon: <PlayCircle size={18} />, color: "text-pink-400" }
   ];
 
   const truthSteps = [
     { id: 1, tag: "Mwaka 31 B.K. - Yerusalemu", h2: "Pilato Anauliza Swali la Milenia.", h3: "KWELI NI NINI?", p: <><span className="text-slate-900 dark:text-slate-100 font-medium">Swali hili la miaka 2,000, lililoulizwa na gavana wa Kirumi, limesafiri katika korido za wakati na bado linasumbua hadi leo. Katika zama zetu za AI, ukweli umechakachuliwa, umeburuzwa, umepuuzwa, umefifishwa, na katika sehemu nyingine umeangamizwa kabisa.</span></>, img: resolvedSiteSettings.home_truth_story_1_image || "https://images.unsplash.com/photo-1548013146-72479768bbaa?q=80&w=2000" },
-    { id: 2, tag: "Jibu la Mfalme", h2: "Yesu Anamjibu Pilato.", h3: "NIMEKUJA NIISHUHUDIE KWELI.", p: <>"Mimi nimezaliwa kwa ajili ya haya, na kwa ajili ya haya mimi nalikuja ulimwenguni, ili niishuhudie kweli. Kila aliye wa hiyo kweli hunisikia sauti yangu." - <span className="text-green-700 font-black">Yohana 18:37</span></>, img: resolvedSiteSettings.home_truth_story_2_image || "https://images.unsplash.com/photo-1512117187123-f365d9c227ba?q=80&w=2000" },
-    { id: 3, tag: "Dhana Moja", h2: "Kweli Zipo Ngapi?", h3: "UKWELI UPO MMOJA TU.", p: <>"Yesu akamwambia, Mimi ndimi njia, na kweli, na uzima; mtu haji kwa Baba, ila kwa njia ya mimi." - <span className="text-green-700 font-black">Yohana 14:6</span> <br/><br/> <span className="text-slate-900 dark:text-slate-100 font-medium">Kwa kuwa ukweli ni msingi wa kile tunachoamini, lazima uwe mmoja.</span></>, img: resolvedSiteSettings.home_truth_story_3_image || "https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2000" }
+    { id: 2, tag: "Jibu la Mfalme", h2: "Yesu Anamjibu Pilato.", h3: "NIMEKUJA NIISHUHUDIE KWELI.", p: <>"Mimi nimezaliwa kwa ajili ya haya, na kwa ajili ya haya mimi nalikuja ulimwenguni, ili niishuhudie kweli. Kila aliye wa hiyo kweli hunisikia sauti yangu." - <span className="text-green-700 dark:text-green-300 font-black">Yohana 18:37</span></>, img: resolvedSiteSettings.home_truth_story_2_image || "https://images.unsplash.com/photo-1512117187123-f365d9c227ba?q=80&w=2000" },
+    { id: 3, tag: "Dhana Moja", h2: "Kweli Zipo Ngapi?", h3: "UKWELI UPO MMOJA TU.", p: <>"Yesu akamwambia, Mimi ndimi njia, na kweli, na uzima; mtu haji kwa Baba, ila kwa njia ya mimi." - <span className="text-green-700 dark:text-green-300 font-black">Yohana 14:6</span> <br/><br/> <span className="text-slate-900 dark:text-slate-100 font-medium">Kwa kuwa ukweli ni msingi wa kile tunachoamini, lazima uwe mmoja.</span></>, img: resolvedSiteSettings.home_truth_story_3_image || "https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2000" }
   ];
 
   const deceptionSteps = [
@@ -95,7 +95,7 @@ export const Home: React.FC<HomeProps> = ({ onNavigate, siteSettings }) => {
            <ScrollReveal>
              <div className="inline-flex items-center gap-3 px-5 sm:px-7 py-3 rounded-2xl border border-white/30 dark:border-white/20 bg-white/12 dark:bg-white/[0.1] backdrop-blur-3xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.3),0_8px_40px_rgba(0,0,0,0.08)] dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.15),0_8px_40px_rgba(0,0,0,0.3)] mb-6 hover:bg-white/[0.16] dark:hover:bg-white/[0.13] transition-all">
                 <span className="w-2.5 h-2.5 bg-green-500 rounded-full animate-pulse"></span>
-                <span className="text-[9px] xs:text-[10px] sm:text-[11px] font-black tracking-widest uppercase text-green-700">Yohana 8:32</span>
+                <span className="text-[9px] xs:text-[10px] sm:text-[11px] font-black tracking-widest uppercase text-green-700 dark:text-green-300">Yohana 8:32</span>
              </div>
              <h1 className="text-[48px] sm:text-[52px] md:text-[60px] lg:text-[72px] xl:text-[80px] font-black text-slate-900 dark:text-white tracking-tighter leading-[0.9] drop-shadow-[0_10px_20px_rgba(0,0,0,0.15)] dark:drop-shadow-[0_10px_20px_rgba(0,0,0,0.5)] uppercase">GOD CARES <br/> <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-400 via-green-500 to-green-800">365</span></h1>
              <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-5 pt-8 sm:pt-14">
@@ -113,7 +113,7 @@ export const Home: React.FC<HomeProps> = ({ onNavigate, siteSettings }) => {
       {/* --- Hitaji letu la Ukweli --- */}
       <section className="relative pt-12 sm:pt-20 pb-12 sm:pb-16 bg-gradient-to-b from-white via-slate-50 to-white dark:from-[#020617] dark:via-[#0f172a] dark:to-[#020617]">
          <div className="max-w-7xl mx-auto px-4 sm:px-6 mb-10 sm:mb-16 text-center">
-            <h3 className="text-green-700 font-black text-[12px] sm:text-[13px] md:text-[14px] uppercase tracking-widest mb-6 italic">Hitaji letu la Ukweli</h3>
+            <h3 className="text-green-700 dark:text-green-300 font-black text-[12px] sm:text-[13px] md:text-[14px] uppercase tracking-widest mb-6 italic">Hitaji letu la Ukweli</h3>
             <div className="h-1 w-20 bg-green-700 mx-auto rounded-full"></div>
          </div>
 
@@ -125,7 +125,7 @@ export const Home: React.FC<HomeProps> = ({ onNavigate, siteSettings }) => {
               <ScrollReveal className={i % 2 === 1 ? "text-right ml-auto" : ""}>
                 <div className={`inline-flex items-center gap-3 mb-6 ${i % 2 === 1 ? 'flex-row-reverse' : ''}`}>
                     <div className="w-12 h-12 bg-gradient-to-br from-white/20 to-white/5 dark:from-white/12 dark:to-white/5 backdrop-blur-2xl border border-white/30 dark:border-white/15 rounded-full flex items-center justify-center text-green-700 dark:text-green-400 font-black text-[18px] shadow-lg">0{step.id}</div>
-                    <span className="text-green-700 font-black text-[12px] sm:text-[13px] md:text-[14px] lg:text-[14px] uppercase tracking-widest">{step.tag}</span>
+                    <span className="text-green-700 dark:text-green-300 font-black text-[12px] sm:text-[13px] md:text-[14px] lg:text-[14px] uppercase tracking-widest">{step.tag}</span>
                 </div>
                 <h2 className="text-[18px] sm:text-[22px] md:text-[26px] lg:text-[30px] xl:text-[32px] font-serif text-slate-900 dark:text-white italic opacity-90 dark:opacity-85 mb-6 leading-tight">{step.h2}</h2>
                 <div className={`bg-white/[0.18] dark:bg-white/[0.12] backdrop-blur-3xl p-5 xs:p-7 sm:p-10 md:p-12 lg:p-14 border-l-4 ${i % 2 === 1 ? 'border-r-4 border-l-0 text-right' : 'border-l-4'} border-green-500/70 shadow-[0_8px_32px_rgba(0,0,0,0.1)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.3)] max-w-3xl ${i % 2 === 1 ? 'ml-auto' : ''} rounded-2xl transition-all hover:bg-white/[0.22] dark:hover:bg-white/[0.15] border border-white/40 dark:border-white/20`}>
@@ -141,7 +141,7 @@ export const Home: React.FC<HomeProps> = ({ onNavigate, siteSettings }) => {
       {/* --- Changamoto ya Kudanganywa --- */}
       <section className="relative pt-12 sm:pt-20 pb-12 sm:pb-16 bg-gradient-to-b from-slate-50 via-white to-slate-50 dark:from-[#0f172a] dark:via-[#050b1d] dark:to-[#0f172a]">
          <div className="max-w-7xl mx-auto px-4 sm:px-6 mb-10 sm:mb-16 text-center">
-            <h3 className="text-green-700 font-black text-[12px] sm:text-[13px] md:text-[14px] uppercase tracking-widest mb-6 italic">Changamoto ya Kudanganywa</h3>
+            <h3 className="text-green-700 dark:text-green-300 font-black text-[12px] sm:text-[13px] md:text-[14px] uppercase tracking-widest mb-6 italic">Changamoto ya Kudanganywa</h3>
             <div className="h-1 w-20 bg-green-700 mx-auto rounded-full"></div>
          </div>
 
@@ -153,7 +153,7 @@ export const Home: React.FC<HomeProps> = ({ onNavigate, siteSettings }) => {
               <ScrollReveal className={i % 2 === 0 ? "text-right ml-auto" : ""}>
                 <div className={`inline-flex items-center gap-3 mb-6 ${i % 2 === 0 ? 'flex-row-reverse' : ''}`}>
                     <div className="w-12 h-12 bg-gradient-to-br from-green-100/30 to-green-50/10 dark:from-green-500/15 dark:to-green-500/5 backdrop-blur-2xl border border-green-300/40 dark:border-green-500/25 rounded-full flex items-center justify-center text-green-700 dark:text-green-400 font-black text-[18px] shadow-lg">0{step.id}</div>
-                    <span className="text-green-700 font-black text-[12px] sm:text-[13px] md:text-[14px] uppercase tracking-widest">{step.tag}</span>
+                    <span className="text-green-700 dark:text-green-300 font-black text-[12px] sm:text-[13px] md:text-[14px] uppercase tracking-widest">{step.tag}</span>
                 </div>
                 <h2 className="text-[18px] sm:text-[22px] md:text-[26px] lg:text-[30px] xl:text-[32px] font-serif text-slate-900 dark:text-white italic opacity-90 dark:opacity-85 mb-6 leading-tight">{step.h2}</h2>
                 <div className={`bg-white/[0.18] dark:bg-white/[0.12] backdrop-blur-3xl p-5 xs:p-7 sm:p-10 md:p-12 lg:p-14 border-l-4 ${i % 2 === 1 ? 'border-r-4 border-l-0 text-right' : 'border-l-4'} border-green-500/70 shadow-[0_8px_32px_rgba(0,0,0,0.1)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.3)] max-w-3xl ${i % 2 === 1 ? 'ml-auto' : ''} rounded-2xl transition-all hover:bg-white/[0.22] dark:hover:bg-white/[0.15] border border-white/40 dark:border-white/20`}>
@@ -169,7 +169,7 @@ export const Home: React.FC<HomeProps> = ({ onNavigate, siteSettings }) => {
       {/* --- Ukweli upo. --- */}
       <section className="relative pt-12 sm:pt-20 pb-12 sm:pb-16 bg-gradient-to-b from-white via-slate-50 to-white dark:from-[#020617] dark:via-[#0f172a] dark:to-[#020617]">
          <div className="max-w-7xl mx-auto px-4 sm:px-6 mb-10 sm:mb-16 text-center">
-            <h3 className="text-green-700 font-black text-[12px] sm:text-[13px] md:text-[14px] uppercase tracking-widest mb-6 italic">Ukweli upo.</h3>
+            <h3 className="text-green-700 dark:text-green-300 font-black text-[12px] sm:text-[13px] md:text-[14px] uppercase tracking-widest mb-6 italic">Ukweli upo.</h3>
             <div className="h-1 w-20 bg-green-700 mx-auto rounded-full"></div>
          </div>
 
