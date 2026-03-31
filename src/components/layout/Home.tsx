@@ -88,7 +88,7 @@ export const Home: React.FC<HomeProps> = ({ onNavigate, siteSettings }) => {
       {/* --- HERO --- */}
       <section className="relative min-h-[68vh] sm:min-h-[72vh] md:min-h-[82vh] flex flex-col items-center justify-center overflow-hidden">
         <div className="absolute inset-0 z-0">
-           <img src="https://images.unsplash.com/photo-1462331940025-496dfbfc7564?q=80&w=2500" className="w-full h-full object-cover opacity-85 dark:opacity-75 animate-ken-burns" alt="Cosmos" />
+           <img src="https://images.unsplash.com/photo-1462331940025-496dfbfc7564?q=80&w=2500" className="w-full h-full object-cover opacity-85 dark:opacity-75 animate-zoom-in-subtle" alt="Cosmos" />
            <div className="absolute inset-0 bg-gradient-to-b from-green-50/40 via-transparent to-green-50/40 dark:from-[#020617]/60 dark:via-[#020617]/10 dark:to-[#020617]/60"></div>
         </div>
         <div className="relative z-10 text-center px-4 sm:px-6 max-w-5xl space-y-6">

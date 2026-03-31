@@ -330,9 +330,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
           {/* Main Content Sections */}
           {sections.map((section, sIdx) => (
             <div key={sIdx} className="space-y-4">
-                <h3 className="text-[10px] sm:text-xs font-black text-[#c79d35] uppercase tracking-[0.4em] px-1 flex items-center gap-4">
+                <h3 className="text-[10px] sm:text-xs font-black text-green-600 dark:text-green-400 uppercase tracking-[0.4em] px-1 flex items-center gap-4">
                   <span>{section.title}</span>
-                  <div className="h-[1px] flex-1 bg-gradient-to-r from-slate-300 dark:from-white/10 to-transparent"></div>
+                  <div className="h-[1px] flex-1 bg-gradient-to-r from-green-300 dark:from-green-600/40 to-transparent"></div>
                 </h3>
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
                   {isOpen && section.ids.map((id, idx) => {
@@ -348,9 +348,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
           {/* OUR WEBSITES SECTION */}
           <div className="space-y-6 pt-4 pb-12">
-             <h3 className="text-[10px] sm:text-xs font-black text-[#c79d35] uppercase tracking-[0.4em] px-1 flex items-center gap-4">
+             <h3 className="text-[10px] sm:text-xs font-black text-green-600 dark:text-green-400 uppercase tracking-[0.4em] px-1 flex items-center gap-4">
                  <span>Tovuti Zetu</span>
-                <div className="h-[1px] flex-1 bg-gradient-to-r from-slate-300 dark:from-white/10 to-transparent"></div>
+                <div className="h-[1px] flex-1 bg-gradient-to-r from-green-300 dark:from-green-600/40 to-transparent"></div>
              </h3>
              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pb-12">
                 {externalWebsites.map((web, idx) => (
@@ -359,20 +359,20 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     href={web.url} 
                     target="_blank" 
                     rel="noopener noreferrer"
-                    className="group relative flex items-center gap-4 p-4 bg-[color:var(--surface-2)] dark:bg-white/5 border border-slate-200/20 dark:border-white/5 rounded-2xl hover:border-gold-500/50 hover:shadow-xl backdrop-blur-md transition-all duration-300"
+                    className="group relative flex items-center gap-4 p-4 bg-gradient-to-br from-slate-50 to-slate-100/80 dark:from-slate-900/50 dark:to-slate-900/30 border border-slate-200/60 dark:border-green-500/20 rounded-2xl hover:border-green-500/60 hover:shadow-xl hover:shadow-green-500/20 backdrop-blur-md transition-all duration-300"
                   >
-                    <div className="p-3 bg-slate-100/50 dark:bg-black/20 rounded-xl text-slate-600 dark:text-slate-400 group-hover:text-gold-500 group-hover:bg-gold-500/10 transition-all shrink-0">
+                    <div className="p-3 bg-slate-200/40 dark:bg-green-500/10 rounded-xl text-slate-600 dark:text-slate-400 group-hover:text-green-600 dark:group-hover:text-green-400 group-hover:bg-green-500/15 transition-all shrink-0">
                        {web.icon}
                     </div>
                     <div className="flex-1 min-w-0">
-                       <h4 className="text-[10px] font-black text-slate-900 dark:text-white uppercase tracking-tight leading-tight group-hover:text-gold-500 transition-colors line-clamp-2">
+                       <h4 className="text-[10px] font-black text-slate-900 dark:text-white uppercase tracking-tight leading-tight group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors line-clamp-2">
                           {web.name}
                        </h4>
-                       <p className="text-[9px] text-slate-500 dark:text-slate-500 font-bold uppercase mt-1 truncate">
+                       <p className="text-[9px] text-slate-500 dark:text-slate-400 font-bold uppercase mt-1 truncate">
                           {web.desc}
                        </p>
                     </div>
-                    <div className="text-slate-400 dark:text-slate-700 group-hover:text-gold-500 transition-colors shrink-0">
+                    <div className="text-slate-400 dark:text-slate-600 group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors shrink-0">
                        <ExternalLink size={14} />
                     </div>
                   </a>
