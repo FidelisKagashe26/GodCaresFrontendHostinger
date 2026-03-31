@@ -128,9 +128,9 @@ export const Home: React.FC<HomeProps> = ({ onNavigate, siteSettings }) => {
                     <span className="text-gold-500 font-black text-[12px] sm:text-[13px] md:text-[14px] lg:text-[14px] uppercase tracking-widest">{step.tag}</span>
                 </div>
                 <h2 className="text-[18px] sm:text-[22px] md:text-[26px] lg:text-[30px] xl:text-[32px] font-serif text-slate-900 dark:text-white italic opacity-90 dark:opacity-85 mb-6 leading-tight">{step.h2}</h2>
-                <div className={`bg-white/[0.09] dark:bg-white/[0.06] backdrop-blur-3xl p-5 xs:p-7 sm:p-10 md:p-12 lg:p-14 border-l-4 ${i % 2 === 1 ? 'border-r-4 border-l-0 text-right' : 'border-l-4'} border-gold-500/70 shadow-[0_8px_32px_rgba(0,0,0,0.1)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.3)] max-w-3xl ${i % 2 === 1 ? 'ml-auto' : ''} rounded-2xl transition-all hover:bg-white/[0.12] dark:hover:bg-white/[0.09] border border-white/25 dark:border-white/12`}>
+                <div className={`bg-white/[0.18] dark:bg-white/[0.12] backdrop-blur-3xl p-5 xs:p-7 sm:p-10 md:p-12 lg:p-14 border-l-4 ${i % 2 === 1 ? 'border-r-4 border-l-0 text-right' : 'border-l-4'} border-gold-500/70 shadow-[0_8px_32px_rgba(0,0,0,0.1)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.3)] max-w-3xl ${i % 2 === 1 ? 'ml-auto' : ''} rounded-2xl transition-all hover:bg-white/[0.22] dark:hover:bg-white/[0.15] border border-white/40 dark:border-white/20`}>
                   <h3 className="text-[16px] sm:text-[20px] md:text-[24px] lg:text-[28px] xl:text-[32px] font-black text-slate-900 dark:text-white uppercase tracking-tighter mb-4 sm:mb-6">{step.h3}</h3>
-                  <div className="text-[14px] sm:text-[15px] md:text-[16px] lg:text-[17px] xl:text-[18px] text-slate-700 dark:text-slate-200 font-serif italic leading-relaxed">{step.p}</div>
+                  <div className="text-[14px] sm:text-[15px] md:text-[16px] lg:text-[17px] xl:text-[18px] text-slate-800 dark:text-slate-100 font-serif italic leading-relaxed">{step.p}</div>
                 </div>
               </ScrollReveal>
             </div>
@@ -156,9 +156,9 @@ export const Home: React.FC<HomeProps> = ({ onNavigate, siteSettings }) => {
                     <span className="text-red-500 font-black text-[12px] sm:text-[13px] md:text-[14px] uppercase tracking-widest">{step.tag}</span>
                 </div>
                 <h2 className="text-[18px] sm:text-[22px] md:text-[26px] lg:text-[30px] xl:text-[32px] font-serif text-slate-900 dark:text-white italic opacity-90 dark:opacity-85 mb-6 leading-tight">{step.h2}</h2>
-                <div className={`bg-white/[0.09] dark:bg-white/[0.06] backdrop-blur-3xl p-5 xs:p-7 sm:p-10 md:p-12 lg:p-14 border-l-4 ${i % 2 === 0 ? 'border-r-4 border-l-0 text-right' : 'border-l-4'} border-red-500/70 shadow-[0_8px_32px_rgba(0,0,0,0.1)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.3)] max-w-3xl ${i % 2 === 0 ? 'ml-auto' : ''} rounded-2xl transition-all hover:bg-white/[0.12] dark:hover:bg-white/[0.09] border border-white/25 dark:border-white/12`}>
+                <div className={`bg-white/[0.18] dark:bg-white/[0.12] backdrop-blur-3xl p-5 xs:p-7 sm:p-10 md:p-12 lg:p-14 border-l-4 ${i % 2 === 0 ? 'border-r-4 border-l-0 text-right' : 'border-l-4'} border-red-500/70 shadow-[0_8px_32px_rgba(0,0,0,0.1)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.3)] max-w-3xl ${i % 2 === 0 ? 'ml-auto' : ''} rounded-2xl transition-all hover:bg-white/[0.22] dark:hover:bg-white/[0.15] border border-white/40 dark:border-white/20`}>
                   <h3 className="text-[16px] sm:text-[20px] md:text-[24px] lg:text-[28px] xl:text-[32px] font-black text-slate-900 dark:text-white uppercase tracking-tighter mb-4 sm:mb-6">{step.h3}</h3>
-                  <div className="text-[14px] sm:text-[15px] md:text-[16px] lg:text-[17px] xl:text-[18px] text-slate-700 dark:text-slate-200 font-serif italic leading-relaxed">{step.p}</div>
+                  <div className="text-[14px] sm:text-[15px] md:text-[16px] lg:text-[17px] xl:text-[18px] text-slate-800 dark:text-slate-100 font-serif italic leading-relaxed">{step.p}</div>
                 </div>
               </ScrollReveal>
             </div>
@@ -184,9 +184,9 @@ export const Home: React.FC<HomeProps> = ({ onNavigate, siteSettings }) => {
                     <span className="text-emerald-500 font-black text-[12px] sm:text-[13px] md:text-[14px] uppercase tracking-widest">{step.tag}</span>
                 </div>
                 <h2 className="text-[18px] sm:text-[22px] md:text-[26px] lg:text-[30px] xl:text-[32px] font-serif text-slate-900 dark:text-white italic opacity-90 dark:opacity-85 mb-6 leading-tight">{step.h2}</h2>
-                <div className={`bg-white/[0.09] dark:bg-white/[0.06] backdrop-blur-3xl p-5 xs:p-7 sm:p-10 md:p-12 lg:p-14 border-l-4 ${i % 2 === 1 ? 'border-r-4 border-l-0 text-right' : 'border-l-4'} border-emerald-500/70 shadow-[0_8px_32px_rgba(0,0,0,0.1)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.3)] max-w-3xl ${i % 2 === 1 ? 'ml-auto' : ''} rounded-2xl transition-all hover:bg-white/[0.12] dark:hover:bg-white/[0.09] border border-white/25 dark:border-white/12`}>
+                <div className={`bg-white/[0.18] dark:bg-white/[0.12] backdrop-blur-3xl p-5 xs:p-7 sm:p-10 md:p-12 lg:p-14 border-l-4 ${i % 2 === 1 ? 'border-r-4 border-l-0 text-right' : 'border-l-4'} border-emerald-500/70 shadow-[0_8px_32px_rgba(0,0,0,0.1)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.3)] max-w-3xl ${i % 2 === 1 ? 'ml-auto' : ''} rounded-2xl transition-all hover:bg-white/[0.22] dark:hover:bg-white/[0.15] border border-white/40 dark:border-white/20`}>
                   <h3 className="text-[16px] sm:text-[20px] md:text-[24px] lg:text-[28px] xl:text-[32px] font-black text-slate-900 dark:text-white uppercase tracking-tighter mb-4 sm:mb-6">{step.h3}</h3>
-                  <div className="text-[14px] sm:text-[15px] md:text-[16px] lg:text-[17px] xl:text-[18px] text-slate-700 dark:text-slate-200 font-serif italic leading-relaxed">{step.p}</div>
+                  <div className="text-[14px] sm:text-[15px] md:text-[16px] lg:text-[17px] xl:text-[18px] text-slate-800 dark:text-slate-100 font-serif italic leading-relaxed">{step.p}</div>
                 </div>
               </ScrollReveal>
             </div>
@@ -219,15 +219,15 @@ export const Home: React.FC<HomeProps> = ({ onNavigate, siteSettings }) => {
                   </div>
                </ScrollReveal>
 
-               <ScrollReveal className="bg-white/[0.08] dark:bg-white/[0.05] backdrop-blur-3xl border border-white/25 dark:border-white/12 p-7 xs:p-8 sm:p-12 rounded-2xl shadow-lg group hover:shadow-xl hover:bg-white/[0.12] dark:hover:bg-white/[0.07] transition-all">
+               <ScrollReveal className="bg-white/[0.18] dark:bg-white/[0.12] backdrop-blur-3xl border border-white/40 dark:border-white/20 p-7 xs:p-8 sm:p-12 rounded-2xl shadow-lg group hover:shadow-xl hover:bg-white/[0.22] dark:hover:bg-white/[0.15] transition-all">
                   <h3 className="text-[18px] sm:text-[22px] md:text-[26px] lg:text-[28px] font-black text-slate-900 dark:text-white uppercase tracking-tight mb-6 sm:mb-8">Ukweli Unapatikana Wapi?</h3>
-                  <div className="p-6 xs:p-7 sm:p-10 bg-white/[0.15] dark:bg-primary-950/20 backdrop-blur-2xl border border-primary-300/40 dark:border-primary-500/20 rounded-2xl text-center space-y-4 sm:space-y-5 mb-8 sm:mb-10">
-                     <div className="w-12 xs:w-14 sm:w-16 bg-primary-100/[0.6] dark:bg-primary-500/15 backdrop-blur-xl rounded-full flex items-center justify-center mx-auto text-primary-700 dark:text-primary-400 shadow-md"><Search size={24}/></div>
+                  <div className="p-6 xs:p-7 sm:p-10 bg-white/[0.25] dark:bg-primary-950/40 backdrop-blur-2xl border border-primary-300/60 dark:border-primary-500/40 rounded-2xl text-center space-y-4 sm:space-y-5 mb-8 sm:mb-10">
+                     <div className="w-12 xs:w-14 sm:w-16 bg-primary-100/[0.8] dark:bg-primary-500/30 backdrop-blur-xl rounded-full flex items-center justify-center mx-auto text-primary-700 dark:text-primary-300 shadow-md"><Search size={24}/></div>
                      <h5 className="text-[16px] sm:text-[18px] md:text-[20px] lg:text-[22px] font-black text-slate-900 dark:text-white uppercase tracking-widest">KWENYE NENO LA MUNGU</h5>
-                     <p className="text-primary-800 dark:text-primary-200 text-[14px] sm:text-[15px] md:text-[16px] italic font-light">"Uwatakase kwa ile kweli; neno lako ndiyo kweli" - <span className="text-gold-500 font-black">Yohana 17:17</span></p>
+                     <p className="text-primary-800 dark:text-primary-100 text-[14px] sm:text-[15px] md:text-[16px] italic font-light">"Uwatakase kwa ile kweli; neno lako ndiyo kweli" - <span className="text-gold-500 font-black">Yohana 17:17</span></p>
                   </div>
-                  <p className="text-slate-700 dark:text-slate-400 text-[14px] sm:text-[15px] md:text-[16px] leading-relaxed italic">
-                     <span className="text-primary-600 dark:text-primary-400 font-medium">Bila Neno la Mungu, hatuwezi kutofautisha kati ya ukweli na uongo.</span>
+                  <p className="text-slate-800 dark:text-slate-200 text-[14px] sm:text-[15px] md:text-[16px] leading-relaxed italic">
+                     <span className="text-primary-700 dark:text-primary-300 font-medium">Bila Neno la Mungu, hatuwezi kutofautisha kati ya ukweli na uongo.</span>
                   </p>
                </ScrollReveal>
             </div>
@@ -236,25 +236,25 @@ export const Home: React.FC<HomeProps> = ({ onNavigate, siteSettings }) => {
             <ScrollReveal className="max-w-4xl mx-auto space-y-8">
                <h3 className="text-center text-gold-500 font-black text-[12px] sm:text-[13px] md:text-[14px] uppercase tracking-widest mb-10 italic">Kupambanua Misingi</h3>
                <div className="space-y-4">
-                  <div className={`rounded-lg border transition-all duration-500 overflow-hidden ${activeDef === 'ukweli' ? 'bg-white dark:bg-white/[0.04] border-gold-500/60 shadow-lg' : 'bg-white/50 dark:bg-white/[0.01] border-slate-200 dark:border-white/5'}`}>
+                  <div className={`rounded-lg border transition-all duration-500 overflow-hidden ${activeDef === 'ukweli' ? 'bg-white/85 dark:bg-white/[0.12] border-gold-500/70 shadow-lg' : 'bg-white/70 dark:bg-white/[0.08] border-slate-200 dark:border-white/15'}`}>
                      <button onClick={() => setActiveDef(activeDef === 'ukweli' ? null : 'ukweli')} className="w-full p-5 sm:p-7 md:p-8 flex items-center justify-between text-left hover:bg-slate-50 dark:hover:bg-white/[0.02] transition-colors">
                         <h3 className={`text-[14px] sm:text-[16px] md:text-[18px] font-black uppercase tracking-widest ${activeDef === 'ukweli' ? 'text-gold-600 dark:text-gold-400' : 'text-slate-700 dark:text-slate-400'}`}>Ukweli ni nini?</h3>
                         <ChevronDown className={`transition-transform duration-500 ${activeDef === 'ukweli' ? 'rotate-180 text-gold-500' : 'text-slate-400 dark:text-slate-600'}`} />
                      </button>
                      <div className={`px-6 sm:px-8 md:px-10 overflow-hidden transition-all duration-500 ${activeDef === 'ukweli' ? 'max-h-96 pb-8 md:pb-10 opacity-100' : 'max-h-0 opacity-0'}`}>
-                        <p className="text-slate-700 dark:text-slate-300 text-[14px] sm:text-[15px] md:text-[16px] leading-relaxed italic border-l-3 border-gold-500/40 pl-5 sm:pl-6 font-serif">
+                        <p className="text-slate-800 dark:text-slate-200 text-[14px] sm:text-[15px] md:text-[16px] leading-relaxed italic border-l-3 border-gold-500/60 pl-5 sm:pl-6 font-serif">
                            Ukweli si hisia au kile ambacho watu wengi wanakikubali. Ukweli ni halisi, hautikisiki, na asili yake ni Mungu mwenyewe kupitia Neno lake. Ni kioo kinachoonyesha hali halisi ya roho.
                         </p>
                      </div>
                   </div>
 
-                  <div className={`rounded-lg border transition-all duration-500 overflow-hidden ${activeDef === 'uongo' ? 'bg-white dark:bg-white/[0.04] border-red-500/60 shadow-lg' : 'bg-white/50 dark:bg-white/[0.01] border-slate-200 dark:border-white/5'}`}>
+                  <div className={`rounded-lg border transition-all duration-500 overflow-hidden ${activeDef === 'uongo' ? 'bg-white/85 dark:bg-white/[0.12] border-red-500/70 shadow-lg' : 'bg-white/70 dark:bg-white/[0.08] border-slate-200 dark:border-white/15'}`}>
                      <button onClick={() => setActiveDef(activeDef === 'uongo' ? null : 'uongo')} className="w-full p-5 sm:p-7 md:p-8 flex items-center justify-between text-left hover:bg-slate-50 dark:hover:bg-white/[0.02] transition-colors">
                         <h3 className={`text-[14px] sm:text-[16px] md:text-[18px] font-black uppercase tracking-widest ${activeDef === 'uongo' ? 'text-red-600 dark:text-red-400' : 'text-slate-700 dark:text-slate-400'}`}>Uongo ni nini?</h3>
                         <ChevronDown className={`transition-transform duration-500 ${activeDef === 'uongo' ? 'rotate-180 text-red-500' : 'text-slate-400 dark:text-slate-600'}`} />
                      </button>
                      <div className={`px-6 sm:px-8 md:px-10 overflow-hidden transition-all duration-500 ${activeDef === 'uongo' ? 'max-h-96 pb-8 md:pb-10 opacity-100' : 'max-h-0 opacity-0'}`}>
-                        <p className="text-slate-700 dark:text-slate-300 text-[14px] sm:text-[15px] md:text-[16px] leading-relaxed italic border-l-3 border-red-500/40 pl-5 sm:pl-6 font-serif">
+                        <p className="text-slate-800 dark:text-slate-200 text-[14px] sm:text-[15px] md:text-[16px] leading-relaxed italic border-l-3 border-red-500/60 pl-5 sm:pl-6 font-serif">
                            Uongo ni sumu iliyovikwa sukari. Ni kile kinachopingana na Neno la Mungu, kikitumia mapokeo ya wanadamu au falsafa za dunia kupofusha akili za watu wasiuone utukufu wa Injili.
                         </p>
                      </div>
