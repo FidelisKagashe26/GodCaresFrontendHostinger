@@ -66,6 +66,8 @@ const stageLoader = (
 
 const NOTIFICATION_STATE_KEY = 'gc365_center_notification_state_v1';
 const RESET_PASSWORD_PATH = '/reset-password';
+const ROUTE_LOADING_HIDE_DELAY_MS = 260;
+const ROUTE_LOADING_FAILSAFE_MS = 6000;
 
 type StageNavigationOptions = {
   replace?: boolean;
@@ -128,15 +130,41 @@ const App: React.FC = () => {
 
   const [centerNotifications, setCenterNotifications] = useState<ToastNotification[]>([]);
   const [canGoBack, setCanGoBack] = useState(false);
+  const [isRouteLoading, setIsRouteLoading] = useState(false);
 
   const [resetParams, setResetParams] = useState<{ uid: string; token: string } | null>(null);
 
   const [aiLanguage, setAiLanguage] = useState<LanguageCode>('en');
   const [theme, setTheme] = useState<ThemePreference>('system');
   const [siteSettings, setSiteSettings] = useState<SiteSettings>(DEFAULT_SITE_SETTINGS);
+  const routeLoadingTimerRef = useRef<number | null>(null);
 
   const fallbackLogoSrc = `${import.meta.env.BASE_URL}Logo.png`;
   const logoSrc = siteSettings.logo_url || fallbackLogoSrc;
+
+  const clearRouteLoadingTimer = () => {
+    if (routeLoadingTimerRef.current !== null) {
+      window.clearTimeout(routeLoadingTimerRef.current);
+      routeLoadingTimerRef.current = null;
+    }
+  };
+
+  const startRouteLoading = () => {
+    clearRouteLoadingTimer();
+    setIsRouteLoading(true);
+    routeLoadingTimerRef.current = window.setTimeout(() => {
+      setIsRouteLoading(false);
+      routeLoadingTimerRef.current = null;
+    }, ROUTE_LOADING_FAILSAFE_MS);
+  };
+
+  const stopRouteLoading = (delayMs: number = ROUTE_LOADING_HIDE_DELAY_MS) => {
+    clearRouteLoadingTimer();
+    routeLoadingTimerRef.current = window.setTimeout(() => {
+      setIsRouteLoading(false);
+      routeLoadingTimerRef.current = null;
+    }, delayMs);
+  };
 
   const openAuthModal = (mode: 'login' | 'register' = 'login') => {
     setAuthEntryMode(mode);
@@ -154,6 +182,7 @@ const App: React.FC = () => {
     if (isRestrictedStage(id) && !user) {
       openAuthModal('login');
       if (currentPath !== getStagePath(StageId.HOME)) {
+        startRouteLoading();
         navigate(getStagePath(StageId.HOME), { replace: true });
       }
       return;
@@ -169,6 +198,7 @@ const App: React.FC = () => {
       return;
     }
 
+    startRouteLoading();
     navigate(targetPath, { replace });
   };
 
@@ -204,6 +234,7 @@ const App: React.FC = () => {
     setShowProfileModal(false);
     setIsAccountMenuOpen(false);
     setAuthEntryMode('login');
+    startRouteLoading();
     navigate(getStagePath(StageId.HOME), { replace: true });
   };
 
@@ -418,7 +449,14 @@ const App: React.FC = () => {
     if (mainContentRef.current) {
       mainContentRef.current.scrollTo({ top: 0, behavior: 'auto' });
     }
+    if (isRouteLoading) {
+      stopRouteLoading();
+    }
   }, [currentPath]);
+
+  useEffect(() => () => {
+    clearRouteLoadingTimer();
+  }, []);
 
   const renderStageContent = (stage: StageId) => {
     switch (stage) {
@@ -453,6 +491,7 @@ const App: React.FC = () => {
 
   const handleGlobalBack = () => {
     if (canGoBack) {
+      startRouteLoading();
       navigate(-1);
       return;
     }
@@ -465,6 +504,20 @@ const App: React.FC = () => {
   return (
     <div className="relative min-h-screen bg-[color:var(--page-bg)] text-[color:var(--text-primary)] font-sans transition-colors duration-500 overflow-hidden">
       <ToastContainer notifications={notifications} onDismiss={(id) => setNotifications((prev) => prev.filter((n) => n.id !== id))} />
+      {isRouteLoading && (
+        <div className="fixed inset-0 z-[950] pointer-events-none">
+          <div className="absolute inset-0 bg-[color:var(--page-bg)]/18 backdrop-blur-[1px]" />
+          <div className="absolute top-0 left-0 right-0 h-1 bg-transparent">
+            <div className="h-full w-2/5 rounded-r-full bg-gradient-to-r from-emerald-600 via-gold-500 to-emerald-600 animate-pulse" />
+          </div>
+          <div className="absolute top-3 left-1/2 -translate-x-1/2 rounded-full border border-[color:var(--line-strong)] bg-[color:var(--surface-2)] px-3 py-1.5 shadow-lg">
+            <div className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.16em] text-[color:var(--text-primary)]">
+              <span className="inline-block h-3 w-3 rounded-full border-2 border-[color:var(--accent)] border-t-transparent animate-spin" />
+              Inapakia
+            </div>
+          </div>
+        </div>
+      )}
 
       {isNotificationOpen && (
         <Suspense fallback={null}>
