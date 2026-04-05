@@ -15,8 +15,9 @@ export interface AuthUser {
 export interface RegisterResult {
   success: boolean;
   message: string;
-  phone: string;
+  phone?: string;
   email: string;
+  masked_email?: string;
 }
 
 export interface VerifyOtpResult {
@@ -239,21 +240,23 @@ export const registerUser = async (payload: {
   const data = (await response.json()) as {
     success: boolean;
     message: string;
-    phone: string;
+    phone?: string;
     email: string;
+    masked_email?: string;
   };
 
   return {
     success: Boolean(data.success),
-    message: data.message || "Tumekutumia OTP kwenye simu yako.",
+    message: data.message || "Tumekutumia OTP kwenye email yako.",
     phone: data.phone,
     email: data.email,
+    masked_email: data.masked_email,
   };
 };
 
 export const verifyRegistrationOtp = async (payload: {
   email: string;
-  phone: string;
+  phone?: string;
   code: string;
 }): Promise<VerifyOtpResult> => {
   const response = await request("/api/auth/verify-otp/", {
@@ -274,9 +277,8 @@ export const verifyRegistrationOtp = async (payload: {
 };
 
 export const resendRegistrationOtp = async (payload: {
-  email?: string;
-  phone?: string;
-}): Promise<{ message: string; email?: string; phone?: string }> => {
+  email: string;
+}): Promise<{ message: string; email?: string; phone?: string; masked_email?: string }> => {
   const response = await request("/api/auth/resend-otp/", {
     method: "POST",
     body: JSON.stringify(payload),
@@ -290,12 +292,14 @@ export const resendRegistrationOtp = async (payload: {
     message?: string;
     email?: string;
     phone?: string;
+    masked_email?: string;
   };
 
   return {
-    message: data.message || "OTP mpya imetumwa.",
+    message: data.message || "OTP mpya imetumwa kwenye email yako.",
     email: data.email,
     phone: data.phone,
+    masked_email: data.masked_email,
   };
 };
 

@@ -1,6 +1,6 @@
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Mail, Lock, User, ArrowRight, X, Chrome, ShieldCheck, Phone, Eye, EyeOff } from 'lucide-react';
+import { Mail, Lock, User, ArrowRight, X, Chrome, ShieldCheck, Eye, EyeOff } from 'lucide-react';
 import {
   AuthUser,
   AuthRequestError,
@@ -12,6 +12,7 @@ import {
   resetPassword,
   verifyRegistrationOtp,
 } from '../../services/core/authService';
+import { COUNTRY_DIAL_OPTIONS } from '../../data/countryDialOptions';
 
 interface AuthProps {
   onLogin: (userData: AuthUser) => void;
@@ -26,23 +27,6 @@ type OtpContext = 'register' | 'login' | null;
 type FormErrors = Record<string, string>;
 
 const OTP_LENGTH = 6;
-
-const COUNTRY_CODES = [
-  { code: '255', label: 'Tanzania (+255)' },
-  { code: '254', label: 'Kenya (+254)' },
-  { code: '256', label: 'Uganda (+256)' },
-  { code: '250', label: 'Rwanda (+250)' },
-  { code: '257', label: 'Burundi (+257)' },
-  { code: '251', label: 'Ethiopia (+251)' },
-  { code: '234', label: 'Nigeria (+234)' },
-  { code: '27', label: 'South Africa (+27)' },
-  { code: '1', label: 'USA/Canada (+1)' },
-  { code: '44', label: 'UK (+44)' },
-  { code: '49', label: 'Germany (+49)' },
-  { code: '33', label: 'France (+33)' },
-  { code: '971', label: 'UAE (+971)' },
-  { code: '91', label: 'India (+91)' },
-];
 
 const normalizePhone = (value: string): string => {
   const digits = value.replace(/\D/g, '');
@@ -95,7 +79,7 @@ export const Auth: React.FC<AuthProps> = ({ onLogin, onClose, resetParams, onRes
   const [username, setUsername] = useState('');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
-  const [phoneCountryCode, setPhoneCountryCode] = useState('255');
+  const [phoneCountryIso, setPhoneCountryIso] = useState('TZ');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -123,6 +107,14 @@ export const Auth: React.FC<AuthProps> = ({ onLogin, onClose, resetParams, onRes
   const otpCode = useMemo(() => otpDigits.join(''), [otpDigits]);
   const isLoginOtpOverlay = isOtpMode && otpContext === 'login';
   const isRegisterOtpMode = isOtpMode && otpContext === 'register';
+  const selectedCountry = useMemo(
+    () =>
+      COUNTRY_DIAL_OPTIONS.find((country) => country.iso2 === phoneCountryIso)
+      || COUNTRY_DIAL_OPTIONS.find((country) => country.iso2 === 'TZ')
+      || COUNTRY_DIAL_OPTIONS[0],
+    [phoneCountryIso]
+  );
+  const selectedDialCode = selectedCountry?.dialCode || '255';
 
   useEffect(() => {
     if (resetParams) {
@@ -266,13 +258,9 @@ export const Auth: React.FC<AuthProps> = ({ onLogin, onClose, resetParams, onRes
 
   const submitOtpVerification = async () => {
     const localErrors: FormErrors = {};
-    const normalizedPhone = normalizePhone(
-      pendingPhone || buildInternationalPhone(phoneCountryCode, phoneNumber),
-    );
     const otpEmail = (pendingEmail || email).trim().toLowerCase();
 
     if (!otpEmail) localErrors.email = 'Barua pepe ya usajili inahitajika.';
-    if (!normalizedPhone) localErrors.phone = 'Namba ya simu ya usajili si sahihi.';
     if (otpCode.length !== OTP_LENGTH) localErrors.code = 'Weka tarakimu 6 za OTP.';
 
     if (Object.keys(localErrors).length) {
@@ -289,7 +277,6 @@ export const Auth: React.FC<AuthProps> = ({ onLogin, onClose, resetParams, onRes
     try {
       const result = await verifyRegistrationOtp({
         email: otpEmail,
-        phone: normalizedPhone,
         code: otpCode,
       });
       setPassword('');
@@ -309,7 +296,7 @@ export const Auth: React.FC<AuthProps> = ({ onLogin, onClose, resetParams, onRes
     const normalizedUsername = username.trim().toLowerCase();
     const normalizedFirstName = firstName.trim();
     const normalizedLastName = lastName.trim();
-    const normalizedPhone = buildInternationalPhone(phoneCountryCode, phoneNumber);
+    const normalizedPhone = buildInternationalPhone(selectedDialCode, phoneNumber);
     const normalizedEmail = email.trim().toLowerCase();
 
     if (!normalizedUsername) {
@@ -319,7 +306,7 @@ export const Auth: React.FC<AuthProps> = ({ onLogin, onClose, resetParams, onRes
     }
     if (!normalizedFirstName) localErrors.firstName = 'Weka First name.';
     if (!normalizedLastName) localErrors.lastName = 'Weka Last name.';
-    if (!phoneCountryCode) localErrors.countryCode = 'Chagua country code.';
+    if (!selectedDialCode) localErrors.countryCode = 'Chagua country code.';
     if (!normalizedPhone) localErrors.phone = 'Weka namba sahihi ya simu.';
     if (!normalizedEmail) {
       localErrors.email = 'Weka barua pepe yako.';
@@ -365,7 +352,7 @@ export const Auth: React.FC<AuthProps> = ({ onLogin, onClose, resetParams, onRes
         'register',
         result.email || normalizedEmail,
         result.phone || normalizedPhone,
-        result.message || 'Tumekutumia OTP kwenye simu yako. Weka tarakimu 6 kuthibitisha usajili.'
+        result.message || 'Tumekutumia OTP kwenye email yako. Weka tarakimu 6 kuthibitisha usajili.'
       );
     } catch (error) {
       applyError(error, 'Imeshindikana kusajili.');
@@ -403,8 +390,8 @@ export const Auth: React.FC<AuthProps> = ({ onLogin, onClose, resetParams, onRes
         startOtpFlow(
           'login',
           error.email || normalizedIdentifier,
-          normalizePhone(error.phone || pendingPhone || buildInternationalPhone(phoneCountryCode, phoneNumber)),
-          error.message || 'Akaunti yako bado haijathibitishwa. Weka OTP tuliyotuma sasa hivi.'
+          normalizePhone(error.phone || pendingPhone || buildInternationalPhone(selectedDialCode, phoneNumber)),
+          error.message || 'Akaunti yako bado haijathibitishwa. Weka OTP tuliyotuma kwenye email yako.'
         );
         return;
       }
@@ -516,9 +503,6 @@ export const Auth: React.FC<AuthProps> = ({ onLogin, onClose, resetParams, onRes
 
   const handleResendOtp = async () => {
     const resolvedEmail = (pendingEmail || email).trim().toLowerCase();
-    const resolvedPhone = normalizePhone(
-      pendingPhone || buildInternationalPhone(phoneCountryCode, phoneNumber),
-    );
 
     setLoading(true);
     setErrorMessage('');
@@ -527,7 +511,6 @@ export const Auth: React.FC<AuthProps> = ({ onLogin, onClose, resetParams, onRes
     try {
       const response = await resendRegistrationOtp({
         email: resolvedEmail,
-        phone: resolvedPhone,
       });
       if (response.phone) {
         setPendingPhone(response.phone);
@@ -535,7 +518,7 @@ export const Auth: React.FC<AuthProps> = ({ onLogin, onClose, resetParams, onRes
       if (response.email) {
         setPendingEmail(response.email);
       }
-      setInfoMessage(response.message || 'OTP mpya imetumwa kwenye simu yako.');
+      setInfoMessage(response.message || 'OTP mpya imetumwa kwenye email yako.');
       clearOtpInputs();
       window.setTimeout(() => otpInputRefs.current[0]?.focus(), 80);
     } catch (error) {
@@ -586,7 +569,7 @@ export const Auth: React.FC<AuthProps> = ({ onLogin, onClose, resetParams, onRes
             <div className="rounded-2xl border border-white/50 bg-white/35 p-4 shadow-2xl backdrop-blur-xl dark:border-white/20 dark:bg-slate-900/45">
               <p className="text-[10px] font-black uppercase tracking-[0.24em] text-gold-700 dark:text-gold-300">Thibitisha Akaunti</p>
               <p className="mt-1 text-xs font-semibold text-slate-700 dark:text-slate-200">
-                Akaunti hii bado haijathibitishwa. Ingiza OTP ya tarakimu 6 tuliyotuma kwenye simu yako.
+                Akaunti hii bado haijathibitishwa. Ingiza OTP ya tarakimu 6 tuliyotuma kwenye email yako.
               </p>
               <div className="mt-3">{renderOtpBoxes()}</div>
               <div className="mt-3 flex flex-wrap gap-2">
@@ -645,7 +628,7 @@ export const Auth: React.FC<AuthProps> = ({ onLogin, onClose, resetParams, onRes
               {isResetMode
                 ? 'Weka nenosiri jipya ili kuendelea'
                 : isRegisterOtpMode
-                  ? 'Ingiza tarakimu 6 za msimbo uliotumwa kwenye simu yako'
+                  ? 'Ingiza tarakimu 6 za msimbo uliotumwa kwenye email yako'
                   : isLogin
                     ? 'Ingia ili uendelee na uchambuzi'
                     : 'Tengeneza akaunti kuanza safari'}
@@ -742,25 +725,32 @@ export const Auth: React.FC<AuthProps> = ({ onLogin, onClose, resetParams, onRes
 
               {!isLogin && !isResetMode && !isRegisterOtpMode && (
                 <div className="space-y-1">
-                  <div className="grid grid-cols-[minmax(140px,0.95fr)_minmax(0,2.05fr)] gap-2">
+                  <div className="grid grid-cols-[76px_minmax(0,1fr)] gap-2">
                     <div className="relative">
                       <select
                         ref={countryCodeRef}
-                        value={phoneCountryCode}
-                        onChange={(event) => setPhoneCountryCode(event.target.value)}
-                        className={`w-full h-full min-h-[48px] rounded-lg border bg-slate-50 dark:bg-black/20 px-3 text-sm font-semibold text-slate-900 outline-none transition-all dark:text-white ${
+                        value={phoneCountryIso}
+                        onChange={(event) => setPhoneCountryIso(event.target.value)}
+                        className={`w-full h-full min-h-[48px] rounded-lg border bg-slate-50 dark:bg-black/20 px-2 text-center text-2xl font-semibold text-slate-900 outline-none transition-all dark:text-white ${
                           fieldErrors.countryCode ? 'border-red-400 focus:border-red-500' : 'border-slate-200 dark:border-white/5 focus:border-gold-500'
                         }`}
+                        aria-label="Chagua nchi"
                       >
-                        {COUNTRY_CODES.map((country) => (
-                          <option key={country.code} value={country.code}>
-                            {country.label}
+                        {COUNTRY_DIAL_OPTIONS.map((country) => (
+                          <option
+                            key={`${country.iso2}-${country.dialCode}`}
+                            value={country.iso2}
+                            title={`+${country.dialCode}`}
+                          >
+                            {country.flag}
                           </option>
                         ))}
                       </select>
                     </div>
                     <div className="relative group">
-                      <Phone className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-gold-500 transition-colors" size={16} />
+                      <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[12px] font-black text-slate-500 transition-colors group-focus-within:text-gold-600">
+                        +{selectedDialCode}
+                      </span>
                       <input
                         ref={phoneInputRef}
                         type="tel"
@@ -768,7 +758,7 @@ export const Auth: React.FC<AuthProps> = ({ onLogin, onClose, resetParams, onRes
                         value={phoneNumber}
                         onChange={e => setPhoneNumber(e.target.value)}
                         placeholder="Namba ya simu"
-                        className={`w-full pl-14 pr-6 py-3 bg-slate-50 dark:bg-black/20 border rounded-lg outline-none transition-all text-sm text-slate-900 dark:text-white font-medium ${
+                        className={`w-full pl-[66px] pr-6 py-3 bg-slate-50 dark:bg-black/20 border rounded-lg outline-none transition-all text-sm text-slate-900 dark:text-white font-medium ${
                           fieldErrors.phone ? 'border-red-400 focus:border-red-500' : 'border-slate-200 dark:border-white/5 focus:border-gold-500'
                         }`}
                       />
@@ -849,7 +839,7 @@ export const Auth: React.FC<AuthProps> = ({ onLogin, onClose, resetParams, onRes
                   <div className="flex items-center gap-2 text-slate-600 dark:text-slate-300">
                     <ShieldCheck size={14} className="text-gold-600 dark:text-gold-400" />
                     <p className="text-[11px] font-semibold">
-                      Weka OTP ya tarakimu 6 tuliyotuma kwenye namba yako ya simu.
+                      Weka OTP ya tarakimu 6 tuliyotuma kwenye email yako.
                     </p>
                   </div>
                   {renderOtpBoxes()}
