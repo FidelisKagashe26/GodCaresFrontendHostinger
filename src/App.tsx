@@ -4,7 +4,7 @@ import { Sidebar, ProfileModal } from './components/layout/Sidebar';
 import { Home } from './components/layout/Home';
 import { StageId, ToastNotification, LanguageCode, ThemePreference } from './types';
 import { ToastContainer } from './components/ui/Toast';
-import { Sun, Moon, Menu, Bell, User, Monitor, ChevronDown, LogOut, ArrowLeft, ChevronRight } from 'lucide-react';
+import { Sun, Moon, Menu, Bell, User, Monitor, ChevronDown, LogOut, ArrowLeft, ChevronRight, Plus, X } from 'lucide-react';
 import { clearTokens, getCurrentUser } from './services/core/authService';
 import { getSystemMessages } from './services/core/systemMessageService';
 import { DEFAULT_SITE_SETTINGS, getSiteSettings, SiteSettings } from './services/core/siteSettingsService';
@@ -115,6 +115,7 @@ const App: React.FC = () => {
   const [isThemeOpen, setIsThemeOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showFloatingTools, setShowFloatingTools] = useState(false);
+  const [isQuickToolsOpen, setIsQuickToolsOpen] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [authEntryMode, setAuthEntryMode] = useState<'login' | 'register'>('login');
@@ -406,6 +407,7 @@ const App: React.FC = () => {
   useEffect(() => {
     setIsMenuOpen(false);
     setIsAccountMenuOpen(false);
+    setIsQuickToolsOpen(false);
     if (mainContentRef.current) {
       mainContentRef.current.scrollTo({ top: 0, behavior: 'auto' });
     }
@@ -530,11 +532,24 @@ const App: React.FC = () => {
           style={{ bottom: 'max(0.85rem, env(safe-area-inset-bottom))' }}
         >
           <Suspense fallback={null}>
-            <div className="gc-floating-tools flex flex-col gap-2 md:gap-3 saturate-75">
-              <HistoryTool aiLanguage={aiLanguage} onGoToTimeline={() => handleStageChange(StageId.TIMELINE)} />
-              <QuestionTool onGoToVault={() => handleStageChange(StageId.QUESTION_VAULT)} />
-              <DeceptionTool onGoToVault={() => handleStageChange(StageId.DECEPTION_VAULT)} />
-              <EvidenceTool onGoToVault={() => handleStageChange(StageId.EVIDENCE)} />
+            <div className="flex flex-col items-end gap-2 md:gap-3">
+              {isQuickToolsOpen && (
+                <div className="gc-floating-tools flex flex-col gap-2 md:gap-3 saturate-75 animate-fade-in">
+                  <HistoryTool aiLanguage={aiLanguage} onGoToTimeline={() => handleStageChange(StageId.TIMELINE)} />
+                  <QuestionTool onGoToVault={() => handleStageChange(StageId.QUESTION_VAULT)} />
+                  <DeceptionTool onGoToVault={() => handleStageChange(StageId.DECEPTION_VAULT)} />
+                  <EvidenceTool onGoToVault={() => handleStageChange(StageId.EVIDENCE)} />
+                </div>
+              )}
+              <button
+                type="button"
+                onClick={() => setIsQuickToolsOpen((prev) => !prev)}
+                className={`gc-icon-button h-12 w-12 rounded-2xl flex items-center justify-center ${isQuickToolsOpen ? 'is-active' : ''}`}
+                aria-label={isQuickToolsOpen ? 'Funga zana za haraka' : 'Fungua zana za haraka'}
+                title={isQuickToolsOpen ? 'Funga zana' : 'Zana za haraka'}
+              >
+                {isQuickToolsOpen ? <X size={19} /> : <Plus size={19} />}
+              </button>
             </div>
           </Suspense>
         </div>
