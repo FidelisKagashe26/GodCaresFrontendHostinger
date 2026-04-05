@@ -155,14 +155,21 @@ jobs:
                exit 1
              fi
 
-             # runtime check: client-side route refresh should not return 404
-             if command -v curl >/dev/null 2>&1; then
-               SPA_STATUS="$(curl -k -s -o /dev/null -w "%{http_code}" https://127.0.0.1/about -H "Host: godcares365.com")"
-               if [ "$SPA_STATUS" -ge 400 ]; then
-                 echo "ERROR: SPA route /about returned HTTP $SPA_STATUS"
-                 exit 1
-               fi
-             else
-               echo "WARN: curl not found on server; skipping runtime SPA HTTP check."
-             fi
-            '
+              # runtime check: client-side route refresh should not return 404
+              if command -v curl >/dev/null 2>&1; then
+                SPA_STATUS="$(curl -k -s -o /dev/null -w "%{http_code}" https://127.0.0.1/about -H "Host: godcares365.com")"
+                if [ "$SPA_STATUS" -ge 400 ]; then
+                  echo "ERROR: SPA route /about returned HTTP $SPA_STATUS"
+                  exit 1
+                fi
+
+                # runtime check: nginx must proxy API to backend (detect bad upstream/port quickly)
+                API_STATUS="$(curl -k -s -o /dev/null -w "%{http_code}" "https://127.0.0.1/api/blog/?client_id=deploy-smoke" -H "Host: godcares365.com")"
+                if [[ ! "$API_STATUS" =~ ^[0-9]{3}$ ]] || [ "$API_STATUS" -ge 500 ]; then
+                  echo "ERROR: API reverse proxy /api/blog returned HTTP ${API_STATUS:-unknown}"
+                  exit 1
+                fi
+              else
+                echo "WARN: curl not found on server; skipping runtime SPA HTTP check."
+              fi
+             '
