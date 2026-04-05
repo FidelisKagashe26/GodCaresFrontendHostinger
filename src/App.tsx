@@ -11,6 +11,7 @@ import { DEFAULT_SITE_SETTINGS, getSiteSettings, SiteSettings } from './services
 import {
   STAGES,
   STAGE_ROUTE_ENTRIES,
+  getLegacyRedirectPath,
   getStageFromPath,
   getStagePath,
   isRestrictedStage,
@@ -207,6 +208,12 @@ const App: React.FC = () => {
   };
 
   useEffect(() => {
+    const legacyRedirectPath = getLegacyRedirectPath(currentPath);
+    if (legacyRedirectPath) {
+      navigate(legacyRedirectPath, { replace: true });
+      return;
+    }
+
     if (!matchedStage && currentPath !== RESET_PASSWORD_PATH) {
       navigate(getStagePath(StageId.HOME), { replace: true });
     }

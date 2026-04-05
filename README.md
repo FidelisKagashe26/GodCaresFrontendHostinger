@@ -18,3 +18,22 @@ View your app in AI Studio: https://ai.studio/apps/drive/1MQFImNGZ-mQmEI0OQn5G9T
 2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
 3. Run the app:
    `npm run dev`
+
+## Production Routing (No 404 on Refresh)
+
+This app uses `BrowserRouter` with clean URLs (`/about-us`, `/blog`, etc.).
+For production behind Nginx, you must enable SPA fallback so refresh works on any page.
+
+Use the sample config at:
+
+`deploy/nginx/spa.conf`
+
+Critical rule:
+
+```nginx
+location / {
+  try_files $uri $uri/ /index.html;
+}
+```
+
+Without that rule, direct access or refresh on nested routes will return `404 Not Found`.
