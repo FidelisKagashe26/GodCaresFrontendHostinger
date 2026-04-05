@@ -194,11 +194,17 @@ jobs:
              run_privileged nginx -t
              run_privileged systemctl reload nginx
 
-             # hard check: active config should contain a try_files fallback to /index.html
-             if ! run_privileged nginx -T 2>/dev/null | grep -qE "try_files[[:space:]].*/index\\.html;"; then
-               echo "ERROR: Active Nginx config has no SPA fallback to /index.html."
-               exit 1
-             fi
+              # hard check: active config should contain a try_files fallback to /index.html
+              if ! run_privileged nginx -T 2>/dev/null | grep -qE "try_files[[:space:]].*/index\\.html;"; then
+                echo "ERROR: Active Nginx config has no SPA fallback to /index.html."
+                exit 1
+              fi
+
+              # hard check: media handler must be protected from regex override (use ^~ /media/)
+              if ! run_privileged nginx -T 2>/dev/null | grep -qE "location[[:space:]]+\\^~[[:space:]]+/media/"; then
+                echo "ERROR: Active Nginx config has no '^~ /media/' block. Media may return 404."
+                exit 1
+              fi
 
               # runtime check: client-side route refresh should not return 404
               if command -v curl >/dev/null 2>&1; then
