@@ -210,21 +210,21 @@ const Tile: React.FC<TileProps> = ({ stage, isActive, onClick, index }) => {
       style={{ animationDelay: `${index * 60}ms` }}
       className={`group relative flex h-[108px] w-full flex-col items-center justify-center gap-3 rounded-2xl border px-4 py-5 text-center transition-all duration-300 animate-morph-in shadow-sm ${
         isActive 
-          ? 'bg-[#f2c14e] text-[#1f1708] border-[#e6b64a] shadow-[0_18px_36px_rgba(242,193,78,0.24)]'
-          : 'bg-[color:var(--surface-2)]/95 dark:bg-slate-900/60 border-slate-200/70 dark:border-white/5 hover:-translate-y-1 hover:border-[#f2c14e]/60 hover:bg-[color:var(--surface-3)] dark:hover:bg-slate-800/70'
+          ? 'bg-gradient-to-br from-gold-300 to-gold-400 text-green-900 border-gold-500 shadow-[0_16px_30px_rgba(212,154,20,0.28)]'
+          : 'bg-[color:var(--surface-2)] border-[color:var(--border-subtle)] hover:-translate-y-1 hover:border-gold-500/60 hover:bg-[color:var(--surface-3)]'
       }`}
     >
       <div className={`flex h-12 w-12 items-center justify-center rounded-2xl transition-all duration-300 ${
          isActive
-           ? 'bg-white/35 text-[#1f1708]'
-           : 'bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-slate-400 group-hover:bg-[#f2c14e]/12 group-hover:text-[#f2c14e]'
+           ? 'bg-white/70 text-green-900 shadow-sm'
+           : 'bg-green-100/70 dark:bg-green-900/25 text-green-700 dark:text-green-300 group-hover:bg-gold-100 group-hover:text-gold-700'
       }`}>
          {getIcon(stage.id)}
       </div>
 
       <div className="w-full">
         <h3 className={`text-[11px] sm:text-xs font-black uppercase tracking-[0.18em] leading-tight transition-colors ${
-            isActive ? 'text-[#1f1708]' : 'text-slate-700 dark:text-slate-200 group-hover:text-[#f2c14e]'
+            isActive ? 'text-green-900' : 'text-slate-800 dark:text-slate-100 group-hover:text-gold-700 dark:group-hover:text-gold-300'
         }`}>
           {stage.title}
         </h3>
@@ -298,29 +298,29 @@ export const Sidebar: React.FC<SidebarProps> = ({
       name: "PAMBANO KUU YESU ANASHINDA SHETANI ANASHINDWA",
       url: resolvedSettings.website_main_url,
       desc: "Ushindi wa Milele",
-      icon: <ShieldCheck size={18} className="text-red-500" />
+      icon: <ShieldCheck size={18} className="text-gold-600 dark:text-gold-400" />
     },
     {
       name: "GODCARES 365 KIDS",
       url: resolvedSettings.website_kids_url,
       desc: "Ukweli kwa Wadogo",
-      icon: <Baby size={18} className="text-blue-400" />
+      icon: <Baby size={18} className="text-blue-600 dark:text-blue-300" />
     },
     {
       name: "GODCARES 365 OUTREACH",
       url: resolvedSettings.website_outreach_url,
       desc: "Huduma kwa Jamii",
-      icon: <Users size={18} className="text-emerald-500" />
+      icon: <Users size={18} className="text-green-600 dark:text-green-400" />
     }
   ].filter((web) => Boolean(web.url && web.url.trim()));
 
   return (
-    <div className={`fixed inset-0 z-[200] bg-[color:var(--surface-1)] dark:bg-[#020617]/72 backdrop-blur-2xl flex flex-col transition-all duration-700 ease-in-out ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
-      <div className="relative z-10 flex items-center justify-end p-4 md:p-6 border-b border-slate-200/20 dark:border-white/5 bg-[color:var(--surface-2)] dark:bg-black/20 backdrop-blur-md h-20">
+    <div className={`fixed inset-0 z-[200] bg-[color:var(--surface-1)]/95 dark:bg-[color:var(--surface-1)]/95 backdrop-blur-xl flex flex-col transition-all duration-700 ease-in-out ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+      <div className="relative z-10 flex items-center justify-end p-4 md:p-6 border-b border-[color:var(--border-subtle)] bg-[color:var(--surface-2)] backdrop-blur-md h-20">
         <div onClick={() => { onStageChange(StageId.HOME); onClose(); }} className="absolute left-1/2 -translate-x-1/2 flex items-center cursor-pointer group">
            <img src={resolvedLogoSrc} alt={resolvedSettings.site_name} className="h-20 w-auto group-hover:scale-105 transition-transform" />
         </div>
-        <button onClick={onClose} className="p-3 bg-[color:var(--surface-3)] hover:bg-red-500/20 dark:hover:bg-red-500/30 text-slate-600 dark:text-slate-400 hover:text-red-500 transition-all rounded-xl border border-transparent hover:border-red-500/20">
+        <button onClick={onClose} className="p-3 bg-[color:var(--surface-3)] text-[color:var(--text-soft)] hover:text-[color:var(--accent-strong)] transition-all rounded-xl border border-[color:var(--border-subtle)] hover:border-[color:var(--accent)]/45">
           <X size={24} />
         </button>
       </div>
@@ -330,11 +330,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
           {/* Main Content Sections */}
           {sections.map((section, sIdx) => (
             <div key={sIdx} className="space-y-4">
-                <h3 className="text-[10px] sm:text-xs font-black text-green-600 dark:text-green-400 uppercase tracking-[0.4em] px-1 flex items-center gap-4">
+                <h3 className="text-[10px] sm:text-xs font-black text-green-700 dark:text-green-300 uppercase tracking-[0.28em] px-1 flex items-center gap-4">
                   <span>{section.title}</span>
-                  <div className="h-[1px] flex-1 bg-gradient-to-r from-green-300 dark:from-green-600/40 to-transparent"></div>
+                  <div className="h-[1px] flex-1 bg-gradient-to-r from-green-400/70 dark:from-green-500/50 to-transparent"></div>
                 </h3>
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                   {isOpen && section.ids.map((id, idx) => {
                     const s = stages.find(st => st.id === id);
                     if (!s) return null;
@@ -348,9 +348,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
           {/* OUR WEBSITES SECTION */}
           <div className="space-y-6 pt-4 pb-12">
-             <h3 className="text-[10px] sm:text-xs font-black text-green-600 dark:text-green-400 uppercase tracking-[0.4em] px-1 flex items-center gap-4">
+             <h3 className="text-[10px] sm:text-xs font-black text-green-700 dark:text-green-300 uppercase tracking-[0.28em] px-1 flex items-center gap-4">
                  <span>Tovuti Zetu</span>
-                <div className="h-[1px] flex-1 bg-gradient-to-r from-green-300 dark:from-green-600/40 to-transparent"></div>
+                <div className="h-[1px] flex-1 bg-gradient-to-r from-green-400/70 dark:from-green-500/50 to-transparent"></div>
              </h3>
              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pb-12">
                 {externalWebsites.map((web, idx) => (
@@ -359,20 +359,20 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     href={web.url} 
                     target="_blank" 
                     rel="noopener noreferrer"
-                    className="group relative flex items-center gap-4 p-4 bg-gradient-to-br from-slate-50 to-slate-100/80 dark:from-slate-900/50 dark:to-slate-900/30 border border-slate-200/60 dark:border-green-500/20 rounded-2xl hover:border-green-500/60 hover:shadow-xl hover:shadow-green-500/20 backdrop-blur-md transition-all duration-300"
+                    className="group relative flex items-center gap-4 p-4 bg-white/95 dark:bg-[color:var(--surface-3)]/80 border border-[color:var(--border-subtle)] rounded-2xl hover:border-green-500/55 hover:shadow-[0_14px_32px_rgba(47,104,51,0.16)] backdrop-blur-md transition-all duration-300"
                   >
-                    <div className="p-3 bg-slate-200/40 dark:bg-green-500/10 rounded-xl text-slate-600 dark:text-slate-400 group-hover:text-green-600 dark:group-hover:text-green-400 group-hover:bg-green-500/15 transition-all shrink-0">
+                    <div className="p-3 bg-green-100/65 dark:bg-green-900/25 rounded-xl text-green-700 dark:text-green-300 group-hover:text-gold-700 dark:group-hover:text-gold-300 group-hover:bg-gold-100/80 dark:group-hover:bg-gold-900/25 transition-all shrink-0">
                        {web.icon}
                     </div>
                     <div className="flex-1 min-w-0">
-                       <h4 className="text-[10px] font-black text-slate-900 dark:text-white uppercase tracking-tight leading-tight group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors line-clamp-2">
+                       <h4 className="text-[10px] font-black text-slate-900 dark:text-white uppercase tracking-tight leading-tight group-hover:text-green-700 dark:group-hover:text-green-300 transition-colors line-clamp-2">
                           {web.name}
                        </h4>
                        <p className="text-[9px] text-slate-500 dark:text-slate-400 font-bold uppercase mt-1 truncate">
                           {web.desc}
                        </p>
                     </div>
-                    <div className="text-slate-400 dark:text-slate-600 group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors shrink-0">
+                    <div className="text-slate-400 dark:text-slate-600 group-hover:text-blue-600 dark:group-hover:text-blue-300 transition-colors shrink-0">
                        <ExternalLink size={14} />
                     </div>
                   </a>
@@ -382,9 +382,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </div>
       </div>
 
-      <div className="p-6 md:px-12 border-t border-slate-200/20 dark:border-white/5 bg-[color:var(--surface-2)] dark:bg-black/20 backdrop-blur-md flex justify-end items-center relative z-10 shrink-0">
+      <div className="p-6 md:px-12 border-t border-[color:var(--border-subtle)] bg-[color:var(--surface-2)] backdrop-blur-md flex justify-end items-center relative z-10 shrink-0">
         {user ? (
-          <button onClick={onShowProfile} className="group flex items-center gap-3 bg-[color:var(--surface-3)] dark:bg-white/5 p-1 pr-4 rounded-full border border-slate-200/20 dark:border-white/10 hover:border-gold-500 transition-all shadow-xl backdrop-blur-md">
+          <button onClick={onShowProfile} className="group flex items-center gap-3 bg-[color:var(--surface-3)] p-1 pr-4 rounded-full border border-[color:var(--border-subtle)] hover:border-gold-500 transition-all shadow-xl backdrop-blur-md">
              <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-gold-500 to-gold-700 flex items-center justify-center text-[#020617] shadow-lg group-hover:scale-105 transition-transform overflow-hidden">
                 <img src={profilePic || `https://ui-avatars.com/api/?name=${user.name}&background=eab308&color=020617&bold=true`} className="w-full h-full object-cover" alt="" />
              </div>
@@ -396,9 +396,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
         ) : (
           <button 
             onClick={onShowAuth}
-            className="group flex items-center gap-3 bg-[color:var(--surface-3)] dark:bg-white/5 p-1 pr-4 rounded-full border border-slate-200/20 dark:border-white/10 hover:border-gold-500 transition-all shadow-xl backdrop-blur-md"
+            className="group flex items-center gap-3 bg-[color:var(--surface-3)] p-1 pr-4 rounded-full border border-[color:var(--border-subtle)] hover:border-gold-500 transition-all shadow-xl backdrop-blur-md"
           >
-             <div className="w-10 h-10 rounded-full bg-slate-200/50 dark:bg-slate-800/50 flex items-center justify-center text-slate-600 dark:text-slate-400 group-hover:text-gold-500 transition-colors shadow-lg">
+             <div className="w-10 h-10 rounded-full bg-green-100/75 dark:bg-green-900/25 flex items-center justify-center text-green-700 dark:text-green-300 group-hover:text-gold-500 transition-colors shadow-lg">
                 <User size={20} />
              </div>
              <div className="text-left pr-2">
@@ -417,12 +417,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
         .animate-morph-in { 
           animation: morphIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; 
         }
-        @media (prefers-reduced-motion: reduce) {
+        @media (max-width: 767px), (prefers-reduced-motion: reduce) {
           .animate-morph-in { animation: none; }
         }
       `}</style>
     </div>
   );
 };
-
 

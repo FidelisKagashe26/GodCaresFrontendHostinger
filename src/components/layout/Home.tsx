@@ -58,11 +58,11 @@ export const Home: React.FC<HomeProps> = ({ onNavigate, siteSettings }) => {
 
   const TOOLS = [
     { id: StageId.BIBLE_STUDY, title: "Biblia", desc: "Andiko safi.", icon: <BookOpen size={18} />, color: "text-green-700 dark:text-green-300" },
-    { id: StageId.TIMELINE, title: "Unabii", desc: "Historia.", icon: <Clock size={18} />, color: "text-blue-400" },
+    { id: StageId.TIMELINE, title: "Unabii", desc: "Historia.", icon: <Clock size={18} />, color: "text-blue-700 dark:text-blue-300" },
     { id: StageId.DECEPTION_VAULT, title: "Fichua", desc: "Pambanua.", icon: <ShieldCheck size={18} />, color: "text-green-700 dark:text-green-300" },
-    { id: StageId.EVIDENCE, title: "Ushahidi", desc: "Sayansi.", icon: <Microscope size={18} />, color: "text-green-700 dark:text-green-300" },
-    { id: StageId.QUESTION_VAULT, title: "Majibu", desc: "Maswali.", icon: <HelpCircle size={18} />, color: "text-purple-400" },
-    { id: StageId.MEDIA, title: "Media", desc: "Video.", icon: <PlayCircle size={18} />, color: "text-pink-400" }
+    { id: StageId.EVIDENCE, title: "Ushahidi", desc: "Sayansi.", icon: <Microscope size={18} />, color: "text-blue-700 dark:text-blue-300" },
+    { id: StageId.QUESTION_VAULT, title: "Majibu", desc: "Maswali.", icon: <HelpCircle size={18} />, color: "text-gold-700 dark:text-gold-300" },
+    { id: StageId.MEDIA, title: "Media", desc: "Video.", icon: <PlayCircle size={18} />, color: "text-blue-700 dark:text-blue-300" }
   ];
 
   const truthSteps = [
@@ -352,6 +352,5 @@ export const Home: React.FC<HomeProps> = ({ onNavigate, siteSettings }) => {
     </div>
   );
 };
-
 
 
