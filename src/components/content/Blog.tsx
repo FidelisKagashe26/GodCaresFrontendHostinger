@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Heart, MessageCircle, Share2, User, Bookmark, Search, ArrowRight } from 'lucide-react';
+import { ThumbsUp, MessageCircle, Share2, User, Bookmark, Search, ArrowRight } from 'lucide-react';
 import { useSearchParams } from 'react-router-dom';
 import {
   createBlogComment,
@@ -108,6 +108,35 @@ const copyToClipboard = async (value: string): Promise<boolean> => {
   }
 };
 
+const normalizeUsername = (value?: string | null): string => {
+  const raw = String(value || '').trim();
+  if (!raw) return '';
+  const withoutAt = raw.startsWith('@') ? raw.slice(1) : raw;
+  if (!withoutAt) return '';
+  if (withoutAt.includes('@') && !withoutAt.includes(' ')) {
+    return withoutAt.split('@')[0].trim();
+  }
+  return withoutAt.replace(/\s+/g, '_').trim();
+};
+
+const getAvatarInitial = (value?: string): string => {
+  const first = String(value || '').trim().charAt(0).toUpperCase();
+  if (!first) return 'M';
+  return /[A-Z0-9]/i.test(first) ? first : 'M';
+};
+
+const formatCommentTimestamp = (value: string): string => {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '';
+  return date.toLocaleString('sw-TZ', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+};
+
 export const Blog: React.FC<BlogProps> = ({ user, onRequireLogin }) => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [activePost, setActivePost] = useState<number | null>(null);
@@ -133,7 +162,11 @@ export const Blog: React.FC<BlogProps> = ({ user, onRequireLogin }) => {
   const commentInputRef = useRef<HTMLTextAreaElement | null>(null);
   const actionMessageTimeoutRef = useRef<number | null>(null);
   const isLoggedIn = Boolean(user);
-  const displayUsername = (user?.username || '').trim() || (user?.name || '').trim() || 'mtumiaji';
+  const displayUsername =
+    normalizeUsername(user?.username) ||
+    normalizeUsername(user?.name) ||
+    normalizeUsername(user?.email) ||
+    'mtumiaji';
 
   const mapPost = (post: any): BlogPost => ({
     id: post.id,
@@ -350,7 +383,7 @@ export const Blog: React.FC<BlogProps> = ({ user, onRequireLogin }) => {
         setComments(
           data.map((item) => ({
             id: item.id,
-            authorName: item.author_name,
+            authorName: normalizeUsername(item.author_name) || 'mtumiaji',
             content: item.content,
             createdAt: item.created_at,
           })),
@@ -474,7 +507,7 @@ export const Blog: React.FC<BlogProps> = ({ user, onRequireLogin }) => {
       setComments((prev) => [
         {
           id: created.id,
-          authorName: created.author_name,
+          authorName: normalizeUsername(created.author_name) || displayUsername,
           content: created.content,
           createdAt: created.created_at,
         },
@@ -599,9 +632,9 @@ export const Blog: React.FC<BlogProps> = ({ user, onRequireLogin }) => {
             <button
               onClick={() => handleLike(post.id)}
               disabled={!!likeBusyByPost[post.id]}
-              className="flex items-center gap-2 text-slate-500 dark:text-slate-300 hover:text-red-500 dark:hover:text-red-400 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+              className="flex items-center gap-2 text-slate-500 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              <Heart size={24} className={post.liked ? 'fill-red-500 text-red-500' : ''} />
+              <ThumbsUp size={24} className={post.liked ? 'fill-blue-600 text-blue-600 dark:fill-blue-400 dark:text-blue-400' : ''} />
               <span>{post.likes}</span>
             </button>
             <button
@@ -626,8 +659,14 @@ export const Blog: React.FC<BlogProps> = ({ user, onRequireLogin }) => {
               <h3 className="text-xl font-black text-slate-900 dark:text-slate-100">Comments ({post.comments})</h3>
 
               <div className="space-y-3 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50/80 dark:bg-slate-900/65 p-4">
-                <div className="rounded-xl border border-green-200 bg-green-50 px-3 py-2 text-xs font-bold text-green-800">
-                  Umeingia kama <span className="font-black">@{displayUsername}</span>
+                <div className="flex items-center gap-3 rounded-xl border border-green-200 bg-green-50 px-3 py-2.5">
+                  <div className="h-10 w-10 shrink-0 rounded-full border border-green-300 bg-white flex items-center justify-center text-sm font-black text-green-800">
+                    {getAvatarInitial(displayUsername)}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-[11px] font-bold uppercase tracking-[0.08em] text-green-700">Umeingia kama</p>
+                    <p className="text-sm font-black text-green-900 break-words">@{displayUsername}</p>
+                  </div>
                 </div>
                 <textarea
                   ref={commentInputRef}
@@ -635,10 +674,10 @@ export const Blog: React.FC<BlogProps> = ({ user, onRequireLogin }) => {
                   onChange={(event) => setCommentText(event.target.value)}
                   placeholder="Andika comment yako hapa..."
                   rows={4}
-                  className="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-3 py-2 text-sm text-slate-900 dark:text-slate-100 outline-none focus:border-slate-500 dark:focus:border-slate-500 resize-y"
+                  className="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-3 py-2.5 text-[15px] leading-6 text-slate-900 dark:text-slate-100 outline-none focus:border-slate-500 dark:focus:border-slate-500 resize-y"
                 />
                 {commentSubmitError && (
-                  <div className="text-xs font-bold text-red-600">{commentSubmitError}</div>
+                  <div className="text-sm font-bold text-red-600">{commentSubmitError}</div>
                 )}
                 <div className="flex justify-end">
                   <button
@@ -664,14 +703,25 @@ export const Blog: React.FC<BlogProps> = ({ user, onRequireLogin }) => {
                 </div>
               )}
               {comments.map((comment) => (
-                <div key={comment.id} className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-4">
-                  <div className="flex items-center justify-between gap-3 mb-2">
-                    <p className="text-sm font-black text-slate-800 dark:text-slate-100">{comment.authorName}</p>
-                    <p className="text-[11px] font-bold text-slate-400 dark:text-slate-500">
-                      {new Date(comment.createdAt).toLocaleString('sw-TZ')}
-                    </p>
+                <div key={comment.id} className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-4 sm:p-5">
+                  <div className="flex items-start gap-3 sm:gap-4">
+                    <div className="h-10 w-10 sm:h-11 sm:w-11 shrink-0 rounded-full border border-green-200 bg-green-100 dark:border-green-800 dark:bg-green-900/40 flex items-center justify-center text-sm font-black text-green-800 dark:text-green-200">
+                      {getAvatarInitial(comment.authorName)}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-start justify-between gap-3">
+                        <p className="min-w-0 text-sm sm:text-base font-black text-slate-800 dark:text-slate-100 break-words">
+                          @{comment.authorName}
+                        </p>
+                        <time className="shrink-0 text-right text-[11px] sm:text-xs font-semibold leading-5 text-slate-500 dark:text-slate-400">
+                          {formatCommentTimestamp(comment.createdAt)}
+                        </time>
+                      </div>
+                      <p className="mt-2 text-sm sm:text-[15px] leading-7 text-slate-700 dark:text-slate-200 whitespace-pre-wrap break-words">
+                        {comment.content}
+                      </p>
+                    </div>
                   </div>
-                  <p className="text-sm text-slate-700 dark:text-slate-200 whitespace-pre-wrap break-words">{comment.content}</p>
                 </div>
               ))}
             </div>

@@ -210,21 +210,21 @@ const Tile: React.FC<TileProps> = ({ stage, isActive, onClick, index }) => {
       style={{ animationDelay: `${index * 60}ms` }}
       className={`group relative flex h-[64px] w-full items-center justify-start gap-2 rounded-2xl border px-3.5 py-2 text-left transition-all duration-300 animate-morph-in shadow-sm sm:h-[108px] sm:flex-col sm:items-center sm:justify-center sm:gap-3 sm:px-4 sm:py-5 sm:text-center ${
          isActive 
-          ? 'bg-gradient-to-br from-gold-200 to-gold-300 dark:from-gold-500/35 dark:to-gold-600/35 text-green-950 dark:text-gold-100 border-gold-500 dark:border-gold-500/50 shadow-[0_12px_22px_rgba(212,154,20,0.22)] dark:shadow-[0_12px_24px_rgba(238,183,32,0.18)]'
-          : 'bg-white/95 dark:bg-[color:var(--surface-3)]/88 border-green-200/80 dark:border-[color:var(--border-subtle)] hover:-translate-y-0.5 hover:border-gold-400/70 hover:bg-white dark:hover:bg-[color:var(--surface-2)]'
+          ? 'bg-gradient-to-br from-gold-200 to-gold-300 dark:from-[#6f5314] dark:to-[#8d6b1f] text-green-950 dark:text-gold-100 border-gold-500 dark:border-[#b38829] shadow-[0_12px_22px_rgba(212,154,20,0.22)] dark:shadow-[0_14px_26px_rgba(145,106,24,0.32)]'
+          : 'bg-[#f1f7e8] dark:bg-[#13261b] border-green-200/80 dark:border-[#2b4a35] hover:-translate-y-0.5 hover:border-gold-400/70 hover:bg-[#f8fcef] dark:hover:bg-[#1a3324]'
        }`}
     >
       <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl transition-all duration-300 sm:h-12 sm:w-12 sm:rounded-2xl ${
          isActive
            ? 'bg-white/75 dark:bg-slate-900/80 text-green-900 dark:text-gold-200 shadow-sm'
-           : 'bg-green-100 text-green-700 dark:bg-green-900/25 dark:text-green-300 group-hover:bg-gold-100 group-hover:text-gold-700'
+           : 'bg-green-100 text-green-700 dark:bg-[#1d3a29] dark:text-green-200 group-hover:bg-gold-100 group-hover:text-gold-700 dark:group-hover:bg-[#3e3112] dark:group-hover:text-gold-200'
        }`}>
          {getIcon(stage.id)}
       </div>
 
       <div className="w-full min-w-0">
         <h3 className={`line-clamp-2 text-[15px] sm:text-xs font-black uppercase tracking-[0.04em] sm:tracking-[0.12em] leading-tight transition-colors ${
-            isActive ? 'text-green-900 dark:text-gold-100' : 'text-slate-800 dark:text-slate-100 group-hover:text-gold-700 dark:group-hover:text-gold-300'
+            isActive ? 'text-green-900 dark:text-gold-100' : 'text-slate-800 dark:text-[#f2f8ef] group-hover:text-gold-700 dark:group-hover:text-gold-300'
         }`}>
           {stage.title}
         </h3>
@@ -315,12 +315,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
   ].filter((web) => Boolean(web.url && web.url.trim()));
 
   return (
-    <div className={`fixed inset-0 z-[200] bg-[color:var(--surface-0)]/98 md:bg-[color:var(--surface-1)]/95 backdrop-blur-sm md:backdrop-blur-md flex flex-col transition-all duration-700 ease-in-out ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
-      <div className="relative z-10 flex items-center justify-end px-4 py-2.5 md:p-6 border-b border-[color:var(--border-subtle)] bg-[color:var(--surface-2)] backdrop-blur-md h-16 md:h-20">
+    <div className={`fixed inset-0 z-[200] bg-[#f4f8ec]/98 dark:bg-[#040f0a] md:bg-[#eef6e1]/95 md:dark:bg-[#06130d]/96 backdrop-blur-sm md:backdrop-blur-md flex flex-col transition-all duration-700 ease-in-out ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+      <div className="relative z-10 flex items-center justify-end px-4 py-2.5 md:p-6 border-b border-green-200/70 dark:border-green-900/60 bg-[#f8fbf1]/95 dark:bg-[#0a1a12]/92 backdrop-blur-md h-16 md:h-20">
         <div onClick={() => { onStageChange(StageId.HOME); onClose(); }} className="absolute left-1/2 -translate-x-1/2 flex items-center cursor-pointer group">
            <img src={resolvedLogoSrc} alt={resolvedSettings.site_name} className="h-14 md:h-20 w-auto group-hover:scale-105 transition-transform" />
         </div>
-        <button onClick={onClose} className="p-2.5 md:p-3 bg-[color:var(--surface-3)] text-[color:var(--text-soft)] hover:text-[color:var(--accent-strong)] transition-all rounded-xl border border-[color:var(--border-subtle)] hover:border-[color:var(--accent)]/45">
+        <button onClick={onClose} className="p-2.5 md:p-3 bg-white dark:bg-[#12281b] text-slate-500 dark:text-slate-300 hover:text-gold-700 dark:hover:text-gold-300 transition-all rounded-xl border border-green-200/70 dark:border-green-900/60 hover:border-gold-500/45">
           <X size={21} />
         </button>
       </div>
@@ -359,7 +359,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     href={web.url} 
                     target="_blank" 
                     rel="noopener noreferrer"
-                    className="group relative flex min-h-[64px] items-center gap-3 p-3 bg-white/95 dark:bg-[color:var(--surface-3)]/80 border border-[color:var(--border-subtle)] rounded-2xl hover:border-green-500/55 hover:shadow-[0_14px_32px_rgba(47,104,51,0.16)] backdrop-blur-md transition-all duration-300"
+                    className="group relative flex min-h-[64px] items-center gap-3 p-3 bg-[#f1f7e8] dark:bg-[#13261b] border border-green-200/80 dark:border-[#2b4a35] rounded-2xl hover:border-green-500/55 hover:shadow-[0_14px_32px_rgba(47,104,51,0.16)] backdrop-blur-md transition-all duration-300"
                   >
                     <div className="p-2.5 bg-green-100/65 dark:bg-green-900/25 rounded-xl text-green-700 dark:text-green-300 group-hover:text-gold-700 dark:group-hover:text-gold-300 group-hover:bg-gold-100/80 dark:group-hover:bg-gold-900/25 transition-all shrink-0">
                        {web.icon}
@@ -382,9 +382,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </div>
       </div>
 
-      <div className="px-4 py-3 md:px-12 md:py-5 border-t border-[color:var(--border-subtle)] bg-[color:var(--surface-2)] backdrop-blur-md flex justify-end items-center relative z-10 shrink-0">
+      <div className="px-4 py-3 md:px-12 md:py-5 border-t border-green-200/70 dark:border-green-900/60 bg-[#f8fbf1]/95 dark:bg-[#0a1a12]/92 backdrop-blur-md flex justify-end items-center relative z-10 shrink-0">
         {user ? (
-          <button onClick={onShowProfile} className="group flex items-center gap-2.5 bg-[color:var(--surface-3)] p-1 pr-3.5 rounded-full border border-[color:var(--border-subtle)] hover:border-gold-500 transition-all shadow-xl backdrop-blur-md">
+          <button onClick={onShowProfile} className="group flex items-center gap-2.5 bg-[#f4faee] dark:bg-[#12281b] p-1 pr-3.5 rounded-full border border-green-200/70 dark:border-green-900/60 hover:border-gold-500 transition-all shadow-xl backdrop-blur-md">
              <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-gold-500 to-gold-700 flex items-center justify-center text-[#020617] shadow-lg group-hover:scale-105 transition-transform overflow-hidden">
                 <img src={profilePic || `https://ui-avatars.com/api/?name=${user.name}&background=eab308&color=020617&bold=true`} className="w-full h-full object-cover" alt="" />
              </div>
@@ -396,7 +396,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         ) : (
           <button 
             onClick={onShowAuth}
-            className="group flex items-center gap-2.5 bg-[color:var(--surface-3)] p-1 pr-3.5 rounded-full border border-[color:var(--border-subtle)] hover:border-gold-500 transition-all shadow-xl backdrop-blur-md"
+            className="group flex items-center gap-2.5 bg-[#f4faee] dark:bg-[#12281b] p-1 pr-3.5 rounded-full border border-green-200/70 dark:border-green-900/60 hover:border-gold-500 transition-all shadow-xl backdrop-blur-md"
           >
              <div className="w-9 h-9 rounded-full bg-green-100/75 dark:bg-green-900/25 flex items-center justify-center text-green-700 dark:text-green-300 group-hover:text-gold-500 transition-colors shadow-lg">
                 <User size={18} />

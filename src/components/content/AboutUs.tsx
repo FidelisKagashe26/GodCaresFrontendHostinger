@@ -8,6 +8,7 @@ import {
   BarChart3, Layers, ArrowRight
 } from 'lucide-react';
 import { getTeamMembers } from '../../services/content/aboutService';
+import { subscribeNewsletter } from '../../services/content/newsletterService';
 
 interface TeamLeader {
   id: string;
@@ -74,6 +75,10 @@ const TOOL_ITEMS = [
 export const AboutUs: React.FC = () => {
   const [teamLeaders, setTeamLeaders] = useState<TeamLeader[]>(DEFAULT_LEADERS);
   const [teamError, setTeamError] = useState('');
+  const [newsletterEmail, setNewsletterEmail] = useState('');
+  const [newsletterLoading, setNewsletterLoading] = useState(false);
+  const [newsletterSuccess, setNewsletterSuccess] = useState('');
+  const [newsletterError, setNewsletterError] = useState('');
 
   useEffect(() => {
     const loadTeam = async () => {
@@ -104,6 +109,30 @@ export const AboutUs: React.FC = () => {
     [teamLeaders]
   );
   const featuredLeader = leaders[0] || DEFAULT_LEADERS[0];
+
+  const handleNewsletterSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const normalized = newsletterEmail.trim().toLowerCase();
+
+    if (!/.+@.+\..+/.test(normalized)) {
+      setNewsletterError('Weka email sahihi ili kujiunga.');
+      setNewsletterSuccess('');
+      return;
+    }
+
+    setNewsletterLoading(true);
+    setNewsletterError('');
+    setNewsletterSuccess('');
+    try {
+      await subscribeNewsletter(normalized);
+      setNewsletterSuccess('Umejiunga kikamilifu. Tutakuwa tunakutumia taarifa mpya kwa email.');
+      setNewsletterEmail('');
+    } catch (error) {
+      setNewsletterError(error instanceof Error ? error.message : 'Imeshindikana kujiunga kwa sasa. Jaribu tena.');
+    } finally {
+      setNewsletterLoading(false);
+    }
+  };
 
   return (
     <div className="space-y-12 md:space-y-16 animate-fade-in pb-28 md:pb-32 max-w-7xl mx-auto px-4 md:px-6 pt-8 md:pt-12">
@@ -353,20 +382,38 @@ export const AboutUs: React.FC = () => {
 
           <div className="max-w-md mx-auto relative group">
              <div className="absolute -inset-1 bg-gradient-to-r from-gold-500 to-emerald-600 rounded-xl blur opacity-25 group-hover:opacity-45 transition duration-700"></div>
-             <div className="relative flex flex-col sm:flex-row sm:items-center bg-white dark:bg-slate-900 rounded-xl p-1 border border-slate-200 dark:border-white/10 shadow-xl gap-1.5 sm:gap-0">
-                <div className="pl-3 sm:pl-4 text-slate-400 hidden sm:block">
-                   <Mail size={18} />
-                </div>
-                <input
-                  type="email"
-                  placeholder="Weka barua pepe yako hapa..."
-                  className="w-full bg-transparent px-3 py-3 text-base font-semibold text-slate-900 dark:text-white placeholder:text-slate-400 outline-none"
-                />
-                <button className="bg-emerald-700 text-white px-4 sm:px-6 py-2.5 rounded-lg font-black text-sm uppercase tracking-[0.08em] hover:bg-gold-500 hover:text-slate-900 transition-all shadow-lg shrink-0 flex items-center justify-center gap-1 group/btn w-full sm:w-auto">
-                   Jiunge <ArrowRight size={12} className="group-hover/btn:translate-x-1 transition-transform" />
-                </button>
-             </div>
-           </div>
+             <form onSubmit={handleNewsletterSubmit} className="relative flex flex-col sm:flex-row sm:items-center bg-white dark:bg-slate-900 rounded-xl p-1 border border-slate-200 dark:border-white/10 shadow-xl gap-1.5 sm:gap-0">
+               <div className="pl-3 sm:pl-4 text-slate-400 hidden sm:block">
+                  <Mail size={18} />
+               </div>
+               <input
+                 type="email"
+                 value={newsletterEmail}
+                 onChange={(event) => {
+                   setNewsletterEmail(event.target.value);
+                   if (newsletterError) setNewsletterError('');
+                   if (newsletterSuccess) setNewsletterSuccess('');
+                 }}
+                 placeholder="Weka barua pepe yako hapa..."
+                 className="w-full bg-transparent px-3 py-3 text-base font-semibold text-slate-900 dark:text-white placeholder:text-slate-400 outline-none"
+                 aria-label="Barua pepe ya jarida"
+               />
+               <button
+                 type="submit"
+                 disabled={newsletterLoading}
+                 className="bg-emerald-700 text-white px-4 sm:px-6 py-2.5 rounded-lg font-black text-sm uppercase tracking-[0.08em] hover:bg-gold-500 hover:text-slate-900 transition-all shadow-lg shrink-0 flex items-center justify-center gap-1 group/btn w-full sm:w-auto disabled:opacity-70 disabled:cursor-not-allowed"
+               >
+                 {newsletterLoading ? 'Inahifadhi...' : 'Jiunge'}
+                 {!newsletterLoading && <ArrowRight size={12} className="group-hover/btn:translate-x-1 transition-transform" />}
+               </button>
+             </form>
+             {newsletterSuccess && (
+               <p className="mt-3 text-sm font-semibold text-emerald-700 dark:text-emerald-400">{newsletterSuccess}</p>
+             )}
+             {newsletterError && (
+               <p className="mt-3 text-sm font-semibold text-red-600 dark:text-red-400">{newsletterError}</p>
+             )}
+            </div>
            
           <p className="text-sm text-slate-500 dark:text-slate-500 font-semibold">
              Hatutumi spam. Unaweza kujiondoa wakati wowote.

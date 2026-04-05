@@ -8,6 +8,7 @@ import { Sun, Moon, Menu, Bell, User, Monitor, ChevronDown, LogOut, ArrowLeft, C
 import { AuthUser, clearTokens, getCurrentUser } from './services/core/authService';
 import { getSystemMessages } from './services/core/systemMessageService';
 import { DEFAULT_SITE_SETTINGS, getSiteSettings, SiteSettings } from './services/core/siteSettingsService';
+import { ThemeCenter } from './components/system/ThemeCenter';
 import {
   STAGES,
   STAGE_ROUTE_ENTRIES,
@@ -53,7 +54,6 @@ const DeceptionTool = lazyNamed(() => import('./components/tools/DeceptionTool')
 const EvidenceTool = lazyNamed(() => import('./components/tools/EvidenceTool'), 'EvidenceTool');
 const NotificationCenter = lazyNamed(() => import('./components/system/NotificationCenter'), 'NotificationCenter');
 const LanguageCenter = lazyNamed(() => import('./components/system/LanguageCenter'), 'LanguageCenter');
-const ThemeCenter = lazyNamed(() => import('./components/system/ThemeCenter'), 'ThemeCenter');
 
 const stageLoader = (
   <div className="flex min-h-[40vh] items-center justify-center px-6">

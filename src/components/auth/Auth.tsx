@@ -1,6 +1,6 @@
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Mail, Lock, User, ArrowRight, X, Chrome, ShieldCheck, Eye, EyeOff } from 'lucide-react';
+import { Mail, Lock, User, ArrowRight, X, ShieldCheck, Eye, EyeOff } from 'lucide-react';
 import {
   AuthUser,
   AuthRequestError,
@@ -69,6 +69,15 @@ const mapServerFieldErrors = (errors: Record<string, string>): FormErrors => {
   });
   return mapped;
 };
+
+const GoogleMark: React.FC = () => (
+  <svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true">
+    <path fill="#FFC107" d="M43.6 20H42V19.9H24V28H35.3C33.6 32.7 29.2 36 24 36C17.4 36 12 30.6 12 24S17.4 12 24 12C27 12 29.7 13.1 31.8 15L37.5 9.3C33.9 5.9 29.2 4 24 4C13 4 4 13 4 24S13 44 24 44C35 44 44 35 44 24C44 22.7 43.9 21.3 43.6 20Z" />
+    <path fill="#FF3D00" d="M6.3 14.7L12.9 19.5C14.7 15 19 12 24 12C27 12 29.7 13.1 31.8 15L37.5 9.3C33.9 5.9 29.2 4 24 4C16.3 4 9.6 8.3 6.3 14.7Z" />
+    <path fill="#4CAF50" d="M24 44C29 44 33.5 42.1 37.1 38.9L30.8 33.6C28.8 35.1 26.5 36 24 36C18.8 36 14.4 32.7 12.7 28.1L6.1 33.2C9.3 39.8 16 44 24 44Z" />
+    <path fill="#1976D2" d="M43.6 20H42V19.9H24V28H35.3C34.5 30.3 33 32.2 30.8 33.6L30.8 33.6L37.1 38.9C36.7 39.2 44 34 44 24C44 22.7 43.9 21.3 43.6 20Z" />
+  </svg>
+);
 
 export const Auth: React.FC<AuthProps> = ({ onLogin, onClose, resetParams, onResetComplete, logoSrc, initialMode = 'login' }) => {
   const resolvedLogoSrc = logoSrc || `${import.meta.env.BASE_URL}Logo.png`;
@@ -642,9 +651,9 @@ export const Auth: React.FC<AuthProps> = ({ onLogin, onClose, resetParams, onRes
                 <button 
                   onClick={handleGoogleLogin}
                   disabled={loading}
-                  className="w-full py-3 px-6 bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl flex items-center justify-center gap-3 text-slate-700 dark:text-white font-bold text-sm hover:bg-slate-50 dark:hover:bg-white/10 transition-all shadow-sm active:scale-[0.98]"
+                  className="w-full py-3 px-6 bg-white dark:bg-[#10231a] border border-slate-200 dark:border-[#2b4a35] rounded-xl flex items-center justify-center gap-3 text-slate-700 dark:text-[#eaf5e8] font-bold text-sm hover:bg-slate-50 dark:hover:bg-[#163326] transition-all shadow-sm active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
                 >
-                  <Chrome size={18} className="text-blue-500" />
+                  <GoogleMark />
                   <span>Endelea na Google</span>
                 </button>
 
@@ -898,7 +907,7 @@ export const Auth: React.FC<AuthProps> = ({ onLogin, onClose, resetParams, onRes
 
               <button 
                 type="submit" disabled={loading || isLoginOtpOverlay}
-                className="w-full bg-primary-950 dark:bg-gold-500 text-white dark:text-primary-950 py-4 rounded-lg font-black text-xs uppercase tracking-[0.3em] flex items-center justify-center gap-3 hover:opacity-90 transition-all shadow-xl active:scale-[0.98] disabled:opacity-50"
+                className="w-full bg-emerald-800 dark:bg-gold-500 text-white dark:text-[#1f1800] py-4 rounded-lg font-black text-xs uppercase tracking-[0.3em] flex items-center justify-center gap-3 hover:bg-emerald-900 dark:hover:bg-gold-400 transition-all shadow-xl active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
               >
                 {loading
                   ? 'Inachakata...'

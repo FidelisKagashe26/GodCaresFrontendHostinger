@@ -22,7 +22,7 @@ export const ThemeCenter: React.FC<Props> = ({ isOpen, onClose, currentTheme, on
   return (
     <>
       <div className="fixed inset-0 z-[80]" onClick={onClose}></div>
-      <div className="fixed top-24 right-28 md:right-36 w-72 bg-white dark:bg-slate-900/95 backdrop-blur-xl border border-slate-200 dark:border-white/20 rounded-2xl shadow-2xl z-[90] overflow-hidden flex flex-col animate-scale-in origin-top-right">
+      <div className="fixed top-[5.25rem] left-1/2 -translate-x-1/2 w-[calc(100vw-1rem)] max-w-sm bg-white dark:bg-slate-900/95 backdrop-blur-xl border border-slate-200 dark:border-white/20 rounded-2xl shadow-2xl z-[90] overflow-hidden flex flex-col origin-top md:top-24 md:left-auto md:right-24 md:translate-x-0 md:w-72 md:max-w-none md:origin-top-right">
          {/* Header */}
          <div className="p-4 border-b border-slate-100 dark:border-white/10 flex justify-between items-center bg-slate-50/80 dark:bg-black/40">
            <div className="flex items-center gap-2">
