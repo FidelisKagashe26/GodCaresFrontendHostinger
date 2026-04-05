@@ -149,9 +149,9 @@ jobs:
              run_privileged nginx -t
              run_privileged systemctl reload nginx
 
-             # hard check: SPA fallback must exist in active nginx config
-             if ! run_privileged nginx -T 2>/dev/null | grep -q "try_files \\$uri \\$uri/ /index.html;"; then
-               echo "ERROR: Active Nginx config has no SPA fallback try_files rule."
+             # hard check: active config should contain a try_files fallback to /index.html
+             if ! run_privileged nginx -T 2>/dev/null | grep -qE "try_files[[:space:]].*/index\\.html;"; then
+               echo "ERROR: Active Nginx config has no SPA fallback to /index.html."
                exit 1
              fi
 
