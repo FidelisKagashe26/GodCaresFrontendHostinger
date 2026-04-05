@@ -1,4 +1,5 @@
 import { invalidateCachedResult, withCachedResult } from "../core/cacheService";
+import { getApiBaseUrl, resolveApiAssetUrl } from "../core/urlService";
 
 export interface TestimonyApi {
   id: number;
@@ -16,7 +17,7 @@ export interface TestimonyApi {
   created_at: string;
 }
 
-const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || window.location.origin).replace(/\/$/, "");
+const API_BASE_URL = getApiBaseUrl();
 
 export const getTestimonies = async (): Promise<TestimonyApi[]> => {
   return withCachedResult(
@@ -26,7 +27,13 @@ export const getTestimonies = async (): Promise<TestimonyApi[]> => {
       if (!response.ok) {
         throw new Error("Imeshindikana kupata shuhuda.");
       }
-      return (await response.json()) as TestimonyApi[];
+      const payload = (await response.json()) as TestimonyApi[];
+      return payload.map((item) => ({
+        ...item,
+        profile_image: resolveApiAssetUrl(item.profile_image || "", API_BASE_URL),
+        thumbnail: resolveApiAssetUrl(item.thumbnail || "", API_BASE_URL),
+        video_url: resolveApiAssetUrl(item.video_url || "", API_BASE_URL),
+      }));
     },
     { ttlMs: 2 * 60 * 1000, persist: true },
   );
@@ -82,7 +89,12 @@ export const submitTestimony = async (payload: {
 
   const result = (await response.json()) as TestimonyApi;
   invalidateCachedResult("testimonies_list_v1");
-  return result;
+  return {
+    ...result,
+    profile_image: resolveApiAssetUrl(result.profile_image || "", API_BASE_URL),
+    thumbnail: resolveApiAssetUrl(result.thumbnail || "", API_BASE_URL),
+    video_url: resolveApiAssetUrl(result.video_url || "", API_BASE_URL),
+  };
 };
 
 export const reactToTestimony = async (

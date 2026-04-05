@@ -1,4 +1,5 @@
 import { withCachedResult } from "../core/cacheService";
+import { getApiBaseUrl, resolveApiAssetUrl } from "../core/urlService";
 
 export interface FaithHeroApi {
   id: number;
@@ -16,19 +17,7 @@ export interface FaithHeroApi {
   video_url: string;
 }
 
-const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || window.location.origin).replace(/\/$/, "");
-
-const toAbsoluteUrl = (value: string): string => {
-  const raw = (value || "").trim();
-  if (!raw) {
-    return "";
-  }
-  if (/^https?:\/\//i.test(raw) || raw.startsWith("data:")) {
-    return raw;
-  }
-  const normalized = raw.startsWith("/") ? raw : `/${raw}`;
-  return `${API_BASE_URL}${normalized}`;
-};
+const API_BASE_URL = getApiBaseUrl();
 
 export const getFaithHeroes = async (): Promise<FaithHeroApi[]> => {
   return withCachedResult(
@@ -44,8 +33,8 @@ export const getFaithHeroes = async (): Promise<FaithHeroApi[]> => {
       }
       return payload.map((item) => ({
         ...item,
-        image: toAbsoluteUrl(item.image),
-        video_url: toAbsoluteUrl(item.video_url),
+        image: resolveApiAssetUrl(item.image, API_BASE_URL),
+        video_url: resolveApiAssetUrl(item.video_url, API_BASE_URL),
       }));
     },
     { ttlMs: 10 * 60 * 1000, persist: true },

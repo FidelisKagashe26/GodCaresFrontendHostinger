@@ -1,6 +1,7 @@
 import { withCachedResult } from "./cacheService";
+import { getApiBaseUrl, resolveApiAssetUrl } from "./urlService";
 
-const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || window.location.origin).replace(/\/$/, "");
+const API_BASE_URL = getApiBaseUrl();
 
 export interface SiteSettings {
   site_name: string;
@@ -54,28 +55,18 @@ export const DEFAULT_SITE_SETTINGS: SiteSettings = {
   website_outreach_url: "https://outreach.godcares365.org",
 };
 
-const toAbsoluteUrl = (value: string): string => {
-  if (!value) return "";
-  if (value.startsWith("http://") || value.startsWith("https://") || value.startsWith("data:")) return value;
-  try {
-    return new URL(value, API_BASE_URL).toString();
-  } catch {
-    return value;
-  }
-};
-
 const normalizeSettings = (input: Partial<SiteSettings>): SiteSettings => ({
   ...DEFAULT_SITE_SETTINGS,
   ...input,
-  logo_url: toAbsoluteUrl((input.logo_url || "").trim()),
-  home_truth_story_1_image: toAbsoluteUrl((input.home_truth_story_1_image || "").trim()),
-  home_truth_story_2_image: toAbsoluteUrl((input.home_truth_story_2_image || "").trim()),
-  home_truth_story_3_image: toAbsoluteUrl((input.home_truth_story_3_image || "").trim()),
-  home_deception_story_1_image: toAbsoluteUrl((input.home_deception_story_1_image || "").trim()),
-  home_deception_story_2_image: toAbsoluteUrl((input.home_deception_story_2_image || "").trim()),
-  home_deception_story_3_image: toAbsoluteUrl((input.home_deception_story_3_image || "").trim()),
-  home_hope_story_1_image: toAbsoluteUrl((input.home_hope_story_1_image || "").trim()),
-  home_hope_story_2_image: toAbsoluteUrl((input.home_hope_story_2_image || "").trim()),
+  logo_url: resolveApiAssetUrl((input.logo_url || "").trim(), API_BASE_URL),
+  home_truth_story_1_image: resolveApiAssetUrl((input.home_truth_story_1_image || "").trim(), API_BASE_URL),
+  home_truth_story_2_image: resolveApiAssetUrl((input.home_truth_story_2_image || "").trim(), API_BASE_URL),
+  home_truth_story_3_image: resolveApiAssetUrl((input.home_truth_story_3_image || "").trim(), API_BASE_URL),
+  home_deception_story_1_image: resolveApiAssetUrl((input.home_deception_story_1_image || "").trim(), API_BASE_URL),
+  home_deception_story_2_image: resolveApiAssetUrl((input.home_deception_story_2_image || "").trim(), API_BASE_URL),
+  home_deception_story_3_image: resolveApiAssetUrl((input.home_deception_story_3_image || "").trim(), API_BASE_URL),
+  home_hope_story_1_image: resolveApiAssetUrl((input.home_hope_story_1_image || "").trim(), API_BASE_URL),
+  home_hope_story_2_image: resolveApiAssetUrl((input.home_hope_story_2_image || "").trim(), API_BASE_URL),
 });
 
 export const getSiteSettings = async (): Promise<SiteSettings> => {

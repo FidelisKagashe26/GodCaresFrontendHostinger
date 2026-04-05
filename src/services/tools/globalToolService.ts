@@ -1,18 +1,7 @@
 import { withCachedResult } from "../core/cacheService";
+import { getApiBaseUrl, resolveApiAssetUrl } from "../core/urlService";
 
-const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || window.location.origin).replace(/\/$/, "");
-
-const toAbsoluteUrl = (value: string): string => {
-  const raw = (value || "").trim();
-  if (!raw) {
-    return "";
-  }
-  if (/^https?:\/\//i.test(raw) || raw.startsWith("data:")) {
-    return raw;
-  }
-  const normalized = raw.startsWith("/") ? raw : `/${raw}`;
-  return `${API_BASE_URL}${normalized}`;
-};
+const API_BASE_URL = getApiBaseUrl();
 
 const safeFetch = async (url: string) => {
   try {
@@ -64,7 +53,7 @@ export const getHistoryMoments = async (): Promise<HistoryMomentApi[]> => {
 
       return payload.map((item) => ({
         ...item,
-        image: toAbsoluteUrl(item.image || ""),
+        image: resolveApiAssetUrl(item.image || "", API_BASE_URL),
       }));
     },
     { ttlMs: 60 * 60 * 1000, persist: true },
@@ -87,7 +76,7 @@ export const getEvidenceHighlights = async (): Promise<EvidenceHighlightApi[]> =
 
       return payload.map((item) => ({
         ...item,
-        image: toAbsoluteUrl(item.image || ""),
+        image: resolveApiAssetUrl(item.image || "", API_BASE_URL),
         hints: Array.isArray(item.hints) ? item.hints.filter((hint) => typeof hint === "string" && hint.trim()) : [],
       }));
     },

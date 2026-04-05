@@ -1,4 +1,5 @@
 import { withCachedResult } from "../core/cacheService";
+import { getApiBaseUrl, resolveApiAssetUrl } from "../core/urlService";
 
 export type LibraryItemType = "PDF" | "Audio" | "Video" | "Image";
 
@@ -16,19 +17,7 @@ export interface LibraryItemApi {
   created_at: string;
 }
 
-const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || window.location.origin).replace(/\/$/, "");
-
-const toAbsoluteUrl = (value: string): string => {
-  const raw = (value || "").trim();
-  if (!raw) {
-    return "";
-  }
-  if (/^https?:\/\//i.test(raw) || raw.startsWith("data:")) {
-    return raw;
-  }
-  const normalized = raw.startsWith("/") ? raw : `/${raw}`;
-  return `${API_BASE_URL}${normalized}`;
-};
+const API_BASE_URL = getApiBaseUrl();
 
 export const getLibraryItems = async (): Promise<LibraryItemApi[]> => {
   return withCachedResult(
@@ -44,8 +33,8 @@ export const getLibraryItems = async (): Promise<LibraryItemApi[]> => {
       }
       return payload.map((item) => ({
         ...item,
-        image: toAbsoluteUrl(item.image),
-        content_url: toAbsoluteUrl(item.content_url),
+        image: resolveApiAssetUrl(item.image, API_BASE_URL),
+        content_url: resolveApiAssetUrl(item.content_url, API_BASE_URL),
       }));
     },
     { ttlMs: 10 * 60 * 1000, persist: true },

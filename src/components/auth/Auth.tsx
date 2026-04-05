@@ -561,12 +561,12 @@ export const Auth: React.FC<AuthProps> = ({ onLogin, onClose, resetParams, onRes
 
   return (
     <div className="fixed inset-0 z-[600] flex items-center justify-center p-4 bg-slate-950/90 backdrop-blur-xl animate-fade-in">
-      <div className="relative w-full max-w-lg max-h-[95vh] flex flex-col bg-white dark:bg-[#0f172a] rounded-lg overflow-hidden shadow-2xl border border-slate-200 dark:border-white/10 animate-scale-up">
+      <div className="relative w-full max-w-lg max-h-[95vh] flex flex-col bg-[color:var(--surface-2)] text-[color:var(--text-primary)] rounded-lg overflow-hidden shadow-2xl border border-[color:var(--border-subtle)] animate-scale-up">
         <div className="absolute top-0 left-0 right-0 h-24 bg-gradient-to-br from-gold-500 to-gold-600 opacity-10 dark:opacity-20 pointer-events-none"></div>
 
         {isLoginOtpOverlay && (
           <div className="absolute top-3 left-1/2 z-20 w-[calc(100%-1.5rem)] -translate-x-1/2">
-            <div className="rounded-2xl border border-white/50 bg-white/35 p-4 shadow-2xl backdrop-blur-xl dark:border-white/20 dark:bg-slate-900/45">
+            <div className="rounded-2xl border border-white/50 bg-white/35 p-4 shadow-2xl backdrop-blur-xl dark:border-white/20 dark:bg-slate-900/55">
               <p className="text-[10px] font-black uppercase tracking-[0.24em] text-gold-700 dark:text-gold-300">Thibitisha Akaunti</p>
               <p className="mt-1 text-xs font-semibold text-slate-700 dark:text-slate-200">
                 Akaunti hii bado haijathibitishwa. Ingiza OTP ya tarakimu 6 tuliyotuma kwenye email yako.

@@ -1,4 +1,5 @@
 import { withCachedResult } from "../core/cacheService";
+import { getApiBaseUrl, resolveApiAssetUrl } from "../core/urlService";
 
 export interface TeamMemberApi {
   id: number;
@@ -12,7 +13,7 @@ export interface TeamMemberApi {
   is_active: boolean;
 }
 
-const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || window.location.origin).replace(/\/$/, "");
+const API_BASE_URL = getApiBaseUrl();
 
 export const getTeamMembers = async (): Promise<TeamMemberApi[]> => {
   return withCachedResult(
@@ -28,12 +29,17 @@ export const getTeamMembers = async (): Promise<TeamMemberApi[]> => {
         return [];
       }
 
-      return [...payload].sort((a, b) => {
+      return payload
+        .map((item) => ({
+          ...item,
+          avatar_url: resolveApiAssetUrl(item.avatar_url, API_BASE_URL),
+        }))
+        .sort((a, b) => {
         if ((a.sort_order || 0) !== (b.sort_order || 0)) {
           return (a.sort_order || 0) - (b.sort_order || 0);
         }
         return (a.id || 0) - (b.id || 0);
-      });
+        });
     },
     { ttlMs: 10 * 60 * 1000, persist: true },
   );

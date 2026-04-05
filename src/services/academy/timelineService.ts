@@ -1,4 +1,5 @@
 import { withCachedResult } from "../core/cacheService";
+import { getApiBaseUrl, resolveApiAssetUrl } from "../core/urlService";
 
 export interface TimelineMilestoneApi {
   id: number;
@@ -30,7 +31,7 @@ export interface TimelineSectionApi {
   milestones: TimelineMilestoneApi[];
 }
 
-const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || window.location.origin).replace(/\/$/, "");
+const API_BASE_URL = getApiBaseUrl();
 
 const readFriendlyError = async (response: Response, fallback: string) => {
   const payload = await response.json().catch(() => ({} as { detail?: string }));
@@ -46,19 +47,6 @@ const safeFetch = async (url: string) => {
     return await fetch(url);
   } catch {
     throw new Error("Hakuna mawasiliano ya mtandao kwa sasa. Tafadhali angalia muunganisho wako wa mtandao kisha ujaribu tena.");
-  }
-};
-
-const toAbsoluteUrl = (value: string) => {
-  const trimmed = (value || "").trim();
-  if (!trimmed) {
-    return "";
-  }
-
-  try {
-    return new URL(trimmed, `${API_BASE_URL}/`).toString();
-  } catch {
-    return trimmed;
   }
 };
 
@@ -85,7 +73,7 @@ export const getTimelineSections = async (): Promise<TimelineSectionApi[]> => {
             ? [...section.milestones]
                 .map((milestone) => ({
                   ...milestone,
-                  image: toAbsoluteUrl(milestone.image || ""),
+                  image: resolveApiAssetUrl(milestone.image || "", API_BASE_URL),
                 }))
                 .sort((a, b) => {
                   if ((a.sort_order || 0) !== (b.sort_order || 0)) {

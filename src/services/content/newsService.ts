@@ -1,4 +1,5 @@
 import { invalidateCachedResult, withCachedResult } from "../core/cacheService";
+import { getApiBaseUrl, resolveApiAssetUrl } from "../core/urlService";
 
 export interface NewsItemApi {
   id: number;
@@ -14,14 +15,7 @@ export interface NewsItemApi {
   published_at: string;
 }
 
-const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || window.location.origin).replace(/\/$/, "");
-
-const toAbsoluteUrl = (value?: string | null): string => {
-  const raw = (value || "").trim();
-  if (!raw) return "";
-  if (/^(https?:)?\/\//i.test(raw) || raw.startsWith("data:")) return raw;
-  return `${API_BASE_URL}${raw.startsWith("/") ? raw : `/${raw}`}`;
-};
+const API_BASE_URL = getApiBaseUrl();
 
 export const getNewsItems = async (): Promise<NewsItemApi[]> => {
   return withCachedResult(
@@ -34,8 +28,8 @@ export const getNewsItems = async (): Promise<NewsItemApi[]> => {
       const payload = (await response.json()) as NewsItemApi[];
       return payload.map((item) => ({
         ...item,
-        image: toAbsoluteUrl(item.image),
-        author_image: toAbsoluteUrl(item.author_image),
+        image: resolveApiAssetUrl(item.image, API_BASE_URL),
+        author_image: resolveApiAssetUrl(item.author_image, API_BASE_URL),
       }));
     },
     { ttlMs: 3 * 60 * 1000, persist: true },

@@ -1,4 +1,5 @@
 import { withCachedResult } from "../core/cacheService";
+import { getApiBaseUrl, resolveApiAssetUrl } from "../core/urlService";
 
 export interface MediaVideoApi {
   id: number;
@@ -20,19 +21,7 @@ export interface MediaPlaylistApi {
   videos: MediaVideoApi[];
 }
 
-const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || window.location.origin).replace(/\/$/, "");
-
-const toAbsoluteUrl = (value: string): string => {
-  const raw = (value || "").trim();
-  if (!raw) {
-    return "";
-  }
-  if (/^https?:\/\//i.test(raw) || raw.startsWith("data:")) {
-    return raw;
-  }
-  const normalized = raw.startsWith("/") ? raw : `/${raw}`;
-  return `${API_BASE_URL}${normalized}`;
-};
+const API_BASE_URL = getApiBaseUrl();
 
 export const getMediaPlaylists = async (): Promise<MediaPlaylistApi[]> => {
   return withCachedResult(
@@ -48,12 +37,12 @@ export const getMediaPlaylists = async (): Promise<MediaPlaylistApi[]> => {
       }
       return payload.map((playlist) => ({
         ...playlist,
-        thumbnail: toAbsoluteUrl(playlist.thumbnail),
+        thumbnail: resolveApiAssetUrl(playlist.thumbnail, API_BASE_URL),
         videos: Array.isArray(playlist.videos)
           ? playlist.videos.map((video) => ({
               ...video,
-              thumbnail: toAbsoluteUrl(video.thumbnail),
-              embed_url: toAbsoluteUrl(video.embed_url),
+              thumbnail: resolveApiAssetUrl(video.thumbnail, API_BASE_URL),
+              embed_url: resolveApiAssetUrl(video.embed_url, API_BASE_URL),
             }))
           : [],
       }));

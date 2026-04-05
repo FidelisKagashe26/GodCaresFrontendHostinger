@@ -209,22 +209,22 @@ const Tile: React.FC<TileProps> = ({ stage, isActive, onClick, index }) => {
       onClick={onClick}
       style={{ animationDelay: `${index * 60}ms` }}
       className={`group relative flex h-[64px] w-full items-center justify-start gap-2 rounded-2xl border px-3.5 py-2 text-left transition-all duration-300 animate-morph-in shadow-sm sm:h-[108px] sm:flex-col sm:items-center sm:justify-center sm:gap-3 sm:px-4 sm:py-5 sm:text-center ${
-        isActive 
-          ? 'bg-gradient-to-br from-gold-200 to-gold-300 text-green-950 border-gold-500 shadow-[0_12px_22px_rgba(212,154,20,0.22)]'
-          : 'bg-white/95 dark:bg-[color:var(--surface-3)]/88 border-green-200/80 dark:border-[color:var(--border-subtle)] hover:-translate-y-0.5 hover:border-gold-400/70 hover:bg-white'
-      }`}
+         isActive 
+          ? 'bg-gradient-to-br from-gold-200 to-gold-300 dark:from-gold-500/35 dark:to-gold-600/35 text-green-950 dark:text-gold-100 border-gold-500 dark:border-gold-500/50 shadow-[0_12px_22px_rgba(212,154,20,0.22)] dark:shadow-[0_12px_24px_rgba(238,183,32,0.18)]'
+          : 'bg-white/95 dark:bg-[color:var(--surface-3)]/88 border-green-200/80 dark:border-[color:var(--border-subtle)] hover:-translate-y-0.5 hover:border-gold-400/70 hover:bg-white dark:hover:bg-[color:var(--surface-2)]'
+       }`}
     >
       <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl transition-all duration-300 sm:h-12 sm:w-12 sm:rounded-2xl ${
          isActive
-           ? 'bg-white/75 text-green-900 shadow-sm'
+           ? 'bg-white/75 dark:bg-slate-900/80 text-green-900 dark:text-gold-200 shadow-sm'
            : 'bg-green-100 text-green-700 dark:bg-green-900/25 dark:text-green-300 group-hover:bg-gold-100 group-hover:text-gold-700'
-      }`}>
+       }`}>
          {getIcon(stage.id)}
       </div>
 
       <div className="w-full min-w-0">
         <h3 className={`line-clamp-2 text-[15px] sm:text-xs font-black uppercase tracking-[0.04em] sm:tracking-[0.12em] leading-tight transition-colors ${
-            isActive ? 'text-green-900' : 'text-slate-800 dark:text-slate-100 group-hover:text-gold-700 dark:group-hover:text-gold-300'
+            isActive ? 'text-green-900 dark:text-gold-100' : 'text-slate-800 dark:text-slate-100 group-hover:text-gold-700 dark:group-hover:text-gold-300'
         }`}>
           {stage.title}
         </h3>

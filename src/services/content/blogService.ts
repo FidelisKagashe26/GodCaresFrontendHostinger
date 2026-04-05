@@ -1,4 +1,5 @@
 import { invalidateCachedResult, withCachedResult } from "../core/cacheService";
+import { getApiBaseUrl, resolveApiAssetUrl } from "../core/urlService";
 
 export interface BlogPostApi {
   id: number;
@@ -31,17 +32,10 @@ export interface BlogCommentApi {
   created_at: string;
 }
 
-export const BLOG_API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || window.location.origin).replace(/\/$/, "");
+export const BLOG_API_BASE_URL = getApiBaseUrl();
 const API_BASE_URL = BLOG_API_BASE_URL;
 const CLIENT_ID_KEY = "gc365_blog_client_id";
 const ACCESS_TOKEN_KEY = "gc365_access_token";
-
-const toAbsoluteUrl = (value?: string | null): string => {
-  const raw = (value || "").trim();
-  if (!raw) return "";
-  if (/^(https?:)?\/\//i.test(raw) || raw.startsWith("data:")) return raw;
-  return `${API_BASE_URL}${raw.startsWith("/") ? raw : `/${raw}`}`;
-};
 
 const getClientId = (): string => {
   if (typeof window === "undefined") {
@@ -75,9 +69,9 @@ const getRequestHeaders = (): Record<string, string> => {
 
 const normalizePost = (item: BlogPostApi): BlogPostApi => ({
   ...item,
-  image: toAbsoluteUrl(item.image),
-  author_image: toAbsoluteUrl(item.author_image),
-  share_url: toAbsoluteUrl(item.share_url),
+  image: resolveApiAssetUrl(item.image, API_BASE_URL),
+  author_image: resolveApiAssetUrl(item.author_image, API_BASE_URL),
+  share_url: resolveApiAssetUrl(item.share_url, API_BASE_URL),
   liked: !!item.liked,
 });
 

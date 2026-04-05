@@ -1,4 +1,5 @@
 import { withCachedResult } from "../core/cacheService";
+import { getApiBaseUrl, resolveApiAssetUrl } from "../core/urlService";
 
 export interface ShopProductApi {
   id: number;
@@ -47,7 +48,7 @@ export interface ShopOrderCreatePayload {
   }>;
 }
 
-const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || window.location.origin).replace(/\/$/, "");
+const API_BASE_URL = getApiBaseUrl();
 
 export const getShopProducts = async (): Promise<ShopProductApi[]> => {
   return withCachedResult(
@@ -57,7 +58,11 @@ export const getShopProducts = async (): Promise<ShopProductApi[]> => {
       if (!response.ok) {
         throw new Error("Imeshindikana kupata bidhaa.");
       }
-      return (await response.json()) as ShopProductApi[];
+      const payload = (await response.json()) as ShopProductApi[];
+      return payload.map((item) => ({
+        ...item,
+        image: resolveApiAssetUrl(item.image, API_BASE_URL),
+      }));
     },
     { ttlMs: 5 * 60 * 1000, persist: true },
   );

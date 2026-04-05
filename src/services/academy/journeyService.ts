@@ -1,4 +1,5 @@
 import { withCachedResult } from "../core/cacheService";
+import { getApiBaseUrl, resolveApiAssetUrl } from "../core/urlService";
 
 export interface JourneyLesson {
   id: number;
@@ -27,7 +28,7 @@ export interface JourneyModule {
   lessons: JourneyLesson[];
 }
 
-const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || window.location.origin).replace(/\/$/, '');
+const API_BASE_URL = getApiBaseUrl();
 
 const readFriendlyError = async (response: Response, fallback: string) => {
   const payload = await response.json().catch(() => ({} as any));
@@ -62,12 +63,17 @@ export const getJourneyModules = async (): Promise<JourneyModule[]> => {
         return [];
       }
 
-      return [...payload].sort((a, b) => {
+      return payload
+        .map((item) => ({
+          ...item,
+          hero_image: resolveApiAssetUrl(item.hero_image, API_BASE_URL),
+        }))
+        .sort((a, b) => {
         if (a.sort_order !== b.sort_order) {
           return a.sort_order - b.sort_order;
         }
         return a.id - b.id;
-      });
+        });
     },
     { ttlMs: 10 * 60 * 1000, persist: true },
   );

@@ -20,6 +20,7 @@ import {
   Share2,
 } from 'lucide-react';
 import { getTestimonies, reactToTestimony, submitTestimony } from '../../services/content/testimonyService';
+import { getApiBaseUrl, resolveApiAssetUrl } from '../../services/core/urlService';
 
 interface Testimony {
   id: number;
@@ -37,18 +38,11 @@ interface Testimony {
   reactions: { amen: number; praise: number; love: number };
 }
 
-const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || window.location.origin).replace(/\/$/, '');
+const API_BASE_URL = getApiBaseUrl();
 const STORY_PREVIEW_LENGTH = 210;
 
 const resolveAssetUrl = (value?: string) => {
-  const raw = (value || '').trim();
-  if (!raw) {
-    return '';
-  }
-  if (raw.startsWith('http://') || raw.startsWith('https://') || raw.startsWith('data:')) {
-    return raw;
-  }
-  return `${API_BASE_URL}${raw.startsWith('/') ? '' : '/'}${raw}`;
+  return resolveApiAssetUrl(value || '', API_BASE_URL);
 };
 
 const extractYoutubeId = (url?: string) => {

@@ -1,4 +1,5 @@
 import { invalidateCachedResult, withCachedResult } from "../core/cacheService";
+import { getApiBaseUrl, resolveApiAssetUrl } from "../core/urlService";
 
 export interface Annotation {
   x: number;
@@ -96,19 +97,7 @@ export interface QuestionVaultSubmissionApi {
   created_at: string;
 }
 
-const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || window.location.origin).replace(/\/$/, "");
-
-const toAbsoluteUrl = (value: string): string => {
-  const raw = (value || "").trim();
-  if (!raw) {
-    return "";
-  }
-  if (/^https?:\/\//i.test(raw) || raw.startsWith("data:")) {
-    return raw;
-  }
-  const normalized = raw.startsWith("/") ? raw : `/${raw}`;
-  return `${API_BASE_URL}${normalized}`;
-};
+const API_BASE_URL = getApiBaseUrl();
 
 export const getEvidenceItems = async (): Promise<EvidenceItemApi[]> => {
   return withCachedResult(
@@ -124,11 +113,11 @@ export const getEvidenceItems = async (): Promise<EvidenceItemApi[]> => {
       }
       return payload.map((item) => ({
         ...item,
-        heroImage: toAbsoluteUrl(item.heroImage),
-        videoUrl: toAbsoluteUrl(item.videoUrl || ""),
+        heroImage: resolveApiAssetUrl(item.heroImage, API_BASE_URL),
+        videoUrl: resolveApiAssetUrl(item.videoUrl || "", API_BASE_URL),
         author: {
           ...item.author,
-          image: toAbsoluteUrl(item.author?.image || ""),
+          image: resolveApiAssetUrl(item.author?.image || "", API_BASE_URL),
         },
       }));
     },
@@ -150,7 +139,7 @@ export const getDeceptionCases = async (): Promise<DeceptionCaseApi[]> => {
       }
       return payload.map((item) => ({
         ...item,
-        videoUrl: toAbsoluteUrl(item.videoUrl),
+        videoUrl: resolveApiAssetUrl(item.videoUrl, API_BASE_URL),
       }));
     },
     { ttlMs: 10 * 60 * 1000, persist: true },
@@ -171,8 +160,8 @@ export const getQuestionVaultItems = async (): Promise<QuestionVaultItemApi[]> =
       }
       return payload.map((item) => ({
         ...item,
-        videoUrl: toAbsoluteUrl(item.videoUrl || ""),
-        videoThumbnail: toAbsoluteUrl(item.videoThumbnail || ""),
+        videoUrl: resolveApiAssetUrl(item.videoUrl || "", API_BASE_URL),
+        videoThumbnail: resolveApiAssetUrl(item.videoThumbnail || "", API_BASE_URL),
       }));
     },
     { ttlMs: 10 * 60 * 1000, persist: true },
