@@ -2,6 +2,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Mail, Lock, User, ArrowRight, X, Chrome, ShieldCheck, Phone, Eye, EyeOff } from 'lucide-react';
 import {
+  AuthUser,
   AuthRequestError,
   forgotPassword,
   getCurrentUser,
@@ -13,7 +14,7 @@ import {
 } from '../../services/core/authService';
 
 interface AuthProps {
-  onLogin: (userData: { name: string; email: string }) => void;
+  onLogin: (userData: AuthUser) => void;
   onClose: () => void;
   resetParams?: { uid: string; token: string } | null;
   onResetComplete?: () => void;
@@ -26,12 +27,37 @@ type FormErrors = Record<string, string>;
 
 const OTP_LENGTH = 6;
 
+const COUNTRY_CODES = [
+  { code: '255', label: 'Tanzania (+255)' },
+  { code: '254', label: 'Kenya (+254)' },
+  { code: '256', label: 'Uganda (+256)' },
+  { code: '250', label: 'Rwanda (+250)' },
+  { code: '257', label: 'Burundi (+257)' },
+  { code: '251', label: 'Ethiopia (+251)' },
+  { code: '234', label: 'Nigeria (+234)' },
+  { code: '27', label: 'South Africa (+27)' },
+  { code: '1', label: 'USA/Canada (+1)' },
+  { code: '44', label: 'UK (+44)' },
+  { code: '49', label: 'Germany (+49)' },
+  { code: '33', label: 'France (+33)' },
+  { code: '971', label: 'UAE (+971)' },
+  { code: '91', label: 'India (+91)' },
+];
+
 const normalizePhone = (value: string): string => {
   const digits = value.replace(/\D/g, '');
   if (!digits) return '';
-  if (digits.startsWith('0') && digits.length === 10) return `255${digits.slice(1)}`;
-  if (digits.startsWith('255') && digits.length === 12) return digits;
+  const stripped = digits.startsWith('00') ? digits.slice(2) : digits;
+  if (stripped.startsWith('0') && stripped.length === 10) return `255${stripped.slice(1)}`;
+  if (stripped.length >= 8 && stripped.length <= 15) return stripped;
   return '';
+};
+
+const buildInternationalPhone = (countryCode: string, localNumber: string): string => {
+  const cc = (countryCode || '').replace(/\D/g, '');
+  const local = (localNumber || '').replace(/\D/g, '').replace(/^0+/, '');
+  if (!cc || !local) return '';
+  return normalizePhone(`${cc}${local}`);
 };
 
 const isValidEmail = (value: string): boolean => /.+@.+\..+/.test(value.trim());
@@ -44,7 +70,15 @@ const mapServerFieldErrors = (errors: Record<string, string>): FormErrors => {
       return;
     }
     if (key === 'username') {
-      mapped.email = value;
+      mapped.username = value;
+      return;
+    }
+    if (key === 'first_name') {
+      mapped.firstName = value;
+      return;
+    }
+    if (key === 'last_name') {
+      mapped.lastName = value;
       return;
     }
     mapped[key] = value;
@@ -58,11 +92,14 @@ export const Auth: React.FC<AuthProps> = ({ onLogin, onClose, resetParams, onRes
   const [isResetMode, setIsResetMode] = useState(false);
   const [isOtpMode, setIsOtpMode] = useState(false);
   const [otpContext, setOtpContext] = useState<OtpContext>(null);
+  const [username, setUsername] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [phoneCountryCode, setPhoneCountryCode] = useState('255');
+  const [phoneNumber, setPhoneNumber] = useState('');
   const [email, setEmail] = useState('');
-  const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [name, setName] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [otpDigits, setOtpDigits] = useState<string[]>(() => Array.from({ length: OTP_LENGTH }, () => ''));
@@ -73,7 +110,10 @@ export const Auth: React.FC<AuthProps> = ({ onLogin, onClose, resetParams, onRes
   const [infoMessage, setInfoMessage] = useState('');
   const [fieldErrors, setFieldErrors] = useState<FormErrors>({});
 
-  const nameInputRef = useRef<HTMLInputElement | null>(null);
+  const usernameInputRef = useRef<HTMLInputElement | null>(null);
+  const firstNameInputRef = useRef<HTMLInputElement | null>(null);
+  const lastNameInputRef = useRef<HTMLInputElement | null>(null);
+  const countryCodeRef = useRef<HTMLSelectElement | null>(null);
   const phoneInputRef = useRef<HTMLInputElement | null>(null);
   const emailInputRef = useRef<HTMLInputElement | null>(null);
   const passwordInputRef = useRef<HTMLInputElement | null>(null);
@@ -114,7 +154,10 @@ export const Auth: React.FC<AuthProps> = ({ onLogin, onClose, resetParams, onRes
   };
 
   const focusField = (field: string) => {
-    if (field === 'name') nameInputRef.current?.focus();
+    if (field === 'username') usernameInputRef.current?.focus();
+    if (field === 'firstName') firstNameInputRef.current?.focus();
+    if (field === 'lastName') lastNameInputRef.current?.focus();
+    if (field === 'countryCode') countryCodeRef.current?.focus();
     if (field === 'phone') phoneInputRef.current?.focus();
     if (field === 'email') emailInputRef.current?.focus();
     if (field === 'password') passwordInputRef.current?.focus();
@@ -123,7 +166,7 @@ export const Auth: React.FC<AuthProps> = ({ onLogin, onClose, resetParams, onRes
   };
 
   const focusFirstError = (errors: FormErrors) => {
-    const order = ['name', 'phone', 'email', 'password', 'confirmPassword', 'code'];
+    const order = ['username', 'firstName', 'lastName', 'countryCode', 'phone', 'email', 'password', 'confirmPassword', 'code'];
     const first = order.find((key) => errors[key]);
     if (!first) return;
     window.setTimeout(() => focusField(first), 0);
@@ -223,7 +266,9 @@ export const Auth: React.FC<AuthProps> = ({ onLogin, onClose, resetParams, onRes
 
   const submitOtpVerification = async () => {
     const localErrors: FormErrors = {};
-    const normalizedPhone = normalizePhone(pendingPhone || phone);
+    const normalizedPhone = normalizePhone(
+      pendingPhone || buildInternationalPhone(phoneCountryCode, phoneNumber),
+    );
     const otpEmail = (pendingEmail || email).trim().toLowerCase();
 
     if (!otpEmail) localErrors.email = 'Barua pepe ya usajili inahitajika.';
@@ -261,12 +306,21 @@ export const Auth: React.FC<AuthProps> = ({ onLogin, onClose, resetParams, onRes
 
   const submitRegistration = async () => {
     const localErrors: FormErrors = {};
-    const trimmedName = name.trim();
-    const normalizedPhone = normalizePhone(phone);
+    const normalizedUsername = username.trim().toLowerCase();
+    const normalizedFirstName = firstName.trim();
+    const normalizedLastName = lastName.trim();
+    const normalizedPhone = buildInternationalPhone(phoneCountryCode, phoneNumber);
     const normalizedEmail = email.trim().toLowerCase();
 
-    if (!trimmedName) localErrors.name = 'Weka jina lako.';
-    if (!normalizedPhone) localErrors.phone = 'Weka namba sahihi ya simu (mfano: 2557XXXXXXXX).';
+    if (!normalizedUsername) {
+      localErrors.username = 'Weka username yako.';
+    } else if (!/^[a-z0-9._-]{3,150}$/.test(normalizedUsername)) {
+      localErrors.username = "Username ikubali herufi ndogo, namba, '.', '_' au '-' pekee.";
+    }
+    if (!normalizedFirstName) localErrors.firstName = 'Weka First name.';
+    if (!normalizedLastName) localErrors.lastName = 'Weka Last name.';
+    if (!phoneCountryCode) localErrors.countryCode = 'Chagua country code.';
+    if (!normalizedPhone) localErrors.phone = 'Weka namba sahihi ya simu.';
     if (!normalizedEmail) {
       localErrors.email = 'Weka barua pepe yako.';
     } else if (!isValidEmail(normalizedEmail)) {
@@ -296,13 +350,14 @@ export const Auth: React.FC<AuthProps> = ({ onLogin, onClose, resetParams, onRes
     setFieldErrors({});
     try {
       const result = await registerUser({
-        name: trimmedName,
+        username: normalizedUsername,
+        firstName: normalizedFirstName,
+        lastName: normalizedLastName,
         email: normalizedEmail,
         password,
         passwordConfirm: confirmPassword,
         phone: normalizedPhone,
       });
-      setPhone(result.phone || normalizedPhone);
       setEmail(result.email || normalizedEmail);
       setShowPassword(false);
       setShowConfirmPassword(false);
@@ -321,12 +376,10 @@ export const Auth: React.FC<AuthProps> = ({ onLogin, onClose, resetParams, onRes
 
   const submitLogin = async () => {
     const localErrors: FormErrors = {};
-    const normalizedEmail = email.trim().toLowerCase();
+    const normalizedIdentifier = email.trim().toLowerCase();
 
-    if (!normalizedEmail) {
-      localErrors.email = 'Weka barua pepe yako.';
-    } else if (!isValidEmail(normalizedEmail)) {
-      localErrors.email = 'Barua pepe si sahihi.';
+    if (!normalizedIdentifier) {
+      localErrors.email = 'Weka barua pepe au username yako.';
     }
     if (!password) localErrors.password = 'Weka nenosiri lako.';
 
@@ -342,15 +395,15 @@ export const Auth: React.FC<AuthProps> = ({ onLogin, onClose, resetParams, onRes
     setInfoMessage('');
     setFieldErrors({});
     try {
-      await loginUser({ email: normalizedEmail, password });
+      await loginUser({ email: normalizedIdentifier, password });
       const user = await getCurrentUser();
       onLogin(user);
     } catch (error) {
       if (error instanceof AuthRequestError && error.code === 'verification_required') {
         startOtpFlow(
           'login',
-          error.email || normalizedEmail,
-          normalizePhone(error.phone || pendingPhone || phone),
+          error.email || normalizedIdentifier,
+          normalizePhone(error.phone || pendingPhone || buildInternationalPhone(phoneCountryCode, phoneNumber)),
           error.message || 'Akaunti yako bado haijathibitishwa. Weka OTP tuliyotuma sasa hivi.'
         );
         return;
@@ -463,7 +516,9 @@ export const Auth: React.FC<AuthProps> = ({ onLogin, onClose, resetParams, onRes
 
   const handleResendOtp = async () => {
     const resolvedEmail = (pendingEmail || email).trim().toLowerCase();
-    const resolvedPhone = normalizePhone(pendingPhone || phone);
+    const resolvedPhone = normalizePhone(
+      pendingPhone || buildInternationalPhone(phoneCountryCode, phoneNumber),
+    );
 
     setLoading(true);
     setErrorMessage('');
@@ -634,43 +689,127 @@ export const Auth: React.FC<AuthProps> = ({ onLogin, onClose, resetParams, onRes
                   <div className="relative group">
                     <User className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-gold-500 transition-colors" size={16} />
                     <input 
-                      ref={nameInputRef}
-                      type="text" required value={name} onChange={e => setName(e.target.value)}
-                      placeholder="Jina Lako" 
+                      ref={usernameInputRef}
+                      type="text" required value={username} onChange={e => setUsername(e.target.value)}
+                      placeholder="Username" 
                       className={`w-full pl-14 pr-6 py-3 bg-slate-50 dark:bg-black/20 border rounded-lg outline-none transition-all text-sm text-slate-900 dark:text-white font-medium ${
-                        fieldErrors.name ? 'border-red-400 focus:border-red-500' : 'border-slate-200 dark:border-white/5 focus:border-gold-500'
+                        fieldErrors.username ? 'border-red-400 focus:border-red-500' : 'border-slate-200 dark:border-white/5 focus:border-gold-500'
                       }`}
                     />
                   </div>
-                  {fieldErrors.name && <p className="text-[11px] font-semibold text-red-500">{fieldErrors.name}</p>}
+                  {fieldErrors.username && <p className="text-[11px] font-semibold text-red-500">{fieldErrors.username}</p>}
+                </div>
+              )}
+
+              {!isLogin && !isResetMode && !isRegisterOtpMode && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <div className="relative group">
+                      <User className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-gold-500 transition-colors" size={16} />
+                      <input
+                        ref={firstNameInputRef}
+                        type="text"
+                        required
+                        value={firstName}
+                        onChange={e => setFirstName(e.target.value)}
+                        placeholder="First name"
+                        className={`w-full pl-14 pr-6 py-3 bg-slate-50 dark:bg-black/20 border rounded-lg outline-none transition-all text-sm text-slate-900 dark:text-white font-medium ${
+                          fieldErrors.firstName ? 'border-red-400 focus:border-red-500' : 'border-slate-200 dark:border-white/5 focus:border-gold-500'
+                        }`}
+                      />
+                    </div>
+                    {fieldErrors.firstName && <p className="text-[11px] font-semibold text-red-500">{fieldErrors.firstName}</p>}
+                  </div>
+                  <div className="space-y-1">
+                    <div className="relative group">
+                      <User className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-gold-500 transition-colors" size={16} />
+                      <input
+                        ref={lastNameInputRef}
+                        type="text"
+                        required
+                        value={lastName}
+                        onChange={e => setLastName(e.target.value)}
+                        placeholder="Last name"
+                        className={`w-full pl-14 pr-6 py-3 bg-slate-50 dark:bg-black/20 border rounded-lg outline-none transition-all text-sm text-slate-900 dark:text-white font-medium ${
+                          fieldErrors.lastName ? 'border-red-400 focus:border-red-500' : 'border-slate-200 dark:border-white/5 focus:border-gold-500'
+                        }`}
+                      />
+                    </div>
+                    {fieldErrors.lastName && <p className="text-[11px] font-semibold text-red-500">{fieldErrors.lastName}</p>}
+                  </div>
+                </div>
+              )}
+
+              {!isLogin && !isResetMode && !isRegisterOtpMode && (
+                <div className="space-y-1">
+                  <div className="grid grid-cols-[minmax(140px,0.95fr)_minmax(0,2.05fr)] gap-2">
+                    <div className="relative">
+                      <select
+                        ref={countryCodeRef}
+                        value={phoneCountryCode}
+                        onChange={(event) => setPhoneCountryCode(event.target.value)}
+                        className={`w-full h-full min-h-[48px] rounded-lg border bg-slate-50 dark:bg-black/20 px-3 text-sm font-semibold text-slate-900 outline-none transition-all dark:text-white ${
+                          fieldErrors.countryCode ? 'border-red-400 focus:border-red-500' : 'border-slate-200 dark:border-white/5 focus:border-gold-500'
+                        }`}
+                      >
+                        {COUNTRY_CODES.map((country) => (
+                          <option key={country.code} value={country.code}>
+                            {country.label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="relative group">
+                      <Phone className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-gold-500 transition-colors" size={16} />
+                      <input
+                        ref={phoneInputRef}
+                        type="tel"
+                        required
+                        value={phoneNumber}
+                        onChange={e => setPhoneNumber(e.target.value)}
+                        placeholder="Namba ya simu"
+                        className={`w-full pl-14 pr-6 py-3 bg-slate-50 dark:bg-black/20 border rounded-lg outline-none transition-all text-sm text-slate-900 dark:text-white font-medium ${
+                          fieldErrors.phone ? 'border-red-400 focus:border-red-500' : 'border-slate-200 dark:border-white/5 focus:border-gold-500'
+                        }`}
+                      />
+                    </div>
+                  </div>
+                  {fieldErrors.countryCode && <p className="text-[11px] font-semibold text-red-500">{fieldErrors.countryCode}</p>}
+                  {fieldErrors.phone && <p className="text-[11px] font-semibold text-red-500">{fieldErrors.phone}</p>}
                 </div>
               )}
 
               {!isLogin && !isResetMode && !isRegisterOtpMode && (
                 <div className="space-y-1">
                   <div className="relative group">
-                    <Phone className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-gold-500 transition-colors" size={16} />
+                    <Mail className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-gold-500 transition-colors" size={16} />
                     <input
-                      ref={phoneInputRef}
-                      type="tel" required value={phone} onChange={e => setPhone(e.target.value)}
-                      placeholder="Namba ya Simu (mfano: 2557XXXXXXXX)"
+                      ref={emailInputRef}
+                      type="email"
+                      required
+                      value={email}
+                      onChange={e => setEmail(e.target.value)}
+                      placeholder="Barua Pepe"
                       className={`w-full pl-14 pr-6 py-3 bg-slate-50 dark:bg-black/20 border rounded-lg outline-none transition-all text-sm text-slate-900 dark:text-white font-medium ${
-                        fieldErrors.phone ? 'border-red-400 focus:border-red-500' : 'border-slate-200 dark:border-white/5 focus:border-gold-500'
+                        fieldErrors.email ? 'border-red-400 focus:border-red-500' : 'border-slate-200 dark:border-white/5 focus:border-gold-500'
                       }`}
                     />
                   </div>
-                  {fieldErrors.phone && <p className="text-[11px] font-semibold text-red-500">{fieldErrors.phone}</p>}
+                  {fieldErrors.email && <p className="text-[11px] font-semibold text-red-500">{fieldErrors.email}</p>}
                 </div>
               )}
 
-              {!isResetMode && !isRegisterOtpMode && (
+              {isLogin && !isResetMode && !isRegisterOtpMode && (
                 <div className="space-y-1">
                   <div className="relative group">
                     <Mail className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-gold-500 transition-colors" size={16} />
-                    <input 
+                    <input
                       ref={emailInputRef}
-                      type="email" required value={email} onChange={e => setEmail(e.target.value)}
-                      placeholder="Barua Pepe" 
+                      type="text"
+                      required
+                      value={email}
+                      onChange={e => setEmail(e.target.value)}
+                      placeholder="Barua Pepe au Username"
                       className={`w-full pl-14 pr-6 py-3 bg-slate-50 dark:bg-black/20 border rounded-lg outline-none transition-all text-sm text-slate-900 dark:text-white font-medium ${
                         fieldErrors.email ? 'border-red-400 focus:border-red-500' : 'border-slate-200 dark:border-white/5 focus:border-gold-500'
                       }`}

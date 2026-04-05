@@ -5,7 +5,7 @@ import { Home } from './components/layout/Home';
 import { StageId, ToastNotification, LanguageCode, ThemePreference } from './types';
 import { ToastContainer } from './components/ui/Toast';
 import { Sun, Moon, Menu, Bell, User, Monitor, ChevronDown, LogOut, ArrowLeft, ChevronRight, Plus, X } from 'lucide-react';
-import { clearTokens, getCurrentUser } from './services/core/authService';
+import { AuthUser, clearTokens, getCurrentUser } from './services/core/authService';
 import { getSystemMessages } from './services/core/systemMessageService';
 import { DEFAULT_SITE_SETTINGS, getSiteSettings, SiteSettings } from './services/core/siteSettingsService';
 import {
@@ -106,7 +106,7 @@ const App: React.FC = () => {
   const matchedStage = getStageFromPath(currentPath);
   const currentStage = matchedStage || StageId.HOME;
 
-  const [user, setUser] = useState<{ name: string; email: string } | null>(null);
+  const [user, setUser] = useState<AuthUser | null>(null);
   const [isAuthBootstrapComplete, setIsAuthBootstrapComplete] = useState(false);
   const [activeTimelineId, setActiveTimelineId] = useState('creation');
   const [notifications, setNotifications] = useState<ToastNotification[]>([]);
@@ -176,7 +176,7 @@ const App: React.FC = () => {
     navigateToStage(id, { replace: false, scrollBehavior: 'smooth' });
   };
 
-  const handleLogin = (userData: { name: string; email: string }) => {
+  const handleLogin = (userData: AuthUser) => {
     setUser(userData);
     localStorage.setItem('gc365_user', JSON.stringify(userData));
     setShowAuthModal(false);
@@ -423,7 +423,7 @@ const App: React.FC = () => {
   const renderStageContent = (stage: StageId) => {
     switch (stage) {
       case StageId.HOME: return <Home onNavigate={handleStageChange} siteSettings={siteSettings} />;
-      case StageId.BLOG: return <Blog />;
+      case StageId.BLOG: return <Blog user={user} onRequireLogin={() => openAuthModal('login')} />;
       case StageId.FAITH_BUILDER: return user ? <FaithBuilder /> : <Home onNavigate={handleStageChange} siteSettings={siteSettings} />;
       case StageId.BIBLE_STUDY: return user ? <BibleStudyJourney /> : <Home onNavigate={handleStageChange} siteSettings={siteSettings} />;
       case StageId.TIMELINE: return user ? <PropheticTimeline activeTimelineId={activeTimelineId} setActiveTimelineId={setActiveTimelineId} onNavigate={handleStageChange} /> : <Home onNavigate={handleStageChange} siteSettings={siteSettings} />;

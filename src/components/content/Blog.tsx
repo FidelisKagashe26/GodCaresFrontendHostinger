@@ -32,6 +32,17 @@ interface BlogComment {
   createdAt: string;
 }
 
+interface BlogUser {
+  name: string;
+  email: string;
+  username?: string;
+}
+
+interface BlogProps {
+  user: BlogUser | null;
+  onRequireLogin?: () => void;
+}
+
 const SAVED_POSTS_KEY = 'gc365_saved_blog_posts_v1';
 
 const AuthorAvatar: React.FC<{ name: string; image?: string; className?: string; iconSize?: number }> = ({
@@ -48,17 +59,6 @@ const AuthorAvatar: React.FC<{ name: string; image?: string; className?: string;
     )}
   </div>
 );
-
-const getSavedUserName = (): string => {
-  try {
-    const raw = localStorage.getItem('gc365_user');
-    if (!raw) return '';
-    const parsed = JSON.parse(raw) as { name?: string };
-    return (parsed?.name || '').trim();
-  } catch {
-    return '';
-  }
-};
 
 const getSavedPostIds = (): Set<number> => {
   try {
@@ -106,7 +106,7 @@ const copyToClipboard = async (value: string): Promise<boolean> => {
   }
 };
 
-export const Blog: React.FC = () => {
+export const Blog: React.FC<BlogProps> = ({ user, onRequireLogin }) => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [activePost, setActivePost] = useState<number | null>(null);
   const [posts, setPosts] = useState<BlogPost[]>([]);
@@ -119,11 +119,10 @@ export const Blog: React.FC = () => {
   const [comments, setComments] = useState<BlogComment[]>([]);
   const [commentsLoading, setCommentsLoading] = useState(false);
   const [commentsError, setCommentsError] = useState('');
+  const [isCommentsPanelOpen, setIsCommentsPanelOpen] = useState(false);
   const [savedPostIds, setSavedPostIds] = useState<Set<number>>(new Set<number>());
   const [actionMessage, setActionMessage] = useState('');
 
-  const [savedUserName, setSavedUserName] = useState('');
-  const [commentAuthorName, setCommentAuthorName] = useState('');
   const [commentText, setCommentText] = useState('');
   const [commentSubmitting, setCommentSubmitting] = useState(false);
   const [commentSubmitError, setCommentSubmitError] = useState('');
@@ -131,6 +130,8 @@ export const Blog: React.FC = () => {
   const commentsSectionRef = useRef<HTMLDivElement | null>(null);
   const commentInputRef = useRef<HTMLTextAreaElement | null>(null);
   const actionMessageTimeoutRef = useRef<number | null>(null);
+  const isLoggedIn = Boolean(user);
+  const displayUsername = (user?.username || '').trim() || (user?.name || '').trim() || 'mtumiaji';
 
   const mapPost = (post: any): BlogPost => ({
     id: post.id,
@@ -177,6 +178,7 @@ export const Blog: React.FC = () => {
       setPostQueryParam(postId);
     }
     setActivePost(postId);
+    setIsCommentsPanelOpen(false);
     setCommentText('');
     setCommentSubmitError('');
   };
@@ -186,12 +188,12 @@ export const Blog: React.FC = () => {
       setPostQueryParam(null);
     }
     setActivePost(null);
+    setIsCommentsPanelOpen(false);
     setCommentText('');
     setCommentSubmitError('');
   };
 
   useEffect(() => {
-    setSavedUserName(getSavedUserName());
     setSavedPostIds(getSavedPostIds());
   }, []);
 
@@ -296,7 +298,7 @@ export const Blog: React.FC = () => {
 
   useEffect(() => {
     const loadComments = async () => {
-      if (!activePost) {
+      if (!activePost || !isCommentsPanelOpen) {
         setComments([]);
         setCommentsError('');
         return;
@@ -323,16 +325,7 @@ export const Blog: React.FC = () => {
     };
 
     loadComments();
-  }, [activePost]);
-
-  useEffect(() => {
-    if (!activePost) return;
-    if (savedUserName) {
-      setCommentAuthorName(savedUserName);
-    } else {
-      setCommentAuthorName('');
-    }
-  }, [activePost, savedUserName]);
+  }, [activePost, isCommentsPanelOpen]);
 
   const handleLike = async (id: number) => {
     if (likeBusyByPost[id]) return;
@@ -399,30 +392,44 @@ export const Blog: React.FC = () => {
     commentsSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     window.setTimeout(() => {
       commentInputRef.current?.focus();
-    }, 200);
+    }, 220);
+  };
+
+  const handleCommentAction = () => {
+    if (!isLoggedIn) {
+      showActionMessage('Ingia kwanza ili kuona na kuandika comments.');
+      onRequireLogin?.();
+      return;
+    }
+    if (!isCommentsPanelOpen) {
+      setIsCommentsPanelOpen(true);
+      window.setTimeout(() => {
+        focusComments();
+      }, 100);
+      return;
+    }
+    focusComments();
   };
 
   const handleSubmitComment = async () => {
     if (!activePost || commentSubmitting) return;
     setCommentSubmitError('');
+    if (!isLoggedIn) {
+      showActionMessage('Ingia kwanza ili kuandika comment.');
+      onRequireLogin?.();
+      return;
+    }
 
     const content = commentText.trim();
-    const authorName = (savedUserName || commentAuthorName || '').trim();
 
     if (content.length < 2) {
       setCommentSubmitError('Andika comment yenye angalau herufi 2.');
       return;
     }
 
-    if (!savedUserName && authorName.length < 2) {
-      setCommentSubmitError('Weka jina lako kabla ya kutuma comment.');
-      return;
-    }
-
     setCommentSubmitting(true);
     try {
       const created = await createBlogComment(activePost, {
-        author_name: savedUserName ? undefined : authorName,
         content,
       });
       setComments((prev) => [
@@ -530,9 +537,15 @@ export const Blog: React.FC = () => {
           )}
 
           {post.image ? (
-            <img src={post.image} className="w-full h-96 object-cover rounded-xl mb-10" alt={post.title} />
+            <div className="w-full rounded-xl mb-10 border border-slate-200 bg-slate-100 overflow-hidden">
+              <img
+                src={post.image}
+                className="w-full h-auto max-h-[68vh] md:max-h-[34rem] object-contain"
+                alt={post.title}
+              />
+            </div>
           ) : (
-            <div className="w-full h-96 rounded-xl mb-10 bg-slate-100 flex items-center justify-center text-xs font-black uppercase tracking-widest text-slate-400">
+            <div className="w-full h-64 md:h-96 rounded-xl mb-10 bg-slate-100 flex items-center justify-center text-xs font-black uppercase tracking-widest text-slate-400">
               Hakuna picha
             </div>
           )}
@@ -553,7 +566,7 @@ export const Blog: React.FC = () => {
               <span>{post.likes}</span>
             </button>
             <button
-              onClick={focusComments}
+              onClick={handleCommentAction}
               className="flex items-center gap-2 text-slate-500 hover:text-blue-600 transition-colors"
             >
               <MessageCircle size={24} />
@@ -561,65 +574,69 @@ export const Blog: React.FC = () => {
             </button>
           </div>
 
-          <div ref={commentsSectionRef} className="mt-10 border-t border-slate-100 pt-8 space-y-5">
-            <h3 className="text-xl font-black text-slate-900">Comments ({post.comments})</h3>
-
-            <div className="space-y-3 rounded-2xl border border-slate-200 bg-slate-50/80 p-4">
-              {!savedUserName && (
-                <input
-                  type="text"
-                  value={commentAuthorName}
-                  onChange={(event) => setCommentAuthorName(event.target.value)}
-                  placeholder="Jina lako"
-                  className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-slate-500"
-                />
-              )}
-              <textarea
-                ref={commentInputRef}
-                value={commentText}
-                onChange={(event) => setCommentText(event.target.value)}
-                placeholder="Andika comment yako hapa..."
-                rows={4}
-                className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-slate-500 resize-y"
-              />
-              {commentSubmitError && (
-                <div className="text-xs font-bold text-red-600">{commentSubmitError}</div>
-              )}
-              <div className="flex justify-end">
-                <button
-                  type="button"
-                  onClick={handleSubmitComment}
-                  disabled={commentSubmitting}
-                  className="rounded-full bg-green-700 px-4 py-2 text-xs font-black uppercase tracking-[0.08em] text-white hover:bg-green-800 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
-                >
-                  {commentSubmitting ? 'Inatuma...' : 'Tuma Comment'}
-                </button>
-              </div>
+          {!isCommentsPanelOpen && (
+            <div className="mt-10 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700">
+              <p className="font-semibold">
+                Bonyeza kitufe cha <span className="font-black">comment</span> kuona au kuandika comments.
+              </p>
             </div>
+          )}
 
-            {commentsLoading && (
-              <div className="text-xs uppercase tracking-widest text-slate-400 font-black">Inapakia comments...</div>
-            )}
-            {commentsError && (
-              <div className="text-xs font-bold text-red-600">{commentsError}</div>
-            )}
-            {!commentsLoading && comments.length === 0 && (
-              <div className="rounded-xl border border-slate-200 bg-white p-4 text-sm font-medium text-slate-500">
-                Bado hakuna comments kwenye makala hii. Kuwa wa kwanza kuandika.
-              </div>
-            )}
-            {comments.map((comment) => (
-              <div key={comment.id} className="rounded-xl border border-slate-200 bg-white p-4">
-                <div className="flex items-center justify-between gap-3 mb-2">
-                  <p className="text-sm font-black text-slate-800">{comment.authorName}</p>
-                  <p className="text-[11px] font-bold text-slate-400">
-                    {new Date(comment.createdAt).toLocaleString('sw-TZ')}
-                  </p>
+          {isCommentsPanelOpen && (
+            <div ref={commentsSectionRef} className="mt-10 border-t border-slate-100 pt-8 space-y-5">
+              <h3 className="text-xl font-black text-slate-900">Comments ({post.comments})</h3>
+
+              <div className="space-y-3 rounded-2xl border border-slate-200 bg-slate-50/80 p-4">
+                <div className="rounded-xl border border-green-200 bg-green-50 px-3 py-2 text-xs font-bold text-green-800">
+                  Umeingia kama <span className="font-black">@{displayUsername}</span>
                 </div>
-                <p className="text-sm text-slate-700 whitespace-pre-wrap break-words">{comment.content}</p>
+                <textarea
+                  ref={commentInputRef}
+                  value={commentText}
+                  onChange={(event) => setCommentText(event.target.value)}
+                  placeholder="Andika comment yako hapa..."
+                  rows={4}
+                  className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-slate-500 resize-y"
+                />
+                {commentSubmitError && (
+                  <div className="text-xs font-bold text-red-600">{commentSubmitError}</div>
+                )}
+                <div className="flex justify-end">
+                  <button
+                    type="button"
+                    onClick={handleSubmitComment}
+                    disabled={commentSubmitting}
+                    className="rounded-full bg-green-700 px-4 py-2 text-xs font-black uppercase tracking-[0.08em] text-white hover:bg-green-800 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                  >
+                    {commentSubmitting ? 'Inatuma...' : 'Tuma Comment'}
+                  </button>
+                </div>
               </div>
-            ))}
-          </div>
+
+              {commentsLoading && (
+                <div className="text-xs uppercase tracking-widest text-slate-400 font-black">Inapakia comments...</div>
+              )}
+              {commentsError && (
+                <div className="text-xs font-bold text-red-600">{commentsError}</div>
+              )}
+              {!commentsLoading && comments.length === 0 && (
+                <div className="rounded-xl border border-slate-200 bg-white p-4 text-sm font-medium text-slate-500">
+                  Bado hakuna comments kwenye makala hii. Kuwa wa kwanza kuandika.
+                </div>
+              )}
+              {comments.map((comment) => (
+                <div key={comment.id} className="rounded-xl border border-slate-200 bg-white p-4">
+                  <div className="flex items-center justify-between gap-3 mb-2">
+                    <p className="text-sm font-black text-slate-800">{comment.authorName}</p>
+                    <p className="text-[11px] font-bold text-slate-400">
+                      {new Date(comment.createdAt).toLocaleString('sw-TZ')}
+                    </p>
+                  </div>
+                  <p className="text-sm text-slate-700 whitespace-pre-wrap break-words">{comment.content}</p>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     );
@@ -713,9 +730,13 @@ export const Blog: React.FC = () => {
                     </button>
                   </div>
                 </div>
-                <div className="w-full md:w-48 h-32 shrink-0 rounded-xl overflow-hidden bg-green-50 border border-green-100">
+                <div className="w-full md:w-48 h-36 md:h-32 shrink-0 rounded-xl overflow-hidden bg-green-50 border border-green-100 flex items-center justify-center">
                   {post.image ? (
-                    <img src={post.image} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt={post.title} />
+                    <img
+                      src={post.image}
+                      className="w-full h-full object-contain md:object-cover group-hover:scale-[1.02] md:group-hover:scale-105 transition-transform duration-500"
+                      alt={post.title}
+                    />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-[10px] font-black uppercase tracking-widest text-slate-400">
                       Hakuna picha

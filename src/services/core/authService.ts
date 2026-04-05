@@ -9,6 +9,7 @@
 export interface AuthUser {
   name: string;
   email: string;
+  username: string;
 }
 
 export interface RegisterResult {
@@ -65,6 +66,7 @@ const toAuthUser = (user: ApiUser): AuthUser => {
   return {
     name: fullName || user.username || user.email || "Mtafuta Ukweli",
     email: user.email || "",
+    username: user.username || "",
   };
 };
 
@@ -209,25 +211,24 @@ const refreshAccessToken = async () => {
 };
 
 export const registerUser = async (payload: {
-  name: string;
+  username: string;
+  firstName: string;
+  lastName: string;
   email: string;
   password: string;
   passwordConfirm: string;
   phone: string;
 }): Promise<RegisterResult> => {
-  const [first_name, ...rest] = payload.name.trim().split(" ");
-  const last_name = rest.join(" ");
-
   const response = await request("/api/auth/register/", {
     method: "POST",
     body: JSON.stringify({
-      username: payload.email,
+      username: payload.username.trim(),
       email: payload.email,
       password: payload.password,
       password_confirm: payload.passwordConfirm,
       phone: payload.phone.trim(),
-      first_name: first_name || "",
-      last_name: last_name || "",
+      first_name: payload.firstName.trim(),
+      last_name: payload.lastName.trim(),
     }),
   });
 
