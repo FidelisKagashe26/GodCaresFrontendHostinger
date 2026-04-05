@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Heart, MessageCircle, Share2, User, Bookmark, Search } from 'lucide-react';
+import { Heart, MessageCircle, Share2, User, Bookmark, Search, ArrowRight } from 'lucide-react';
 import { getBlogPost, getBlogPosts } from '../../services/content/blogService';
 
 interface BlogPost {
@@ -217,40 +217,72 @@ export const Blog: React.FC = () => {
           )}
 
           {posts.map((post) => (
-            <div key={post.id} className="flex flex-col md:flex-row gap-6 group cursor-pointer" onClick={() => setActivePost(post.id)}>
-              <div className="flex-1 space-y-3">
-                <div className="flex items-center gap-3 text-xs font-bold text-slate-600">
-                  <AuthorAvatar name={post.author} image={post.authorImage} className="w-8 h-8" iconSize={14} />
-                  <span>{post.author}</span>
-                </div>
-                <h2 className="text-2xl font-bold text-slate-900 group-hover:text-gold-600 transition-colors leading-tight">
-                  {post.title}
-                </h2>
-                <p className="text-slate-500 text-sm line-clamp-2 leading-relaxed font-serif">
-                  {post.excerpt}
-                </p>
-                <div className="pt-2 flex items-center justify-between gap-4">
-                  <div className="flex items-center gap-4 text-xs text-slate-400 flex-wrap">
-                    <span>{post.date}</span>
-                    <span>|</span>
-                    <span>{post.readTime}</span>
-                    {post.tags?.[0] && (
-                      <span className="px-2 py-1 bg-slate-100 rounded-full text-slate-600">{post.tags[0]}</span>
-                    )}
+            <article
+              key={post.id}
+              className="group cursor-pointer rounded-2xl border border-green-200/80 bg-white/95 p-4 md:p-5 shadow-[0_8px_20px_rgba(15,23,42,0.04)] hover:border-gold-400/80 hover:shadow-[0_14px_28px_rgba(212,154,20,0.12)] transition-all"
+              onClick={() => setActivePost(post.id)}
+              role="button"
+              tabIndex={0}
+              aria-label={`Soma zaidi: ${post.title}`}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                  event.preventDefault();
+                  setActivePost(post.id);
+                }
+              }}
+            >
+              <div className="flex flex-col md:flex-row gap-4 md:gap-6">
+                <div className="flex-1 space-y-3">
+                  <div className="flex items-center gap-3 text-xs font-bold text-slate-700">
+                    <AuthorAvatar name={post.author} image={post.authorImage} className="w-8 h-8" iconSize={14} />
+                    <span>{post.author}</span>
                   </div>
-                  <Bookmark size={16} className="text-slate-400 hover:text-slate-800 shrink-0" />
+                  <h2 className="text-2xl font-bold text-slate-900 group-hover:text-gold-700 transition-colors leading-tight">
+                    {post.title}
+                  </h2>
+                  <p className="text-slate-600 text-sm line-clamp-2 leading-relaxed font-serif">
+                    {post.excerpt}
+                  </p>
+                  <div className="pt-1 flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-4 text-xs text-slate-500 flex-wrap">
+                      <span>{post.date}</span>
+                      <span>|</span>
+                      <span>{post.readTime}</span>
+                      {post.tags?.[0] && (
+                        <span className="px-2 py-1 bg-slate-100 rounded-full text-slate-700">{post.tags[0]}</span>
+                      )}
+                    </div>
+                    <Bookmark size={16} className="text-slate-500 group-hover:text-slate-800 shrink-0" />
+                  </div>
+                </div>
+                <div className="w-full md:w-48 h-32 shrink-0 rounded-xl overflow-hidden bg-green-50 border border-green-100">
+                  {post.image ? (
+                    <img src={post.image} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt={post.title} />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-[10px] font-black uppercase tracking-widest text-slate-400">
+                      Hakuna picha
+                    </div>
+                  )}
                 </div>
               </div>
-              <div className="w-full md:w-48 h-32 shrink-0 rounded-lg overflow-hidden bg-slate-100">
-                {post.image ? (
-                  <img src={post.image} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt={post.title} />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-[10px] font-black uppercase tracking-widest text-slate-400">
-                    Hakuna picha
-                  </div>
-                )}
+
+              <div className="mt-4 pt-3 border-t border-green-100/90 flex items-center justify-between gap-3">
+                <span className="text-[11px] font-bold uppercase tracking-[0.08em] text-slate-500">
+                  Gusa card kusoma
+                </span>
+                <button
+                  type="button"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    setActivePost(post.id);
+                  }}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-gold-300/80 bg-gold-100/70 px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.08em] text-gold-800 hover:bg-gold-200/80 transition-colors"
+                >
+                  More
+                  <ArrowRight size={13} />
+                </button>
               </div>
-            </div>
+            </article>
           ))}
         </div>
 
