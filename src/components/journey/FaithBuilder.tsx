@@ -1,9 +1,14 @@
-
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { 
-  ArrowRight, BookOpen, ShieldCheck, Quote, 
-  ChevronRight, ChevronLeft, Sparkles, Sword, 
-  Play, GraduationCap, X, Video, Monitor, PlayCircle, Shield, Share2
+import React, { useEffect, useMemo, useState } from 'react';
+import {
+  ArrowRight,
+  BookOpen,
+  GraduationCap,
+  Play,
+  Share2,
+  Shield,
+  Sparkles,
+  Sword,
+  X,
 } from 'lucide-react';
 import { getFaithHeroes } from '../../services/academy/faithService';
 
@@ -23,13 +28,11 @@ interface HeroProfile {
   videoUrl: string;
 }
 
-const CATEGORIES = ['Zote', 'Wapiganaji', 'Wanawake', 'Manabii'];
+const CATEGORIES = ['Zote', 'Wapiganaji', 'Wanawake', 'Manabii'] as const;
 
 const normalizeVideoUrl = (value: string): string => {
   const raw = (value || '').trim();
-  if (!raw) {
-    return '';
-  }
+  if (!raw) return '';
 
   try {
     const url = new URL(raw);
@@ -42,9 +45,7 @@ const normalizeVideoUrl = (value: string): string => {
     }
 
     if (host.includes('youtube.com')) {
-      if (path.startsWith('/embed/')) {
-        return raw;
-      }
+      if (path.startsWith('/embed/')) return raw;
       if (path.startsWith('/watch')) {
         const id = url.searchParams.get('v');
         return id ? `https://www.youtube.com/embed/${id}` : raw;
@@ -63,9 +64,7 @@ const normalizeVideoUrl = (value: string): string => {
 
 const withAutoplay = (value: string): string => {
   const normalized = normalizeVideoUrl(value);
-  if (!normalized) {
-    return normalized;
-  }
+  if (!normalized) return '';
   return `${normalized}${normalized.includes('?') ? '&' : '?'}autoplay=1`;
 };
 
@@ -74,11 +73,22 @@ const isIframeVideoSource = (value: string): boolean => {
   return /youtube\.com\/embed|player\.vimeo\.com/i.test(normalized);
 };
 
+const splitParagraphs = (value: string): string[] =>
+  (value || '')
+    .split(/\r?\n+/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+
+const copyShareText = async (hero: HeroProfile): Promise<void> => {
+  const shareUrl = window.location.href;
+  const text = `God Cares 365 - ${hero.name}: ${hero.title}`;
+  await navigator.clipboard.writeText(`${text} ${shareUrl}`);
+};
+
 export const FaithBuilder: React.FC = () => {
   const [activeHero, setActiveHero] = useState<string | null>(null);
-  const [activeCategory, setActiveCategory] = useState('Zote');
+  const [activeCategory, setActiveCategory] = useState<(typeof CATEGORIES)[number]>('Zote');
   const [showVideoInModal, setShowVideoInModal] = useState(false);
-  const scrollRef = useRef<HTMLDivElement>(null);
   const [heroes, setHeroes] = useState<HeroProfile[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -112,306 +122,303 @@ export const FaithBuilder: React.FC = () => {
       }
     };
 
-    loadHeroes();
+    void loadHeroes();
   }, []);
 
-  const filteredHeroes = useMemo(() => {
-    return heroes.filter(h => activeCategory === 'Zote' || h.category === activeCategory);
-  }, [activeCategory, heroes]);
+  const filteredHeroes = useMemo(
+    () => heroes.filter((hero) => activeCategory === 'Zote' || hero.category === activeCategory),
+    [activeCategory, heroes],
+  );
 
-  const scroll = (direction: 'left' | 'right') => {
-    if (scrollRef.current) {
-      const { scrollLeft, clientWidth } = scrollRef.current;
-      const scrollTo = direction === 'left' ? scrollLeft - clientWidth : scrollLeft + clientWidth;
-      scrollRef.current.scrollTo({ left: scrollTo, behavior: 'smooth' });
-    }
-  };
+  const currentHero = useMemo(
+    () => heroes.find((hero) => hero.id === activeHero) || null,
+    [activeHero, heroes],
+  );
 
   const handleHeroOpen = (id: string) => {
     setActiveHero(id);
     setShowVideoInModal(false);
   };
 
-  const handleShare = async (e: React.MouseEvent, hero: HeroProfile) => {
-    e.stopPropagation();
+  const handleShare = async (hero: HeroProfile) => {
     const shareData = {
       title: `God Cares 365: ${hero.name}`,
-      text: `Jifunze kuhusu ${hero.name} (${hero.title}) na jinsi imani yake ilivyobadili dunia kupitia God Cares 365.`,
+      text: `${hero.name} - ${hero.title}`,
       url: window.location.href,
     };
     try {
       if (navigator.share) {
         await navigator.share(shareData);
-      } else {
-        navigator.clipboard.writeText(`${shareData.text} ${shareData.url}`);
-        alert('Imeandikwa kwenye clipboard! Unaweza ku-paste sasa.');
+        return;
       }
-    } catch (err) {
-      console.error('Error sharing:', err);
+      await copyShareText(hero);
+      window.alert('Link imenakiliwa. Unaweza kuipaste sasa.');
+    } catch {
+      // User cancelled share or browser blocked. No hard failure needed.
     }
   };
 
-  const currentHero = heroes.find(h => h.id === activeHero);
-
   return (
-    <div className="animate-fade-in pb-40 max-w-full mx-auto space-y-8 overflow-hidden">
-      
-      {/* 1. IMPACT HEADER */}
-      <section className="relative pt-12 pb-2 px-6 text-center space-y-4">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-5xl h-60 bg-gold-500/5 blur-[120px] rounded-full pointer-events-none"></div>
-        
-        <div className="relative z-10 space-y-4">
-          <div className="inline-flex items-center gap-2 px-4 py-1 bg-slate-950 border border-gold-500/20 rounded-full">
-             <span className="text-[8px] font-black tracking-[0.3em] uppercase text-gold-500">Kuza Imani yako</span>
-          </div>
-          
-          <div className="space-y-2">
-            <h1 className="text-4xl md:text-7xl font-black text-white tracking-tighter uppercase leading-[0.9]">
-              MASHUJAA WA <br/>
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-gold-400 via-gold-500 to-gold-400 italic">IMANI.</span>
-            </h1>
-            <p className="text-slate-500 font-serif italic text-sm md:text-lg max-w-xl mx-auto opacity-70">
-              "Ulimwengu haukuwastahili hawa..." - Waebrania 11:38.
-            </p>
-          </div>
+    <div className="animate-fade-in pb-28 md:pb-32 max-w-6xl mx-auto px-3 sm:px-4 md:px-6 space-y-6 md:space-y-8">
+      <section className="rounded-2xl border border-[color:var(--line-strong)] bg-[color:var(--surface-2)] p-4 sm:p-5 md:p-7 shadow-sm">
+        <div className="inline-flex items-center gap-2 rounded-full border border-gold-500/30 bg-gold-100/60 dark:bg-gold-900/25 px-3 py-1.5">
+          <Sparkles size={12} className="text-gold-600 dark:text-gold-300" />
+          <span className="text-[10px] font-black uppercase tracking-[0.18em] text-gold-700 dark:text-gold-300">Kuza Imani Yako</span>
         </div>
+        <h1 className="mt-4 text-2xl sm:text-3xl md:text-5xl font-black leading-tight text-slate-900 dark:text-slate-100">
+          Mashujaa wa Imani
+        </h1>
+        <p className="mt-2 text-sm sm:text-base font-medium text-slate-600 dark:text-slate-300 leading-relaxed max-w-3xl">
+          Chagua shujaa, soma simulizi yake, na jifunze somo la imani kwa mpangilio safi na rahisi kusoma.
+        </p>
       </section>
 
-      {/* 2. CATEGORY SELECTOR */}
-      <section className="relative z-30 flex justify-center px-4">
-         <div className="flex bg-slate-900/40 backdrop-blur-xl p-1 rounded-xl border border-white/5 shadow-xl overflow-x-auto scrollbar-hide max-w-full">
-            {CATEGORIES.map(cat => (
-              <button 
-                key={cat}
-                onClick={() => setActiveCategory(cat)}
-                className={`px-5 py-2 rounded-lg text-[8px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${
-                  activeCategory === cat 
-                    ? 'bg-gold-500 text-slate-950 shadow-lg' 
-                    : 'text-slate-500 hover:text-white'
-                }`}
-              >
-                {cat}
-              </button>
-            ))}
-         </div>
+      <section className="flex flex-wrap gap-2">
+        {CATEGORIES.map((cat) => (
+          <button
+            key={cat}
+            onClick={() => setActiveCategory(cat)}
+            className={`px-4 py-2 rounded-full text-[10px] sm:text-xs font-black uppercase tracking-[0.12em] transition-colors border ${
+              activeCategory === cat
+                ? 'bg-gold-500 text-[#211600] border-gold-500'
+                : 'bg-[color:var(--surface-2)] text-[color:var(--text-muted)] border-[color:var(--line-strong)] hover:text-[color:var(--text-primary)]'
+            }`}
+          >
+            {cat}
+          </button>
+        ))}
       </section>
 
       {loading && (
-        <div className="text-center text-xs font-black uppercase tracking-widest text-slate-400">Inapakia mashujaa...</div>
+        <div className="rounded-xl border border-[color:var(--line-strong)] bg-[color:var(--surface-2)] px-4 py-4 text-center text-xs font-black uppercase tracking-[0.16em] text-[color:var(--text-muted)]">
+          Inapakia mashujaa wa imani...
+        </div>
       )}
+
       {error && (
-        <div className="text-center text-xs font-black uppercase tracking-widest text-red-500">{error}</div>
+        <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-4 text-center text-xs font-black uppercase tracking-[0.12em] text-red-600 dark:text-red-400">
+          {error}
+        </div>
       )}
 
-      {/* 3. HORIZONTAL SCROLL SECTION */}
-      <section className="relative px-4 md:px-20 group min-h-[350px]">
-        {/* Navigation Arrows */}
-        <button 
-          onClick={() => scroll('left')}
-          className="absolute left-2 md:left-10 top-1/2 -translate-y-1/2 z-40 p-2 md:p-4 bg-black/50 backdrop-blur-xl border border-white/10 rounded-full text-gold-500 transition-all hover:bg-gold-500 hover:text-black shadow-2xl flex"
-        >
-          <ChevronLeft size={20} className="md:w-6 md:h-6" />
-        </button>
-        <button 
-          onClick={() => scroll('right')}
-          className="absolute right-2 md:right-10 top-1/2 -translate-y-1/2 z-40 p-2 md:p-4 bg-black/50 backdrop-blur-xl border border-white/10 rounded-full text-gold-500 transition-all hover:bg-gold-500 hover:text-black shadow-2xl flex"
-        >
-          <ChevronRight size={20} className="md:w-6 md:h-6" />
-        </button>
+      {!loading && !error && filteredHeroes.length === 0 && (
+        <div className="rounded-xl border border-[color:var(--line-strong)] bg-[color:var(--surface-2)] px-4 py-7 text-center space-y-2">
+          <Shield size={24} className="mx-auto text-[color:var(--text-muted)]" />
+          <p className="text-xs font-black uppercase tracking-[0.14em] text-[color:var(--text-muted)]">Hakuna taarifa katika kundi hili.</p>
+        </div>
+      )}
 
-        {/* Scroll Container */}
-        <div 
-          ref={scrollRef}
-          className="flex gap-4 overflow-x-auto scroll-smooth snap-x snap-mandatory scrollbar-hide py-4 px-4 md:px-10"
-        >
-          {filteredHeroes.length > 0 ? filteredHeroes.map((hero) => (
-            <div 
+      {!loading && !error && filteredHeroes.length > 0 && (
+        <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-5">
+          {filteredHeroes.map((hero) => (
+            <article
               key={hero.id}
+              role="button"
+              tabIndex={0}
               onClick={() => handleHeroOpen(hero.id)}
-              className="min-w-[68vw] md:min-w-[280px] snap-center cursor-pointer group/card relative transition-all duration-500 animate-fade-in"
+              onKeyDown={(event) => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                  event.preventDefault();
+                  handleHeroOpen(hero.id);
+                }
+              }}
+              className="group rounded-2xl overflow-hidden border border-[color:var(--line-strong)] bg-[color:var(--surface-2)] shadow-sm hover:shadow-lg transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-500/60"
             >
-              {/* Card Container */}
-                <div className="relative h-[380px] md:h-[430px] bg-slate-900 rounded-3xl border border-white/5 overflow-hidden transition-all duration-700 group-hover/card:border-gold-500/30 shadow-xl">
-                <div className="h-full w-full relative">
-                  {hero.image ? (
-                    <img src={hero.image} className="w-full h-full object-cover grayscale opacity-30 group-hover/card:grayscale-0 group-hover/card:opacity-100 group-hover/card:scale-105 transition-all duration-1000" alt="" />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-xs font-black uppercase tracking-widest text-slate-400">
-                      Hakuna picha
-                    </div>
-                  )}
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/70 to-transparent"></div>
-                  
-                  {/* Share Button (Mobile-accessible) */}
-                  <div className="absolute top-4 right-4 z-20">
-                     <button 
-                       onClick={(e) => handleShare(e, hero)}
-                       className="p-2.5 bg-black/40 backdrop-blur-md hover:bg-gold-500 hover:text-black rounded-lg text-white transition-all border border-white/10 shadow-lg"
-                     >
-                       <Share2 size={14} />
-                     </button>
+              <div className="relative h-48 bg-slate-900">
+                {hero.image ? (
+                  <img src={hero.image} alt={hero.name} className="w-full h-full object-cover" />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-[10px] font-black uppercase tracking-[0.14em] text-slate-300">
+                    Hakuna picha
                   </div>
-
-                  {/* Content Overlay */}
-                  <div className="absolute bottom-0 left-0 right-0 p-5 space-y-2">
-                    <div className="space-y-0.5">
-                       <h3 className="text-2xl font-black text-white uppercase tracking-tighter italic leading-none">{hero.name}</h3>
-                       <p className="text-gold-400 text-[7px] font-black uppercase tracking-[0.3em]">{hero.title}</p>
-                    </div>
-                    
-                    <div className="h-[1px] w-8 bg-gold-500/50 group-hover/card:w-20 transition-all duration-700"></div>
-                    
-                    <div className="space-y-2">
-                       <p className="text-slate-400 text-[10px] leading-relaxed font-medium italic line-clamp-2">
-                          "{hero.faithAction}"
-                       </p>
-                       <div className="flex items-center justify-between pt-1">
-                         <span className="text-[7px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-1 group-hover/card:text-gold-500">
-                            FUNGUA <ChevronRight size={10} />
-                         </span>
-                         <span className="text-[7px] font-bold text-slate-600 uppercase tracking-widest">{hero.period}</span>
-                       </div>
-                    </div>
+                )}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/20 to-transparent" />
+                <button
+                  type="button"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    void handleShare(hero);
+                  }}
+                  className="absolute top-3 right-3 inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/30 bg-black/35 text-white hover:bg-gold-500 hover:text-[#1f1600] hover:border-gold-500 transition-colors"
+                  aria-label={`Shiriki ${hero.name}`}
+                >
+                  <Share2 size={15} />
+                </button>
+                <div className="absolute bottom-3 left-3 right-3 flex items-end justify-between gap-2">
+                  <div className="min-w-0">
+                    <h3 className="text-xl font-black text-white uppercase tracking-tight leading-none">{hero.name}</h3>
+                    <p className="mt-1 text-[10px] font-black uppercase tracking-[0.12em] text-gold-300 truncate">{hero.title}</p>
                   </div>
+                  <span className="shrink-0 rounded-full border border-white/35 bg-black/45 px-2 py-1 text-[9px] font-black uppercase tracking-[0.1em] text-white">
+                    {hero.period}
+                  </span>
                 </div>
               </div>
-            </div>
-          )) : (
-            <div className="w-full flex flex-col items-center justify-center text-slate-700 py-16 space-y-4 opacity-50">
-               <Shield size={48} />
-               <p className="font-black uppercase tracking-[0.3em] text-[10px]">Hakuna shujaa hapa...</p>
-            </div>
-          )}
-        </div>
-      </section>
 
-      {/* 4. HERO IMMERSIVE MODAL */}
+              <div className="p-4 space-y-3">
+                <p className="text-sm font-medium text-slate-700 dark:text-slate-300 leading-relaxed line-clamp-2">
+                  {hero.challenge}
+                </p>
+                <div className="rounded-xl border border-gold-500/20 bg-gold-50/80 dark:bg-gold-900/20 px-3 py-2.5">
+                  <p className="text-sm font-semibold italic text-slate-700 dark:text-slate-200 line-clamp-2">
+                    "{hero.faithAction}"
+                  </p>
+                </div>
+
+                <div className="flex items-center justify-between gap-3 pt-1">
+                  <span className="inline-flex items-center rounded-full bg-emerald-100 dark:bg-emerald-900/35 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.1em] text-emerald-800 dark:text-emerald-300">
+                    {hero.category}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      handleHeroOpen(hero.id);
+                    }}
+                    className="inline-flex items-center gap-1.5 rounded-full bg-emerald-700 hover:bg-emerald-800 px-3.5 py-1.5 text-[10px] font-black uppercase tracking-[0.12em] text-white"
+                  >
+                    Soma
+                    <ArrowRight size={12} />
+                  </button>
+                </div>
+              </div>
+            </article>
+          ))}
+        </section>
+      )}
+
       {currentHero && (
-        <div className="fixed inset-0 z-[500] bg-slate-950/98 backdrop-blur-3xl animate-fade-in flex items-center justify-center p-4 overflow-hidden">
-           <div className="w-full max-w-6xl h-full md:h-[85vh] bg-white dark:bg-slate-950 rounded-3xl overflow-hidden shadow-2xl flex flex-col md:flex-row border border-white/5 relative">
-              
-              <button 
-                onClick={() => setActiveHero(null)}
-                className="absolute top-4 right-4 z-[510] p-3 bg-black/40 hover:bg-red-600 text-white transition-all rounded-xl shadow-2xl"
-              >
-                <X size={20} />
-              </button>
+        <div className="fixed inset-0 z-[500] bg-slate-950/75 backdrop-blur-sm p-2 sm:p-4">
+          <div className="relative mx-auto h-full sm:h-[94vh] max-w-5xl overflow-hidden rounded-2xl border border-[color:var(--line-strong)] bg-[color:var(--surface-2)] shadow-2xl">
+            <button
+              onClick={() => setActiveHero(null)}
+              className="absolute top-3 right-3 z-[510] inline-flex h-10 w-10 items-center justify-center rounded-full border border-[color:var(--line-strong)] bg-[color:var(--surface-2)] text-[color:var(--text-primary)] hover:text-red-500 transition-colors"
+              aria-label="Funga"
+            >
+              <X size={18} />
+            </button>
 
-              <div className="w-full md:w-1/2 relative h-[300px] md:h-full bg-slate-900 overflow-hidden group">
-                 {showVideoInModal ? (
+            <div className="h-full overflow-y-auto">
+              <div className="grid grid-cols-1 lg:grid-cols-2 min-h-full">
+                <div className="relative bg-slate-900 min-h-[260px] sm:min-h-[330px] lg:min-h-full">
+                  {showVideoInModal ? (
                     currentHero.videoUrl ? (
-                      <div className="w-full h-full bg-black">
+                      <div className="w-full h-full">
                         {isIframeVideoSource(currentHero.videoUrl) ? (
-                          <iframe 
-                            src={withAutoplay(currentHero.videoUrl)} 
-                            className="w-full h-full border-none" 
+                          <iframe
+                            src={withAutoplay(currentHero.videoUrl)}
+                            className="w-full h-full border-none"
                             allow="autoplay; encrypted-media; picture-in-picture"
                             allowFullScreen
-                          ></iframe>
+                          />
                         ) : (
                           <video src={currentHero.videoUrl} className="w-full h-full" controls autoPlay />
                         )}
                       </div>
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center text-sm font-black uppercase tracking-widest text-slate-300">
+                      <div className="w-full h-full flex items-center justify-center text-xs font-black uppercase tracking-[0.12em] text-slate-300">
                         Hakuna video
                       </div>
                     )
-                 ) : (
+                  ) : (
                     <>
-                       {currentHero.image ? (
-                         <img src={currentHero.image} className="w-full h-full object-cover contrast-[1.1]" alt="" />
-                       ) : (
-                         <div className="w-full h-full flex items-center justify-center text-sm font-black uppercase tracking-widest text-slate-300">
-                           Hakuna picha
-                         </div>
-                       )}
-                       <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20"></div>
-                       
-                       {/* Play Button in Modal */}
-                       <div className="absolute inset-0 flex items-center justify-center z-30">
-                          <button 
-                            onClick={() => currentHero.videoUrl && setShowVideoInModal(true)}
-                            className={`w-20 h-20 backdrop-blur-sm border rounded-full flex items-center justify-center text-white transition-all shadow-2xl animate-pulse-slow group/btn ${currentHero.videoUrl ? 'bg-white/20 border-white/30 hover:bg-red-600 hover:border-red-600' : 'bg-white/10 border-white/15 cursor-not-allowed opacity-60'}`}
-                          >
-                             <Play size={32} fill="currentColor" className="ml-1 group-hover/btn:scale-110 transition-transform" />
-                          </button>
-                       </div>
-
-                       <div className="absolute bottom-6 left-6 right-6 space-y-4 z-20 pointer-events-none">
-                          <div className="space-y-1">
-                             <h2 className="text-3xl md:text-6xl font-black text-white uppercase tracking-tighter italic leading-none">{currentHero.name}</h2>
-                             <p className="text-gold-500 font-black text-[10px] md:text-sm uppercase tracking-[0.4em]">{currentHero.title}</p>
-                          </div>
-                          <div className="p-3 bg-white/5 backdrop-blur-md rounded-lg border border-white/10 w-fit">
-                             <p className="text-[14px] font-black text-white italic">{currentHero.verse}</p>
-                          </div>
-                       </div>
+                      {currentHero.image ? (
+                        <img src={currentHero.image} alt={currentHero.name} className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-xs font-black uppercase tracking-[0.12em] text-slate-300">
+                          Hakuna picha
+                        </div>
+                      )}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/25 to-transparent" />
                     </>
-                 )}
-              </div>
+                  )}
 
-              <div className="flex-1 flex flex-col h-full bg-white dark:bg-[#0f172a] overflow-hidden">
-                 <div className="flex-1 overflow-y-auto scrollbar-hide p-6 md:p-12 space-y-8">
-                    <section className="relative pl-6 border-l-4 border-gold-500 py-2">
-                       <p className="text-xl md:text-2xl font-serif italic text-slate-800 dark:text-slate-200 leading-tight">
-                          "{currentHero.swahiliQuote}"
-                       </p>
-                    </section>
+                  <div className="absolute bottom-4 left-4 right-4 space-y-2">
+                    <h2 className="text-2xl sm:text-3xl font-black text-white leading-tight">{currentHero.name}</h2>
+                    <p className="text-[11px] sm:text-xs font-black uppercase tracking-[0.12em] text-gold-300">{currentHero.title}</p>
+                    <p className="text-sm font-semibold italic text-slate-100">{currentHero.verse}</p>
+                  </div>
+                </div>
 
-                    <div className="space-y-6">
-                       <div className="space-y-2">
-                          <h4 className="text-[9px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
-                             <Sword size={14} className="text-red-500" /> Pambano la Imani
-                          </h4>
-                          <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-                             {currentHero.story}
-                          </p>
-                       </div>
+                <div className="p-4 sm:p-6 md:p-7 space-y-5 bg-[color:var(--surface-2)]">
+                  <div className="flex flex-wrap items-center gap-2">
+                    {currentHero.videoUrl && (
+                      <button
+                        type="button"
+                        onClick={() => setShowVideoInModal((prev) => !prev)}
+                        className="inline-flex items-center gap-2 rounded-full border border-[color:var(--line-strong)] bg-[color:var(--surface-3)] px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.12em] text-[color:var(--text-primary)] hover:border-gold-500/45"
+                      >
+                        <Play size={12} />
+                        {showVideoInModal ? 'Ficha Video' : 'Tazama Video'}
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => void handleShare(currentHero)}
+                      className="inline-flex items-center gap-2 rounded-full border border-[color:var(--line-strong)] bg-[color:var(--surface-3)] px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.12em] text-[color:var(--text-primary)] hover:border-gold-500/45"
+                    >
+                      <Share2 size={12} />
+                      Shiriki
+                    </button>
+                  </div>
 
-                       <div className="p-6 bg-primary-950 rounded-2xl border border-white/5 space-y-3 shadow-lg">
-                          <h4 className="text-[9px] font-black text-gold-500 uppercase tracking-widest">Hatua ya Shujaa</h4>
-                          <p className="text-lg font-bold text-white italic leading-tight">
-                             "{currentHero.faithAction}"
-                          </p>
-                       </div>
+                  <section className="rounded-xl border border-gold-500/25 bg-gold-50/70 dark:bg-gold-900/20 px-4 py-3">
+                    <p className="text-sm sm:text-base font-semibold italic leading-relaxed text-slate-700 dark:text-slate-200">
+                      "{currentHero.swahiliQuote}"
+                    </p>
+                  </section>
 
-                       <div className="space-y-2">
-                          <h4 className="text-[9px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
-                             <GraduationCap size={14} className="text-blue-500" /> Somo Kwako
-                          </h4>
-                          <div className="p-5 bg-slate-50 dark:bg-white/5 rounded-xl border border-slate-100 dark:border-white/10 italic text-sm text-slate-700 dark:text-slate-400 font-medium">
-                             "{currentHero.lesson}"
-                          </div>
-                       </div>
+                  <section className="space-y-2">
+                    <h4 className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">
+                      <Sword size={13} className="text-red-500" />
+                      Pambano la Imani
+                    </h4>
+                    <div className="space-y-3">
+                      {splitParagraphs(currentHero.story).map((paragraph, index) => (
+                        <p key={`${currentHero.id}-story-${index}`} className="text-sm sm:text-[15px] leading-7 text-slate-700 dark:text-slate-300">
+                          {paragraph}
+                        </p>
+                      ))}
                     </div>
+                  </section>
 
-                    <div className="pt-4 flex flex-col gap-4">
-                       <button 
-                         onClick={(e) => handleShare(e, currentHero)}
-                         className="w-full py-4 border border-gold-500/30 text-gold-500 rounded-xl font-black text-[9px] uppercase tracking-widest flex items-center justify-center gap-2"
-                       >
-                          <Share2 size={14}/> Share Shujaa Huyu
-                       </button>
+                  <section className="rounded-xl border border-emerald-500/30 bg-emerald-50 dark:bg-emerald-900/20 px-4 py-3">
+                    <h4 className="text-[10px] font-black uppercase tracking-[0.14em] text-emerald-700 dark:text-emerald-300">Hatua ya Shujaa</h4>
+                    <p className="mt-2 text-sm sm:text-[15px] font-semibold italic leading-7 text-slate-800 dark:text-slate-100">
+                      "{currentHero.faithAction}"
+                    </p>
+                  </section>
+
+                  <section className="space-y-2">
+                    <h4 className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">
+                      <GraduationCap size={13} className="text-blue-500" />
+                      Somo Kwako
+                    </h4>
+                    <div className="rounded-xl border border-[color:var(--line-strong)] bg-[color:var(--surface-3)] px-4 py-3">
+                      <div className="space-y-3">
+                        {splitParagraphs(currentHero.lesson).map((paragraph, index) => (
+                          <p key={`${currentHero.id}-lesson-${index}`} className="text-sm sm:text-[15px] leading-7 text-slate-700 dark:text-slate-300">
+                            {paragraph}
+                          </p>
+                        ))}
+                      </div>
                     </div>
-                 </div>
+                  </section>
+
+                  <button
+                    type="button"
+                    onClick={() => setActiveHero(null)}
+                    className="inline-flex items-center gap-2 rounded-full bg-emerald-700 px-4 py-2 text-[10px] font-black uppercase tracking-[0.12em] text-white hover:bg-emerald-800"
+                  >
+                    <BookOpen size={12} />
+                    Rudi Kwenye Orodha
+                  </button>
+                </div>
               </div>
-           </div>
+            </div>
+          </div>
         </div>
       )}
-
-      <style>{`
-        .scrollbar-hide::-webkit-scrollbar { display: none; }
-        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
-        @keyframes ken-burns {
-          0% { transform: scale(1.1); }
-          100% { transform: scale(1); }
-        }
-        .animate-ken-burns { animation: ken-burns 15s ease-out forwards; }
-      `}</style>
     </div>
   );
 };
-
-
-
