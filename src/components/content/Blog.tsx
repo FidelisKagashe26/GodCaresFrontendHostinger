@@ -12,6 +12,8 @@ import {
 
 interface BlogPost {
   id: number;
+  shareKey?: string;
+  shareUrl?: string;
   title: string;
   excerpt: string;
   author: string;
@@ -135,6 +137,8 @@ export const Blog: React.FC<BlogProps> = ({ user, onRequireLogin }) => {
 
   const mapPost = (post: any): BlogPost => ({
     id: post.id,
+    shareKey: typeof post.share_key === 'string' ? post.share_key : '',
+    shareUrl: typeof post.share_url === 'string' ? post.share_url : '',
     title: post.title,
     excerpt: post.excerpt,
     author: post.author || 'Mwandishi',
@@ -155,9 +159,17 @@ export const Blog: React.FC<BlogProps> = ({ user, onRequireLogin }) => {
   const setPostQueryParam = (postId: number | null, replace = false) => {
     const next = new URLSearchParams(searchParams);
     if (postId) {
-      next.set('post', String(postId));
+      const selected = posts.find((item) => item.id === postId);
+      if (selected?.shareKey) {
+        next.set('share', selected.shareKey);
+        next.delete('post');
+      } else {
+        next.set('post', String(postId));
+        next.delete('share');
+      }
     } else {
       next.delete('post');
+      next.delete('share');
     }
     setSearchParams(next, { replace });
   };
@@ -225,10 +237,30 @@ export const Blog: React.FC<BlogProps> = ({ user, onRequireLogin }) => {
     let cancelled = false;
 
     const syncPostFromUrl = async () => {
+      const rawShareKey = (searchParams.get('share') || '').trim().toLowerCase();
       const rawPostId = (searchParams.get('post') || '').trim();
-      if (!rawPostId) {
+      if (!rawShareKey && !rawPostId) {
         if (activePost !== null) {
           closePost(false);
+        }
+        return;
+      }
+
+      if (rawShareKey) {
+        const matchedPost = posts.find((item) => (item.shareKey || '').toLowerCase() === rawShareKey);
+        if (matchedPost) {
+          if (activePost !== matchedPost.id) {
+            openPost(matchedPost.id, false);
+          }
+          return;
+        }
+
+        if (posts.length > 0) {
+          setErrorMessage('Makala uliyoifungua haijapatikana.');
+          const next = new URLSearchParams(searchParams);
+          next.delete('share');
+          next.delete('post');
+          setSearchParams(next, { replace: true });
         }
         return;
       }
@@ -240,6 +272,13 @@ export const Blog: React.FC<BlogProps> = ({ user, onRequireLogin }) => {
 
       const hasPost = posts.some((item) => item.id === postId);
       if (hasPost) {
+        const matchedPost = posts.find((item) => item.id === postId);
+        if (matchedPost?.shareKey) {
+          const next = new URLSearchParams(searchParams);
+          next.set('share', matchedPost.shareKey);
+          next.delete('post');
+          setSearchParams(next, { replace: true });
+        }
         if (activePost !== postId) {
           openPost(postId, false);
         }
@@ -360,7 +399,7 @@ export const Blog: React.FC<BlogProps> = ({ user, onRequireLogin }) => {
   };
 
   const handleShare = async (post: BlogPost) => {
-    const url = getBlogSharePageUrl(post.id);
+    const url = post.shareUrl || getBlogSharePageUrl(post.shareKey, post.id);
     const payload = {
       title: post.title,
       text: post.excerpt || `Soma makala: ${post.title}`,

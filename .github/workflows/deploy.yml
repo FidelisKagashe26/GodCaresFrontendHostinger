@@ -57,47 +57,67 @@ jobs:
         run: |
           set -euo pipefail
           test -d dist
+          test -f deploy/nginx/spa.conf
           tar -C dist -czf dist.tar.gz .
 
-      - name: Upload build to VPS (scp + tar)
+      - name: Upload build + Nginx config to VPS
         shell: bash
         run: |
           set -euo pipefail
 
-          # Upload tarball to /tmp
+          # Upload build tarball + nginx config to /tmp
           scp -i ~/.ssh/id_ed25519 \
             -o BatchMode=yes \
             -o StrictHostKeyChecking=yes \
             dist.tar.gz \
             "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/tmp/dist.tar.gz"
+          scp -i ~/.ssh/id_ed25519 \
+            -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes \
+            deploy/nginx/spa.conf \
+            "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/tmp/godcares365-spa.conf"
 
-          # Extract into web root (clean deploy)
+          # Extract into web root + install nginx site config
           ssh -i ~/.ssh/id_ed25519 \
             -o BatchMode=yes \
             -o StrictHostKeyChecking=yes \
             "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" \
             'set -euo pipefail
-             mkdir -p /var/www/godcares365
+             WEB_ROOT="/var/www/godcares365"
+             TMP_DEPLOY_DIR="$WEB_ROOT/.deploy_tmp"
+             NGINX_SOURCE="/tmp/godcares365-spa.conf"
+             NGINX_SITE="/etc/nginx/sites-available/godcares365.conf"
+             NGINX_SITE_ENABLED="/etc/nginx/sites-enabled/godcares365.conf"
+             run_privileged() {
+               if [ "$(id -u)" -eq 0 ]; then
+                 "$@"
+               elif command -v sudo >/dev/null 2>&1; then
+                 sudo -n "$@"
+               else
+                 "$@"
+               fi
+             }
+
+             mkdir -p "$WEB_ROOT"
 
              # extract to temp folder first
-             rm -rf /var/www/godcares365/.deploy_tmp
-             mkdir -p /var/www/godcares365/.deploy_tmp
-             tar -xzf /tmp/dist.tar.gz -C /var/www/godcares365/.deploy_tmp
+             rm -rf "$TMP_DEPLOY_DIR"
+             mkdir -p "$TMP_DEPLOY_DIR"
+             tar -xzf /tmp/dist.tar.gz -C "$TMP_DEPLOY_DIR"
              rm -f /tmp/dist.tar.gz
 
              # replace contents
-             rm -rf /var/www/godcares365/*
+             rm -rf "$WEB_ROOT"/*
              shopt -s dotglob
-             mv /var/www/godcares365/.deploy_tmp/* /var/www/godcares365/
-             rm -rf /var/www/godcares365/.deploy_tmp
-            '
+             mv "$TMP_DEPLOY_DIR"/* "$WEB_ROOT/"
+             rm -rf "$TMP_DEPLOY_DIR"
 
-      - name: Reload Nginx
-        shell: bash
-        run: |
-          set -euo pipefail
-          ssh -i ~/.ssh/id_ed25519 \
-            -o BatchMode=yes \
-            -o StrictHostKeyChecking=yes \
-            "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" \
-            "nginx -t && systemctl reload nginx"
+             # install and enable nginx site config
+             test -f "$NGINX_SOURCE"
+             run_privileged cp "$NGINX_SOURCE" "$NGINX_SITE"
+             run_privileged ln -sfn "$NGINX_SITE" "$NGINX_SITE_ENABLED"
+             rm -f "$NGINX_SOURCE"
+
+             run_privileged nginx -t
+             run_privileged systemctl reload nginx
+            '

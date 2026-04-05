@@ -22,13 +22,13 @@ View your app in AI Studio: https://ai.studio/apps/drive/1MQFImNGZ-mQmEI0OQn5G9T
 ## Production Routing (No 404 on Refresh)
 
 This app uses `BrowserRouter` with clean URLs (`/about-us`, `/blog`, etc.).
-For production behind Nginx, you must enable SPA fallback so refresh works on any page.
+For production behind Nginx, you must enable SPA fallback on the active HTTPS server block so refresh works on any page.
 
 Use the sample config at:
 
 `deploy/nginx/spa.conf`
 
-Critical rule:
+Critical rule (inside the live `server {}` block that serves your domain, usually `listen 443`):
 
 ```nginx
 location / {

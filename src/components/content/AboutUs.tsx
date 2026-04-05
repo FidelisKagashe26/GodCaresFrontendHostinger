@@ -58,6 +58,19 @@ const DEFAULT_LEADERS: TeamLeader[] = [
   },
 ];
 
+const CORE_ACCENTS = ['#166534', '#15803d', '#ca8a04', '#a16207'];
+
+const getLeaderAccent = (index: number) => CORE_ACCENTS[index % CORE_ACCENTS.length];
+
+const TOOL_ITEMS = [
+  { icon: <Microscope size={18} />, title: 'Uchambuzi', desc: 'Uchunguzi wa kina.', tone: 'text-emerald-700 bg-emerald-50 border-emerald-100' },
+  { icon: <Clock size={18} />, title: 'Nyakati', desc: 'Ramani za nyakati.', tone: 'text-amber-700 bg-amber-50 border-amber-100' },
+  { icon: <ShieldCheck size={18} />, title: 'Ufichuzi', desc: 'Kufichua uongo.', tone: 'text-emerald-700 bg-emerald-50 border-emerald-100' },
+  { icon: <Download size={18} />, title: 'Upakuaji', desc: 'Maktaba ya bure.', tone: 'text-amber-700 bg-amber-50 border-amber-100' },
+  { icon: <Target size={18} />, title: 'Imani', desc: 'Mashujaa wa imani.', tone: 'text-emerald-700 bg-emerald-50 border-emerald-100' },
+  { icon: <Activity size={18} />, title: 'Maendeleo', desc: 'Maendeleo yako.', tone: 'text-amber-700 bg-amber-50 border-amber-100' },
+];
+
 export const AboutUs: React.FC = () => {
   const [teamLeaders, setTeamLeaders] = useState<TeamLeader[]>(DEFAULT_LEADERS);
   const [teamError, setTeamError] = useState('');
@@ -103,11 +116,11 @@ export const AboutUs: React.FC = () => {
           <h2 className="text-2xl sm:text-3xl md:text-5xl font-black text-slate-900 dark:text-white uppercase tracking-tighter leading-none">
              Mungu Anajali, <br/><span className="text-gold-500">Ukweli Ni Muhimu.</span>
           </h2>
-          <div className="space-y-4 text-slate-600 dark:text-slate-400 text-sm sm:text-base leading-relaxed font-medium">
+          <div className="space-y-4 text-slate-700 dark:text-slate-300 text-base sm:text-lg leading-relaxed font-medium">
              <p>
                  Tunaishi katika kipindi ambacho ukweli unapotoshwa na kupuuzwa. God Cares 365 ilizaliwa kwa mzigo wa kuwasaidia watu wanaopotea na kuwaonyesha kwamba Mungu hajawaacha; ukweli wake ndio uhuru wa kweli.
              </p>
-             <div className="inline-block px-6 py-2 border-l-2 border-r-2 border-gold-500/30 italic text-slate-500 text-sm bg-slate-50 dark:bg-white/5 rounded-lg">
+             <div className="inline-block px-6 py-3 border-l-2 border-r-2 border-gold-500/30 italic text-slate-600 dark:text-slate-300 text-base bg-slate-50 dark:bg-white/5 rounded-lg">
                 "Hatuhubiri dini, tunahubiri Kristo na Neno lake lililo hai."
              </div>
           </div>
@@ -116,7 +129,7 @@ export const AboutUs: React.FC = () => {
           <div className="pt-2 flex justify-center">
              <div className="flex gap-2 items-center opacity-70">
                 <Church size={16} className="text-slate-400 mt-0.5 shrink-0" />
-                <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-500 font-bold uppercase tracking-[0.08em] leading-tight">
+                <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400 font-semibold leading-tight">
                    God Cares 365 ni huduma huru inayofuata miongozo ya Kanisa la Waadventista Wasabato.
                 </p>
              </div>
@@ -126,22 +139,24 @@ export const AboutUs: React.FC = () => {
        {/* 2. Leadership Section - Square/Boxy Cards */}
        <section className="space-y-6 pt-4 md:pt-8">
           <div className="text-center space-y-2">
-             <h3 className="text-xs sm:text-sm font-black text-gold-500 uppercase tracking-[0.2em]">TIMU YA UONGOZI</h3>
+             <h3 className="text-sm font-black text-gold-500 uppercase tracking-[0.16em]">TIMU YA UONGOZI</h3>
              <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">Viongozi Wetu</h2>
           </div>
 
           {teamError && (
-            <div className="text-center text-xs font-bold uppercase tracking-widest text-amber-600 dark:text-amber-400">
+            <div className="text-center text-sm font-semibold text-amber-700 dark:text-amber-400">
               {teamError}
             </div>
           )}
 
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 sm:gap-5">
-             {leaders.map((leader) => (
-                <div key={leader.id} className="flex flex-col items-center justify-center text-center gap-4 bg-white dark:bg-slate-900 p-5 sm:p-6 rounded-2xl border border-slate-100 dark:border-white/5 shadow-sm hover:border-gold-500/30 hover:shadow-lg transition-all group relative overflow-hidden min-h-[228px] sm:aspect-square">
-                   <div className="absolute top-0 left-0 w-full h-1" style={{ backgroundColor: leader.accentColor }}></div>
+             {leaders.map((leader, index) => {
+               const accentColor = getLeaderAccent(index);
+               return (
+                <div key={leader.id} className="flex flex-col items-center justify-center text-center gap-3 bg-white dark:bg-slate-900 p-5 sm:p-6 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm hover:border-gold-400/40 hover:shadow-lg transition-all group relative overflow-hidden min-h-[236px] sm:aspect-square">
+                   <div className="absolute top-0 left-0 w-full h-1.5" style={{ backgroundColor: accentColor }}></div>
                     
-                    <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl flex items-center justify-center text-white shadow-lg shrink-0 group-hover:scale-110 transition-transform mb-1 overflow-hidden" style={{ backgroundColor: leader.accentColor }}>
+                    <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl flex items-center justify-center text-white shadow-lg shrink-0 group-hover:scale-105 transition-transform mb-1 overflow-hidden" style={{ backgroundColor: accentColor }}>
                        {leader.avatarUrl ? (
                          <img src={leader.avatarUrl} alt={leader.name} className="w-full h-full object-cover" />
                        ) : (
@@ -150,20 +165,20 @@ export const AboutUs: React.FC = () => {
                     </div>
                     
                     <div className="space-y-1">
-                      <h4 className="text-sm sm:text-base font-black text-slate-900 dark:text-white uppercase tracking-tight">{leader.name}</h4>
-                      <p className="text-xs sm:text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-[0.1em] leading-tight w-full px-2">{leader.role}</p>
+                      <h4 className="text-base sm:text-lg font-black text-slate-900 dark:text-white leading-tight">{leader.name}</h4>
+                      <p className="text-sm sm:text-base font-semibold text-slate-600 dark:text-slate-300 leading-snug w-full px-1">{leader.role}</p>
                     </div>
 
-                    <div className="flex gap-3 mt-1 opacity-60 group-hover:opacity-100 transition-opacity">
+                    <div className="flex gap-3 mt-1 opacity-80 group-hover:opacity-100 transition-opacity">
                        {leader.email && (
-                        <a href={`mailto:${leader.email}`} className="p-2.5 bg-slate-50 dark:bg-white/5 rounded-lg text-slate-500 dark:text-slate-400 hover:text-primary-600 hover:bg-white dark:hover:bg-white/10 transition-all border border-transparent hover:border-slate-100 dark:hover:border-white/10"><Mail size={14}/></a>
+                        <a href={`mailto:${leader.email}`} className="p-2.5 bg-amber-50 dark:bg-white/5 rounded-lg text-amber-700 dark:text-amber-300 hover:bg-amber-100 transition-all border border-amber-100 dark:border-white/10"><Mail size={16}/></a>
                        )}
                        {leader.phone && (
-                        <a href={`tel:${leader.phone}`} className="p-2.5 bg-slate-50 dark:bg-white/5 rounded-lg text-slate-500 dark:text-slate-400 hover:text-green-600 hover:bg-white dark:hover:bg-white/10 transition-all border border-transparent hover:border-slate-100 dark:hover:border-white/10"><Phone size={14}/></a>
+                        <a href={`tel:${leader.phone}`} className="p-2.5 bg-emerald-50 dark:bg-white/5 rounded-lg text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 transition-all border border-emerald-100 dark:border-white/10"><Phone size={16}/></a>
                        )}
                     </div>
                 </div>
-             ))}
+             )})}
           </div>
         </section>
 
@@ -182,7 +197,7 @@ export const AboutUs: React.FC = () => {
                     </div>
                  </div>
                 <h4 className="text-base sm:text-lg font-black text-slate-900 dark:text-white uppercase tracking-tight text-center">{featuredLeader.name}</h4>
-                <p className="text-xs sm:text-sm font-black text-gold-500 uppercase tracking-[0.1em] text-center">{featuredLeader.role}</p>
+                <p className="text-sm sm:text-base font-black text-gold-500 uppercase tracking-[0.08em] text-center">{featuredLeader.role}</p>
              </div>
 
              {/* Right Column: The Message */}
@@ -194,7 +209,7 @@ export const AboutUs: React.FC = () => {
                    </h3>
                 </div>
                 
-                <div className="space-y-4 text-slate-600 dark:text-slate-300 text-sm md:text-base leading-relaxed font-serif">
+                <div className="space-y-4 text-slate-700 dark:text-slate-200 text-base md:text-lg leading-relaxed font-serif">
                    <p>
                       "Habari, rafiki! Umechanganyikiwa? Umedanganywa? Unautafuta ukweli? Una roho ya udadisi? Unataka kujifunza zaidi? Je, unajua uko ndani kabisa ya moyo wa Mungu?"
                    </p>
@@ -210,7 +225,7 @@ export const AboutUs: React.FC = () => {
                 </div>
 
                 <div className="pt-4 border-t border-slate-100 dark:border-white/5 flex items-start justify-between gap-3">
-                   <p className="text-xs sm:text-sm font-black text-slate-400 uppercase tracking-[0.08em] leading-relaxed">
+                   <p className="text-sm sm:text-base font-semibold text-slate-500 dark:text-slate-400 leading-relaxed">
                       "Amani ya Bwana wetu Yesu Kristo, na upendo wa Mungu Baba, na ushirika wa Roho Mtakatifu uwe pamoja nawe. Amina."
                    </p>
                    <div className="text-gold-500 opacity-50">
@@ -227,7 +242,7 @@ export const AboutUs: React.FC = () => {
              
              {/* Section Header */}
               <div className="text-center space-y-2">
-                <div className="inline-flex items-center gap-2 text-gold-500 font-black text-xs sm:text-sm uppercase tracking-[0.18em]">
+                <div className="inline-flex items-center gap-2 text-gold-500 font-black text-sm uppercase tracking-[0.14em]">
                    <Activity size={12} className="animate-pulse" /> Hali
                 </div>
                 <h3 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">
@@ -240,7 +255,7 @@ export const AboutUs: React.FC = () => {
                  {/* LEFT: Compact Stats */}
                  <div className="space-y-6">
                    <div className="flex items-center justify-between border-b border-slate-200 dark:border-white/10 pb-2">
-                      <h4 className="text-xs sm:text-sm font-black text-slate-700 dark:text-white uppercase tracking-[0.12em]">Mwenendo</h4>
+                      <h4 className="text-sm font-black text-slate-700 dark:text-white uppercase tracking-[0.08em]">Mwenendo</h4>
                       <div className="flex gap-2">
                          <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></div>
                          <span className="text-xs font-bold text-green-500 uppercase">Sasa</span>
@@ -260,7 +275,7 @@ export const AboutUs: React.FC = () => {
                                <span className="text-sm sm:text-base font-black text-slate-900 dark:text-white">100%</span>
                             </div>
                          </div>
-                         <p className="text-xs sm:text-sm font-bold text-slate-700 dark:text-white uppercase text-center">Biblia</p>
+                          <p className="text-sm font-bold text-slate-700 dark:text-white uppercase text-center">Biblia</p>
                        </div>
 
                        {/* Circular Item 2 */}
@@ -268,13 +283,13 @@ export const AboutUs: React.FC = () => {
                          <div className="relative w-20 h-20 sm:w-24 sm:h-24">
                             <svg className="w-full h-full rotate-[-90deg]" viewBox="0 0 36 36">
                                <path className="text-slate-200 dark:text-slate-800" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" strokeWidth="3" />
-                               <path className="text-blue-500" strokeDasharray="85, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" strokeWidth="3" />
+                               <path className="text-emerald-600" strokeDasharray="85, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" strokeWidth="3" />
                             </svg>
                             <div className="absolute inset-0 flex items-center justify-center flex-col">
                                <span className="text-sm sm:text-base font-black text-slate-900 dark:text-white">7+</span>
                             </div>
                          </div>
-                         <p className="text-xs sm:text-sm font-bold text-slate-700 dark:text-white uppercase text-center">Lugha</p>
+                          <p className="text-sm font-bold text-slate-700 dark:text-white uppercase text-center">Lugha</p>
                        </div>
 
                        {/* Circular Item 3 */}
@@ -284,14 +299,14 @@ export const AboutUs: React.FC = () => {
                                <span className="text-sm sm:text-base font-black text-slate-900 dark:text-white block">50K</span>
                             </div>
                          </div>
-                         <p className="text-xs sm:text-sm font-bold text-slate-700 dark:text-white uppercase text-center">Watu</p>
+                          <p className="text-sm font-bold text-slate-700 dark:text-white uppercase text-center">Watu</p>
                        </div>
                     </div>
 
                     {/* Compact Bar */}
                    <div className="bg-[color:var(--surface-1)] dark:bg-white/5 p-4 sm:p-5 rounded-lg border border-slate-200 dark:border-white/5">
                        <div className="flex justify-between items-end mb-1">
-                         <h5 className="text-xs sm:text-sm font-black text-slate-700 dark:text-white uppercase tracking-[0.08em]">Mataifa</h5>
+                         <h5 className="text-sm font-black text-slate-700 dark:text-white uppercase tracking-[0.06em]">Mataifa</h5>
                          <span className="text-base sm:text-lg font-black text-gold-500">12+</span>
                        </div>
                        <div className="h-1.5 w-full bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
@@ -303,23 +318,16 @@ export const AboutUs: React.FC = () => {
                  {/* RIGHT: Compact Tools Grid */}
                  <div className="space-y-6">
                    <div className="flex items-center justify-between border-b border-slate-200 dark:border-white/10 pb-2">
-                      <h4 className="text-xs sm:text-sm font-black text-slate-700 dark:text-white uppercase tracking-[0.12em]">Zana</h4>
+                      <h4 className="text-sm font-black text-slate-700 dark:text-white uppercase tracking-[0.08em]">Zana</h4>
                       <Zap size={14} className="text-gold-500" />
                    </div>
 
                    <div className="grid grid-cols-2 gap-3">
-                      {[
-                         { icon: <Microscope size={16} />, title: "Uchambuzi", desc: "Uchunguzi wa kina.", color: "text-purple-500 dark:text-purple-400" },
-                         { icon: <Clock size={16} />, title: "Nyakati", desc: "Ramani za nyakati.", color: "text-blue-500 dark:text-blue-400" },
-                         { icon: <ShieldCheck size={16} />, title: "Ufichuzi", desc: "Kufichua uongo.", color: "text-red-500 dark:text-red-400" },
-                         { icon: <Download size={16} />, title: "Upakuaji", desc: "Maktaba ya bure.", color: "text-green-500 dark:text-green-400" },
-                         { icon: <Target size={16} />, title: "Imani", desc: "Mashujaa wa imani.", color: "text-gold-500" },
-                         { icon: <Activity size={16} />, title: "Maendeleo", desc: "Maendeleo yako.", color: "text-cyan-500 dark:text-cyan-400" }
-                      ].map((tool, i) => (
+                      {TOOL_ITEMS.map((tool, i) => (
                          <div key={i} className="bg-[color:var(--surface-1)] dark:bg-white/5 hover:bg-[color:var(--surface-3)] dark:hover:bg-white/10 p-3 sm:p-4 rounded-xl border border-slate-200 dark:border-white/5 transition-all group cursor-default">
-                            <div className={`mb-2 ${tool.color} bg-white dark:bg-white/5 w-fit p-2 rounded-lg group-hover:scale-110 transition-transform shadow-sm`}>{tool.icon}</div>
-                            <h5 className="text-xs sm:text-sm font-black text-slate-900 dark:text-white uppercase tracking-widest mb-1">{tool.title}</h5>
-                            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-snug font-medium">{tool.desc}</p>
+                            <div className={`mb-2 ${tool.tone} w-fit p-2 rounded-lg group-hover:scale-105 transition-transform shadow-sm border`}>{tool.icon}</div>
+                            <h5 className="text-sm sm:text-base font-black text-slate-900 dark:text-white mb-1 leading-tight">{tool.title}</h5>
+                            <p className="text-sm sm:text-base text-slate-600 dark:text-slate-300 leading-relaxed font-medium">{tool.desc}</p>
                          </div>
                       ))}
                    </div>
@@ -344,7 +352,7 @@ export const AboutUs: React.FC = () => {
           </div>
 
           <div className="max-w-md mx-auto relative group">
-             <div className="absolute -inset-1 bg-gradient-to-r from-gold-500 to-primary-600 rounded-xl blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
+             <div className="absolute -inset-1 bg-gradient-to-r from-gold-500 to-emerald-600 rounded-xl blur opacity-25 group-hover:opacity-45 transition duration-700"></div>
              <div className="relative flex flex-col sm:flex-row sm:items-center bg-white dark:bg-slate-900 rounded-xl p-1 border border-slate-200 dark:border-white/10 shadow-xl gap-1.5 sm:gap-0">
                 <div className="pl-3 sm:pl-4 text-slate-400 hidden sm:block">
                    <Mail size={18} />
@@ -352,15 +360,15 @@ export const AboutUs: React.FC = () => {
                 <input
                   type="email"
                   placeholder="Weka barua pepe yako hapa..."
-                  className="w-full bg-transparent px-3 py-3 text-sm font-bold text-slate-900 dark:text-white placeholder:text-slate-400 outline-none"
+                  className="w-full bg-transparent px-3 py-3 text-base font-semibold text-slate-900 dark:text-white placeholder:text-slate-400 outline-none"
                 />
-                <button className="bg-primary-900 text-gold-400 px-4 sm:px-6 py-2.5 rounded-lg font-black text-xs sm:text-sm uppercase tracking-[0.1em] hover:bg-gold-500 hover:text-primary-950 transition-all shadow-lg shrink-0 flex items-center justify-center gap-1 group/btn w-full sm:w-auto">
+                <button className="bg-emerald-700 text-white px-4 sm:px-6 py-2.5 rounded-lg font-black text-sm uppercase tracking-[0.08em] hover:bg-gold-500 hover:text-slate-900 transition-all shadow-lg shrink-0 flex items-center justify-center gap-1 group/btn w-full sm:w-auto">
                    Jiunge <ArrowRight size={12} className="group-hover/btn:translate-x-1 transition-transform" />
                 </button>
              </div>
-          </div>
-          
-          <p className="text-xs sm:text-sm text-slate-400 dark:text-slate-600 font-bold uppercase tracking-[0.08em]">
+           </div>
+           
+          <p className="text-sm text-slate-500 dark:text-slate-500 font-semibold">
              Hatutumi spam. Unaweza kujiondoa wakati wowote.
           </p>
        </section>

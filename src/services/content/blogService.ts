@@ -2,6 +2,8 @@ import { invalidateCachedResult, withCachedResult } from "../core/cacheService";
 
 export interface BlogPostApi {
   id: number;
+  share_key?: string;
+  share_url?: string;
   title: string;
   excerpt: string;
   content: string;
@@ -75,6 +77,7 @@ const normalizePost = (item: BlogPostApi): BlogPostApi => ({
   ...item,
   image: toAbsoluteUrl(item.image),
   author_image: toAbsoluteUrl(item.author_image),
+  share_url: toAbsoluteUrl(item.share_url),
   liked: !!item.liked,
 });
 
@@ -183,7 +186,15 @@ export const createBlogComment = async (
   return (await response.json()) as BlogCommentApi;
 };
 
-export const getBlogSharePageUrl = (postId: number): string =>
-  `${API_BASE_URL}/api/share/blog/${postId}/`;
+export const getBlogSharePageUrl = (shareKey?: string, postId?: number): string => {
+  const token = (shareKey || "").trim();
+  if (token) {
+    return `${API_BASE_URL}/api/share/blog/${encodeURIComponent(token)}/`;
+  }
+  if (postId && Number.isInteger(postId) && postId > 0) {
+    return `${API_BASE_URL}/api/share/blog/${postId}/`;
+  }
+  return `${API_BASE_URL}/blog`;
+};
 
 
