@@ -104,9 +104,9 @@ export const ProfileModal: React.FC<{ user: any; onLogout: () => void; onClose: 
             
             <div className="space-y-0.5">
               <h3 className="text-xl font-black text-white uppercase tracking-tight leading-none">{user.name}</h3>
-              <p className="text-[10px] font-bold text-gold-500 uppercase tracking-widest mb-1 italic">{getUserTitle()}</p>
+              <p className="text-xs font-bold text-gold-500 uppercase tracking-[0.14em] mb-1 italic">{getUserTitle()}</p>
               <div className="flex gap-1.5 pt-1">
-                <span className="px-2 py-0.5 bg-blue-500/10 text-blue-400 rounded text-[8px] font-black uppercase tracking-widest border border-blue-500/20">Akaunti Hai</span>
+                <span className="px-2 py-0.5 bg-blue-500/10 text-blue-400 rounded text-[10px] font-black uppercase tracking-[0.14em] border border-blue-500/20">Akaunti Hai</span>
               </div>
             </div>
           </div>
@@ -115,23 +115,23 @@ export const ProfileModal: React.FC<{ user: any; onLogout: () => void; onClose: 
         <div className="p-5 space-y-5">
           <div className="grid grid-cols-3 gap-3">
             <div className="bg-white/5 p-3 rounded-xl border border-white/5 text-center">
-              <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1">Pointi (KP)</p>
+              <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.14em] mb-1">Pointi (KP)</p>
               <p className="text-xs font-bold text-white">{kpPoints.toLocaleString()}</p>
             </div>
             <div className="bg-white/5 p-3 rounded-xl border border-white/5 text-center">
-              <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1">Mfululizo</p>
-              <p className="text-xs font-bold text-white">{streak} <span className="text-[8px] text-orange-500">Siku</span></p>
+              <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.14em] mb-1">Mfululizo</p>
+              <p className="text-sm font-bold text-white">{streak} <span className="text-[10px] text-orange-500">Siku</span></p>
             </div>
             <div className="bg-white/5 p-3 rounded-xl border border-white/5 text-center">
-              <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1">Ngazi</p>
-              <p className="text-xs font-bold text-white">{completedModulesCount + 1}</p>
+              <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.14em] mb-1">Ngazi</p>
+              <p className="text-sm font-bold text-white">{completedModulesCount + 1}</p>
             </div>
           </div>
 
           <div className="bg-white/5 p-4 rounded-xl border border-white/5 space-y-3">
             <div className="flex justify-between items-center">
-              <h4 className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em]">Maendeleo ya Masomo</h4>
-              <span className="text-[10px] font-black text-gold-500">{completedModulesCount}/3 Moduli</span>
+              <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.14em]">Maendeleo ya Masomo</h4>
+              <span className="text-xs font-black text-gold-500">{completedModulesCount}/3 Moduli</span>
             </div>
             <div className="h-1.5 w-full bg-black/40 rounded-full overflow-hidden">
               <div 
@@ -157,7 +157,7 @@ export const ProfileModal: React.FC<{ user: any; onLogout: () => void; onClose: 
             ].map((item, i) => (
               <button key={i} onClick={() => handleFeatureClick(item.id)} className="flex items-center gap-3 p-3 bg-white/5 rounded-xl border border-transparent hover:border-gold-500/30 hover:bg-white/[0.08] transition-all group">
                 <div className={`${item.color} group-hover:scale-110 transition-transform`}>{item.icon}</div>
-                <span className="text-[9px] font-black text-slate-300 uppercase tracking-widest">{item.label}</span>
+                <span className="text-[10px] font-black text-slate-300 uppercase tracking-[0.14em]">{item.label}</span>
               </button>
             ))}
           </div>
@@ -208,22 +208,22 @@ const Tile: React.FC<TileProps> = ({ stage, isActive, onClick, index }) => {
     <button
       onClick={onClick}
       style={{ animationDelay: `${index * 60}ms` }}
-      className={`group relative flex h-[108px] w-full flex-col items-center justify-center gap-3 rounded-2xl border px-4 py-5 text-center transition-all duration-300 animate-morph-in shadow-sm ${
+      className={`group relative flex min-h-[70px] w-full items-center justify-start gap-2 rounded-2xl border px-3.5 py-2.5 text-left transition-all duration-300 animate-morph-in shadow-sm sm:h-[108px] sm:flex-col sm:items-center sm:justify-center sm:gap-3 sm:px-4 sm:py-5 sm:text-center ${
         isActive 
-          ? 'bg-gradient-to-br from-gold-300 to-gold-400 text-green-900 border-gold-500 shadow-[0_16px_30px_rgba(212,154,20,0.28)]'
-          : 'bg-[color:var(--surface-2)] border-[color:var(--border-subtle)] hover:-translate-y-1 hover:border-gold-500/60 hover:bg-[color:var(--surface-3)]'
+          ? 'bg-gradient-to-br from-gold-200 to-gold-300 text-green-950 border-gold-500 shadow-[0_12px_22px_rgba(212,154,20,0.22)]'
+          : 'bg-white/95 dark:bg-[color:var(--surface-3)]/88 border-green-200/80 dark:border-[color:var(--border-subtle)] hover:-translate-y-0.5 hover:border-gold-400/70 hover:bg-white'
       }`}
     >
-      <div className={`flex h-12 w-12 items-center justify-center rounded-2xl transition-all duration-300 ${
+      <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl transition-all duration-300 sm:h-12 sm:w-12 sm:rounded-2xl ${
          isActive
-           ? 'bg-white/70 text-green-900 shadow-sm'
-           : 'bg-green-100/70 dark:bg-green-900/25 text-green-700 dark:text-green-300 group-hover:bg-gold-100 group-hover:text-gold-700'
+           ? 'bg-white/75 text-green-900 shadow-sm'
+           : 'bg-green-100 text-green-700 dark:bg-green-900/25 dark:text-green-300 group-hover:bg-gold-100 group-hover:text-gold-700'
       }`}>
          {getIcon(stage.id)}
       </div>
 
-      <div className="w-full">
-        <h3 className={`text-[11px] sm:text-xs font-black uppercase tracking-[0.18em] leading-tight transition-colors ${
+      <div className="w-full min-w-0">
+        <h3 className={`text-[15px] sm:text-xs font-black uppercase tracking-[0.04em] sm:tracking-[0.12em] leading-tight transition-colors ${
             isActive ? 'text-green-900' : 'text-slate-800 dark:text-slate-100 group-hover:text-gold-700 dark:group-hover:text-gold-300'
         }`}>
           {stage.title}
@@ -315,7 +315,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   ].filter((web) => Boolean(web.url && web.url.trim()));
 
   return (
-    <div className={`fixed inset-0 z-[200] bg-[color:var(--surface-1)]/95 dark:bg-[color:var(--surface-1)]/95 backdrop-blur-xl flex flex-col transition-all duration-700 ease-in-out ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+    <div className={`fixed inset-0 z-[200] bg-[color:var(--surface-0)]/98 md:bg-[color:var(--surface-1)]/95 backdrop-blur-sm md:backdrop-blur-md flex flex-col transition-all duration-700 ease-in-out ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
       <div className="relative z-10 flex items-center justify-end p-4 md:p-6 border-b border-[color:var(--border-subtle)] bg-[color:var(--surface-2)] backdrop-blur-md h-20">
         <div onClick={() => { onStageChange(StageId.HOME); onClose(); }} className="absolute left-1/2 -translate-x-1/2 flex items-center cursor-pointer group">
            <img src={resolvedLogoSrc} alt={resolvedSettings.site_name} className="h-20 w-auto group-hover:scale-105 transition-transform" />
@@ -330,11 +330,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
           {/* Main Content Sections */}
           {sections.map((section, sIdx) => (
             <div key={sIdx} className="space-y-4">
-                <h3 className="text-[10px] sm:text-xs font-black text-green-700 dark:text-green-300 uppercase tracking-[0.28em] px-1 flex items-center gap-4">
+                <h3 className="text-sm sm:text-sm font-black text-green-700 dark:text-green-300 uppercase tracking-[0.1em] sm:tracking-[0.2em] px-1 flex items-center gap-4">
                   <span>{section.title}</span>
                   <div className="h-[1px] flex-1 bg-gradient-to-r from-green-400/70 dark:from-green-500/50 to-transparent"></div>
                 </h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
                   {isOpen && section.ids.map((id, idx) => {
                     const s = stages.find(st => st.id === id);
                     if (!s) return null;
@@ -348,7 +348,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
           {/* OUR WEBSITES SECTION */}
           <div className="space-y-6 pt-4 pb-12">
-             <h3 className="text-[10px] sm:text-xs font-black text-green-700 dark:text-green-300 uppercase tracking-[0.28em] px-1 flex items-center gap-4">
+             <h3 className="text-sm sm:text-sm font-black text-green-700 dark:text-green-300 uppercase tracking-[0.1em] sm:tracking-[0.2em] px-1 flex items-center gap-4">
                  <span>Tovuti Zetu</span>
                 <div className="h-[1px] flex-1 bg-gradient-to-r from-green-400/70 dark:from-green-500/50 to-transparent"></div>
              </h3>
@@ -365,10 +365,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
                        {web.icon}
                     </div>
                     <div className="flex-1 min-w-0">
-                       <h4 className="text-[10px] font-black text-slate-900 dark:text-white uppercase tracking-tight leading-tight group-hover:text-green-700 dark:group-hover:text-green-300 transition-colors line-clamp-2">
+                       <h4 className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-tight leading-tight group-hover:text-green-700 dark:group-hover:text-green-300 transition-colors line-clamp-2">
                           {web.name}
                        </h4>
-                       <p className="text-[9px] text-slate-500 dark:text-slate-400 font-bold uppercase mt-1 truncate">
+                       <p className="text-[11px] text-slate-500 dark:text-slate-400 font-bold uppercase mt-1 truncate">
                           {web.desc}
                        </p>
                     </div>
@@ -390,7 +390,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
              </div>
              <div className="text-left pr-2">
                <p className="text-slate-900 dark:text-white text-xs font-black uppercase tracking-tight leading-none mb-1">{user.name.split(' ')[0]}</p>
-               <p className="text-[8px] font-black uppercase text-gold-500 tracking-widest leading-none">Akaunti</p>
+               <p className="text-[10px] font-black uppercase text-gold-500 tracking-[0.14em] leading-none">Akaunti</p>
              </div>
           </button>
         ) : (
@@ -403,7 +403,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
              </div>
              <div className="text-left pr-2">
                <p className="text-slate-900 dark:text-white text-xs font-black uppercase tracking-tight leading-none mb-1">Mgeni</p>
-               <p className="text-[8px] font-black uppercase text-gold-500 tracking-widest leading-none">Ingia Sasa</p>
+               <p className="text-[10px] font-black uppercase text-gold-500 tracking-[0.14em] leading-none">Ingia Sasa</p>
              </div>
           </button>
         )}
@@ -424,4 +424,3 @@ export const Sidebar: React.FC<SidebarProps> = ({
     </div>
   );
 };
-
