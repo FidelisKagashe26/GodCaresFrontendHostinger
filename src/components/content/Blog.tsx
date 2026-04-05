@@ -166,9 +166,9 @@ export const Blog: React.FC = () => {
           )}
 
           <div className="prose prose-lg prose-slate max-w-none">
-            <p className="font-serif text-xl leading-relaxed text-slate-700">
+            <div className="font-serif text-[1.05rem] md:text-xl leading-8 text-slate-700 whitespace-pre-wrap break-words">
               {detail || post.excerpt || 'Hakuna taarifa.'}
-            </p>
+            </div>
           </div>
 
           <div className="mt-12 pt-8 border-t border-slate-100 flex items-center gap-8">
