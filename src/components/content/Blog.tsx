@@ -1,6 +1,12 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Heart, MessageCircle, Share2, User, Bookmark, Search, ArrowRight } from 'lucide-react';
-import { getBlogPost, getBlogPosts } from '../../services/content/blogService';
+import {
+  createBlogComment,
+  getBlogComments,
+  getBlogPost,
+  getBlogPosts,
+  toggleBlogLike,
+} from '../../services/content/blogService';
 
 interface BlogPost {
   id: number;
@@ -12,8 +18,16 @@ interface BlogPost {
   readTime: string;
   likes: number;
   comments: number;
+  liked: boolean;
   image: string;
   tags: string[];
+}
+
+interface BlogComment {
+  id: number;
+  authorName: string;
+  content: string;
+  createdAt: string;
 }
 
 const AuthorAvatar: React.FC<{ name: string; image?: string; className?: string; iconSize?: number }> = ({
@@ -31,13 +45,38 @@ const AuthorAvatar: React.FC<{ name: string; image?: string; className?: string;
   </div>
 );
 
+const getSavedUserName = (): string => {
+  try {
+    const raw = localStorage.getItem('gc365_user');
+    if (!raw) return '';
+    const parsed = JSON.parse(raw) as { name?: string };
+    return (parsed?.name || '').trim();
+  } catch {
+    return '';
+  }
+};
+
 export const Blog: React.FC = () => {
   const [activePost, setActivePost] = useState<number | null>(null);
   const [posts, setPosts] = useState<BlogPost[]>([]);
-  const [likes, setLikes] = useState<Record<number, number>>({});
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [detail, setDetail] = useState<string | null>(null);
+
+  const [likeBusyByPost, setLikeBusyByPost] = useState<Record<number, boolean>>({});
+
+  const [comments, setComments] = useState<BlogComment[]>([]);
+  const [commentsLoading, setCommentsLoading] = useState(false);
+  const [commentsError, setCommentsError] = useState('');
+
+  const [savedUserName, setSavedUserName] = useState('');
+  const [commentAuthorName, setCommentAuthorName] = useState('');
+  const [commentText, setCommentText] = useState('');
+  const [commentSubmitting, setCommentSubmitting] = useState(false);
+  const [commentSubmitError, setCommentSubmitError] = useState('');
+
+  const commentsSectionRef = useRef<HTMLDivElement | null>(null);
+  const commentInputRef = useRef<HTMLTextAreaElement | null>(null);
 
   const mapPost = (post: any): BlogPost => ({
     id: post.id,
@@ -49,9 +88,24 @@ export const Blog: React.FC = () => {
     readTime: post.read_time || 'Hakuna taarifa',
     likes: post.likes || 0,
     comments: post.comments || 0,
+    liked: !!post.liked,
     image: post.image || '',
     tags: post.tags || [],
   });
+
+  const updatePost = (postId: number, updater: (current: BlogPost) => BlogPost) => {
+    setPosts((prev) => prev.map((item) => (item.id === postId ? updater(item) : item)));
+  };
+
+  const openPost = (postId: number) => {
+    setActivePost(postId);
+    setCommentText('');
+    setCommentSubmitError('');
+  };
+
+  useEffect(() => {
+    setSavedUserName(getSavedUserName());
+  }, []);
 
   useEffect(() => {
     const loadPosts = async () => {
@@ -59,13 +113,10 @@ export const Blog: React.FC = () => {
       setErrorMessage('');
       try {
         const data = await getBlogPosts();
-        const mapped = data.map(mapPost);
-        setPosts(mapped);
-        setLikes(mapped.reduce((acc, post) => ({ ...acc, [post.id]: post.likes }), {}));
+        setPosts(data.map(mapPost));
       } catch {
         setErrorMessage('Imeshindikana kupakua makala.');
         setPosts([]);
-        setLikes({});
       } finally {
         setLoading(false);
       }
@@ -73,10 +124,6 @@ export const Blog: React.FC = () => {
 
     loadPosts();
   }, []);
-
-  const handleLike = (id: number) => {
-    setLikes((prev) => ({ ...prev, [id]: (prev[id] ?? 0) + 1 }));
-  };
 
   useEffect(() => {
     const loadDetail = async () => {
@@ -91,17 +138,131 @@ export const Blog: React.FC = () => {
       try {
         const data = await getBlogPost(post.id);
         setDetail(data.content || data.excerpt || 'Hakuna taarifa.');
+        updatePost(post.id, (current) => ({
+          ...current,
+          likes: data.likes ?? current.likes,
+          comments: data.comments ?? current.comments,
+          liked: !!data.liked,
+        }));
       } catch {
         setDetail(post.excerpt || 'Hakuna taarifa.');
       }
     };
 
     loadDetail();
-  }, [activePost, posts]);
+  }, [activePost]);
+
+  useEffect(() => {
+    const loadComments = async () => {
+      if (!activePost) {
+        setComments([]);
+        setCommentsError('');
+        return;
+      }
+
+      setCommentsLoading(true);
+      setCommentsError('');
+      try {
+        const data = await getBlogComments(activePost);
+        setComments(
+          data.map((item) => ({
+            id: item.id,
+            authorName: item.author_name,
+            content: item.content,
+            createdAt: item.created_at,
+          })),
+        );
+      } catch {
+        setComments([]);
+        setCommentsError('Imeshindikana kupata comments kwa sasa.');
+      } finally {
+        setCommentsLoading(false);
+      }
+    };
+
+    loadComments();
+  }, [activePost]);
+
+  useEffect(() => {
+    if (!activePost) return;
+    if (savedUserName) {
+      setCommentAuthorName(savedUserName);
+    } else {
+      setCommentAuthorName('');
+    }
+  }, [activePost, savedUserName]);
+
+  const handleLike = async (id: number) => {
+    if (likeBusyByPost[id]) return;
+    setLikeBusyByPost((prev) => ({ ...prev, [id]: true }));
+    try {
+      const payload = await toggleBlogLike(id);
+      updatePost(id, (current) => ({
+        ...current,
+        likes: payload.likes,
+        liked: payload.liked,
+      }));
+    } catch {
+      setErrorMessage('Imeshindikana kusasisha like. Jaribu tena.');
+    } finally {
+      setLikeBusyByPost((prev) => ({ ...prev, [id]: false }));
+    }
+  };
+
+  const focusComments = () => {
+    commentsSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    window.setTimeout(() => {
+      commentInputRef.current?.focus();
+    }, 200);
+  };
+
+  const handleSubmitComment = async () => {
+    if (!activePost || commentSubmitting) return;
+    setCommentSubmitError('');
+
+    const content = commentText.trim();
+    const authorName = (savedUserName || commentAuthorName || '').trim();
+
+    if (content.length < 2) {
+      setCommentSubmitError('Andika comment yenye angalau herufi 2.');
+      return;
+    }
+
+    if (!savedUserName && authorName.length < 2) {
+      setCommentSubmitError('Weka jina lako kabla ya kutuma comment.');
+      return;
+    }
+
+    setCommentSubmitting(true);
+    try {
+      const created = await createBlogComment(activePost, {
+        author_name: savedUserName ? undefined : authorName,
+        content,
+      });
+      setComments((prev) => [
+        {
+          id: created.id,
+          authorName: created.author_name,
+          content: created.content,
+          createdAt: created.created_at,
+        },
+        ...prev,
+      ]);
+      updatePost(activePost, (current) => ({
+        ...current,
+        comments: current.comments + 1,
+      }));
+      setCommentText('');
+    } catch (error) {
+      setCommentSubmitError(error instanceof Error ? error.message : 'Imeshindikana kutuma comment.');
+    } finally {
+      setCommentSubmitting(false);
+    }
+  };
 
   const trendingTags = useMemo(
     () => Array.from(new Set(posts.flatMap((post) => post.tags))).slice(0, 8),
-    [posts]
+    [posts],
   );
 
   const editors = useMemo(() => {
@@ -172,14 +333,81 @@ export const Blog: React.FC = () => {
           </div>
 
           <div className="mt-12 pt-8 border-t border-slate-100 flex items-center gap-8">
-            <button onClick={() => handleLike(post.id)} className="flex items-center gap-2 text-slate-500 hover:text-red-500 transition-colors">
-              <Heart size={24} className={likes[post.id] > post.likes ? 'fill-red-500 text-red-500' : ''} />
-              <span>{likes[post.id] ?? post.likes}</span>
+            <button
+              onClick={() => handleLike(post.id)}
+              disabled={!!likeBusyByPost[post.id]}
+              className="flex items-center gap-2 text-slate-500 hover:text-red-500 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+              <Heart size={24} className={post.liked ? 'fill-red-500 text-red-500' : ''} />
+              <span>{post.likes}</span>
             </button>
-            <button className="flex items-center gap-2 text-slate-500 hover:text-blue-500 transition-colors">
+            <button
+              onClick={focusComments}
+              className="flex items-center gap-2 text-slate-500 hover:text-blue-600 transition-colors"
+            >
               <MessageCircle size={24} />
               <span>{post.comments}</span>
             </button>
+          </div>
+
+          <div ref={commentsSectionRef} className="mt-10 border-t border-slate-100 pt-8 space-y-5">
+            <h3 className="text-xl font-black text-slate-900">Comments ({post.comments})</h3>
+
+            <div className="space-y-3 rounded-2xl border border-slate-200 bg-slate-50/80 p-4">
+              {!savedUserName && (
+                <input
+                  type="text"
+                  value={commentAuthorName}
+                  onChange={(event) => setCommentAuthorName(event.target.value)}
+                  placeholder="Jina lako"
+                  className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-slate-500"
+                />
+              )}
+              <textarea
+                ref={commentInputRef}
+                value={commentText}
+                onChange={(event) => setCommentText(event.target.value)}
+                placeholder="Andika comment yako hapa..."
+                rows={4}
+                className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-slate-500 resize-y"
+              />
+              {commentSubmitError && (
+                <div className="text-xs font-bold text-red-600">{commentSubmitError}</div>
+              )}
+              <div className="flex justify-end">
+                <button
+                  type="button"
+                  onClick={handleSubmitComment}
+                  disabled={commentSubmitting}
+                  className="rounded-full bg-green-700 px-4 py-2 text-xs font-black uppercase tracking-[0.08em] text-white hover:bg-green-800 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                >
+                  {commentSubmitting ? 'Inatuma...' : 'Tuma Comment'}
+                </button>
+              </div>
+            </div>
+
+            {commentsLoading && (
+              <div className="text-xs uppercase tracking-widest text-slate-400 font-black">Inapakia comments...</div>
+            )}
+            {commentsError && (
+              <div className="text-xs font-bold text-red-600">{commentsError}</div>
+            )}
+            {!commentsLoading && comments.length === 0 && (
+              <div className="rounded-xl border border-slate-200 bg-white p-4 text-sm font-medium text-slate-500">
+                Bado hakuna comments kwenye makala hii. Kuwa wa kwanza kuandika.
+              </div>
+            )}
+            {comments.map((comment) => (
+              <div key={comment.id} className="rounded-xl border border-slate-200 bg-white p-4">
+                <div className="flex items-center justify-between gap-3 mb-2">
+                  <p className="text-sm font-black text-slate-800">{comment.authorName}</p>
+                  <p className="text-[11px] font-bold text-slate-400">
+                    {new Date(comment.createdAt).toLocaleString('sw-TZ')}
+                  </p>
+                </div>
+                <p className="text-sm text-slate-700 whitespace-pre-wrap break-words">{comment.content}</p>
+              </div>
+            ))}
           </div>
         </div>
       </div>
@@ -220,14 +448,14 @@ export const Blog: React.FC = () => {
             <article
               key={post.id}
               className="group cursor-pointer rounded-2xl border border-green-200/80 bg-white/95 p-4 md:p-5 shadow-[0_8px_20px_rgba(15,23,42,0.04)] hover:border-gold-400/80 hover:shadow-[0_14px_28px_rgba(212,154,20,0.12)] transition-all"
-              onClick={() => setActivePost(post.id)}
+              onClick={() => openPost(post.id)}
               role="button"
               tabIndex={0}
               aria-label={`Soma zaidi: ${post.title}`}
               onKeyDown={(event) => {
                 if (event.key === 'Enter' || event.key === ' ') {
                   event.preventDefault();
-                  setActivePost(post.id);
+                  openPost(post.id);
                 }
               }}
             >
@@ -274,7 +502,7 @@ export const Blog: React.FC = () => {
                   type="button"
                   onClick={(event) => {
                     event.stopPropagation();
-                    setActivePost(post.id);
+                    openPost(post.id);
                   }}
                   className="inline-flex items-center gap-1.5 rounded-full border border-gold-300/80 bg-gold-100/70 px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.08em] text-gold-800 hover:bg-gold-200/80 transition-colors"
                 >
@@ -316,5 +544,3 @@ export const Blog: React.FC = () => {
     </div>
   );
 };
-
-
