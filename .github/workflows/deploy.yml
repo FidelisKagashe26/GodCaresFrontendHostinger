@@ -31,15 +31,48 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          VPS_HOST="${{ secrets.VPS_HOST }}"
+          VPS_USER="${{ secrets.VPS_USER }}"
+
+          if [ -z "$VPS_HOST" ] || [ -z "$VPS_USER" ]; then
+            echo "ERROR: VPS_HOST or VPS_USER secret is empty."
+            exit 1
+          fi
+
           mkdir -p ~/.ssh
           chmod 700 ~/.ssh
 
-          # Decode base64 SSH private key (handles Windows CRLF)
-          printf '%s' "${{ secrets.VPS_SSH_KEY_B64 }}" | tr -d '\r' | base64 -d > ~/.ssh/id_ed25519
+          # Decode base64 SSH private key (handles CR/LF/space noise)
+          KEY_B64_CLEAN="$(printf '%s' "${{ secrets.VPS_SSH_KEY_B64 }}" | tr -d '\n\r ')"
+          if [ -z "$KEY_B64_CLEAN" ]; then
+            echo "ERROR: VPS_SSH_KEY_B64 secret is empty."
+            exit 1
+          fi
+          printf '%s' "$KEY_B64_CLEAN" | base64 -d > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
+          if [ ! -s ~/.ssh/id_ed25519 ]; then
+            echo "ERROR: Decoded SSH key file is empty."
+            exit 1
+          fi
+          if ! ssh-keygen -y -f ~/.ssh/id_ed25519 >/dev/null 2>&1; then
+            echo "ERROR: Decoded SSH key is invalid."
+            exit 1
+          fi
 
-          # Add host key to known_hosts
-          ssh-keyscan -H "${{ secrets.VPS_HOST }}" >> ~/.ssh/known_hosts
+          # Add host key to known_hosts with retry (avoid random network flake)
+          SSH_SCAN_OK=0
+          for i in 1 2 3; do
+            if ssh-keyscan -T 10 -H "$VPS_HOST" >> ~/.ssh/known_hosts 2>/tmp/ssh-keyscan.err; then
+              SSH_SCAN_OK=1
+              break
+            fi
+            sleep 2
+          done
+          if [ "$SSH_SCAN_OK" -ne 1 ]; then
+            echo "ERROR: ssh-keyscan failed for host: $VPS_HOST"
+            cat /tmp/ssh-keyscan.err || true
+            exit 1
+          fi
           chmod 600 ~/.ssh/known_hosts
 
       - name: SSH smoke test
@@ -56,9 +89,21 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          test -d dist
-          test -f deploy/nginx/spa.conf
+          if [ ! -d dist ]; then
+            echo "ERROR: dist directory not found after build."
+            pwd
+            ls -la
+            exit 1
+          fi
+          if [ ! -f deploy/nginx/spa.conf ]; then
+            echo "ERROR: deploy/nginx/spa.conf not found."
+            pwd
+            ls -la deploy || true
+            ls -la deploy/nginx || true
+            exit 1
+          fi
           tar -C dist -czf dist.tar.gz .
+          ls -lh dist.tar.gz
 
       - name: Upload build + Nginx config to VPS
         shell: bash
@@ -165,7 +210,11 @@ jobs:
 
                 # runtime check: nginx must proxy API to backend (detect bad upstream/port quickly)
                 API_STATUS="$(curl -k -s -o /dev/null -w "%{http_code}" "https://127.0.0.1/api/blog/?client_id=deploy-smoke" -H "Host: godcares365.com")"
-                if [[ ! "$API_STATUS" =~ ^[0-9]{3}$ ]] || [ "$API_STATUS" -ge 500 ]; then
+                if ! echo "$API_STATUS" | grep -Eq "^[0-9]{3}$"; then
+                  echo "ERROR: API reverse proxy /api/blog returned non-http code: ${API_STATUS:-unknown}"
+                  exit 1
+                fi
+                if [ "$API_STATUS" -ge 500 ]; then
                   echo "ERROR: API reverse proxy /api/blog returned HTTP ${API_STATUS:-unknown}"
                   exit 1
                 fi
