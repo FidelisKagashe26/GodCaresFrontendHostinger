@@ -88,6 +88,9 @@ jobs:
              NGINX_SOURCE="/tmp/godcares365-spa.conf"
              NGINX_SITE="/etc/nginx/sites-available/godcares365.conf"
              NGINX_SITE_ENABLED="/etc/nginx/sites-enabled/godcares365.conf"
+             LEGACY_NGINX_SITE_ENABLED="/etc/nginx/sites-enabled/godcares365.com"
+             LEGACY_NGINX_CONF_D="/etc/nginx/conf.d/godcares365.conf"
+             NGINX_CONF_D="/etc/nginx/conf.d/godcares365.conf"
              run_privileged() {
                if [ "$(id -u)" -eq 0 ]; then
                  "$@"
@@ -114,10 +117,52 @@ jobs:
 
              # install and enable nginx site config
              test -f "$NGINX_SOURCE"
-             run_privileged cp "$NGINX_SOURCE" "$NGINX_SITE"
-             run_privileged ln -sfn "$NGINX_SITE" "$NGINX_SITE_ENABLED"
+             NGINX_DUMP="$(run_privileged nginx -T 2>/dev/null || true)"
+             if echo "$NGINX_DUMP" | grep -qE "include\\s+/etc/nginx/sites-enabled/\\*"; then
+               run_privileged mkdir -p /etc/nginx/sites-available /etc/nginx/sites-enabled
+               run_privileged cp "$NGINX_SOURCE" "$NGINX_SITE"
+               run_privileged ln -sfn "$NGINX_SITE" "$NGINX_SITE_ENABLED"
+             elif echo "$NGINX_DUMP" | grep -qE "include\\s+/etc/nginx/conf\\.d/\\*\\.conf"; then
+               run_privileged mkdir -p /etc/nginx/conf.d
+               run_privileged cp "$NGINX_SOURCE" "$NGINX_CONF_D"
+             else
+               # fallback to common Debian/Ubuntu layout
+               run_privileged mkdir -p /etc/nginx/sites-available /etc/nginx/sites-enabled
+               run_privileged cp "$NGINX_SOURCE" "$NGINX_SITE"
+               run_privileged ln -sfn "$NGINX_SITE" "$NGINX_SITE_ENABLED"
+             fi
+
+             # disable default site if present to avoid refresh 404 from wrong vhost
+             if [ -e /etc/nginx/sites-enabled/default ]; then
+               run_privileged rm -f /etc/nginx/sites-enabled/default
+             fi
+             # disable known legacy duplicate vhost
+             if [ -e "$LEGACY_NGINX_SITE_ENABLED" ]; then
+               run_privileged rm -f "$LEGACY_NGINX_SITE_ENABLED"
+             fi
+             # if using sites-enabled layout, remove duplicate conf.d copy
+             if [ -e "$NGINX_SITE_ENABLED" ] && [ -e "$LEGACY_NGINX_CONF_D" ]; then
+               run_privileged rm -f "$LEGACY_NGINX_CONF_D"
+             fi
              rm -f "$NGINX_SOURCE"
 
              run_privileged nginx -t
              run_privileged systemctl reload nginx
+
+             # hard check: SPA fallback must exist in active nginx config
+             if ! run_privileged nginx -T 2>/dev/null | grep -q "try_files \\$uri \\$uri/ /index.html;"; then
+               echo "ERROR: Active Nginx config has no SPA fallback try_files rule."
+               exit 1
+             fi
+
+             # runtime check: client-side route refresh should not return 404
+             if command -v curl >/dev/null 2>&1; then
+               SPA_STATUS="$(curl -k -s -o /dev/null -w "%{http_code}" https://127.0.0.1/about -H "Host: godcares365.com")"
+               if [ "$SPA_STATUS" -ge 400 ]; then
+                 echo "ERROR: SPA route /about returned HTTP $SPA_STATUS"
+                 exit 1
+               fi
+             else
+               echo "WARN: curl not found on server; skipping runtime SPA HTTP check."
+             fi
             '
