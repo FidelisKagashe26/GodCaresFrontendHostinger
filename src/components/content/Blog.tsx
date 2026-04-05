@@ -683,7 +683,7 @@ export const Blog: React.FC<BlogProps> = ({ user, onRequireLogin }) => {
 
   return (
     <div className="bg-white dark:bg-slate-950 min-h-screen pb-20 max-w-6xl mx-auto">
-      <div className="p-8 md:p-12 border-b border-slate-100 dark:border-slate-800 flex flex-col md:flex-row justify-between items-center gap-6">
+      <div className="p-4 sm:p-6 md:p-12 border-b border-slate-100 dark:border-slate-800 flex flex-col md:flex-row justify-between items-center gap-6">
         <h1 className="text-4xl font-black text-slate-900 dark:text-slate-100 tracking-tight">God Cares <span className="text-gold-500">Blog</span></h1>
         <div className="relative w-full md:w-64">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" size={18} />
@@ -695,8 +695,8 @@ export const Blog: React.FC<BlogProps> = ({ user, onRequireLogin }) => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-12 p-8 md:p-12">
-        <div className="md:col-span-2 space-y-12">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-12 p-3 sm:p-4 md:p-12">
+        <div className="md:col-span-2 space-y-5 md:space-y-12">
           {loading && (
             <div className="text-xs uppercase tracking-widest text-slate-400 dark:text-slate-500 font-black">Inapakia makala...</div>
           )}
@@ -719,7 +719,7 @@ export const Blog: React.FC<BlogProps> = ({ user, onRequireLogin }) => {
           {posts.map((post) => (
             <article
               key={post.id}
-              className="group cursor-pointer rounded-2xl border border-green-200/80 dark:border-slate-700 bg-white/95 dark:bg-slate-900/90 p-4 md:p-5 shadow-[0_8px_20px_rgba(15,23,42,0.04)] dark:shadow-[0_10px_26px_rgba(2,6,23,0.38)] hover:border-gold-400/80 hover:shadow-[0_14px_28px_rgba(212,154,20,0.12)] transition-all"
+              className="group cursor-pointer rounded-2xl border border-green-200/80 dark:border-slate-700 bg-white/95 dark:bg-slate-900/90 p-3.5 sm:p-4 md:p-5 shadow-[0_8px_20px_rgba(15,23,42,0.04)] dark:shadow-[0_10px_26px_rgba(2,6,23,0.38)] hover:border-gold-400/80 hover:shadow-[0_14px_28px_rgba(212,154,20,0.12)] transition-all"
               onClick={() => openPost(post.id)}
               role="button"
               tabIndex={0}
@@ -769,11 +769,11 @@ export const Blog: React.FC<BlogProps> = ({ user, onRequireLogin }) => {
                     </button>
                   </div>
                 </div>
-                <div className="w-full md:w-48 h-36 md:h-32 shrink-0 rounded-xl overflow-hidden bg-green-50 dark:bg-slate-800 border border-green-100 dark:border-slate-700 flex items-center justify-center">
+                <div className="w-full md:w-48 md:h-32 min-h-[10.5rem] md:min-h-0 shrink-0 rounded-xl overflow-hidden bg-green-50 dark:bg-slate-800 border border-green-100 dark:border-slate-700 flex items-center justify-center">
                   {post.image ? (
                     <img
                       src={post.image}
-                      className="w-full h-full object-contain md:object-cover group-hover:scale-[1.02] md:group-hover:scale-105 transition-transform duration-500"
+                      className="block w-full h-auto md:h-full object-contain md:object-cover md:group-hover:scale-105 transition-transform duration-500"
                       alt={post.title}
                     />
                   ) : (
