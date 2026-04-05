@@ -1,10 +1,12 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Heart, MessageCircle, Share2, User, Bookmark, Search, ArrowRight } from 'lucide-react';
+import { useSearchParams } from 'react-router-dom';
 import {
   createBlogComment,
   getBlogComments,
   getBlogPost,
   getBlogPosts,
+  getBlogSharePageUrl,
   toggleBlogLike,
 } from '../../services/content/blogService';
 
@@ -29,6 +31,8 @@ interface BlogComment {
   content: string;
   createdAt: string;
 }
+
+const SAVED_POSTS_KEY = 'gc365_saved_blog_posts_v1';
 
 const AuthorAvatar: React.FC<{ name: string; image?: string; className?: string; iconSize?: number }> = ({
   name,
@@ -56,7 +60,54 @@ const getSavedUserName = (): string => {
   }
 };
 
+const getSavedPostIds = (): Set<number> => {
+  try {
+    const raw = localStorage.getItem(SAVED_POSTS_KEY);
+    if (!raw) return new Set<number>();
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return new Set<number>();
+    return new Set(
+      parsed
+        .map((item) => Number(item))
+        .filter((item) => Number.isInteger(item) && item > 0),
+    );
+  } catch {
+    return new Set<number>();
+  }
+};
+
+const persistSavedPostIds = (ids: Set<number>) => {
+  localStorage.setItem(SAVED_POSTS_KEY, JSON.stringify(Array.from(ids.values())));
+};
+
+const copyToClipboard = async (value: string): Promise<boolean> => {
+  try {
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(value);
+      return true;
+    }
+  } catch {
+    // Fallback below.
+  }
+
+  try {
+    const textArea = document.createElement('textarea');
+    textArea.value = value;
+    textArea.style.position = 'fixed';
+    textArea.style.left = '-9999px';
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+    const copied = document.execCommand('copy');
+    document.body.removeChild(textArea);
+    return copied;
+  } catch {
+    return false;
+  }
+};
+
 export const Blog: React.FC = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [activePost, setActivePost] = useState<number | null>(null);
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(false);
@@ -68,6 +119,8 @@ export const Blog: React.FC = () => {
   const [comments, setComments] = useState<BlogComment[]>([]);
   const [commentsLoading, setCommentsLoading] = useState(false);
   const [commentsError, setCommentsError] = useState('');
+  const [savedPostIds, setSavedPostIds] = useState<Set<number>>(new Set<number>());
+  const [actionMessage, setActionMessage] = useState('');
 
   const [savedUserName, setSavedUserName] = useState('');
   const [commentAuthorName, setCommentAuthorName] = useState('');
@@ -77,6 +130,7 @@ export const Blog: React.FC = () => {
 
   const commentsSectionRef = useRef<HTMLDivElement | null>(null);
   const commentInputRef = useRef<HTMLTextAreaElement | null>(null);
+  const actionMessageTimeoutRef = useRef<number | null>(null);
 
   const mapPost = (post: any): BlogPost => ({
     id: post.id,
@@ -97,14 +151,54 @@ export const Blog: React.FC = () => {
     setPosts((prev) => prev.map((item) => (item.id === postId ? updater(item) : item)));
   };
 
-  const openPost = (postId: number) => {
+  const setPostQueryParam = (postId: number | null, replace = false) => {
+    const next = new URLSearchParams(searchParams);
+    if (postId) {
+      next.set('post', String(postId));
+    } else {
+      next.delete('post');
+    }
+    setSearchParams(next, { replace });
+  };
+
+  const showActionMessage = (message: string) => {
+    setActionMessage(message);
+    if (actionMessageTimeoutRef.current !== null) {
+      window.clearTimeout(actionMessageTimeoutRef.current);
+    }
+    actionMessageTimeoutRef.current = window.setTimeout(() => {
+      setActionMessage('');
+      actionMessageTimeoutRef.current = null;
+    }, 2200);
+  };
+
+  const openPost = (postId: number, syncUrl = true) => {
+    if (syncUrl) {
+      setPostQueryParam(postId);
+    }
     setActivePost(postId);
+    setCommentText('');
+    setCommentSubmitError('');
+  };
+
+  const closePost = (syncUrl = true) => {
+    if (syncUrl) {
+      setPostQueryParam(null);
+    }
+    setActivePost(null);
     setCommentText('');
     setCommentSubmitError('');
   };
 
   useEffect(() => {
     setSavedUserName(getSavedUserName());
+    setSavedPostIds(getSavedPostIds());
+  }, []);
+
+  useEffect(() => () => {
+    if (actionMessageTimeoutRef.current !== null) {
+      window.clearTimeout(actionMessageTimeoutRef.current);
+    }
   }, []);
 
   useEffect(() => {
@@ -124,6 +218,54 @@ export const Blog: React.FC = () => {
 
     loadPosts();
   }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const syncPostFromUrl = async () => {
+      const rawPostId = (searchParams.get('post') || '').trim();
+      if (!rawPostId) {
+        if (activePost !== null) {
+          closePost(false);
+        }
+        return;
+      }
+
+      const postId = Number.parseInt(rawPostId, 10);
+      if (!Number.isInteger(postId) || postId <= 0) {
+        return;
+      }
+
+      const hasPost = posts.some((item) => item.id === postId);
+      if (hasPost) {
+        if (activePost !== postId) {
+          openPost(postId, false);
+        }
+        return;
+      }
+
+      try {
+        const fetchedPost = await getBlogPost(postId);
+        if (cancelled) return;
+        setPosts((prev) => {
+          if (prev.some((item) => item.id === postId)) {
+            return prev;
+          }
+          return [mapPost(fetchedPost), ...prev];
+        });
+        openPost(postId, false);
+      } catch {
+        if (cancelled) return;
+        setErrorMessage('Makala uliyoifungua haijapatikana.');
+        setPostQueryParam(null, true);
+      }
+    };
+
+    void syncPostFromUrl();
+    return () => {
+      cancelled = true;
+    };
+  }, [searchParams, posts, activePost]);
 
   useEffect(() => {
     const loadDetail = async () => {
@@ -209,6 +351,50 @@ export const Blog: React.FC = () => {
     }
   };
 
+  const isPostSaved = (postId: number) => savedPostIds.has(postId);
+
+  const toggleSavePost = (postId: number) => {
+    const next = new Set(savedPostIds);
+    const willSave = !next.has(postId);
+    if (willSave) {
+      next.add(postId);
+    } else {
+      next.delete(postId);
+    }
+    setSavedPostIds(next);
+    persistSavedPostIds(next);
+    showActionMessage(willSave ? 'Makala imehifadhiwa.' : 'Makala imeondolewa kwenye save.');
+  };
+
+  const handleShare = async (post: BlogPost) => {
+    const url = getBlogSharePageUrl(post.id);
+    const payload = {
+      title: post.title,
+      text: post.excerpt || `Soma makala: ${post.title}`,
+      url,
+    };
+
+    if (navigator.share) {
+      try {
+        await navigator.share(payload);
+        showActionMessage('Makala imeshirikishwa.');
+        return;
+      } catch (error) {
+        if (error instanceof DOMException && error.name === 'AbortError') {
+          return;
+        }
+      }
+    }
+
+    const copied = await copyToClipboard(url);
+    if (copied) {
+      showActionMessage('Link imenakiliwa.');
+      return;
+    }
+
+    window.prompt('Nakili link hii ya kushare:', url);
+  };
+
   const focusComments = () => {
     commentsSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     window.setTimeout(() => {
@@ -286,7 +472,7 @@ export const Blog: React.FC = () => {
       return (
         <div className="max-w-3xl mx-auto bg-white min-h-screen text-slate-900 pb-20 animate-fade-in">
           <div className="p-8 space-y-6">
-            <button onClick={() => setActivePost(null)} className="text-slate-500 hover:text-slate-900 font-bold text-sm">
+            <button onClick={() => closePost()} className="text-slate-500 hover:text-slate-900 font-bold text-sm">
               Rudi kwenye Makala
             </button>
             <div className="text-sm text-slate-500 font-bold uppercase tracking-widest">Hakuna taarifa.</div>
@@ -298,7 +484,7 @@ export const Blog: React.FC = () => {
     return (
       <div className="max-w-3xl mx-auto bg-white min-h-screen text-slate-900 pb-20 animate-fade-in">
         <div className="p-8">
-          <button onClick={() => setActivePost(null)} className="text-slate-500 hover:text-slate-900 mb-8 font-bold text-sm">
+          <button onClick={() => closePost()} className="text-slate-500 hover:text-slate-900 mb-8 font-bold text-sm">
             Rudi kwenye Makala
           </button>
 
@@ -312,11 +498,36 @@ export const Blog: React.FC = () => {
                 <p className="text-slate-500 text-xs">{post.date} | {post.readTime}</p>
               </div>
             </div>
-            <div className="flex gap-4 text-slate-400 shrink-0">
-              <Share2 size={20} className="hover:text-slate-900 cursor-pointer" />
-              <Bookmark size={20} className="hover:text-slate-900 cursor-pointer" />
+            <div className="flex gap-2 text-slate-400 shrink-0">
+              <button
+                type="button"
+                onClick={() => {
+                  void handleShare(post);
+                }}
+                className="inline-flex items-center justify-center h-9 w-9 rounded-full border border-slate-200 text-slate-500 hover:text-slate-900 hover:border-slate-400 transition-colors"
+                aria-label="Shiriki makala"
+              >
+                <Share2 size={17} />
+              </button>
+              <button
+                type="button"
+                onClick={() => toggleSavePost(post.id)}
+                className={`inline-flex items-center justify-center h-9 w-9 rounded-full border transition-colors ${
+                  isPostSaved(post.id)
+                    ? 'border-green-300 bg-green-50 text-green-700'
+                    : 'border-slate-200 text-slate-500 hover:text-slate-900 hover:border-slate-400'
+                }`}
+                aria-label={isPostSaved(post.id) ? 'Ondoa kwenye save' : 'Save makala'}
+              >
+                <Bookmark size={17} className={isPostSaved(post.id) ? 'fill-green-200' : ''} />
+              </button>
             </div>
           </div>
+          {actionMessage && (
+            <div className="mb-5 rounded-lg border border-green-200 bg-green-50 px-3 py-2 text-xs font-bold text-green-700">
+              {actionMessage}
+            </div>
+          )}
 
           {post.image ? (
             <img src={post.image} className="w-full h-96 object-cover rounded-xl mb-10" alt={post.title} />
@@ -438,6 +649,11 @@ export const Blog: React.FC = () => {
               {errorMessage}
             </div>
           )}
+          {actionMessage && (
+            <div className="bg-green-500/10 border border-green-500/20 text-green-700 text-xs font-bold px-4 py-2 rounded-lg">
+              {actionMessage}
+            </div>
+          )}
           {!loading && posts.length === 0 && (
             <div className="bg-slate-100 border border-slate-200 text-slate-500 text-[10px] font-bold uppercase tracking-widest px-4 py-3 rounded-lg">
               Hakuna taarifa za makala kwa sasa.
@@ -480,7 +696,21 @@ export const Blog: React.FC = () => {
                         <span className="px-2 py-1 bg-slate-100 rounded-full text-slate-700">{post.tags[0]}</span>
                       )}
                     </div>
-                    <Bookmark size={16} className="text-slate-500 group-hover:text-slate-800 shrink-0" />
+                    <button
+                      type="button"
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        toggleSavePost(post.id);
+                      }}
+                      className={`inline-flex h-8 w-8 items-center justify-center rounded-full border transition-colors ${
+                        isPostSaved(post.id)
+                          ? 'border-green-300 bg-green-50 text-green-700'
+                          : 'border-slate-200 text-slate-500 hover:border-slate-400 hover:text-slate-800'
+                      }`}
+                      aria-label={isPostSaved(post.id) ? 'Ondoa kwenye save' : 'Save makala'}
+                    >
+                      <Bookmark size={16} className={isPostSaved(post.id) ? 'fill-green-200' : ''} />
+                    </button>
                   </div>
                 </div>
                 <div className="w-full md:w-48 h-32 shrink-0 rounded-xl overflow-hidden bg-green-50 border border-green-100">

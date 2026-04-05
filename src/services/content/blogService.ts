@@ -29,7 +29,8 @@ export interface BlogCommentApi {
   created_at: string;
 }
 
-const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || window.location.origin).replace(/\/$/, "");
+export const BLOG_API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || window.location.origin).replace(/\/$/, "");
+const API_BASE_URL = BLOG_API_BASE_URL;
 const CLIENT_ID_KEY = "gc365_blog_client_id";
 const ACCESS_TOKEN_KEY = "gc365_access_token";
 
@@ -181,5 +182,8 @@ export const createBlogComment = async (
   invalidateCachedResult(`blog_post_${postId}_v2_${clientId}`);
   return (await response.json()) as BlogCommentApi;
 };
+
+export const getBlogSharePageUrl = (postId: number): string =>
+  `${API_BASE_URL}/api/share/blog/${postId}/`;
 
 
