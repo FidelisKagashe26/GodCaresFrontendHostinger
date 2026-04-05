@@ -97,7 +97,7 @@ export const AboutUs: React.FC = () => {
        
        {/* 1. Philosophy Section (Now Main Header - Centered, No Image Card) */}
        <section className="max-w-3xl mx-auto text-center space-y-5 md:space-y-6">
-          <div className="flex items-center justify-center gap-2 text-gold-500 font-black text-[10px] sm:text-xs uppercase tracking-[0.2em]">
+          <div className="flex items-center justify-center gap-2 text-gold-500 font-black text-xs sm:text-sm uppercase tracking-[0.14em]">
              <Lightbulb size={14} /> Falsafa Yetu
           </div>
           <h2 className="text-2xl sm:text-3xl md:text-5xl font-black text-slate-900 dark:text-white uppercase tracking-tighter leading-none">
@@ -116,7 +116,7 @@ export const AboutUs: React.FC = () => {
           <div className="pt-2 flex justify-center">
              <div className="flex gap-2 items-center opacity-70">
                 <Church size={16} className="text-slate-400 mt-0.5 shrink-0" />
-                <p className="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-500 font-bold uppercase tracking-wide leading-tight">
+                <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-500 font-bold uppercase tracking-[0.08em] leading-tight">
                    God Cares 365 ni huduma huru inayofuata miongozo ya Kanisa la Waadventista Wasabato.
                 </p>
              </div>
@@ -126,7 +126,7 @@ export const AboutUs: React.FC = () => {
        {/* 2. Leadership Section - Square/Boxy Cards */}
        <section className="space-y-6 pt-4 md:pt-8">
           <div className="text-center space-y-2">
-             <h3 className="text-[10px] sm:text-xs font-black text-gold-500 uppercase tracking-[0.4em]">TIMU YA UONGOZI</h3>
+             <h3 className="text-xs sm:text-sm font-black text-gold-500 uppercase tracking-[0.2em]">TIMU YA UONGOZI</h3>
              <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">Viongozi Wetu</h2>
           </div>
 
@@ -151,7 +151,7 @@ export const AboutUs: React.FC = () => {
                     
                     <div className="space-y-1">
                       <h4 className="text-sm sm:text-base font-black text-slate-900 dark:text-white uppercase tracking-tight">{leader.name}</h4>
-                      <p className="text-[10px] sm:text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest leading-tight w-full px-2">{leader.role}</p>
+                      <p className="text-xs sm:text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-[0.1em] leading-tight w-full px-2">{leader.role}</p>
                     </div>
 
                     <div className="flex gap-3 mt-1 opacity-60 group-hover:opacity-100 transition-opacity">
@@ -182,7 +182,7 @@ export const AboutUs: React.FC = () => {
                     </div>
                  </div>
                 <h4 className="text-base sm:text-lg font-black text-slate-900 dark:text-white uppercase tracking-tight text-center">{featuredLeader.name}</h4>
-                <p className="text-[10px] sm:text-xs font-black text-gold-500 uppercase tracking-widest text-center">{featuredLeader.role}</p>
+                <p className="text-xs sm:text-sm font-black text-gold-500 uppercase tracking-[0.1em] text-center">{featuredLeader.role}</p>
              </div>
 
              {/* Right Column: The Message */}
@@ -210,7 +210,7 @@ export const AboutUs: React.FC = () => {
                 </div>
 
                 <div className="pt-4 border-t border-slate-100 dark:border-white/5 flex items-start justify-between gap-3">
-                   <p className="text-[10px] sm:text-xs font-black text-slate-400 uppercase tracking-widest leading-relaxed">
+                   <p className="text-xs sm:text-sm font-black text-slate-400 uppercase tracking-[0.08em] leading-relaxed">
                       "Amani ya Bwana wetu Yesu Kristo, na upendo wa Mungu Baba, na ushirika wa Roho Mtakatifu uwe pamoja nawe. Amina."
                    </p>
                    <div className="text-gold-500 opacity-50">
@@ -227,7 +227,7 @@ export const AboutUs: React.FC = () => {
              
              {/* Section Header */}
               <div className="text-center space-y-2">
-                <div className="inline-flex items-center gap-2 text-gold-500 font-black text-[10px] sm:text-xs uppercase tracking-[0.3em]">
+                <div className="inline-flex items-center gap-2 text-gold-500 font-black text-xs sm:text-sm uppercase tracking-[0.18em]">
                    <Activity size={12} className="animate-pulse" /> Hali
                 </div>
                 <h3 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">
@@ -240,10 +240,10 @@ export const AboutUs: React.FC = () => {
                  {/* LEFT: Compact Stats */}
                  <div className="space-y-6">
                    <div className="flex items-center justify-between border-b border-slate-200 dark:border-white/10 pb-2">
-                      <h4 className="text-[10px] sm:text-xs font-black text-slate-700 dark:text-white uppercase tracking-[0.2em]">Mwenendo</h4>
+                      <h4 className="text-xs sm:text-sm font-black text-slate-700 dark:text-white uppercase tracking-[0.12em]">Mwenendo</h4>
                       <div className="flex gap-2">
                          <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></div>
-                         <span className="text-[10px] font-bold text-green-500 uppercase">Sasa</span>
+                         <span className="text-xs font-bold text-green-500 uppercase">Sasa</span>
                       </div>
                    </div>
 
@@ -260,7 +260,7 @@ export const AboutUs: React.FC = () => {
                                <span className="text-sm sm:text-base font-black text-slate-900 dark:text-white">100%</span>
                             </div>
                          </div>
-                         <p className="text-[10px] sm:text-xs font-bold text-slate-700 dark:text-white uppercase text-center">Biblia</p>
+                         <p className="text-xs sm:text-sm font-bold text-slate-700 dark:text-white uppercase text-center">Biblia</p>
                        </div>
 
                        {/* Circular Item 2 */}
@@ -274,7 +274,7 @@ export const AboutUs: React.FC = () => {
                                <span className="text-sm sm:text-base font-black text-slate-900 dark:text-white">7+</span>
                             </div>
                          </div>
-                         <p className="text-[10px] sm:text-xs font-bold text-slate-700 dark:text-white uppercase text-center">Lugha</p>
+                         <p className="text-xs sm:text-sm font-bold text-slate-700 dark:text-white uppercase text-center">Lugha</p>
                        </div>
 
                        {/* Circular Item 3 */}
@@ -284,14 +284,14 @@ export const AboutUs: React.FC = () => {
                                <span className="text-sm sm:text-base font-black text-slate-900 dark:text-white block">50K</span>
                             </div>
                          </div>
-                         <p className="text-[10px] sm:text-xs font-bold text-slate-700 dark:text-white uppercase text-center">Watu</p>
+                         <p className="text-xs sm:text-sm font-bold text-slate-700 dark:text-white uppercase text-center">Watu</p>
                        </div>
                     </div>
 
                     {/* Compact Bar */}
                    <div className="bg-[color:var(--surface-1)] dark:bg-white/5 p-4 sm:p-5 rounded-lg border border-slate-200 dark:border-white/5">
                        <div className="flex justify-between items-end mb-1">
-                         <h5 className="text-[10px] sm:text-xs font-black text-slate-700 dark:text-white uppercase tracking-widest">Mataifa</h5>
+                         <h5 className="text-xs sm:text-sm font-black text-slate-700 dark:text-white uppercase tracking-[0.08em]">Mataifa</h5>
                          <span className="text-base sm:text-lg font-black text-gold-500">12+</span>
                        </div>
                        <div className="h-1.5 w-full bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
@@ -303,7 +303,7 @@ export const AboutUs: React.FC = () => {
                  {/* RIGHT: Compact Tools Grid */}
                  <div className="space-y-6">
                    <div className="flex items-center justify-between border-b border-slate-200 dark:border-white/10 pb-2">
-                      <h4 className="text-[10px] sm:text-xs font-black text-slate-700 dark:text-white uppercase tracking-[0.2em]">Zana</h4>
+                      <h4 className="text-xs sm:text-sm font-black text-slate-700 dark:text-white uppercase tracking-[0.12em]">Zana</h4>
                       <Zap size={14} className="text-gold-500" />
                    </div>
 
@@ -319,7 +319,7 @@ export const AboutUs: React.FC = () => {
                          <div key={i} className="bg-[color:var(--surface-1)] dark:bg-white/5 hover:bg-[color:var(--surface-3)] dark:hover:bg-white/10 p-3 sm:p-4 rounded-xl border border-slate-200 dark:border-white/5 transition-all group cursor-default">
                             <div className={`mb-2 ${tool.color} bg-white dark:bg-white/5 w-fit p-2 rounded-lg group-hover:scale-110 transition-transform shadow-sm`}>{tool.icon}</div>
                             <h5 className="text-xs sm:text-sm font-black text-slate-900 dark:text-white uppercase tracking-widest mb-1">{tool.title}</h5>
-                            <p className="text-[11px] sm:text-xs text-slate-600 dark:text-slate-400 leading-snug font-medium">{tool.desc}</p>
+                            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-snug font-medium">{tool.desc}</p>
                          </div>
                       ))}
                    </div>
@@ -332,7 +332,7 @@ export const AboutUs: React.FC = () => {
        {/* 6. Newsletter Subscription (Replaces Call to Action) */}
        <section className="text-center space-y-6 pt-4 pb-2">
           <div className="max-w-xl mx-auto space-y-2">
-             <div className="inline-flex items-center gap-2 text-gold-500 font-black text-[10px] sm:text-xs uppercase tracking-[0.2em] mb-1">
+             <div className="inline-flex items-center gap-2 text-gold-500 font-black text-xs sm:text-sm uppercase tracking-[0.14em] mb-1">
                 <Mail size={14} /> Taarifa za Kila Wiki
              </div>
               <h3 className="text-2xl md:text-3xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">
@@ -354,13 +354,13 @@ export const AboutUs: React.FC = () => {
                   placeholder="Weka barua pepe yako hapa..."
                   className="w-full bg-transparent px-3 py-3 text-sm font-bold text-slate-900 dark:text-white placeholder:text-slate-400 outline-none"
                 />
-                <button className="bg-primary-900 text-gold-400 px-4 sm:px-6 py-2.5 rounded-lg font-black text-[10px] uppercase tracking-widest hover:bg-gold-500 hover:text-primary-950 transition-all shadow-lg shrink-0 flex items-center justify-center gap-1 group/btn w-full sm:w-auto">
+                <button className="bg-primary-900 text-gold-400 px-4 sm:px-6 py-2.5 rounded-lg font-black text-xs sm:text-sm uppercase tracking-[0.1em] hover:bg-gold-500 hover:text-primary-950 transition-all shadow-lg shrink-0 flex items-center justify-center gap-1 group/btn w-full sm:w-auto">
                    Jiunge <ArrowRight size={12} className="group-hover/btn:translate-x-1 transition-transform" />
                 </button>
              </div>
           </div>
           
-          <p className="text-[10px] sm:text-xs text-slate-400 dark:text-slate-600 font-bold uppercase tracking-widest">
+          <p className="text-xs sm:text-sm text-slate-400 dark:text-slate-600 font-bold uppercase tracking-[0.08em]">
              Hatutumi spam. Unaweza kujiondoa wakati wowote.
           </p>
        </section>

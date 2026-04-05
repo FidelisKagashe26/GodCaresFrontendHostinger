@@ -727,7 +727,7 @@ const App: React.FC = () => {
                   <ArrowLeft size={16} />
                 </button>
 
-                <div className="min-w-0 inline-flex items-center gap-1.5 text-[10px] md:text-xs font-black uppercase tracking-[0.12em] text-[color:var(--text-muted)]">
+                <div className="min-w-0 inline-flex items-center gap-1.5 text-xs md:text-sm font-black uppercase tracking-[0.08em] text-[color:var(--text-muted)]">
                   <button
                     type="button"
                     onClick={() => handleStageChange(StageId.HOME)}
