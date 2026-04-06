@@ -63,17 +63,12 @@ export const getJourneyModules = async (): Promise<JourneyModule[]> => {
         return [];
       }
 
-      return payload
-        .map((item) => ({
-          ...item,
-          hero_image: resolveApiAssetUrl(item.hero_image, API_BASE_URL),
-        }))
-        .sort((a, b) => {
+      return [...payload].sort((a, b) => {
         if (a.sort_order !== b.sort_order) {
           return a.sort_order - b.sort_order;
         }
         return a.id - b.id;
-        });
+      });
     },
     { ttlMs: 10 * 60 * 1000, persist: true },
   );
@@ -100,12 +95,17 @@ export const getJourneyModuleLessons = async (moduleCode: string): Promise<Journ
         return [];
       }
 
-      return [...payload].sort((a, b) => {
-        if (a.sort_order !== b.sort_order) {
-          return a.sort_order - b.sort_order;
-        }
-        return a.id - b.id;
-      });
+      return payload
+        .map((lesson) => ({
+          ...lesson,
+          hero_image: resolveApiAssetUrl(lesson.hero_image, API_BASE_URL),
+        }))
+        .sort((a, b) => {
+          if (a.sort_order !== b.sort_order) {
+            return a.sort_order - b.sort_order;
+          }
+          return a.id - b.id;
+        });
     },
     { ttlMs: 10 * 60 * 1000, persist: true },
   );
