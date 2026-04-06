@@ -43,7 +43,7 @@ export const getHistoryMoments = async (): Promise<HistoryMomentApi[]> => {
     async () => {
       const response = await safeFetch(`${API_BASE_URL}/api/tools/history/`);
       if (!response.ok) {
-        throw new Error("Imeshindikana kupata This Day in History.");
+        throw new Error("Imeshindikana kupata tukio la siku katika historia.");
       }
 
       const payload = (await response.json()) as HistoryMomentApi[];

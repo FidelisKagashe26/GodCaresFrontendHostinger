@@ -361,7 +361,7 @@ export const StageFoundations: React.FC<{ onComplete: () => void }> = ({ onCompl
                 <p className="text-sm text-slate-600 dark:text-slate-400 mt-3 leading-relaxed line-clamp-2">{lesson.summary}</p>
                 <div className="mt-4 flex items-center justify-between text-[10px] font-black uppercase tracking-widest text-slate-400">
                   <span>Somo {idx + 1}</span>
-                  <span>{isCompleted ? 'Completed' : 'Start'}</span>
+                  <span>{isCompleted ? 'Limekamilika' : 'Anza'}</span>
                 </div>
               </button>
             );

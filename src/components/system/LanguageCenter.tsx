@@ -187,7 +187,7 @@ export const LanguageCenter: React.FC<Props> = ({ isOpen, onClose, currentLangua
          <div className="p-4 border-b border-white/10 flex justify-between items-center bg-black/40">
            <div className="flex items-center gap-2">
              <Globe size={16} className="text-gold-400" />
-             <h3 className="font-bold text-white text-sm uppercase tracking-wider">Language Center</h3>
+             <h3 className="font-bold text-white text-sm uppercase tracking-wider">Kituo cha Lugha</h3>
            </div>
            <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-lg text-slate-400 hover:text-white transition-colors"><X size={14}/></button>
          </div>
@@ -195,10 +195,10 @@ export const LanguageCenter: React.FC<Props> = ({ isOpen, onClose, currentLangua
          {/* AI Integration Info */}
          <div className="p-3 bg-gold-500/10 border-b border-white/5">
             <div className="flex items-center gap-2 text-[10px] font-bold text-gold-400 uppercase tracking-wider mb-1">
-                <Sparkles size={10} /> Global Translation Active
+                <Sparkles size={10} /> Tafsiri ya Jumla Inatumika
             </div>
             <p className="text-[10px] text-slate-400 leading-relaxed">
-                Selected language will translate the entire interface and AI responses.
+                Lugha utakayochagua itatafsiri mfumo mzima na majibu ya AI.
             </p>
          </div>
 

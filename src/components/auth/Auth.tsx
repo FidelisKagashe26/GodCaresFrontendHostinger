@@ -309,13 +309,13 @@ export const Auth: React.FC<AuthProps> = ({ onLogin, onClose, resetParams, onRes
     const normalizedEmail = email.trim().toLowerCase();
 
     if (!normalizedUsername) {
-      localErrors.username = 'Weka username yako.';
+      localErrors.username = 'Weka jina la mtumiaji.';
     } else if (!/^[a-z0-9._-]{3,150}$/.test(normalizedUsername)) {
-      localErrors.username = "Username ikubali herufi ndogo, namba, '.', '_' au '-' pekee.";
+      localErrors.username = "Jina la mtumiaji likubali herufi ndogo, namba, '.', '_' au '-' pekee.";
     }
-    if (!normalizedFirstName) localErrors.firstName = 'Weka First name.';
-    if (!normalizedLastName) localErrors.lastName = 'Weka Last name.';
-    if (!selectedDialCode) localErrors.countryCode = 'Chagua country code.';
+    if (!normalizedFirstName) localErrors.firstName = 'Weka jina la kwanza.';
+    if (!normalizedLastName) localErrors.lastName = 'Weka jina la mwisho.';
+    if (!selectedDialCode) localErrors.countryCode = 'Chagua msimbo wa nchi.';
     if (!normalizedPhone) localErrors.phone = 'Weka namba sahihi ya simu.';
     if (!normalizedEmail) {
       localErrors.email = 'Weka barua pepe yako.';
@@ -361,7 +361,7 @@ export const Auth: React.FC<AuthProps> = ({ onLogin, onClose, resetParams, onRes
         'register',
         result.email || normalizedEmail,
         result.phone || normalizedPhone,
-        result.message || 'Tumekutumia OTP kwenye email yako. Weka tarakimu 6 kuthibitisha usajili.'
+        result.message || 'Tumekutumia OTP kwenye barua pepe yako. Weka tarakimu 6 kuthibitisha usajili.'
       );
     } catch (error) {
       applyError(error, 'Imeshindikana kusajili.');
@@ -375,7 +375,7 @@ export const Auth: React.FC<AuthProps> = ({ onLogin, onClose, resetParams, onRes
     const normalizedIdentifier = email.trim().toLowerCase();
 
     if (!normalizedIdentifier) {
-      localErrors.email = 'Weka barua pepe au username yako.';
+      localErrors.email = 'Weka barua pepe au jina la mtumiaji.';
     }
     if (!password) localErrors.password = 'Weka nenosiri lako.';
 
@@ -400,7 +400,7 @@ export const Auth: React.FC<AuthProps> = ({ onLogin, onClose, resetParams, onRes
           'login',
           error.email || normalizedIdentifier,
           normalizePhone(error.phone || pendingPhone || buildInternationalPhone(selectedDialCode, phoneNumber)),
-          error.message || 'Akaunti yako bado haijathibitishwa. Weka OTP tuliyotuma kwenye email yako.'
+          error.message || 'Akaunti yako bado haijathibitishwa. Weka OTP tuliyotuma kwenye barua pepe yako.'
         );
         return;
       }
@@ -477,7 +477,7 @@ export const Auth: React.FC<AuthProps> = ({ onLogin, onClose, resetParams, onRes
 
   const handleGoogleLogin = () => {
     setInfoMessage('');
-    setErrorMessage('Google login bado haijaunganishwa. Tumia barua pepe na nenosiri.');
+    setErrorMessage('Kuingia kwa Google bado haijaunganishwa. Tumia barua pepe na nenosiri.');
   };
 
   const handleForgotPassword = async () => {
@@ -504,7 +504,7 @@ export const Auth: React.FC<AuthProps> = ({ onLogin, onClose, resetParams, onRes
       await forgotPassword(normalizedEmail);
       setInfoMessage('Tumetuma maelekezo ya kubadili nenosiri kwenye barua pepe yako.');
     } catch (error) {
-      applyError(error, 'Imeshindikana kutuma link ya kubadili nenosiri.');
+      applyError(error, 'Imeshindikana kutuma kiungo cha kubadili nenosiri.');
     } finally {
       setLoading(false);
     }
@@ -527,7 +527,7 @@ export const Auth: React.FC<AuthProps> = ({ onLogin, onClose, resetParams, onRes
       if (response.email) {
         setPendingEmail(response.email);
       }
-      setInfoMessage(response.message || 'OTP mpya imetumwa kwenye email yako.');
+      setInfoMessage(response.message || 'OTP mpya imetumwa kwenye barua pepe yako.');
       clearOtpInputs();
       window.setTimeout(() => otpInputRefs.current[0]?.focus(), 80);
     } catch (error) {
@@ -578,7 +578,7 @@ export const Auth: React.FC<AuthProps> = ({ onLogin, onClose, resetParams, onRes
             <div className="rounded-2xl border border-white/50 bg-white/35 p-4 shadow-2xl backdrop-blur-xl dark:border-white/20 dark:bg-slate-900/55">
               <p className="text-[10px] font-black uppercase tracking-[0.24em] text-gold-700 dark:text-gold-300">Thibitisha Akaunti</p>
               <p className="mt-1 text-xs font-semibold text-slate-700 dark:text-slate-200">
-                Akaunti hii bado haijathibitishwa. Ingiza OTP ya tarakimu 6 tuliyotuma kwenye email yako.
+                Akaunti hii bado haijathibitishwa. Ingiza OTP ya tarakimu 6 tuliyotuma kwenye barua pepe yako.
               </p>
               <div className="mt-3">{renderOtpBoxes()}</div>
               <div className="mt-3 flex flex-wrap gap-2">
@@ -637,7 +637,7 @@ export const Auth: React.FC<AuthProps> = ({ onLogin, onClose, resetParams, onRes
               {isResetMode
                 ? 'Weka nenosiri jipya ili kuendelea'
                 : isRegisterOtpMode
-                  ? 'Ingiza tarakimu 6 za msimbo uliotumwa kwenye email yako'
+                  ? 'Ingiza tarakimu 6 za msimbo uliotumwa kwenye barua pepe yako'
                   : isLogin
                     ? 'Ingia ili uendelee na uchambuzi'
                     : 'Tengeneza akaunti kuanza safari'}
@@ -659,7 +659,7 @@ export const Auth: React.FC<AuthProps> = ({ onLogin, onClose, resetParams, onRes
 
                 <div className="flex items-center gap-4 py-1">
                   <div className="h-px flex-1 bg-slate-100 dark:bg-white/5"></div>
-                  <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">AU EMAIL</span>
+                  <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">AU BARUA PEPE</span>
                   <div className="h-px flex-1 bg-slate-100 dark:bg-white/5"></div>
                 </div>
               </>
@@ -683,7 +683,7 @@ export const Auth: React.FC<AuthProps> = ({ onLogin, onClose, resetParams, onRes
                     <input 
                       ref={usernameInputRef}
                       type="text" required value={username} onChange={e => setUsername(e.target.value)}
-                      placeholder="Username" 
+                      placeholder="Jina la mtumiaji" 
                       className={`w-full pl-14 pr-6 py-3 bg-slate-50 dark:bg-black/20 border rounded-lg outline-none transition-all text-sm text-slate-900 dark:text-white font-medium ${
                         fieldErrors.username ? 'border-red-400 focus:border-red-500' : 'border-slate-200 dark:border-white/5 focus:border-gold-500'
                       }`}
@@ -704,7 +704,7 @@ export const Auth: React.FC<AuthProps> = ({ onLogin, onClose, resetParams, onRes
                         required
                         value={firstName}
                         onChange={e => setFirstName(e.target.value)}
-                        placeholder="First name"
+                        placeholder="Jina la kwanza"
                         className={`w-full pl-14 pr-6 py-3 bg-slate-50 dark:bg-black/20 border rounded-lg outline-none transition-all text-sm text-slate-900 dark:text-white font-medium ${
                           fieldErrors.firstName ? 'border-red-400 focus:border-red-500' : 'border-slate-200 dark:border-white/5 focus:border-gold-500'
                         }`}
@@ -721,7 +721,7 @@ export const Auth: React.FC<AuthProps> = ({ onLogin, onClose, resetParams, onRes
                         required
                         value={lastName}
                         onChange={e => setLastName(e.target.value)}
-                        placeholder="Last name"
+                        placeholder="Jina la mwisho"
                         className={`w-full pl-14 pr-6 py-3 bg-slate-50 dark:bg-black/20 border rounded-lg outline-none transition-all text-sm text-slate-900 dark:text-white font-medium ${
                           fieldErrors.lastName ? 'border-red-400 focus:border-red-500' : 'border-slate-200 dark:border-white/5 focus:border-gold-500'
                         }`}
@@ -788,7 +788,7 @@ export const Auth: React.FC<AuthProps> = ({ onLogin, onClose, resetParams, onRes
                       required
                       value={email}
                       onChange={e => setEmail(e.target.value)}
-                      placeholder="Barua Pepe"
+                      placeholder="Barua pepe"
                       className={`w-full pl-14 pr-6 py-3 bg-slate-50 dark:bg-black/20 border rounded-lg outline-none transition-all text-sm text-slate-900 dark:text-white font-medium ${
                         fieldErrors.email ? 'border-red-400 focus:border-red-500' : 'border-slate-200 dark:border-white/5 focus:border-gold-500'
                       }`}
@@ -808,7 +808,7 @@ export const Auth: React.FC<AuthProps> = ({ onLogin, onClose, resetParams, onRes
                       required
                       value={email}
                       onChange={e => setEmail(e.target.value)}
-                      placeholder="Barua Pepe au Username"
+                      placeholder="Barua pepe au jina la mtumiaji"
                       className={`w-full pl-14 pr-6 py-3 bg-slate-50 dark:bg-black/20 border rounded-lg outline-none transition-all text-sm text-slate-900 dark:text-white font-medium ${
                         fieldErrors.email ? 'border-red-400 focus:border-red-500' : 'border-slate-200 dark:border-white/5 focus:border-gold-500'
                       }`}
@@ -848,7 +848,7 @@ export const Auth: React.FC<AuthProps> = ({ onLogin, onClose, resetParams, onRes
                   <div className="flex items-center gap-2 text-slate-600 dark:text-slate-300">
                     <ShieldCheck size={14} className="text-gold-600 dark:text-gold-400" />
                     <p className="text-[11px] font-semibold">
-                      Weka OTP ya tarakimu 6 tuliyotuma kwenye email yako.
+                      Weka OTP ya tarakimu 6 tuliyotuma kwenye barua pepe yako.
                     </p>
                   </div>
                   {renderOtpBoxes()}
@@ -955,7 +955,7 @@ export const Auth: React.FC<AuthProps> = ({ onLogin, onClose, resetParams, onRes
             
             <div className="flex items-center justify-center gap-2 text-slate-400">
               <ShieldCheck size={12} className="text-green-500" />
-              <span className="text-[8px] font-bold uppercase tracking-widest">GC-Shield Active</span>
+              <span className="text-[8px] font-bold uppercase tracking-widest">GC-SHIELD INATUMIKA</span>
             </div>
           </div>
         </div>

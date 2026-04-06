@@ -29,7 +29,7 @@ const HERO_CARDS = [
     image: "https://images.unsplash.com/photo-1543165731-0d29792694b8?auto=format&fit=crop&q=80&w=2000"
   },
   {
-    prompt: "An ancient stone tablet with the Ten Commandments being illuminated by a divine light from above, dramatic clouds in the background, Seventh-day Adventist law and grace theme, 4k",
+    prompt: "Bamba la kale la mawe lenye Amri Kumi likiangaziwa na nuru ya mbinguni kutoka juu, mawingu mazito nyuma, mandhari ya sheria na neema, 4k",
     tag: "Sheria na Neema",
     title: "Misingi ya Ukweli",
     swahiliTitle: "AMRI ZA MUNGU",
@@ -63,7 +63,7 @@ const buildSparklinePath = (data: number[], width: number, height: number) => {
 };
 
 export const Dashboard: React.FC<DashboardProps> = ({ 
-  userName = "Seeker", 
+  userName = "Mtafutaji", 
   completedStages, 
   unlockedStages,
   stages, 

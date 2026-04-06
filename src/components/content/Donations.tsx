@@ -163,7 +163,7 @@ export const Donations: React.FC = () => {
                        <div className="space-y-1">
                           <div className="flex items-center gap-2 text-gold-600 dark:text-gold-500">
                              {project.icon}
-                             <span className="text-[9px] font-black uppercase tracking-widest">Digital_Mission_Project</span>
+                             <span className="text-[9px] font-black uppercase tracking-widest">Mradi_wa_Uinjilisti_Kidijitali</span>
                           </div>
                           <h4 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-tight leading-none">{project.title}</h4>
                        </div>
@@ -190,7 +190,7 @@ export const Donations: React.FC = () => {
                             )}
                           </div>
                           <div className="text-right">
-                            <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1">Target Goal</p>
+                            <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1">Lengo Lengwa</p>
                             <p className="text-xs font-bold text-slate-500 uppercase">{formatTZS(project.goal)}</p>
                           </div>
                        </div>
@@ -305,7 +305,7 @@ export const Donations: React.FC = () => {
 
               <div className="flex items-center justify-center gap-2 text-slate-400">
                  <ShieldCheck size={14} className="text-green-500" />
-                 <span className="text-[8px] font-black uppercase tracking-[0.2em]">SSL Secured 256-bit Connection</span>
+                 <span className="text-[8px] font-black uppercase tracking-[0.2em]">Muunganisho Salama wa SSL (Biti 256)</span>
               </div>
            </div>
         </div>

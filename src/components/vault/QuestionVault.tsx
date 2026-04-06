@@ -40,7 +40,7 @@ const ARCHIVED_QUESTIONS: QuestionItem[] = [
     a: "Kwa sababu Mungu aliibariki na kuitakasa siku hiyo pekee tangu uumbaji kama ukumbusho wa uwezo wake wa kuumba na kukomboa.", 
     detailedResponse: "Sabato si siku ya mapumziko tu kwa ajili ya mwili, bali ni 'ishara' kati ya Mungu na watu wake. Katika Kutoka 31:13, Mungu anasema ni ishara ili tujue kuwa Yeye ndiye anayetutakasa. Ni ukumbusho wa mamlaka yake kama Muumba wa mbingu na nchi.",
     ref: "Mwanzo 2:2-3", 
-    tags: ["Sabbath"],
+    tags: ["Sabato"],
     isPopular: true,
     videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
     videoThumbnail: "https://images.unsplash.com/photo-1543336783-bb59efd935a6?auto=format&fit=crop&q=80&w=800"
@@ -179,7 +179,11 @@ export const QuestionVault: React.FC = () => {
       url: window.location.href
     };
     if (navigator.share) {
-      try { await navigator.share(shareData); } catch (e) {}
+      try {
+        await navigator.share(shareData);
+      } catch {
+        return;
+      }
     } else {
       navigator.clipboard.writeText(`${shareData.text}\n${shareData.url}`);
       setIsCopied(true);
@@ -238,7 +242,7 @@ export const QuestionVault: React.FC = () => {
       <section className="relative bg-slate-100 dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(234,179,8,0.18),transparent_55%)]"></div>
         <div className="relative z-10 px-6 py-10 md:px-10 md:py-12 space-y-3">
-          <p className="text-[10px] font-black uppercase tracking-[0.35em] text-gold-600 dark:text-gold-500">Question Vault</p>
+          <p className="text-[10px] font-black uppercase tracking-[0.35em] text-gold-600 dark:text-gold-500">Hazina ya Maswali</p>
           <h1 className="text-3xl md:text-5xl font-black tracking-tight uppercase leading-none">Maswali na <span className="text-gold-600 dark:text-gold-500 italic">Majibu</span></h1>
           <p className="text-sm md:text-base text-slate-600 dark:text-slate-400 max-w-2xl">
             Chuja maswali kwa mada, soma majibu ya Biblia kwa kina, na tazama video za maelezo bila kutoka kwenye ukurasa.
@@ -351,7 +355,7 @@ export const QuestionVault: React.FC = () => {
             <div className="bg-slate-950 px-6 py-4 flex items-center justify-between border-b border-slate-800 shrink-0">
                <div className="flex items-center gap-4 w-1/3">
                   <button onClick={() => setSelectedQuestion(null)} className="p-2 bg-slate-800 rounded-lg text-slate-300 hover:text-white transition-all"><ArrowLeft size={18} /></button>
-                  <span className="hidden md:block text-[10px] font-black text-slate-500 uppercase tracking-widest truncate">Question_ID: #{selectedQuestion.id}</span>
+                  <span className="hidden md:block text-[10px] font-black text-slate-500 uppercase tracking-widest truncate">Namba ya Swali: #{selectedQuestion.id}</span>
                </div>
                
                <div className="flex bg-black/40 p-1 rounded-xl border border-slate-800">
@@ -377,9 +381,9 @@ export const QuestionVault: React.FC = () => {
                    className={`p-2 rounded-xl transition-all border border-slate-800 flex items-center gap-2 ${isCopied ? 'bg-green-600 text-white' : 'bg-slate-800 text-white hover:bg-slate-700'}`}
                  >
                    {isCopied ? <Check size={16}/> : <Share2 size={16}/>}
-                   <span className="hidden lg:block text-[9px] font-black uppercase tracking-widest">{isCopied ? 'Copied' : 'Share'}</span>
-                 </button>
-               </div>
+                    <span className="hidden lg:block text-[9px] font-black uppercase tracking-widest">{isCopied ? 'Imenakiliwa' : 'Shiriki'}</span>
+                  </button>
+                </div>
             </div>
 
             {/* Modal Content - Scrollable stable container */}
@@ -399,7 +403,7 @@ export const QuestionVault: React.FC = () => {
                      </div>
                   </div>
                   <div className="p-5 bg-white/5 rounded-xl border border-slate-800">
-                     <p className="text-[10px] text-slate-500 leading-relaxed italic">"Nanyi mtaifahamu kweli, nayo hiyo kweli itawaweka huru." — Yohana 8:32</p>
+                     <p className="text-[10px] text-slate-500 leading-relaxed italic">"Nanyi mtaifahamu kweli, nayo hiyo kweli itawaweka huru." - Yohana 8:32</p>
                   </div>
                </aside>
 
@@ -434,7 +438,7 @@ export const QuestionVault: React.FC = () => {
                        </div>
                        <div className="mt-8 text-center space-y-2">
                           <h4 className="text-xl font-black text-white uppercase tracking-tighter">Sikiliza Maelezo</h4>
-                          <p className="text-slate-500 text-xs font-bold uppercase tracking-widest opacity-60">Digital Missionary Media</p>
+                          <p className="text-slate-500 text-xs font-bold uppercase tracking-widest opacity-60">Midia ya Umisheni wa Kidijitali</p>
                        </div>
                     </div>
                   )}
@@ -445,7 +449,7 @@ export const QuestionVault: React.FC = () => {
             <div className="p-5 border-t border-slate-800 flex justify-between items-center bg-black/40 shrink-0">
                <div className="flex items-center gap-2">
                   <ShieldCheck size={14} className="text-green-500" />
-                  <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Verified Integrity</span>
+                  <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Uadilifu Uliothibitishwa</span>
                </div>
                <button onClick={() => setSelectedQuestion(null)} className="px-10 py-3 bg-gold-500 text-primary-950 rounded-lg text-[10px] font-black uppercase tracking-widest hover:opacity-90 transition-all">Funga</button>
             </div>
@@ -495,5 +499,6 @@ export const QuestionVault: React.FC = () => {
     </div>
   );
 };
+
 
 

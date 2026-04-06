@@ -125,6 +125,20 @@ const getAvatarInitial = (value?: string): string => {
   return /[A-Z0-9]/i.test(first) ? first : 'M';
 };
 
+const normalizeReadTime = (value?: string | null): string => {
+  const raw = String(value || '').trim();
+  if (!raw) return 'Hakuna taarifa';
+
+  const directMatch = raw.match(/^(\d+)\s*(?:min|mins|minute|minutes)\s*(?:read)?$/i);
+  if (directMatch) {
+    return `Dakika ${directMatch[1]} za kusoma`;
+  }
+
+  return raw
+    .replace(/(\d+)\s*(?:min|mins|minute|minutes)\s*read/gi, 'Dakika $1 za kusoma')
+    .replace(/\bread\b/gi, 'kusoma');
+};
+
 const formatCommentTimestamp = (value: string): string => {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return '';
@@ -177,7 +191,7 @@ export const Blog: React.FC<BlogProps> = ({ user, onRequireLogin }) => {
     author: post.author || 'Mwandishi',
     authorImage: post.author_image || '',
     date: post.published_at ? new Date(post.published_at).toLocaleDateString('sw-TZ') : 'Hakuna taarifa',
-    readTime: post.read_time || 'Hakuna taarifa',
+    readTime: normalizeReadTime(post.read_time),
     likes: post.likes || 0,
     comments: post.comments || 0,
     liked: !!post.liked,
@@ -390,7 +404,7 @@ export const Blog: React.FC<BlogProps> = ({ user, onRequireLogin }) => {
         );
       } catch {
         setComments([]);
-        setCommentsError('Imeshindikana kupata comments kwa sasa.');
+        setCommentsError('Imeshindikana kupata maoni kwa sasa.');
       } finally {
         setCommentsLoading(false);
       }
@@ -410,7 +424,7 @@ export const Blog: React.FC<BlogProps> = ({ user, onRequireLogin }) => {
         liked: payload.liked,
       }));
     } catch {
-      setErrorMessage('Imeshindikana kusasisha like. Jaribu tena.');
+      setErrorMessage('Imeshindikana kusasisha alipenda. Jaribu tena.');
     } finally {
       setLikeBusyByPost((prev) => ({ ...prev, [id]: false }));
     }
@@ -428,7 +442,7 @@ export const Blog: React.FC<BlogProps> = ({ user, onRequireLogin }) => {
     }
     setSavedPostIds(next);
     persistSavedPostIds(next);
-    showActionMessage(willSave ? 'Makala imehifadhiwa.' : 'Makala imeondolewa kwenye save.');
+    showActionMessage(willSave ? 'Makala imehifadhiwa.' : 'Makala imeondolewa kwenye hifadhi.');
   };
 
   const handleShare = async (post: BlogPost) => {
@@ -453,11 +467,11 @@ export const Blog: React.FC<BlogProps> = ({ user, onRequireLogin }) => {
 
     const copied = await copyToClipboard(url);
     if (copied) {
-      showActionMessage('Link imenakiliwa.');
+      showActionMessage('Kiungo kimenakiliwa.');
       return;
     }
 
-    window.prompt('Nakili link hii ya kushare:', url);
+    window.prompt('Nakili kiungo hiki cha kushiriki:', url);
   };
 
   const focusComments = () => {
@@ -469,7 +483,7 @@ export const Blog: React.FC<BlogProps> = ({ user, onRequireLogin }) => {
 
   const handleCommentAction = () => {
     if (!isLoggedIn) {
-      showActionMessage('Ingia kwanza ili kuona na kuandika comments.');
+      showActionMessage('Ingia kwanza ili kuona na kuandika maoni.');
       onRequireLogin?.();
       return;
     }
@@ -487,7 +501,7 @@ export const Blog: React.FC<BlogProps> = ({ user, onRequireLogin }) => {
     if (!activePost || commentSubmitting) return;
     setCommentSubmitError('');
     if (!isLoggedIn) {
-      showActionMessage('Ingia kwanza ili kuandika comment.');
+      showActionMessage('Ingia kwanza ili kuandika maoni.');
       onRequireLogin?.();
       return;
     }
@@ -495,7 +509,7 @@ export const Blog: React.FC<BlogProps> = ({ user, onRequireLogin }) => {
     const content = commentText.trim();
 
     if (content.length < 2) {
-      setCommentSubmitError('Andika comment yenye angalau herufi 2.');
+      setCommentSubmitError('Andika maoni yenye angalau herufi 2.');
       return;
     }
 
@@ -519,7 +533,7 @@ export const Blog: React.FC<BlogProps> = ({ user, onRequireLogin }) => {
       }));
       setCommentText('');
     } catch (error) {
-      setCommentSubmitError(error instanceof Error ? error.message : 'Imeshindikana kutuma comment.');
+      setCommentSubmitError(error instanceof Error ? error.message : 'Imeshindikana kutuma maoni.');
     } finally {
       setCommentSubmitting(false);
     }
@@ -596,7 +610,7 @@ export const Blog: React.FC<BlogProps> = ({ user, onRequireLogin }) => {
                     ? 'border-green-300 bg-green-50 text-green-700 dark:border-green-700 dark:bg-green-900/35 dark:text-green-300'
                     : 'border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:border-slate-400 dark:hover:border-slate-500'
                 }`}
-                aria-label={isPostSaved(post.id) ? 'Ondoa kwenye save' : 'Save makala'}
+                aria-label={isPostSaved(post.id) ? 'Ondoa kwenye hifadhi' : 'Hifadhi makala'}
               >
                 <Bookmark size={17} className={isPostSaved(post.id) ? 'fill-green-200' : ''} />
               </button>
@@ -649,14 +663,14 @@ export const Blog: React.FC<BlogProps> = ({ user, onRequireLogin }) => {
           {!isCommentsPanelOpen && (
             <div className="mt-10 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/70 p-4 text-sm text-slate-700 dark:text-slate-200">
               <p className="font-semibold">
-                Bonyeza kitufe cha <span className="font-black">comment</span> kuona au kuandika comments.
+                Bonyeza kitufe cha <span className="font-black">maoni</span> kuona au kuandika maoni.
               </p>
             </div>
           )}
 
           {isCommentsPanelOpen && (
             <div ref={commentsSectionRef} className="mt-10 border-t border-slate-100 dark:border-slate-800 pt-8 space-y-5">
-              <h3 className="text-xl font-black text-slate-900 dark:text-slate-100">Comments ({post.comments})</h3>
+              <h3 className="text-xl font-black text-slate-900 dark:text-slate-100">Maoni ({post.comments})</h3>
 
               <div className="space-y-3 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50/80 dark:bg-slate-900/65 p-4">
                 <div className="flex items-center gap-3 rounded-xl border border-green-200 bg-green-50 px-3 py-2.5">
@@ -672,7 +686,7 @@ export const Blog: React.FC<BlogProps> = ({ user, onRequireLogin }) => {
                   ref={commentInputRef}
                   value={commentText}
                   onChange={(event) => setCommentText(event.target.value)}
-                  placeholder="Andika comment yako hapa..."
+                  placeholder="Andika maoni yako hapa..."
                   rows={4}
                   className="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-3 py-2.5 text-[15px] leading-6 text-slate-900 dark:text-slate-100 outline-none focus:border-slate-500 dark:focus:border-slate-500 resize-y"
                 />
@@ -686,20 +700,20 @@ export const Blog: React.FC<BlogProps> = ({ user, onRequireLogin }) => {
                     disabled={commentSubmitting}
                     className="rounded-full bg-green-700 px-4 py-2 text-xs font-black uppercase tracking-[0.08em] text-white hover:bg-green-800 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                   >
-                    {commentSubmitting ? 'Inatuma...' : 'Tuma Comment'}
+                    {commentSubmitting ? 'Inatuma...' : 'Tuma Maoni'}
                   </button>
                 </div>
               </div>
 
               {commentsLoading && (
-                <div className="text-xs uppercase tracking-widest text-slate-400 dark:text-slate-500 font-black">Inapakia comments...</div>
+                <div className="text-xs uppercase tracking-widest text-slate-400 dark:text-slate-500 font-black">Inapakia maoni...</div>
               )}
               {commentsError && (
                 <div className="text-xs font-bold text-red-600">{commentsError}</div>
               )}
               {!commentsLoading && comments.length === 0 && (
                 <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-4 text-sm font-medium text-slate-500 dark:text-slate-400">
-                  Bado hakuna comments kwenye makala hii. Kuwa wa kwanza kuandika.
+                  Bado hakuna maoni kwenye makala hii. Kuwa wa kwanza kuandika.
                 </div>
               )}
               {comments.map((comment) => (
@@ -734,7 +748,7 @@ export const Blog: React.FC<BlogProps> = ({ user, onRequireLogin }) => {
   return (
     <div className="bg-white dark:bg-slate-950 min-h-screen pb-20 max-w-6xl mx-auto">
       <div className="p-4 sm:p-6 md:p-12 border-b border-slate-100 dark:border-slate-800 flex flex-col md:flex-row justify-between items-center gap-6">
-        <h1 className="text-4xl font-black text-slate-900 dark:text-slate-100 tracking-tight">God Cares <span className="text-gold-500">Blog</span></h1>
+        <h1 className="text-4xl font-black text-slate-900 dark:text-slate-100 tracking-tight">God Cares <span className="text-gold-500">Makala</span></h1>
         <div className="relative w-full md:w-64">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" size={18} />
           <input
@@ -813,7 +827,7 @@ export const Blog: React.FC<BlogProps> = ({ user, onRequireLogin }) => {
                           ? 'border-green-300 bg-green-50 text-green-700 dark:border-green-700 dark:bg-green-900/35 dark:text-green-300'
                           : 'border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-300 hover:border-slate-400 dark:hover:border-slate-500 hover:text-slate-800 dark:hover:text-slate-100'
                         }`}
-                        aria-label={isPostSaved(post.id) ? 'Ondoa kwenye save' : 'Save makala'}
+                        aria-label={isPostSaved(post.id) ? 'Ondoa kwenye hifadhi' : 'Hifadhi makala'}
                       >
                       <Bookmark size={16} className={isPostSaved(post.id) ? 'fill-green-200' : ''} />
                     </button>
@@ -836,7 +850,7 @@ export const Blog: React.FC<BlogProps> = ({ user, onRequireLogin }) => {
 
               <div className="mt-4 pt-3 border-t border-green-100/90 dark:border-slate-700 flex items-center justify-between gap-3">
                 <span className="text-[11px] font-bold uppercase tracking-[0.08em] text-slate-500 dark:text-slate-400">
-                  Gusa card kusoma
+                  Gusa kadi kusoma
                 </span>
                 <button
                   type="button"
@@ -846,7 +860,7 @@ export const Blog: React.FC<BlogProps> = ({ user, onRequireLogin }) => {
                   }}
                   className="inline-flex items-center gap-1.5 rounded-full border border-gold-300/80 bg-gold-100/70 px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.08em] text-gold-800 hover:bg-gold-200/80 transition-colors"
                 >
-                  More
+                  Zaidi
                   <ArrowRight size={13} />
                 </button>
               </div>

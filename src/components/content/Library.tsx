@@ -312,7 +312,7 @@ export const Library: React.FC = () => {
             <h4 className="text-sm font-bold text-slate-900 dark:text-white leading-tight mb-2">{item.title}</h4>
             <div className="flex items-center justify-between mt-4 pt-4 border-t border-slate-50 dark:border-white/5">
               <button onClick={() => setViewingItem(item)} className="text-[10px] font-black text-slate-500 hover:text-gold-500 uppercase tracking-widest flex items-center gap-1 transition-colors">
-                {item.type === 'Video' ? <><Play size={12} /> Watch Now</> : <><Eye size={12} /> View Item</>}
+                {item.type === 'Video' ? <><Play size={12} /> Tazama Sasa</> : <><Eye size={12} /> Fungua Kipengee</>}
               </button>
               <button onClick={() => handleDownload(item)} className="p-2 text-slate-400 hover:text-slate-900 dark:hover:text-white"><ArrowDownToLine size={16} /></button>
             </div>
@@ -328,7 +328,7 @@ export const Library: React.FC = () => {
       <div className="bg-slate-900 rounded-3xl p-10 md:p-14 text-white relative overflow-hidden">
         <div className="absolute top-0 right-0 p-10 opacity-[0.03] rotate-12"><Layers size={250} /></div>
         <div className="relative z-10 space-y-4">
-          <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/10 rounded-lg text-[10px] font-black uppercase tracking-[0.3em]">Digital Assets Repository</div>
+          <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/10 rounded-lg text-[10px] font-black uppercase tracking-[0.3em]">Hazina ya Vifaa vya Kidijitali</div>
           <h1 className="text-4xl md:text-6xl font-black tracking-tighter">Maktaba ya <span className="text-gold-500">Ukweli</span></h1>
           <p className="text-slate-400 text-lg max-w-2xl">Vifaa vya utafiti, mafundisho ya sauti, video na nyumba ya picha zote katika sehemu moja.</p>
           <div className="pt-6 relative max-w-xl">
@@ -372,7 +372,7 @@ export const Library: React.FC = () => {
 
         {(activeTab === 'Zote' || activeTab === 'Video') && filteredItems.filter(i => i.type === 'Video').length > 0 && (
           <section className="space-y-6">
-            <div className="flex items-center gap-2 px-1 text-gold-500"><PlayCircle size={20}/><h3 className="text-xs font-black uppercase tracking-[0.3em]">Video na Documentary</h3></div>
+            <div className="flex items-center gap-2 px-1 text-gold-500"><PlayCircle size={20}/><h3 className="text-xs font-black uppercase tracking-[0.3em]">Video na Nyaraka</h3></div>
             {renderGrid(filteredItems.filter(i => i.type === 'Video'))}
           </section>
         )}
@@ -386,7 +386,7 @@ export const Library: React.FC = () => {
 
         {(activeTab === 'Zote' || activeTab === 'Image') && filteredItems.filter(i => i.type === 'Image').length > 0 && (
           <section className="space-y-6">
-            <div className="flex items-center gap-2 px-1 text-emerald-500"><LayoutGrid size={20}/><h3 className="text-xs font-black uppercase tracking-[0.3em]">Gallery ya Picha na Albamu</h3></div>
+            <div className="flex items-center gap-2 px-1 text-emerald-500"><LayoutGrid size={20}/><h3 className="text-xs font-black uppercase tracking-[0.3em]">Matunzio ya Picha na Albamu</h3></div>
             {renderImageGallery(filteredItems.filter(i => i.type === 'Image'))}
           </section>
         )}

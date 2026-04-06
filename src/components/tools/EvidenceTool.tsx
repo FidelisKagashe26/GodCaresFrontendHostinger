@@ -17,7 +17,7 @@ interface EvidenceFact {
 const FALLBACK_FACTS: EvidenceFact[] = [
   { 
     id: 1,
-    title: "Dead Sea Scrolls", 
+    title: "Magombo ya Bahari ya Chumvi", 
     evidence: "Hati za Kale za Biblia",
     didYouKnow: "Nakala hizi za miaka 2000 iliyopita zinafanana kwa 99% na Biblia yako ya leo, zikithibitisha kuwa Neno la Mungu halijabadilika.",
     hints: [
@@ -31,7 +31,7 @@ const FALLBACK_FACTS: EvidenceFact[] = [
   },
   { 
     id: 2,
-    title: "Cyrus Cylinder", 
+    title: "Silinda ya Koreshi", 
     evidence: "Silinda ya Koreshi",
     didYouKnow: "Silinda hii inamtaja Mfalme Koreshi na amri yake ya kuwaachia huru mateka, kama ilivyotabiriwa na Isaya miaka 150 kabla.",
     hints: [
@@ -45,7 +45,7 @@ const FALLBACK_FACTS: EvidenceFact[] = [
   },
   {
     id: 3,
-    title: "Pilate Stone",
+    title: "Jiwe la Pilato",
     evidence: "Jiwe la Pilato",
     didYouKnow: "Kwa miaka mingi wakosoaji walisema Pilato hakuwahi kuwepo. Mwaka 1961, jiwe hili lilipatikana likiwa na jina lake.",
     hints: [
@@ -104,7 +104,7 @@ export const EvidenceTool: React.FC<Props> = ({ onGoToVault }) => {
       const mapped = payload.map((item, index) => mapEvidenceToFact(item, index));
       setFacts(mapped.length > 0 ? mapped : FALLBACK_FACTS);
     } catch {
-      setFactsError('Imeshindikana kupakua Did You Know. Tunaonyesha data ya msingi.');
+      setFactsError('Imeshindikana kupakua sehemu ya Je, Wajua?. Tunaonyesha data ya msingi.');
       setFacts(FALLBACK_FACTS);
     } finally {
       setIsLoadingFacts(false);
@@ -154,7 +154,7 @@ export const EvidenceTool: React.FC<Props> = ({ onGoToVault }) => {
                 {isLoadingFacts ? (
                   <div className="h-[420px] flex items-center justify-center flex-col gap-4 text-slate-300">
                     <Loader2 size={36} className="animate-spin text-emerald-500" />
-                    <p className="text-[10px] font-black uppercase tracking-[0.2em]">Inapakua Did You Know...</p>
+                    <p className="text-[10px] font-black uppercase tracking-[0.2em]">Inapakua Je, Wajua?...</p>
                   </div>
                 ) : (
                   <>
@@ -163,7 +163,7 @@ export const EvidenceTool: React.FC<Props> = ({ onGoToVault }) => {
                        <img 
                          src={activeFact.image} 
                          className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-all duration-700 group-hover:scale-105" 
-                         alt="Evidence" 
+                         alt="Ushahidi" 
                        />
                        <div className="absolute inset-0 bg-gradient-to-t from-[#0f172a] via-transparent to-black/60"></div>
                        
@@ -211,7 +211,7 @@ export const EvidenceTool: React.FC<Props> = ({ onGoToVault }) => {
                        {/* Hints / Dondoo Muhimu */}
                        <div>
                           <h4 className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-3 flex items-center gap-2">
-                             <Info size={12} /> Dondoo Muhimu (Hints)
+                             <Info size={12} /> Dondoo Muhimu
                           </h4>
                           <div className="grid grid-cols-1 gap-2">
                              {activeFact.hints.map((hint, idx) => (

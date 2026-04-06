@@ -199,7 +199,7 @@ export const DeceptionVault: React.FC = () => {
              >
                <div className="flex justify-between items-center mb-8">
                   <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-600 group-hover:text-red-500 transition-colors">
-                    Dossier #{c.id}
+                    Kesi #{c.id}
                   </span>
                   <div className={`w-2 h-2 rounded-full ${c.threatLevel === 'CRITICAL' ? 'bg-red-500 animate-pulse shadow-[0_0_10px_rgba(239,68,68,0.5)]' : 'bg-orange-500 shadow-[0_0_10px_rgba(249,115,22,0.5)]'}`}></div>
                </div>
@@ -229,7 +229,7 @@ export const DeceptionVault: React.FC = () => {
                    className="p-2 bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white rounded-lg transition-all flex items-center gap-2 group"
                  >
                     <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform" />
-                    <span className="text-[9px] font-black uppercase tracking-widest">Archives</span>
+                    <span className="text-[9px] font-black uppercase tracking-widest">Kumbukumbu</span>
                  </button>
                  <div className="h-6 w-[1px] bg-white/5"></div>
                  <h3 className="text-[10px] font-black text-white uppercase tracking-[0.2em] hidden sm:block">CHUMBA CHA UKAGUZI: {activeCase.id}</h3>
@@ -239,8 +239,8 @@ export const DeceptionVault: React.FC = () => {
                  <button 
                    onClick={handleShare}
                    className="p-2.5 bg-gold-500 text-primary-950 rounded-lg shadow-lg hover:scale-110 active:scale-95 transition-all"
-                   title="Share Truth"
-                 >
+                   title="Shiriki Ukweli"
+                  >
                     <Share2 size={20} />
                  </button>
                  <div className="h-6 w-[1px] bg-white/5 mx-1"></div>
@@ -271,7 +271,7 @@ export const DeceptionVault: React.FC = () => {
                        <div className="space-y-4">
                           <div className="flex items-center gap-3">
                              <AlertTriangle size={24} className="text-red-500" />
-                             <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-red-500 italic">Uongo (Tradition)</h3>
+                             <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-red-500 italic">Uongo (Mapokeo)</h3>
                           </div>
                           <p className="text-xl md:text-2xl font-bold italic text-red-100/80 leading-tight">"{activeCase.tradition}"</p>
                        </div>

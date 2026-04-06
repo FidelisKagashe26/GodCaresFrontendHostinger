@@ -247,7 +247,7 @@ export const registerUser = async (payload: {
 
   return {
     success: Boolean(data.success),
-    message: data.message || "Tumekutumia OTP kwenye email yako.",
+    message: data.message || "Tumekutumia OTP kwenye barua pepe yako.",
     phone: data.phone,
     email: data.email,
     masked_email: data.masked_email,
@@ -296,7 +296,7 @@ export const resendRegistrationOtp = async (payload: {
   };
 
   return {
-    message: data.message || "OTP mpya imetumwa kwenye email yako.",
+    message: data.message || "OTP mpya imetumwa kwenye barua pepe yako.",
     email: data.email,
     phone: data.phone,
     masked_email: data.masked_email,

@@ -104,7 +104,7 @@ export const StageFiveMissionary: React.FC<{ onComplete: () => void }> = ({ onCo
              <div className="absolute bottom-4 left-4 right-4 flex justify-between items-center bg-white/90 backdrop-blur-md p-4 rounded-2xl border border-white shadow-lg">
                 <div className="flex items-center gap-2">
                   <Navigation size={18} className="text-primary-600 animate-bounce" />
-                  <span className="text-xs font-bold text-slate-700">Inafuatilia Njia (Route Active)</span>
+                  <span className="text-xs font-bold text-slate-700">Inafuatilia Njia (Njia Inatumika)</span>
                 </div>
                 <button className="bg-primary-600 text-white p-2 rounded-xl hover:bg-primary-700 shadow-lg">
                   <Plus size={20} />
@@ -163,7 +163,7 @@ export const StageFiveMissionary: React.FC<{ onComplete: () => void }> = ({ onCo
                 </div>
 
                 <button className="w-full bg-slate-900 text-white py-4 rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-slate-800 shadow-xl shadow-slate-900/10">
-                   <Save size={18} /> Update Records
+                   <Save size={18} /> Sasisha Rekodi
                 </button>
               </div>
             </div>

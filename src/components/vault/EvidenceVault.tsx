@@ -139,15 +139,15 @@ const buildPdfPageUrl = (url: string, page: number): string => {
 
 const getMediaBadge = (item: EvidenceItem): { icon: React.ReactElement; label: string } => {
   if (isPdfSource(item.heroImage, item.type)) {
-    return { icon: <FileText size={22} />, label: 'PDF Evidence' };
+    return { icon: <FileText size={22} />, label: 'Ushahidi wa PDF' };
   }
   if (isVideoSource(item.heroImage, item.type)) {
-    return { icon: <PlayCircle size={22} />, label: 'Video Evidence' };
+    return { icon: <PlayCircle size={22} />, label: 'Ushahidi wa Video' };
   }
   if (isAudioSource(item.heroImage, item.type)) {
-    return { icon: <Activity size={22} />, label: 'Audio Evidence' };
+    return { icon: <Activity size={22} />, label: 'Ushahidi wa Sauti' };
   }
-  return { icon: <Eye size={22} />, label: 'Image Evidence' };
+  return { icon: <Eye size={22} />, label: 'Ushahidi wa Picha' };
 };
 
 const renderMediaCover = (item: EvidenceItem, className: string) => {
@@ -268,7 +268,7 @@ const VAULT_ITEMS: EvidenceItem[] = [
     description: 'Sheria ya kwanza ya kiraia inayolazimisha mapumziko siku ya Jumapili.',
     fact: "Jumapili iliitwa 'Siku ya Jua yenye kuheshimika' (Venerable Day of the Sun).",
     sourceBook: "Codex Justinianus",
-    publisher: "Roman Empire Archives",
+    publisher: "Kumbukumbu za Dola ya Rumi",
     author: {
       name: "Emperor Constantine I",
       role: "Roman Emperor",
@@ -305,7 +305,7 @@ const VAULT_ITEMS: EvidenceItem[] = [
     subCategory: 'Church Councils',
     hint: 'Laana ya Sabato',
     type: 'PDF',
-    title: "Synod of Laodicea",
+    title: "Sinodi ya Laodikia",
     swahiliTitle: 'Mtaguso wa Laodikia',
     description: 'Kanisa lilikataza Wakristo kutunza Sabato ya Biblia (Jumamosi) na kuamuru wafanye kazi siku hiyo.',
     fact: "Utunzaji wa Sabato uliitwa 'Uyahudi' na kulaaniwa.",
@@ -335,7 +335,7 @@ const VAULT_ITEMS: EvidenceItem[] = [
         { x: 15, y: 50, w: 70, h: 15, text: "Tishio la laana (Anathema)" }
       ],
       confidence: 0.98,
-      extractionMethod: "Archive Scan",
+      extractionMethod: "Uchanganuzi wa Kumbukumbu",
       sourceHash: "laodicea-canon-29",
       scanDate: "2024-01-15",
       originalLanguage: "Greek/Latin"
@@ -351,12 +351,12 @@ const VAULT_ITEMS: EvidenceItem[] = [
     swahiliTitle: 'Silinda ya Koreshi',
     description: 'Ushahidi wa kiakiolojia unaothibitisha amri ya Mfalme Koreshi kuruhusu Wayahudi kurudi Yerusalemu.',
     fact: "Inathibitisha simulizi la Ezra 1:1-4 na utabiri wa Isaya kuhusu Koreshi.",
-    sourceBook: "British Museum Archives",
+    sourceBook: "Kumbukumbu za Jumba la Makumbusho la Uingereza",
     publisher: "British Museum",
     author: {
       name: "King Cyrus II",
       role: "King of Persia",
-      authority: "Royal Decree",
+      authority: "Amri ya Kifalme",
       organization: "Achaemenid Empire",
       image: "https://ui-avatars.com/api/?name=Cyrus+The+Great&background=b45309&color=fff",
       bio: "Mfalme wa Uajemi aliyetabiriwa na Isaya miaka 150 kabla ya kuzaliwa kwake, ambaye alishinda Babeli na kuwaruhusu watu wa Mungu kurudi."
@@ -747,10 +747,10 @@ const DocumentPreview: React.FC<{ item: EvidenceItem; onBack: () => void; onClos
           <div className="h-6 w-px bg-white/10 mx-2"></div>
           <div className="flex flex-col">
             <h2 className="text-[10px] md:text-xs font-black text-gold-500 uppercase tracking-[0.2em] flex items-center gap-2">
-              <ShieldCheck size={14} /> Forensic Preview
+              <ShieldCheck size={14} /> Hakiki ya Uthibitisho
             </h2>
             <p className="text-[9px] text-slate-500 font-mono uppercase tracking-widest">
-              UKURASA {isPdfDocument ? safePdfPage : citedPage} • SCAN {item.evidenceData.scanDate || 'N/A'}
+              UKURASA {isPdfDocument ? safePdfPage : citedPage} • SCANI {item.evidenceData.scanDate || 'HAKUNA'}
             </p>
           </div>
         </div>
@@ -762,7 +762,7 @@ const DocumentPreview: React.FC<{ item: EvidenceItem; onBack: () => void; onClos
           </div>
           <div className="flex items-center gap-2">
             <Fingerprint size={14} />
-            HASH: <span className="text-white">{(item.evidenceData.sourceHash || 'N/A').substring(0, 8)}...</span>
+            HASHI: <span className="text-white">{(item.evidenceData.sourceHash || 'HAKUNA').substring(0, 8)}...</span>
           </div>
         </div>
 
@@ -806,14 +806,14 @@ const DocumentPreview: React.FC<{ item: EvidenceItem; onBack: () => void; onClos
             <div className="w-full h-full flex items-center justify-center px-3 md:px-6 py-4 md:py-6">
               {pdfViewerUrl ? (
                 <iframe
-                  title={`${item.title} PDF Preview`}
+                  title={`${item.title} Hakiki ya PDF`}
                   src={pdfViewerUrl}
                   className="w-full max-w-6xl h-full rounded-xl border border-white/15 bg-[#0d1117] shadow-[0_0_80px_rgba(0,0,0,0.6)]"
                 />
               ) : (
                 <div className="w-full max-w-2xl p-8 rounded-xl border border-white/10 bg-white/5 text-center space-y-3">
                   <FileText size={24} className="mx-auto text-gold-400" />
-                  <p className="text-sm text-slate-300">Hakuna PDF source iliyowekwa kwa item hii.</p>
+                  <p className="text-sm text-slate-300">Hakuna chanzo cha PDF kilichowekwa kwa kipengee hiki.</p>
                 </div>
               )}
             </div>
@@ -823,7 +823,7 @@ const DocumentPreview: React.FC<{ item: EvidenceItem; onBack: () => void; onClos
             <div className="relative shadow-[0_0_100px_rgba(0,0,0,0.8)]">
               <img
                 src={primaryEvidenceUrl}
-                alt="Evidence Document"
+                alt="Hati ya Ushahidi"
                 draggable={false}
                 className={`max-w-none w-auto h-[60vh] md:h-[85vh] object-contain transition-all duration-700 ${stage === 'provenance' ? 'blur-sm opacity-50 grayscale' : 'blur-0 opacity-100 grayscale-0'}`}
               />
@@ -1031,7 +1031,7 @@ const DocumentPreview: React.FC<{ item: EvidenceItem; onBack: () => void; onClos
             </button>
           )}
 
-          <button onClick={() => setIsAutoPlaying((prev) => !prev)} className="p-2 md:p-3 hover:bg-white/10 rounded-lg text-slate-300 transition-colors" title="Washa/Zima Auto">
+          <button onClick={() => setIsAutoPlaying((prev) => !prev)} className="p-2 md:p-3 hover:bg-white/10 rounded-lg text-slate-300 transition-colors" title="Washa/Zima Kiotomatiki">
             {isAutoPlaying ? <Pause size={16} className="text-green-500 animate-pulse" /> : <Play size={16} className="text-slate-500" />}
           </button>
         </div>
@@ -1161,7 +1161,7 @@ export const EvidenceVault: React.FC = () => {
         <div className="relative z-10 h-full flex flex-col justify-center p-6 md:p-16 space-y-4 text-center md:text-left">
           <div className="flex items-center justify-center md:justify-start gap-3 text-gold-400">
             <Microscope size={20} />
-            <span className="text-[10px] font-black uppercase tracking-[0.4em]">Forensic Archives</span>
+            <span className="text-[10px] font-black uppercase tracking-[0.4em]">Kumbukumbu za Uthibitisho</span>
           </div>
           <h1 className="text-4xl md:text-6xl font-black text-white tracking-tighter uppercase leading-none">
             Hifadhi ya <span className="text-slate-500">Ushahidi</span>
@@ -1182,12 +1182,12 @@ export const EvidenceVault: React.FC = () => {
            )}
            {loadingVault && (
              <div className="col-span-full py-6 text-center text-xs font-black uppercase tracking-widest text-slate-400">
-               Inapakia evidence...
+               Inapakia ushahidi...
              </div>
            )}
            {!loadingVault && folders.length === 0 && (
              <div className="col-span-full py-6 text-center text-xs font-black uppercase tracking-widest text-slate-400">
-               Hakuna taarifa za evidence kwa sasa.
+               Hakuna taarifa za ushahidi kwa sasa.
              </div>
            )}
            {folders.map(folder => {
@@ -1203,7 +1203,7 @@ export const EvidenceVault: React.FC = () => {
                   </div>
                   <div className="text-center space-y-1">
                      <h3 className="font-bold text-white text-sm uppercase tracking-wider">{folder}</h3>
-                     <p className="text-[10px] text-slate-500 font-mono">{count} Files</p>
+                     <p className="text-[10px] text-slate-500 font-mono">{count} Faili</p>
                   </div>
                </button>
              );

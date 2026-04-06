@@ -75,9 +75,9 @@ const TIMELINES: TimelineSection[] = [
     description: 'Mwanzo wa ulimwengu na wanadamu.',
     milestones: [
       { id: 'c1', year: 'Siku 1', title: 'Nuru', swahiliTitle: 'Nuru ya Kwanza', description: 'Mungu alitenga nuru na giza.', category: 'Past', image: 'https://images.unsplash.com/photo-1464802686167-b939a6910659?q=80&w=1000', verse: 'Mwanzo 1:3', fullStory: 'Hapo mwanzo, dunia ilikuwa ukiwa na utupu, na giza lilikuwa juu ya uso wa vilindi. Nuru ndiyo ilikuwa hatua ya kwanza ya kuondoa machafuko hayo. Mungu alisema, "Iwe Nuru," na nuru ikawako, ikitenganisha siku na usiku.', swahiliDeep: 'Nuru hii inawakilisha Kristo, "Nuru ya Ulimwengu." Kabla ya jua kuumbwa siku ya nne, nuru ya utukufu wa Mungu iliangaza dunia. Hii inatufundisha kuwa nuru ya kiroho hutangulia nuru ya kimwili; lazima kwanza tuangaziwe na Kristo kabla hatujazaa matunda.', didYouKnow: 'Nuru ilikuwepo kabla ya jua kuumbwa siku ya 4, ikithibitisha kuwa Mungu ndiye chanzo cha nuru, si jua.', videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ' },
-      { id: 'c4', year: 'Siku 4', title: 'Lights', swahiliTitle: 'Jua, Mwezi na Nyota', description: 'Taa angani kwa ajili ya majira.', category: 'Past', image: 'https://images.unsplash.com/photo-1462331940025-496dfbfc7564?q=80&w=1000', verse: 'Mwanzo 1:14', fullStory: 'Siku ya nne, Mungu aliumba mianga mikuu miwili: jua ili litawale mchana na mwezi utawale usiku. Pia alizifanya nyota. Hizi ziliwekwa ili kuwa ishara, majira, siku na miaka.', swahiliDeep: 'Jua linawakilisha Kristo ("Jua la Haki"), na mwezi unawakilisha Kanisa (au Biblia), ambalo halina nuru yake lenyewe bali huakisi nuru ya Jua. Nyota ni watumishi wa Mungu (Danieli 12:3) wanaong\'aa gizani.', didYouKnow: 'Nyota zinatumika pia kama ishara za nyakati za mwisho (Mathayo 24:29).' },
+      { id: 'c4', year: 'Siku 4', title: 'Mianga', swahiliTitle: 'Jua, Mwezi na Nyota', description: 'Taa angani kwa ajili ya majira.', category: 'Past', image: 'https://images.unsplash.com/photo-1462331940025-496dfbfc7564?q=80&w=1000', verse: 'Mwanzo 1:14', fullStory: 'Siku ya nne, Mungu aliumba mianga mikuu miwili: jua ili litawale mchana na mwezi utawale usiku. Pia alizifanya nyota. Hizi ziliwekwa ili kuwa ishara, majira, siku na miaka.', swahiliDeep: 'Jua linawakilisha Kristo ("Jua la Haki"), na mwezi unawakilisha Kanisa (au Biblia), ambalo halina nuru yake lenyewe bali huakisi nuru ya Jua. Nyota ni watumishi wa Mungu (Danieli 12:3) wanaong\'aa gizani.', didYouKnow: 'Nyota zinatumika pia kama ishara za nyakati za mwisho (Mathayo 24:29).' },
       { id: 'c6', year: 'Siku 6', title: 'Adamu & Hawa', swahiliTitle: 'Uumbaji wa Mtu', description: 'Mwanadamu kwa mfano wa Mungu.', category: 'Past', image: 'https://images.unsplash.com/photo-1509248961158-e54f6934749c?q=80&w=1000', verse: 'Mwanzo 1:26', fullStory: 'Baada ya kuandaa makao, Mungu alimuumba mwanadamu kwa mfano wake. Alimfanyia Adamu msaidizi, Hawa, na kuwapa mamlaka juu ya viumbe vyote.', swahiliDeep: 'Thamani yetu haitokani na mageuzi, bali kwa kuwa tumeumbwa kwa mfano wa Mungu. Ndoa ya kwanza ilifungwa Edeni, ikionyesha utakatifu wa taasisi hiyo.', didYouKnow: 'Adamu alipewa jukumu la kisayansi la kuwapa majina wanyama wote kabla ya kupewa mke.' },
-      { id: 'c7', year: 'Siku 7', title: 'Sabbath', swahiliTitle: 'Sabato Takatifu', description: 'Mungu alistarehe and kubariki siku ya saba.', category: 'Past', image: 'https://images.unsplash.com/photo-1500462918059-b1a0cb512f1d?q=80&w=1000', verse: 'Mwanzo 2:1-3', fullStory: 'Mungu alipomaliza kazi zake zote, alistarehe siku ya saba. Akaibariki na kuitakasa kama ukumbusho wa uumbaji wake kwa wanadamu wote, hata kabla ya dhambi kuingia.', swahiliDeep: 'Sabato ni "Hekalu la Muda." Tofauti na maeneo matakatifu, Sabato inatufuata popote tulipo kila wiki. Ni ishara ya mamlaka ya Mungu muumbaji na kupumzika kwetu ndani ya kazi yake kamilifu.', didYouKnow: 'Hii ndiyo sikukuu ya kwanza kabisa katika historia ya mwanadamu, na ilitolewa kwa wanadamu wote, si Wayahudi pekee.', videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ' }
+      { id: 'c7', year: 'Siku 7', title: 'Sabato', swahiliTitle: 'Sabato Takatifu', description: 'Mungu alistarehe na kubariki siku ya saba.', category: 'Past', image: 'https://images.unsplash.com/photo-1500462918059-b1a0cb512f1d?q=80&w=1000', verse: 'Mwanzo 2:1-3', fullStory: 'Mungu alipomaliza kazi zake zote, alistarehe siku ya saba. Akaibariki na kuitakasa kama ukumbusho wa uumbaji wake kwa wanadamu wote, hata kabla ya dhambi kuingia.', swahiliDeep: 'Sabato ni "Hekalu la Muda." Tofauti na maeneo matakatifu, Sabato inatufuata popote tulipo kila wiki. Ni ishara ya mamlaka ya Mungu muumbaji na kupumzika kwetu ndani ya kazi yake kamilifu.', didYouKnow: 'Hii ndiyo sikukuu ya kwanza kabisa katika historia ya mwanadamu, na ilitolewa kwa wanadamu wote, si Wayahudi pekee.', videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ' }
     ]
   },
   {
@@ -86,10 +86,10 @@ const TIMELINES: TimelineSection[] = [
     swahiliName: '2. Gharika & Babeli',
     icon: <Waves size={20} />,
     color: '#3b82f6',
-    description: 'Hukumu ya maji and mtawanyiko wa lugha.',
+    description: 'Hukumu ya maji na mtawanyiko wa lugha.',
     milestones: [
-      { id: 'fb1', year: '2348 BC', title: 'The Great Flood', swahiliTitle: 'Gharika Kuu', description: 'Dunia yasafishwa kwa maji.', category: 'Past', image: 'https://images.unsplash.com/photo-1518107612744-298f21427d35?auto=format&fit=crop&q=80&w=1000', verse: 'Mwanzo 7', fullStory: 'Maovu yalipozidi, Mungu alighairi kumuumba mwanadamu. Hata hivyo, Nuhu alipata neema. Mungu alileta gharika ya maji kusafisha dunia, lakini akahifadhi uzao kupitia Safina.', swahiliDeep: 'Safina inawakilisha wokovu ndani ya Yesu Kristo. Wale walioingia safinani walisalimika kwa neema, si kwa uwezo wao wa kuogelea. Mlango wa safina ulifungwa na Mungu mwenyewe.', didYouKnow: 'Mvua ilinyesha kwa siku 40 mfululizo, na maji yalifunika milima yote mirefu.' },
-      { id: 'fb2', year: '2242 BC', title: 'Tower of Babel', swahiliTitle: 'Mnara wa Babeli', description: 'Kiburi cha mwanadamu na lugha.', category: 'Past', image: 'https://images.unsplash.com/photo-1599596378252-474026337f71?q=80&w=1000', verse: 'Mwanzo 11', fullStory: 'Wanadamu walijaribu kujijengea jina na mnara ufikao mbinguni ili wasitawanyike, kinyume na agizo la Mungu. Mungu alichafua lugha zao, wakatawanyika duniani kote.', swahiliDeep: 'Babeli ("Machafuko") inawakilisha juhudi za mwanadamu kujiokoa mwenyewe na kujenga umoja bila Mungu. Ni mwanzo wa dini zote za uongo zinazotegemea matendo badala ya imani.', didYouKnow: 'Babeli ndio asili ya neno "Babylon" linalomaanisha machafuko na pia "Lango la Miungu" kwa lugha yao.' }
+      { id: 'fb1', year: '2348 BC', title: 'Gharika Kuu', swahiliTitle: 'Gharika Kuu', description: 'Dunia yasafishwa kwa maji.', category: 'Past', image: 'https://images.unsplash.com/photo-1518107612744-298f21427d35?auto=format&fit=crop&q=80&w=1000', verse: 'Mwanzo 7', fullStory: 'Maovu yalipozidi, Mungu alighairi kumuumba mwanadamu. Hata hivyo, Nuhu alipata neema. Mungu alileta gharika ya maji kusafisha dunia, lakini akahifadhi uzao kupitia Safina.', swahiliDeep: 'Safina inawakilisha wokovu ndani ya Yesu Kristo. Wale walioingia safinani walisalimika kwa neema, si kwa uwezo wao wa kuogelea. Mlango wa safina ulifungwa na Mungu mwenyewe.', didYouKnow: 'Mvua ilinyesha kwa siku 40 mfululizo, na maji yalifunika milima yote mirefu.' },
+      { id: 'fb2', year: '2242 BC', title: 'Mnara wa Babeli', swahiliTitle: 'Mnara wa Babeli', description: 'Kiburi cha mwanadamu na lugha.', category: 'Past', image: 'https://images.unsplash.com/photo-1599596378252-474026337f71?q=80&w=1000', verse: 'Mwanzo 11', fullStory: 'Wanadamu walijaribu kujijengea jina na mnara ufikao mbinguni ili wasitawanyike, kinyume na agizo la Mungu. Mungu alichafua lugha zao, wakatawanyika duniani kote.', swahiliDeep: 'Babeli ("Machafuko") inawakilisha juhudi za mwanadamu kujiokoa mwenyewe na kujenga umoja bila Mungu. Ni mwanzo wa dini zote za uongo zinazotegemea matendo badala ya imani.', didYouKnow: 'Babeli ndio asili ya neno "Babeli" linalomaanisha machafuko na pia "Lango la Miungu" kwa lugha yao.' }
     ]
   },
   {
@@ -100,10 +100,10 @@ const TIMELINES: TimelineSection[] = [
     color: '#a855f7',
     description: 'Wito wa Ibrahimu, Isaka na Yakobo.',
     milestones: [
-      { id: 'p1', year: '1921 BC', title: 'Call of Abraham', swahiliTitle: 'Wito wa Ibrahimu', description: 'Kutoka Uri kwenda Kanaani.', category: 'Past', image: 'https://images.unsplash.com/photo-1510440842629-a05c440fc75b?q=80&w=1000', verse: 'Mwanzo 12', fullStory: 'Mungu alimwita Abramu atoke katika nchi ya ibada ya sanamu (Uri) aende nchi ambayo Mungu atamwonyesha. Alimtii Mungu kwa imani, asijue aendako.', swahiliDeep: 'Ibrahimu ni "Baba wa Imani." Wito wake unatuonyesha kuwa kumfuata Mungu kunagharimu kuacha vya kale (mapokeo, starehe) na kutembea kwa imani katika ahadi zake.', didYouKnow: 'Ibrahimu aliitwa "Rafiki wa Mungu" mara tatu katika Biblia.' },
-      { id: 'p3', year: '1760 BC', title: 'Jacob\'s Ladder', swahiliTitle: 'Ngazi ya Yakobo', description: 'Ndoto ya ngazi inayofika mbinguni.', category: 'Past', image: 'https://images.unsplash.com/photo-1502481851512-e9e2529bfbf9?q=80&w=1000', verse: 'Mwanzo 28:12', fullStory: 'Yakobo, akimkimbia Esau, aliota ndoto ya ngazi iliyosimama duniani na ncha yake mbinguni, na malaika wakipanda na kushuka. Mungu alirudia ahadi ya Ibrahimu kwake.', swahiliDeep: 'Yesu alijitambulisha kama ile ngazi (Yohana 1:51). Yeye ndiye kiunganishi pekee kati ya mbingu na dunia iliyoanguka. Bila Yeye, hakuna mawasiliano na Mungu.', didYouKnow: 'Mahali hapo paliitwa Betheli, maana yake "Nyumba ya Mungu".' },
-      { id: 'p2', year: '1728 BC', title: 'Joseph in Egypt', swahiliTitle: 'Yusufu Misri', description: 'Kutoka gerezani hadi ikulu.', category: 'Past', image: 'https://images.unsplash.com/photo-1539193143244-c83d9436d633?q=80&w=1000', verse: 'Mwanzo 41', fullStory: 'Yusufu aliuzwa na ndugu zake, akafungwa gerezani kwa uongo, lakini Mungu alikuwa naye. Hatimaye alitafsiri ndoto ya Farao na kuwa Waziri Mkuu, akiokoa familia yake na njaa.', swahiliDeep: 'Maisha ya Yusufu ni kivuli cha Yesu: Alikataliwa na ndugu zake, aliteswa, lakini akafanyika mwokozi wa ulimwengu (Misri) na hatimaye ndugu zake walimsujudia.', didYouKnow: 'Yusufu aliuzwa kwa vipande 20 vya fedha, bei ya mtumwa wakati huo.' },
-      { id: 'p4', year: '1491 BC', title: 'Exodus', swahiliTitle: 'Kutoka Misri', description: 'Kuvuka Bahari ya Shamu.', category: 'Past', image: 'https://images.unsplash.com/photo-1465146344425-f00d5f5c8f07?q=80&w=1000', verse: 'Kutoka 14', fullStory: 'Baada ya mapigo kumi, Farao aliwaruhusu Israeli kuondoka. Mungu aliwagawanyia Bahari ya Shamu, wakapita pakavu, huku jeshi la Farao likiangamia majini.', swahiliDeep: 'Kutoka ni ukombozi kutoka utumwa wa dhambi (Misri). Bahari ya Shamu ni ubatizo (1 Wakorintho 10:2). Mungu hutupigania tunaponyamaza kimya.', didYouKnow: 'Nguzo ya moto na wingu iliwatenga Wamisri na Waisraeli usiku kucha kabla ya kuvuka.' }
+      { id: 'p1', year: '1921 BC', title: 'Wito wa Ibrahimu', swahiliTitle: 'Wito wa Ibrahimu', description: 'Kutoka Uri kwenda Kanaani.', category: 'Past', image: 'https://images.unsplash.com/photo-1510440842629-a05c440fc75b?q=80&w=1000', verse: 'Mwanzo 12', fullStory: 'Mungu alimwita Abramu atoke katika nchi ya ibada ya sanamu (Uri) aende nchi ambayo Mungu atamwonyesha. Alimtii Mungu kwa imani, asijue aendako.', swahiliDeep: 'Ibrahimu ni "Baba wa Imani." Wito wake unatuonyesha kuwa kumfuata Mungu kunagharimu kuacha vya kale (mapokeo, starehe) na kutembea kwa imani katika ahadi zake.', didYouKnow: 'Ibrahimu aliitwa "Rafiki wa Mungu" mara tatu katika Biblia.' },
+      { id: 'p3', year: '1760 BC', title: 'Ngazi ya Yakobo', swahiliTitle: 'Ngazi ya Yakobo', description: 'Ndoto ya ngazi inayofika mbinguni.', category: 'Past', image: 'https://images.unsplash.com/photo-1502481851512-e9e2529bfbf9?q=80&w=1000', verse: 'Mwanzo 28:12', fullStory: 'Yakobo, akimkimbia Esau, aliota ndoto ya ngazi iliyosimama duniani na ncha yake mbinguni, na malaika wakipanda na kushuka. Mungu alirudia ahadi ya Ibrahimu kwake.', swahiliDeep: 'Yesu alijitambulisha kama ile ngazi (Yohana 1:51). Yeye ndiye kiunganishi pekee kati ya mbingu na dunia iliyoanguka. Bila Yeye, hakuna mawasiliano na Mungu.', didYouKnow: 'Mahali hapo paliitwa Betheli, maana yake "Nyumba ya Mungu".' },
+      { id: 'p2', year: '1728 BC', title: 'Yusufu Misri', swahiliTitle: 'Yusufu Misri', description: 'Kutoka gerezani hadi ikulu.', category: 'Past', image: 'https://images.unsplash.com/photo-1539193143244-c83d9436d633?q=80&w=1000', verse: 'Mwanzo 41', fullStory: 'Yusufu aliuzwa na ndugu zake, akafungwa gerezani kwa uongo, lakini Mungu alikuwa naye. Hatimaye alitafsiri ndoto ya Farao na kuwa Waziri Mkuu, akiokoa familia yake na njaa.', swahiliDeep: 'Maisha ya Yusufu ni kivuli cha Yesu: Alikataliwa na ndugu zake, aliteswa, lakini akafanyika mwokozi wa ulimwengu (Misri) na hatimaye ndugu zake walimsujudia.', didYouKnow: 'Yusufu aliuzwa kwa vipande 20 vya fedha, bei ya mtumwa wakati huo.' },
+      { id: 'p4', year: '1491 BC', title: 'Kutoka Misri', swahiliTitle: 'Kutoka Misri', description: 'Kuvuka Bahari ya Shamu.', category: 'Past', image: 'https://images.unsplash.com/photo-1465146344425-f00d5f5c8f07?q=80&w=1000', verse: 'Kutoka 14', fullStory: 'Baada ya mapigo kumi, Farao aliwaruhusu Israeli kuondoka. Mungu aliwagawanyia Bahari ya Shamu, wakapita pakavu, huku jeshi la Farao likiangamia majini.', swahiliDeep: 'Kutoka ni ukombozi kutoka utumwa wa dhambi (Misri). Bahari ya Shamu ni ubatizo (1 Wakorintho 10:2). Mungu hutupigania tunaponyamaza kimya.', didYouKnow: 'Nguzo ya moto na wingu iliwatenga Wamisri na Waisraeli usiku kucha kabla ya kuvuka.' }
     ]
   },
   {
@@ -114,8 +114,8 @@ const TIMELINES: TimelineSection[] = [
     color: '#eab308',
     description: 'Kutoka, Sinai, na Huduma ya Hema.',
     milestones: [
-      { id: 'l1', year: '1445 BC', title: 'Ten Commandments', swahiliTitle: 'Amri Kumi', description: 'Sheria ya Mungu Sinai.', category: 'Past', image: 'https://images.unsplash.com/photo-1543336783-bb59efd935a6?q=80&w=1000', verse: 'Kutoka 20', fullStory: 'Katika Mlima Sinai, Mungu alizungumza na kuandika Amri Kumi kwa kidole chake mwenyewe juu ya mbao mbili za mawe. Hii ndiyo katiba ya ufalme wake.', swahiliDeep: 'Sheria si njia ya wokovu, bali ni kioo (Warumi 3:20) kinachoonyesha dhambi na hitaji letu la Mwokozi. Ni tabia ya Mungu iliyoandikwa.', didYouKnow: 'Mungu aliandika amri kumi kwa kidole chake mwenyewe, tofauti na sheria zingine zilizoandikwa na Musa.' },
-      { id: 'l2', year: '1444 BC', title: 'The Sanctuary', swahiliTitle: 'Hema ya Kukutania', description: 'Mungu akaa na wanadamu.', category: 'Past', image: 'https://images.unsplash.com/photo-1543336783-bb59efd935a6?q=80&w=1000', verse: 'Kutoka 25:8', fullStory: 'Mungu aliagiza, "Nao wanifanyie patakatifu, ili nipate kukaa kati yao." Hema ilikuwa na ua, patakatifu, na patakatifu pa patakatifu, ikionyesha ramani ya wokovu.', swahiliDeep: 'Kila kifaa cha hema kilimwakilisha Yesu: Kondoo wa sadaka, Kuhani Mkuu, Mkate wa Uzima, Nuru ya Vinara, na Sanduku la Agano.', didYouKnow: 'Rangi za hema (bluu, zambarau, nyekundu) zote zilikuwa na maana maalum za kiunabii kuhusu Kristo.' }
+      { id: 'l1', year: '1445 BC', title: 'Amri Kumi', swahiliTitle: 'Amri Kumi', description: 'Sheria ya Mungu Sinai.', category: 'Past', image: 'https://images.unsplash.com/photo-1543336783-bb59efd935a6?q=80&w=1000', verse: 'Kutoka 20', fullStory: 'Katika Mlima Sinai, Mungu alizungumza na kuandika Amri Kumi kwa kidole chake mwenyewe juu ya mbao mbili za mawe. Hii ndiyo katiba ya ufalme wake.', swahiliDeep: 'Sheria si njia ya wokovu, bali ni kioo (Warumi 3:20) kinachoonyesha dhambi na hitaji letu la Mwokozi. Ni tabia ya Mungu iliyoandikwa.', didYouKnow: 'Mungu aliandika amri kumi kwa kidole chake mwenyewe, tofauti na sheria zingine zilizoandikwa na Musa.' },
+      { id: 'l2', year: '1444 BC', title: 'Patakatifu', swahiliTitle: 'Hema ya Kukutania', description: 'Mungu akaa na wanadamu.', category: 'Past', image: 'https://images.unsplash.com/photo-1543336783-bb59efd935a6?q=80&w=1000', verse: 'Kutoka 25:8', fullStory: 'Mungu aliagiza, "Nao wanifanyie patakatifu, ili nipate kukaa kati yao." Hema ilikuwa na ua, patakatifu, na patakatifu pa patakatifu, ikionyesha ramani ya wokovu.', swahiliDeep: 'Kila kifaa cha hema kilimwakilisha Yesu: Kondoo wa sadaka, Kuhani Mkuu, Mkate wa Uzima, Nuru ya Vinara, na Sanduku la Agano.', didYouKnow: 'Rangi za hema (bluu, zambarau, nyekundu) zote zilikuwa na maana maalum za kiunabii kuhusu Kristo.' }
     ]
   },
   {
@@ -126,10 +126,10 @@ const TIMELINES: TimelineSection[] = [
     color: '#ef4444',
     description: 'Maisha ya Yesu na Kanisa la Kwanza.',
     milestones: [
-      { id: 'cd1', year: '4 BC', title: 'Birth of Jesus', swahiliTitle: 'Kuzaliwa kwa Yesu', description: 'Neno alifanyika mwili.', category: 'Past', image: 'https://images.unsplash.com/photo-1512117187123-f365d9c227ba?q=80&w=1000', verse: 'Luka 2', fullStory: 'Kwa utimilifu wa wakati, Mungu alimtuma Mwanawe. Yesu alizaliwa Betlehemu, akaishi maisha makamilifu yasiyo na dhambi, akitufunulia tabia ya Baba.', swahiliDeep: 'Kuzaliwa kwa Yesu ni muujiza wa "Incarnation" - Mungu kuvaa ubinadamu ili aweze kutukomboa. Alishuka chini ili atuinue juu.', didYouKnow: 'Yesu hakuzaliwa Desemba 25; wachungaji hawangekuwa na kondoo nje wakati wa baridi kali ya Israeli.' },
-      { id: 'cd2', year: '31 AD', title: 'The Cross', swahiliTitle: 'Msalaba', description: 'Sadaka ya dhambi.', category: 'Past', image: 'https://images.unsplash.com/photo-1533105079780-92b9be482077?q=80&w=1000', verse: 'Yohana 19', fullStory: 'Kwenye msalaba, Yesu alibeba dhambi za ulimwengu. Alikufa kifo cha pili badala yetu, akisema "Imekwisha." Pazia la hekalu likapasuka.', swahiliDeep: 'Msalaba ni mahali ambapo haki na rehema za Mungu zilibusu. Sheria ilidai kifo cha mwenye dhambi, na Upendo ulitoa uhai wa Mungu mwenyewe.', didYouKnow: 'Giza liliufunika uso wa nchi wakati wa kusulubiwa, likimficha Baba asimuone Mwana akibeba dhambi.' },
-      { id: 'cd3', year: '31 AD', title: 'Pentecost', swahiliTitle: 'Pentekoste', description: 'Kushuka kwa Roho Mtakatifu.', category: 'Past', image: 'https://images.unsplash.com/photo-1472552944129-b035e9ea6fb4?q=80&w=1000', verse: 'Matendo 2', fullStory: 'Siku 50 baada ya Pasaka, wanafunzi walipokuwa wamekusanyika kwa umoja, Roho Mtakatifu alishuka kama ndimi za moto. Walipata ujasiri wa kuhubiri injili.', swahiliDeep: 'Pentekoste ni "Mvua ya Masika" iliyoandaa mavuno ya kwanza ya kanisa. Tunaishi tukiingojea "Mvua ya Vuli" kwa ajili ya mavuno ya mwisho.', didYouKnow: 'Watu 3000 walibatizwa siku hiyo moja baada ya mahubiri ya Petro.' },
-      { id: 'cd4', year: '34 AD', title: 'Stoning of Stephen', swahiliTitle: 'Kupigwa kwa Stefano', description: 'Mwisho wa kipindi cha Wayahudi.', category: 'Past', image: 'https://images.unsplash.com/photo-1594904351111-a072f80b1a71?q=80&w=1000', verse: 'Matendo 7', fullStory: 'Stefano, shemasi wa kwanza, alipigwa mawe kwa kuhubiri ukweli. Kifo chake kiliashiria mwisho wa kipindi cha neema cha kipekee kwa taifa la Israeli (miaka 490).', swahiliDeep: 'Wakati Stefano alipokufa, aliona mbingu zimefunguka na Yesu akiwa amesimama (si ameketi) mkono wa kuume wa Mungu, akionyesha Yesu alisimama kumpokea shahidi wake.', didYouKnow: 'Sauli (ambaye baadaye aliitwa Paulo) alikuwa akishikilia nguo za waliompiga Stefano.' }
+      { id: 'cd1', year: '4 BC', title: 'Kuzaliwa kwa Yesu', swahiliTitle: 'Kuzaliwa kwa Yesu', description: 'Neno alifanyika mwili.', category: 'Past', image: 'https://images.unsplash.com/photo-1512117187123-f365d9c227ba?q=80&w=1000', verse: 'Luka 2', fullStory: 'Kwa utimilifu wa wakati, Mungu alimtuma Mwanawe. Yesu alizaliwa Betlehemu, akaishi maisha makamilifu yasiyo na dhambi, akitufunulia tabia ya Baba.', swahiliDeep: 'Kuzaliwa kwa Yesu ni muujiza wa "Kupata mwili" - Mungu kuvaa ubinadamu ili aweze kutukomboa. Alishuka chini ili atuinue juu.', didYouKnow: 'Yesu hakuzaliwa Desemba 25; wachungaji hawangekuwa na kondoo nje wakati wa baridi kali ya Israeli.' },
+      { id: 'cd2', year: '31 AD', title: 'Msalaba', swahiliTitle: 'Msalaba', description: 'Sadaka ya dhambi.', category: 'Past', image: 'https://images.unsplash.com/photo-1533105079780-92b9be482077?q=80&w=1000', verse: 'Yohana 19', fullStory: 'Kwenye msalaba, Yesu alibeba dhambi za ulimwengu. Alikufa kifo cha pili badala yetu, akisema "Imekwisha." Pazia la hekalu likapasuka.', swahiliDeep: 'Msalaba ni mahali ambapo haki na rehema za Mungu zilibusu. Sheria ilidai kifo cha mwenye dhambi, na Upendo ulitoa uhai wa Mungu mwenyewe.', didYouKnow: 'Giza liliufunika uso wa nchi wakati wa kusulubiwa, likimficha Baba asimuone Mwana akibeba dhambi.' },
+      { id: 'cd3', year: '31 AD', title: 'Pentekoste', swahiliTitle: 'Pentekoste', description: 'Kushuka kwa Roho Mtakatifu.', category: 'Past', image: 'https://images.unsplash.com/photo-1472552944129-b035e9ea6fb4?q=80&w=1000', verse: 'Matendo 2', fullStory: 'Siku 50 baada ya Pasaka, wanafunzi walipokuwa wamekusanyika kwa umoja, Roho Mtakatifu alishuka kama ndimi za moto. Walipata ujasiri wa kuhubiri injili.', swahiliDeep: 'Pentekoste ni "Mvua ya Masika" iliyoandaa mavuno ya kwanza ya kanisa. Tunaishi tukiingojea "Mvua ya Vuli" kwa ajili ya mavuno ya mwisho.', didYouKnow: 'Watu 3000 walibatizwa siku hiyo moja baada ya mahubiri ya Petro.' },
+      { id: 'cd4', year: '34 AD', title: 'Kupigwa kwa Stefano', swahiliTitle: 'Kupigwa kwa Stefano', description: 'Mwisho wa kipindi cha Wayahudi.', category: 'Past', image: 'https://images.unsplash.com/photo-1594904351111-a072f80b1a71?q=80&w=1000', verse: 'Matendo 7', fullStory: 'Stefano, shemasi wa kwanza, alipigwa mawe kwa kuhubiri ukweli. Kifo chake kiliashiria mwisho wa kipindi cha neema cha kipekee kwa taifa la Israeli (miaka 490).', swahiliDeep: 'Wakati Stefano alipokufa, aliona mbingu zimefunguka na Yesu akiwa amesimama (si ameketi) mkono wa kuume wa Mungu, akionyesha Yesu alisimama kumpokea shahidi wake.', didYouKnow: 'Sauli (ambaye baadaye aliitwa Paulo) alikuwa akishikilia nguo za waliompiga Stefano.' }
     ]
   },
   {
@@ -140,10 +140,10 @@ const TIMELINES: TimelineSection[] = [
     color: '#f97316',
     description: 'Unabii wa Danieli 2 - Sanamu.',
     milestones: [
-      { id: 'k1', year: '605 BC', title: 'Babylon', swahiliTitle: 'Babeli (Dhahabu)', description: 'Kichwa cha Dhahabu.', category: 'Past', image: 'https://images.unsplash.com/photo-1599596378252-474026337f71?q=80&w=1000', verse: 'Danieli 2:32', fullStory: 'Ufalme wa Nebukadreza uliwakilishwa na kichwa cha dhahabu. Babeli ilikuwa kitovu cha utajiri, elimu, na ibada ya sanamu, ikitawala dunia kwa fahari.', swahiliDeep: 'Dhahabu inawakilisha utajiri, lakini pia ibada ya uongo. Babeli ya kiroho katika Ufunuo ni mfumo wa dini uliomwacha Mungu.', didYouKnow: 'Babeli ilijulikana kwa bustani zake zinazoelea, moja ya maajabu saba ya dunia ya kale.' },
-      { id: 'k2', year: '539 BC', title: 'Medo-Persia', swahiliTitle: 'Umedi na Uajemi', description: 'Kifua cha Fedha.', category: 'Past', image: 'https://images.unsplash.com/photo-1563861826100-9cb868fdbe1c?q=80&w=1000', verse: 'Danieli 2:32', fullStory: 'Kama ilivyotabiriwa, Babeli ilianguka mikononi mwa Koreshi (Uajemi) na Dario (Umedi). Ufalme huu wa fedha ulikuwa mpana zaidi lakini duni kwa fahari kuliko Babeli.', swahiliDeep: 'Fedha ni duni kuliko dhahabu lakini ngumu zaidi. Hii inaonyesha kupungua kwa utukufu wa kweli kadiri historia inavyosonga mbele.', didYouKnow: 'Koreshi alitabiriwa kwa jina na nabii Isaya miaka 150 kabla hajazaliwa (Isaya 45:1).' },
-      { id: 'k3', year: '331 BC', title: 'Greece', swahiliTitle: 'Ugiriki (Shaba)', description: 'Tumbo la Shaba.', category: 'Past', image: 'https://images.unsplash.com/photo-1552832230-c0197dd311b5?q=80&w=1000', verse: 'Danieli 2:32', fullStory: 'Alexander Mkuu aliteka dunia kwa kasi ya ajabu, akiwakilishwa na shaba (na chui katika Danieli 7). Ugiriki ilileta falsafa na lugha iliyotumika kueneza Injili baadaye.', swahiliDeep: 'Shaba inawakilisha falsafa ya kibinadamu na akili. Ugiriki inatufundisha kuwa hekima ya dunia ni upumbavu mbele za Mungu.', didYouKnow: 'Alexander alikufa akiwa kijana sana (miaka 32) na ufalme wake ukagawanyika mara nne.' },
-      { id: 'k4', year: '168 BC', title: 'Rome', swahiliTitle: 'Rumi (Chuma)', description: 'Miguu ya Chuma.', category: 'Past', image: 'https://images.unsplash.com/photo-1552832230-c0197dd311b5?q=80&w=1000', verse: 'Danieli 2:33', fullStory: 'Dola ya Rumi ilitawala kwa nguvu ya chuma, ikivunja na kuponda. Hii ndiyo dola iliyomsulubisha Yesu na kutesa kanisa la kwanza.', swahiliDeep: 'Chuma inawakilisha nguvu ya kisheria na kijeshi isiyo na huruma. Miguu mirefu inaashiria muda mrefu wa utawala wa Rumi (kipagani na kipadri).', didYouKnow: 'Rumi haikuangushwa na ufalme mwingine mmoja, bali iligawanyika vipande vipande (vidole vya sanamu).' }
+      { id: 'k1', year: '605 BC', title: 'Babeli', swahiliTitle: 'Babeli (Dhahabu)', description: 'Kichwa cha Dhahabu.', category: 'Past', image: 'https://images.unsplash.com/photo-1599596378252-474026337f71?q=80&w=1000', verse: 'Danieli 2:32', fullStory: 'Ufalme wa Nebukadreza uliwakilishwa na kichwa cha dhahabu. Babeli ilikuwa kitovu cha utajiri, elimu, na ibada ya sanamu, ikitawala dunia kwa fahari.', swahiliDeep: 'Dhahabu inawakilisha utajiri, lakini pia ibada ya uongo. Babeli ya kiroho katika Ufunuo ni mfumo wa dini uliomwacha Mungu.', didYouKnow: 'Babeli ilijulikana kwa bustani zake zinazoelea, moja ya maajabu saba ya dunia ya kale.' },
+      { id: 'k2', year: '539 BC', title: 'Umedi na Uajemi', swahiliTitle: 'Umedi na Uajemi', description: 'Kifua cha Fedha.', category: 'Past', image: 'https://images.unsplash.com/photo-1563861826100-9cb868fdbe1c?q=80&w=1000', verse: 'Danieli 2:32', fullStory: 'Kama ilivyotabiriwa, Babeli ilianguka mikononi mwa Koreshi (Uajemi) na Dario (Umedi). Ufalme huu wa fedha ulikuwa mpana zaidi lakini duni kwa fahari kuliko Babeli.', swahiliDeep: 'Fedha ni duni kuliko dhahabu lakini ngumu zaidi. Hii inaonyesha kupungua kwa utukufu wa kweli kadiri historia inavyosonga mbele.', didYouKnow: 'Koreshi alitabiriwa kwa jina na nabii Isaya miaka 150 kabla hajazaliwa (Isaya 45:1).' },
+      { id: 'k3', year: '331 BC', title: 'Ugiriki', swahiliTitle: 'Ugiriki (Shaba)', description: 'Tumbo la Shaba.', category: 'Past', image: 'https://images.unsplash.com/photo-1552832230-c0197dd311b5?q=80&w=1000', verse: 'Danieli 2:32', fullStory: 'Alexander Mkuu aliteka dunia kwa kasi ya ajabu, akiwakilishwa na shaba (na chui katika Danieli 7). Ugiriki ilileta falsafa na lugha iliyotumika kueneza Injili baadaye.', swahiliDeep: 'Shaba inawakilisha falsafa ya kibinadamu na akili. Ugiriki inatufundisha kuwa hekima ya dunia ni upumbavu mbele za Mungu.', didYouKnow: 'Alexander alikufa akiwa kijana sana (miaka 32) na ufalme wake ukagawanyika mara nne.' },
+      { id: 'k4', year: '168 BC', title: 'Rumi', swahiliTitle: 'Rumi (Chuma)', description: 'Miguu ya Chuma.', category: 'Past', image: 'https://images.unsplash.com/photo-1552832230-c0197dd311b5?q=80&w=1000', verse: 'Danieli 2:33', fullStory: 'Dola ya Rumi ilitawala kwa nguvu ya chuma, ikivunja na kuponda. Hii ndiyo dola iliyomsulubisha Yesu na kutesa kanisa la kwanza.', swahiliDeep: 'Chuma inawakilisha nguvu ya kisheria na kijeshi isiyo na huruma. Miguu mirefu inaashiria muda mrefu wa utawala wa Rumi (kipagani na kipadri).', didYouKnow: 'Rumi haikuangushwa na ufalme mwingine mmoja, bali iligawanyika vipande vipande (vidole vya sanamu).' }
     ]
   },
   {
@@ -154,8 +154,8 @@ const TIMELINES: TimelineSection[] = [
     color: '#06b6d4',
     description: 'Ufunuo 2 & 3: Historia ya Kanisa.',
     milestones: [
-      { id: 'sc1', year: '31-100 AD', title: 'Ephesus', swahiliTitle: 'Efeso', description: 'Kanisa la Kwanza lenye upendo.', category: 'Past', image: 'https://images.unsplash.com/photo-1548013146-72479768bbaa?q=80&w=1000', verse: 'Ufunuo 2:1', fullStory: 'Efeso inawakilisha kanisa la Mitume. Walikuwa na juhudi, walichukia uovu, lakini walionywa kuwa wameacha upendo wao wa kwanza.', swahiliDeep: 'Hali ya Efeso ni onyo kwa kila mwamini: Unaweza kuwa na mafundisho sahihi na bidii ya kazi, lakini ukakosa upendo wa dhati kwa Kristo.', didYouKnow: 'Efeso ilimaanisha "Inayotamanika".' },
-      { id: 'sc7', year: '1844-Leo', title: 'Laodicea', swahiliTitle: 'Laodikia', description: 'Kanisa la Hukumu (Vuguvugu).', category: 'Present', image: 'https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?q=80&w=1000', verse: 'Ufunuo 3:14', fullStory: 'Laodikia ni kanisa la mwisho. Wanajiona matajiri na hawahitaji kitu, kumbe ni wanyonge, maskini, vipofu na uchi. Mungu anawatapika kwa kuwa vuguvugu.', swahiliDeep: 'Dawa ya Laodikia ni kununua dhahabu (imani), mavazi meupe (haki ya Kristo) na dawa ya macho (Roho Mtakatifu). Yesu yuko mlangoni anabisha.', didYouKnow: 'Laodikia inamaanisha "Watu waliohukumiwa" au "Haki ya Watu" (demokrasia ya kidini).' }
+      { id: 'sc1', year: '31-100 AD', title: 'Efeso', swahiliTitle: 'Efeso', description: 'Kanisa la Kwanza lenye upendo.', category: 'Past', image: 'https://images.unsplash.com/photo-1548013146-72479768bbaa?q=80&w=1000', verse: 'Ufunuo 2:1', fullStory: 'Efeso inawakilisha kanisa la Mitume. Walikuwa na juhudi, walichukia uovu, lakini walionywa kuwa wameacha upendo wao wa kwanza.', swahiliDeep: 'Hali ya Efeso ni onyo kwa kila mwamini: Unaweza kuwa na mafundisho sahihi na bidii ya kazi, lakini ukakosa upendo wa dhati kwa Kristo.', didYouKnow: 'Efeso ilimaanisha "Inayotamanika".' },
+      { id: 'sc7', year: '1844-Leo', title: 'Laodikia', swahiliTitle: 'Laodikia', description: 'Kanisa la Hukumu (Vuguvugu).', category: 'Present', image: 'https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?q=80&w=1000', verse: 'Ufunuo 3:14', fullStory: 'Laodikia ni kanisa la mwisho. Wanajiona matajiri na hawahitaji kitu, kumbe ni wanyonge, maskini, vipofu na uchi. Mungu anawatapika kwa kuwa vuguvugu.', swahiliDeep: 'Dawa ya Laodikia ni kununua dhahabu (imani), mavazi meupe (haki ya Kristo) na dawa ya macho (Roho Mtakatifu). Yesu yuko mlangoni anabisha.', didYouKnow: 'Laodikia inamaanisha "Watu waliohukumiwa" au "Haki ya Watu" (demokrasia ya kidini).' }
     ]
   },
   {
@@ -166,8 +166,8 @@ const TIMELINES: TimelineSection[] = [
     color: '#8b5cf6',
     description: 'Ufunuo 6: Historia ya Ukristo.',
     milestones: [
-      { id: 'ss1', year: 'Seal 1', title: 'White Horse', swahiliTitle: 'Farasi Mweupe', description: 'Ushindi wa Injili safi.', category: 'Past', image: 'https://images.unsplash.com/photo-1534234828563-02599392cc2a?q=80&w=1000', verse: 'Ufunuo 6:2', fullStory: 'Farasi mweupe anawakilisha kanisa la kwanza katika usafi wake, likiendelea kushinda na kuteka dunia kwa injili.', swahiliDeep: 'Upinde mkononi mwa mpanda farasi unaashiria Neno la Mungu linalochoma mioyo. Taji inashiria ushindi wa mwisho wa Kristo.', didYouKnow: 'Rangi nyeupe katika Biblia daima huwakilisha usafi na haki.' },
-      { id: 'ss4', year: 'Seal 4', title: 'Pale Horse', swahiliTitle: 'Farasi wa Kijivujivu', description: 'Mauti na Kuzimu.', category: 'Past', image: 'https://images.unsplash.com/photo-1519074069444-1ba4fff66d16?q=80&w=1000', verse: 'Ufunuo 6:8', fullStory: 'Farasi wa kijivujivu (rangi ya maiti) anaashiria kipindi cha giza kuu (Dark Ages) ambapo ukweli ulizikwa na mauti ya kiroho ilitawala.', swahiliDeep: 'Matokeo ya kuacha Neno la Mungu (Farasi Mweusi) ni kifo cha kiroho. Mamlaka ilipewa kuua kwa upanga, njaa, na tauni.', didYouKnow: 'Inakadiriwa kuwa mamilioni ya Wakristo waliuawa kwa ajili ya imani yao katika kipindi hiki.' }
+      { id: 'ss1', year: 'Muhuri 1', title: 'Farasi Mweupe', swahiliTitle: 'Farasi Mweupe', description: 'Ushindi wa Injili safi.', category: 'Past', image: 'https://images.unsplash.com/photo-1534234828563-02599392cc2a?q=80&w=1000', verse: 'Ufunuo 6:2', fullStory: 'Farasi mweupe anawakilisha kanisa la kwanza katika usafi wake, likiendelea kushinda na kuteka dunia kwa injili.', swahiliDeep: 'Upinde mkononi mwa mpanda farasi unaashiria Neno la Mungu linalochoma mioyo. Taji inashiria ushindi wa mwisho wa Kristo.', didYouKnow: 'Rangi nyeupe katika Biblia daima huwakilisha usafi na haki.' },
+      { id: 'ss4', year: 'Muhuri 4', title: 'Farasi wa Kijivujivu', swahiliTitle: 'Farasi wa Kijivujivu', description: 'Mauti na Kuzimu.', category: 'Past', image: 'https://images.unsplash.com/photo-1519074069444-1ba4fff66d16?q=80&w=1000', verse: 'Ufunuo 6:8', fullStory: 'Farasi wa kijivujivu (rangi ya maiti) anaashiria kipindi cha giza kuu (Enzi za Giza) ambapo ukweli ulizikwa na mauti ya kiroho ilitawala.', swahiliDeep: 'Matokeo ya kuacha Neno la Mungu (Farasi Mweusi) ni kifo cha kiroho. Mamlaka ilipewa kuua kwa upanga, njaa, na tauni.', didYouKnow: 'Inakadiriwa kuwa mamilioni ya Wakristo waliuawa kwa ajili ya imani yao katika kipindi hiki.' }
     ]
   },
   {
@@ -178,9 +178,9 @@ const TIMELINES: TimelineSection[] = [
     color: '#ec4899',
     description: 'Matukio ya mwisho wa dunia.',
     milestones: [
-      { id: 'esc1', year: 'Future', title: 'Sunday Law', swahiliTitle: 'Sheria ya Jumapili', description: 'Alama ya Mnyama.', category: 'Future', image: 'https://images.unsplash.com/photo-1555462542-a72a7c47f722?q=80&w=1000', verse: 'Ufunuo 13', fullStory: 'Utabiri unaonyesha kuwa kutatungwa sheria ya kulazimisha ibada ya uongo (Jumapili) kinyume na Sabato ya Mungu. Hii itakuwa alama ya utii kwa mwanadamu dhidi ya Mungu.', swahiliDeep: 'Huu ndio mtihani mkuu wa mwisho. Je, tutamtii Mungu au wanadamu? Alama ya Mnyama si \'chip\' ya kompyuta, ni suala la utii na ibada.', didYouKnow: 'Hii itaanza Marekani (Mnyama wa pili) na kuenea duniani kote.', videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ' },
-      { id: 'esc3', year: 'Future', title: '7 Last Plagues', swahiliTitle: 'Mapigo 7 ya Mwisho', description: 'Ghadhabu ya Mungu kwa wasiotubu.', category: 'Future', image: 'https://images.unsplash.com/photo-1463130436662-3162799c0a37?q=80&w=1000', verse: 'Ufunuo 16', fullStory: 'Baada ya mlango wa rehema kufungwa, mapigo saba yatamwagwa kwa wale wenye alama ya mnyama. Hii ni hukumu ya haki ya Mungu.', swahiliDeep: 'Wakati huu, wenye haki watakuwa wamelindwa (kama Waisraeli Gosheni), ingawa watapita katika "taabu ya Yakobo".', didYouKnow: 'Hakuna neema wala toba tena wakati mapigo yanapoanza kumwagwa.' },
-      { id: 'esc2', year: 'Future', title: 'Second Coming', swahiliTitle: 'Kuja kwa Yesu', description: 'Mfalme wa Wafalme.', category: 'Future', image: 'https://images.unsplash.com/photo-1447069387593-a5de0862481e?q=80&w=1200', verse: 'Ufunuo 1:7', fullStory: 'Yesu atarejea si kama mtoto, bali kama Mfalme na Bwana. Kila jicho litamuona. Wafu katika Kristo watafufuliwa, na walio hai watabadilishwa.', swahiliDeep: 'Hili ndilo tumaini letu lenye baraka. Dunia yote itaona utukufu wake, na waovu hawataweza kustahimili mng\'ao wake.', didYouKnow: 'Kuja huko hakutakuwa kwa siri (Secret Rapture), bali kutakuwa na kelele kuu, tarumbeta, na kuonekana na wote.' }
+      { id: 'esc1', year: 'Ijayo', title: 'Sheria ya Jumapili', swahiliTitle: 'Sheria ya Jumapili', description: 'Alama ya Mnyama.', category: 'Future', image: 'https://images.unsplash.com/photo-1555462542-a72a7c47f722?q=80&w=1000', verse: 'Ufunuo 13', fullStory: 'Utabiri unaonyesha kuwa kutatungwa sheria ya kulazimisha ibada ya uongo (Jumapili) kinyume na Sabato ya Mungu. Hii itakuwa alama ya utii kwa mwanadamu dhidi ya Mungu.', swahiliDeep: 'Huu ndio mtihani mkuu wa mwisho. Je, tutamtii Mungu au wanadamu? Alama ya Mnyama si \'chip\' ya kompyuta, ni suala la utii na ibada.', didYouKnow: 'Hii itaanza Marekani (Mnyama wa pili) na kuenea duniani kote.', videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ' },
+      { id: 'esc3', year: 'Ijayo', title: 'Mapigo 7 ya Mwisho', swahiliTitle: 'Mapigo 7 ya Mwisho', description: 'Ghadhabu ya Mungu kwa wasiotubu.', category: 'Future', image: 'https://images.unsplash.com/photo-1463130436662-3162799c0a37?q=80&w=1000', verse: 'Ufunuo 16', fullStory: 'Baada ya mlango wa rehema kufungwa, mapigo saba yatamwagwa kwa wale wenye alama ya mnyama. Hii ni hukumu ya haki ya Mungu.', swahiliDeep: 'Wakati huu, wenye haki watakuwa wamelindwa (kama Waisraeli Gosheni), ingawa watapita katika "taabu ya Yakobo".', didYouKnow: 'Hakuna neema wala toba tena wakati mapigo yanapoanza kumwagwa.' },
+      { id: 'esc2', year: 'Ijayo', title: 'Kuja kwa Yesu', swahiliTitle: 'Kuja kwa Yesu', description: 'Mfalme wa Wafalme.', category: 'Future', image: 'https://images.unsplash.com/photo-1447069387593-a5de0862481e?q=80&w=1200', verse: 'Ufunuo 1:7', fullStory: 'Yesu atarejea si kama mtoto, bali kama Mfalme na Bwana. Kila jicho litamuona. Wafu katika Kristo watafufuliwa, na walio hai watabadilishwa.', swahiliDeep: 'Hili ndilo tumaini letu lenye baraka. Dunia yote itaona utukufu wake, na waovu hawataweza kustahimili mng\'ao wake.', didYouKnow: 'Kuja huko hakutakuwa kwa siri (Unyakuo wa Siri), bali kutakuwa na kelele kuu, tarumbeta, na kuonekana na wote.' }
     ]
   },
   {
@@ -191,8 +191,8 @@ const TIMELINES: TimelineSection[] = [
     color: '#0ea5e9',
     description: 'Miaka elfu moja na dunia mpya.',
     milestones: [
-      { id: 'mil1', year: 'Future', title: 'Satan Bound', swahiliTitle: 'Kufungwa kwa Shetani', description: 'Dunia ikiwa ukiwa.', category: 'Future', image: 'https://images.unsplash.com/photo-1618588507085-c79565432917?q=80&w=1000', verse: 'Ufunuo 20:2', fullStory: 'Wenye haki wakienda mbinguni na waovu wakiwa wamekufa, dunia inabaki ukiwa. Shetani anafungwa kwa "mnyororo wa mazingira" - hana mtu wa kumdanganya kwa miaka 1000.', swahiliDeep: 'Hii ni Sabato ya dunia ya kupumzika kutokana na dhambi. Wenye haki mbinguni watashiriki katika hukumu ya waovu na malaika waasi.', didYouKnow: 'Neno "shimo la kuzimu" hapa linamaanisha dunia iliyoaribika na kuwa giza, kama ilivyokuwa mwanzo.' },
-      { id: 'mil2', year: 'Future', title: 'New Jerusalem', swahiliTitle: 'Yerusalemu Mpya', description: 'Kushuka kwa Mji Mtakatifu.', category: 'Future', image: 'https://images.unsplash.com/photo-1549558549-415fe4c37b60?q=80&w=1000', verse: 'Ufunuo 21', fullStory: 'Baada ya miaka 1000, Mji Mtakatifu unashuka. Waovu wanafufuliwa, Shetani anawadanganya kuushambulia mji, na moto unashuka kuwateketeza milele. Dunia inafanywa mpya.', swahiliDeep: 'Hii ndiyo "Arusi ya Mwanakondoo". Mungu anafanya maskani yake pamoja na wanadamu milele. Hakuna kifo, maumivu wala kilio tena.', didYouKnow: 'Mji huo una misingi 12 ya vito vya thamani na malango 12 ya lulu.' }
+      { id: 'mil1', year: 'Ijayo', title: 'Shetani Afungwa', swahiliTitle: 'Kufungwa kwa Shetani', description: 'Dunia ikiwa ukiwa.', category: 'Future', image: 'https://images.unsplash.com/photo-1618588507085-c79565432917?q=80&w=1000', verse: 'Ufunuo 20:2', fullStory: 'Wenye haki wakienda mbinguni na waovu wakiwa wamekufa, dunia inabaki ukiwa. Shetani anafungwa kwa "mnyororo wa mazingira" - hana mtu wa kumdanganya kwa miaka 1000.', swahiliDeep: 'Hii ni Sabato ya dunia ya kupumzika kutokana na dhambi. Wenye haki mbinguni watashiriki katika hukumu ya waovu na malaika waasi.', didYouKnow: 'Neno "shimo la kuzimu" hapa linamaanisha dunia iliyoaribika na kuwa giza, kama ilivyokuwa mwanzo.' },
+      { id: 'mil2', year: 'Ijayo', title: 'Yerusalemu Mpya', swahiliTitle: 'Yerusalemu Mpya', description: 'Kushuka kwa Mji Mtakatifu.', category: 'Future', image: 'https://images.unsplash.com/photo-1549558549-415fe4c37b60?q=80&w=1000', verse: 'Ufunuo 21', fullStory: 'Baada ya miaka 1000, Mji Mtakatifu unashuka. Waovu wanafufuliwa, Shetani anawadanganya kuushambulia mji, na moto unashuka kuwateketeza milele. Dunia inafanywa mpya.', swahiliDeep: 'Hii ndiyo "Arusi ya Mwanakondoo". Mungu anafanya maskani yake pamoja na wanadamu milele. Hakuna kifo, maumivu wala kilio tena.', didYouKnow: 'Mji huo una misingi 12 ya vito vya thamani na malango 12 ya lulu.' }
     ]
   },
   {
@@ -203,8 +203,8 @@ const TIMELINES: TimelineSection[] = [
     color: '#6366f1',
     description: 'Unabii mrefu zaidi wa wakati.',
     milestones: [
-      { id: 'dy1', year: '457 BC', title: 'Decree', swahiliTitle: 'Amri ya Kujenga', description: 'Kuanza kwa unabii.', category: 'Past', image: 'https://images.unsplash.com/photo-1532153975070-2e9ab71f1b14?q=80&w=1000', verse: 'Danieli 8:14', fullStory: 'Mfalme Artashasta alitoa amri ya kutengeneza na kujenga upya Yerusalemu. Hii ndiyo nukta ya kuanzia ya unabii wa Siku 2300 na majuma 70.', swahiliDeep: 'Unabii huu unathibitisha kwa usahihi wa kihistoria muda wa kubatizwa na kusulubiwa kwa Masihi (Yesu).', didYouKnow: 'Hii ndiyo nanga ya unabii wa Masihi, ikitabiri mwaka haswa wa kuanza huduma yake (27 AD).' },
-      { id: 'dy2', year: '1844 AD', title: 'Cleansing', swahiliTitle: 'Kutakaswa Patakatifu', description: 'Mwisho wa Siku 2300.', category: 'Past', image: 'https://images.unsplash.com/photo-1504052434569-70ad5836ab65?q=80&w=400', verse: 'Danieli 8:14', fullStory: 'Unabii uliishia 1844. Haukumaanisha mwisho wa dunia, bali kuanza kwa "Hukumu ya Upelelezi" mbinguni (Siku ya Upatanisho). Yesu aliingia Patakatifu pa Patakatifu.', swahiliDeep: 'Tunaishi katika wakati wa hukumu. Yesu anapitia vitabu vya uzima. Ni wakati wa kutubu na kuhakikisha majina yetu yamo kitabuni.', didYouKnow: 'Kukosea kuelewa tukio hili kulileta "Kukatishwa Tamaa Kuu" (Great Disappointment), lakini kulizaa vuguvugu la kujifunza Biblia kwa kina.' }
+      { id: 'dy1', year: '457 BC', title: 'Amri', swahiliTitle: 'Amri ya Kujenga', description: 'Kuanza kwa unabii.', category: 'Past', image: 'https://images.unsplash.com/photo-1532153975070-2e9ab71f1b14?q=80&w=1000', verse: 'Danieli 8:14', fullStory: 'Mfalme Artashasta alitoa amri ya kutengeneza na kujenga upya Yerusalemu. Hii ndiyo nukta ya kuanzia ya unabii wa Siku 2300 na majuma 70.', swahiliDeep: 'Unabii huu unathibitisha kwa usahihi wa kihistoria muda wa kubatizwa na kusulubiwa kwa Masihi (Yesu).', didYouKnow: 'Hii ndiyo nanga ya unabii wa Masihi, ikitabiri mwaka haswa wa kuanza huduma yake (27 AD).' },
+      { id: 'dy2', year: '1844 AD', title: 'Utakaso', swahiliTitle: 'Kutakaswa Patakatifu', description: 'Mwisho wa Siku 2300.', category: 'Past', image: 'https://images.unsplash.com/photo-1504052434569-70ad5836ab65?q=80&w=400', verse: 'Danieli 8:14', fullStory: 'Unabii uliishia 1844. Haukumaanisha mwisho wa dunia, bali kuanza kwa "Hukumu ya Upelelezi" mbinguni (Siku ya Upatanisho). Yesu aliingia Patakatifu pa Patakatifu.', swahiliDeep: 'Tunaishi katika wakati wa hukumu. Yesu anapitia vitabu vya uzima. Ni wakati wa kutubu na kuhakikisha majina yetu yamo kitabuni.', didYouKnow: 'Kukosea kuelewa tukio hili kulileta "Kukatishwa Tamaa Kuu" (Kukatishwa Tamaa Kubwa), lakini kulizaa vuguvugu la kujifunza Biblia kwa kina.' }
     ]
   },
   {
@@ -215,8 +215,8 @@ const TIMELINES: TimelineSection[] = [
     color: '#14b8a6',
     description: 'Miaka ya Giza (538-1798 AD).',
     milestones: [
-      { id: 'dk1', year: '538 AD', title: 'Papal Rise', swahiliTitle: 'Kuinuka kwa Papa', description: 'Mwanzo wa mamlaka.', category: 'Past', image: 'https://images.unsplash.com/photo-1548013146-72479768bbaa?q=80&w=1000', verse: 'Danieli 7:25', fullStory: 'Baada ya kung\'olewa kwa pembe tatu (falme za Arian), Askofu wa Rumi alipewa mamlaka ya kisiasa na kidini na Justinian. Hii ilianza kipindi cha mateso ya miaka 1260.', swahiliDeep: 'Muunganiko wa kanisa na serikali daima huzaa mateso kwa wale wanaosimamia uhuru wa dhamiri.', didYouKnow: 'Biblia iliita kipindi hiki "wakati, na nyakati, na nusu ya wakati".' },
-      { id: 'dk2', year: '1798 AD', title: 'Deadly Wound', swahiliTitle: 'Jeraha la Mauti', description: 'Mwisho wa Siku 1260.', category: 'Past', image: 'https://images.unsplash.com/photo-1555462542-a72a7c47f722?q=80&w=1000', verse: 'Ufunuo 13:3', fullStory: 'Jeshi la Ufaransa chini ya Jenerali Berthier lilimkamata Papa Pius VI na kumpeleka uhamishoni, likivunja mamlaka ya kisiasa ya upapa kama ilivyotabiriwa.', swahiliDeep: 'Mungu huweka mipaka kwa nguvu za giza. Unabii ulitimia "siku" ileile iliyopangwa.', didYouKnow: 'Jeraha hili la mauti lilianza kupona 1929 kupitia Mkataba wa Lateran.' }
+      { id: 'dk1', year: '538 AD', title: 'Kuinuka kwa Papa', swahiliTitle: 'Kuinuka kwa Papa', description: 'Mwanzo wa mamlaka.', category: 'Past', image: 'https://images.unsplash.com/photo-1548013146-72479768bbaa?q=80&w=1000', verse: 'Danieli 7:25', fullStory: 'Baada ya kung\'olewa kwa pembe tatu (falme za Arian), Askofu wa Rumi alipewa mamlaka ya kisiasa na kidini na Justinian. Hii ilianza kipindi cha mateso ya miaka 1260.', swahiliDeep: 'Muunganiko wa kanisa na serikali daima huzaa mateso kwa wale wanaosimamia uhuru wa dhamiri.', didYouKnow: 'Biblia iliita kipindi hiki "wakati, na nyakati, na nusu ya wakati".' },
+      { id: 'dk2', year: '1798 AD', title: 'Jeraha la Mauti', swahiliTitle: 'Jeraha la Mauti', description: 'Mwisho wa Siku 1260.', category: 'Past', image: 'https://images.unsplash.com/photo-1555462542-a72a7c47f722?q=80&w=1000', verse: 'Ufunuo 13:3', fullStory: 'Jeshi la Ufaransa chini ya Jenerali Berthier lilimkamata Papa Pius VI na kumpeleka uhamishoni, likivunja mamlaka ya kisiasa ya upapa kama ilivyotabiriwa.', swahiliDeep: 'Mungu huweka mipaka kwa nguvu za giza. Unabii ulitimia "siku" ileile iliyopangwa.', didYouKnow: 'Jeraha hili la mauti lilianza kupona 1929 kupitia Mkataba wa Lateran.' }
     ]
   }
 ];
@@ -263,9 +263,9 @@ const getTimelineIcon = (iconKey: string) => {
 const mapTimelineMilestone = (milestone: TimelineMilestoneApi, milestoneIndex: number): Milestone => ({
   id: milestone.code || `milestone-${milestone.id || milestoneIndex + 1}`,
   year: milestone.year_label || `Hatua ${milestoneIndex + 1}`,
-  title: milestone.title || `Milestone ${milestoneIndex + 1}`,
-  swahiliTitle: milestone.swahili_title || milestone.title || `Milestone ${milestoneIndex + 1}`,
-  description: milestone.summary || 'Hatua ya timeline ya mfumo.',
+  title: milestone.title || `Hatua ${milestoneIndex + 1}`,
+  swahiliTitle: milestone.swahili_title || milestone.title || `Hatua ${milestoneIndex + 1}`,
+  description: milestone.summary || 'Hatua ya mlolongo wa mfumo.',
   category: normalizeMilestoneCategory(milestone.category),
   image: milestone.image || FALLBACK_TIMELINE_IMAGE,
   verse: milestone.verse || 'Marejeo ya Biblia',
@@ -284,7 +284,7 @@ const mapApiTimelinesToSections = (sections: TimelineSectionApi[]): TimelineSect
 
       return {
         id: section.code || `timeline-${section.id}`,
-        name: section.title || `Timeline ${sectionIndex + 1}`,
+        name: section.title || `Mlolongo ${sectionIndex + 1}`,
         swahiliName: prefixedName,
         icon: getTimelineIcon(section.icon_key),
         color: section.accent_color || '#14b8a6',
@@ -330,7 +330,7 @@ export const PropheticTimeline: React.FC<PropheticTimelineProps> = ({ activeTime
         if (!isMounted) {
           return;
         }
-        setTimelineError('Timeline ya mfumo haijapatikana kwa sasa. Tunaonyesha ya msingi.');
+        setTimelineError('Mlolongo wa mfumo haujapatikana kwa sasa. Tunaonyesha wa msingi.');
       }
     };
 
@@ -361,7 +361,7 @@ export const PropheticTimeline: React.FC<PropheticTimelineProps> = ({ activeTime
   };
 
   const handleDownload = () => {
-    alert("Study Guide Download Started...");
+    alert("Upakuaji wa mwongozo wa somo umeanza...");
   };
 
   // Simple Navigation Logic
@@ -468,10 +468,10 @@ export const PropheticTimeline: React.FC<PropheticTimelineProps> = ({ activeTime
             </button>
             
             <div className="px-6 py-2 text-center min-w-[200px] border-x border-white/5">
-               <p className="text-[9px] font-black uppercase text-slate-500 tracking-widest mb-1">Current Timeline</p>
+               <p className="text-[9px] font-black uppercase text-slate-500 tracking-widest mb-1">Mlolongo wa Sasa</p>
                <div className="flex items-center justify-center gap-2 text-gold-400">
                   {activeTimeline?.icon}
-                  <h3 className="text-sm font-black uppercase tracking-wider">{activeTimeline?.swahiliName || 'Timeline'}</h3>
+                  <h3 className="text-sm font-black uppercase tracking-wider">{activeTimeline?.swahiliName || 'Mlolongo'}</h3>
                </div>
             </div>
 
@@ -494,7 +494,7 @@ export const PropheticTimeline: React.FC<PropheticTimelineProps> = ({ activeTime
               </button>
               
               <div className="text-center mb-10">
-                 <h2 className="text-3xl font-black text-white uppercase tracking-tight">Timeline Master Index</h2>
+                 <h2 className="text-3xl font-black text-white uppercase tracking-tight">Orodha Kuu ya Milolongo</h2>
                  <p className="text-slate-500 mt-2 font-medium">Chagua kipindi cha unabii unachotaka kuchunguza</p>
               </div>
 
@@ -514,7 +514,7 @@ export const PropheticTimeline: React.FC<PropheticTimelineProps> = ({ activeTime
                        </div>
                        <div>
                           <p className={`text-[10px] font-black uppercase tracking-widest mb-1 ${activeTimelineId === t.id ? 'text-black/60' : 'text-slate-500'}`}>
-                             Timeline Sequence
+                             Mfuatano wa Mlolongo
                           </p>
                           <h4 className={`font-black uppercase text-sm ${activeTimelineId === t.id ? 'text-black' : 'text-white group-hover:text-gold-400'}`}>
                              {t.swahiliName}
@@ -533,18 +533,18 @@ export const PropheticTimeline: React.FC<PropheticTimelineProps> = ({ activeTime
           <div className="bg-white dark:bg-slate-950 w-full max-w-[95vw] h-full md:h-[90vh] rounded-2xl overflow-hidden shadow-2xl flex flex-col md:flex-row animate-scale-up border border-slate-200 dark:border-white/10">
             {/* Image Side - Fixed height on mobile to ensure visibility */}
             <div className="w-full h-[45vh] md:h-auto md:w-1/2 relative bg-slate-950 overflow-hidden border-b md:border-b-0 md:border-r border-slate-900">
-              <img src={selected.image} className="absolute inset-0 w-full h-full object-cover grayscale-[0.2] contrast-[1.2] animate-ken-burns" alt={selected.title} />
+              <img src={selected.image} className="absolute inset-0 w-full h-full object-cover grayscale-[0.2] contrast-[1.2] animate-ken-burns" alt={selected.swahiliTitle || selected.title} />
               <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent"></div>
               
               <div className="absolute top-12 left-12">
                  <div className="px-6 py-2 bg-white/10 backdrop-blur-md border border-white/20 rounded-lg text-white text-[10px] font-black uppercase tracking-[0.4em]">
-                   SECURE_ARCHIVE_{selected.id.toUpperCase()}
+                   KUMBUKUMBU_SALAMA_{selected.id.toUpperCase()}
                  </div>
               </div>
 
               <div className="absolute bottom-10 left-10 right-10 md:bottom-24 md:left-16 md:right-16 space-y-4 md:space-y-8">
                 <div className="inline-block px-6 py-2 md:px-10 md:py-4 bg-gold-400 text-primary-900 text-[10px] md:text-[14px] font-black uppercase rounded-lg tracking-[0.5em] shadow-lg">{selected.year}</div>
-                <h2 className="text-4xl md:text-6xl lg:text-8xl font-black text-white tracking-tighter italic uppercase leading-[0.8]">{selected.title}</h2>
+                <h2 className="text-4xl md:text-6xl lg:text-8xl font-black text-white tracking-tighter italic uppercase leading-[0.8]">{selected.swahiliTitle || selected.title}</h2>
                 <div className="flex items-center gap-8 text-gold-400">
                   <ScrollText size={32} className="md:w-14 md:h-14" />
                   <p className="text-xl md:text-3xl lg:text-5xl font-black italic tracking-tight">{selected.verse}</p>
@@ -572,7 +572,7 @@ export const PropheticTimeline: React.FC<PropheticTimelineProps> = ({ activeTime
                 <div className="bg-gold-500/10 border border-gold-500/20 rounded-xl p-6 relative overflow-hidden">
                    <div className="absolute top-0 right-0 p-4 opacity-10"><Lightbulb size={64} className="text-gold-500" /></div>
                    <h4 className="text-[10px] font-black text-gold-500 uppercase tracking-widest flex items-center gap-2 mb-3 relative z-10">
-                     <Star size={12} fill="currentColor" /> Did You Know?
+                     <Star size={12} fill="currentColor" /> Je, Wajua?
                    </h4>
                    {/* Typewriter Effect Applied Here */}
                    <TypewriterText 
@@ -602,7 +602,7 @@ export const PropheticTimeline: React.FC<PropheticTimelineProps> = ({ activeTime
                 {/* Narrative - Normal Text */}
                 <div className="space-y-6">
                   <h4 className="text-[11px] font-black text-slate-400 uppercase tracking-[0.5em] flex items-center gap-4">
-                    <Navigation size={20} className="text-primary-600" /> Summary
+                    <Navigation size={20} className="text-primary-600" /> Muhtasari
                   </h4>
                   <p className="text-sm md:text-base text-slate-700 dark:text-slate-300 leading-relaxed">
                     {selected.fullStory}
@@ -628,13 +628,13 @@ export const PropheticTimeline: React.FC<PropheticTimelineProps> = ({ activeTime
                     onClick={() => { setSelected(null); onNavigate?.(StageId.BIBLE_STUDY); }}
                     className="flex-1 px-10 py-5 bg-primary-900 text-gold-400 rounded-xl font-black text-xs uppercase tracking-[0.2em] hover:bg-primary-800 transition-all shadow-xl flex items-center justify-center gap-4"
                   >
-                    <BookOpen size={20} /> Start Deep Study
+                    <BookOpen size={20} /> Anza Somo la Kina
                   </button>
                   <button 
                     onClick={handleDownload}
                     className="flex-1 px-10 py-5 bg-slate-100 dark:bg-white/5 text-slate-900 dark:text-white rounded-xl font-black text-xs uppercase tracking-[0.2em] hover:bg-gold-400 hover:text-white transition-all flex items-center justify-center gap-4 group"
                   >
-                    <Download size={20} /> Download Guide
+                    <Download size={20} /> Pakua Mwongozo
                   </button>
                 </div>
 
@@ -705,7 +705,7 @@ const TimelineScreen: React.FC<{
                       <span className="text-4xl md:text-6xl font-black text-gold-400 tracking-tighter">{milestone.year}</span>
                       <div className="w-3 h-3 rounded-full bg-gold-400 shadow-[0_0_15px_#eab308]"></div>
                    </div>
-                   <h3 className="text-2xl md:text-4xl font-black text-white uppercase italic leading-none">{milestone.title}</h3>
+                   <h3 className="text-2xl md:text-4xl font-black text-white uppercase italic leading-none">{milestone.swahiliTitle || milestone.title}</h3>
                    <p className="text-slate-400 text-sm font-medium max-w-md ml-auto">{milestone.description}</p>
                 </div>
              ) : (
@@ -714,7 +714,7 @@ const TimelineScreen: React.FC<{
                   className="relative group cursor-pointer"
                 >
                    <div className="w-48 h-48 md:w-72 md:h-72 rounded-full border-4 border-gold-500 overflow-hidden shadow-[0_0_60px_rgba(234,179,8,0.3)] group-hover:shadow-[0_0_100px_rgba(234,179,8,0.6)] transition-all duration-500">
-                      <img src={milestone.image} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" alt={milestone.title} />
+                      <img src={milestone.image} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" alt={milestone.swahiliTitle || milestone.title} />
                       {/* Play Icon Overlay if video exists */}
                       {milestone.videoUrl && (
                         <div className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
@@ -733,7 +733,7 @@ const TimelineScreen: React.FC<{
                   className="relative group cursor-pointer"
                 >
                    <div className="w-48 h-48 md:w-72 md:h-72 rounded-full border-4 border-gold-500 overflow-hidden shadow-[0_0_60px_rgba(234,179,8,0.3)] group-hover:shadow-[0_0_100px_rgba(234,179,8,0.6)] transition-all duration-500">
-                      <img src={milestone.image} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" alt={milestone.title} />
+                      <img src={milestone.image} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" alt={milestone.swahiliTitle || milestone.title} />
                       {/* Play Icon Overlay if video exists */}
                       {milestone.videoUrl && (
                         <div className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
@@ -748,7 +748,7 @@ const TimelineScreen: React.FC<{
                       <div className="w-3 h-3 rounded-full bg-gold-400 shadow-[0_0_15px_#eab308]"></div>
                       <span className="text-4xl md:text-6xl font-black text-gold-400 tracking-tighter">{milestone.year}</span>
                    </div>
-                   <h3 className="text-2xl md:text-4xl font-black text-white uppercase italic leading-none">{milestone.title}</h3>
+                   <h3 className="text-2xl md:text-4xl font-black text-white uppercase italic leading-none">{milestone.swahiliTitle || milestone.title}</h3>
                    <p className="text-slate-400 text-sm font-medium max-w-md mr-auto">{milestone.description}</p>
                 </div>
              )}

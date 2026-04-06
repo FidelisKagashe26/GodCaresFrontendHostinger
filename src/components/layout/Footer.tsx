@@ -66,7 +66,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, siteSettings }) => {
               <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-4">Misingi</h4>
               <ul className="space-y-2">
                  <li onClick={() => onNavigate?.(StageId.ABOUT)} className="text-xs font-bold text-slate-400 hover:text-gold-400 cursor-pointer transition-colors">Kuhusu Sisi</li>
-                 <li onClick={() => onNavigate?.(StageId.BLOG)} className="text-xs font-bold text-slate-400 hover:text-gold-400 cursor-pointer transition-colors">Blog ya Imani</li>
+                 <li onClick={() => onNavigate?.(StageId.BLOG)} className="text-xs font-bold text-slate-400 hover:text-gold-400 cursor-pointer transition-colors">Makala ya Imani</li>
                  <li onClick={() => onNavigate?.(StageId.BIBLE_STUDY)} className="text-xs font-bold text-slate-400 hover:text-gold-400 cursor-pointer transition-colors">Darasa la Biblia</li>
                  <li onClick={() => onNavigate?.(StageId.TESTIMONIES)} className="text-xs font-bold text-slate-400 hover:text-gold-400 cursor-pointer transition-colors">Shuhuda</li>
               </ul>
@@ -134,7 +134,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, siteSettings }) => {
         {/* Copyright */}
         <div className="flex flex-col items-center gap-2">
           <p className="text-slate-600 text-[9px] font-black uppercase tracking-[0.4em] text-center">
-            Copyright 2026 Mradi wa Wamishenari wa Kidijitali wa God Cares 365.
+            Haki zote zimehifadhiwa 2026 - Mradi wa Wamishenari wa Kidijitali wa God Cares 365.
           </p>
           <p className="text-slate-700 text-[8px] font-bold uppercase tracking-widest">
             Sola Scriptura | Sola Gratia | Sola Fide

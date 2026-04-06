@@ -216,7 +216,7 @@ const App: React.FC = () => {
       {
         id: `verify-${Date.now()}`,
         title: 'Karibu God Cares 365!',
-        message: 'Hongera kwa kuingia! Tafadhali nenda kwenye Profile ukamilishe verification ya email yako.',
+        message: 'Hongera kwa kuingia! Tafadhali nenda kwenye wasifu ukamilishe uthibitisho wa barua pepe yako.',
         type: 'info',
         timestamp: new Date().toLocaleTimeString(),
       },
@@ -668,7 +668,7 @@ const App: React.FC = () => {
                 <button
                   onClick={() => setIsMenuOpen(true)}
                   className="gc-icon-button p-2.5 md:p-3.5 rounded-full group"
-                  aria-label="Open menu"
+                  aria-label="Fungua menyu"
                 >
                   <Menu size={20} className="group-hover:text-[color:var(--accent)] transition-colors" />
                 </button>
@@ -685,14 +685,14 @@ const App: React.FC = () => {
                 <button
                   onClick={() => setIsThemeOpen(!isThemeOpen)}
                   className="gc-icon-button p-2.5 md:p-3.5 rounded-full"
-                  aria-label="Theme"
+                  aria-label="Mandhari"
                 >
                   {theme === 'light' ? <Sun size={16} /> : theme === 'dark' ? <Moon size={16} /> : <Monitor size={16} />}
                 </button>
                 <button
                   onClick={() => setIsNotificationOpen(!isNotificationOpen)}
                   className={`relative gc-icon-button p-2.5 md:p-3.5 rounded-full ${isNotificationOpen ? 'is-active' : ''}`}
-                  aria-label="Notifications"
+                  aria-label="Arifa"
                 >
                   <Bell size={16} />
                   {unreadCount > 0 && (

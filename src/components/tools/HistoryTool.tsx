@@ -137,7 +137,7 @@ export const HistoryTool: React.FC<Props> = ({ onGoToTimeline }) => {
       setHasLoadedEvents(true);
       fetchHistoryForDate(targetDate, sourceEvents);
     } catch {
-      setEventsError('Imeshindikana kupakua This Day in History. Tunaonyesha data ya msingi.');
+      setEventsError('Imeshindikana kupakua tukio la siku katika historia. Tunaonyesha data ya msingi.');
       setHistoryEvents(FALLBACK_HISTORY_EVENTS);
       setHasLoadedEvents(true);
       fetchHistoryForDate(targetDate, FALLBACK_HISTORY_EVENTS);
@@ -203,7 +203,7 @@ export const HistoryTool: React.FC<Props> = ({ onGoToTimeline }) => {
                        <img 
                          src={todaysEvent.image} 
                          className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-all duration-1000 group-hover:scale-110" 
-                         alt="Event" 
+                         alt="Tukio" 
                        />
                        <div className="absolute inset-0 bg-gradient-to-t from-[#0f172a] via-transparent to-transparent"></div>
                        
@@ -284,7 +284,7 @@ export const HistoryTool: React.FC<Props> = ({ onGoToTimeline }) => {
                               onClick={() => { setIsOpen(false); onGoToTimeline(); }} 
                               className="px-6 py-3 bg-purple-600/20 hover:bg-purple-600 text-purple-300 hover:text-white text-[10px] font-black uppercase tracking-widest rounded-lg transition-all flex items-center gap-2 border border-purple-500/30 hover:border-purple-500"
                             >
-                              Fungua Timeline Kamili <ArrowRight size={14} />
+                              Fungua Mlolongo Kamili <ArrowRight size={14} />
                             </button>
                           )}
                        </div>

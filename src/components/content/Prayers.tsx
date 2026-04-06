@@ -192,7 +192,7 @@ export const Prayers: React.FC<Props> = ({ aiLanguage = 'en' }) => {
                       <div className="flex items-center gap-3">
                          {isPublic ? <Eye className="text-gold-500" size={18} /> : <EyeOff className="text-slate-400" size={18} />}
                          <div>
-                            <p className="text-xs font-black uppercase text-slate-700 dark:text-slate-300">Public Wall</p>
+                            <p className="text-xs font-black uppercase text-slate-700 dark:text-slate-300">Ukuta wa Umma</p>
                             <p className="text-[9px] text-slate-500 uppercase font-bold">Ukuta wa Umma - wengine waione?</p>
                          </div>
                       </div>
@@ -342,7 +342,7 @@ export const Prayers: React.FC<Props> = ({ aiLanguage = 'en' }) => {
 
                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <button onClick={() => setShowAiModal(false)} className="w-full py-5 bg-primary-950 text-gold-400 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-gold-500 hover:text-primary-950 transition-all shadow-xl">OMBA SASA</button>
-                  <button className="w-full py-5 bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-300 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-slate-200 transition-all">Copy Text</button>
+                  <button className="w-full py-5 bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-300 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-slate-200 transition-all">Nakili Maandishi</button>
                </div>
             </div>
          </div>

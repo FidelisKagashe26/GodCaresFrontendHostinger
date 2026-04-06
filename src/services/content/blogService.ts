@@ -126,7 +126,7 @@ export const toggleBlogLike = async (postId: number): Promise<BlogLikeApi> => {
     body: JSON.stringify({ client_id: clientId }),
   });
   if (!response.ok) {
-    throw new Error("Imeshindikana kusasisha like.");
+    throw new Error("Imeshindikana kusasisha kupenda.");
   }
   invalidateCachedResult(`blog_posts_v2_${clientId}`);
   invalidateCachedResult(`blog_post_${postId}_v2_${clientId}`);
@@ -144,7 +144,7 @@ export const getBlogComments = async (postId: number): Promise<BlogCommentApi[]>
     },
   );
   if (!response.ok) {
-    throw new Error("Imeshindikana kupata comments.");
+    throw new Error("Imeshindikana kupata maoni.");
   }
   return (await response.json()) as BlogCommentApi[];
 };
@@ -163,7 +163,7 @@ export const createBlogComment = async (
     }),
   });
   if (!response.ok) {
-    let message = "Imeshindikana kutuma comment.";
+    let message = "Imeshindikana kutuma maoni.";
     try {
       const body = (await response.json()) as { detail?: string };
       if (typeof body?.detail === "string" && body.detail.trim()) {

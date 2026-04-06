@@ -57,14 +57,14 @@ export const ProfileModal: React.FC<{ user: any; onLogout: () => void; onClose: 
   };
 
   const handleFeatureClick = (feature: string) => {
-    if (feature === 'Privacy') {
+    if (feature === 'Faragha') {
       alert("Mpangilio wa faragha: Data zako zimesimbwa. Unaweza kufuta historia yako ya masomo hapa.");
-    } else if (feature === 'Security') {
+    } else if (feature === 'Ulinzi') {
       alert("Hali ya ulinzi: Akaunti yako imelindwa na itifaki ya GC-Shield. Hakuna uingiaji mgeni uliogundulika.");
-    } else if (feature === 'Support') {
+    } else if (feature === 'Msaada') {
       const email = supportEmail || "support@godcares365.org";
       window.location.href = `mailto:${email}?subject=Msaada wa Akaunti`;
-    } else if (feature === 'Settings') {
+    } else if (feature === 'Mipangilio') {
       alert("Mipangilio ya mfumo: Unaweza kubadili lugha na mandhari kupitia sehemu ya juu ya ukurasa.");
     }
   };
@@ -150,10 +150,10 @@ export const ProfileModal: React.FC<{ user: any; onLogout: () => void; onClose: 
 
           <div className="grid grid-cols-2 gap-3">
             {[
-              { label: 'Faragha', id: 'Privacy', icon: <Shield size={14} />, color: 'text-blue-400' },
-              { label: 'Ulinzi', id: 'Security', icon: <Archive size={14} />, color: 'text-green-400' },
-              { label: 'Msaada', id: 'Support', icon: <MessageSquare size={14} />, color: 'text-purple-400' },
-              { label: 'Mipangilio', id: 'Settings', icon: <Settings size={14} />, color: 'text-slate-400' }
+              { label: 'Faragha', id: 'Faragha', icon: <Shield size={14} />, color: 'text-blue-400' },
+              { label: 'Ulinzi', id: 'Ulinzi', icon: <Archive size={14} />, color: 'text-green-400' },
+              { label: 'Msaada', id: 'Msaada', icon: <MessageSquare size={14} />, color: 'text-purple-400' },
+              { label: 'Mipangilio', id: 'Mipangilio', icon: <Settings size={14} />, color: 'text-slate-400' }
             ].map((item, i) => (
               <button key={i} onClick={() => handleFeatureClick(item.id)} className="flex items-center gap-3 p-3 bg-white/5 rounded-xl border border-transparent hover:border-gold-500/30 hover:bg-white/[0.08] transition-all group">
                 <div className={`${item.color} group-hover:scale-110 transition-transform`}>{item.icon}</div>
