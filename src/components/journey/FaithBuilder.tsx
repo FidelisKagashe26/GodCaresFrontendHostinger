@@ -10,10 +10,13 @@ import {
   Sword,
   X,
 } from 'lucide-react';
-import { getFaithHeroes } from '../../services/academy/faithService';
+import { useSearchParams } from 'react-router-dom';
+import { getFaithHeroSharePageUrl, getFaithHeroes } from '../../services/academy/faithService';
 
 interface HeroProfile {
   id: string;
+  shareKey: string;
+  shareUrl: string;
   name: string;
   title: string;
   challenge: string;
@@ -79,13 +82,13 @@ const splitParagraphs = (value: string): string[] =>
     .map((line) => line.trim())
     .filter(Boolean);
 
-const copyShareText = async (hero: HeroProfile): Promise<void> => {
-  const shareUrl = window.location.href;
+const copyShareText = async (hero: HeroProfile, shareUrl: string): Promise<void> => {
   const text = `God Cares 365 - ${hero.name}: ${hero.title}`;
   await navigator.clipboard.writeText(`${text} ${shareUrl}`);
 };
 
 export const FaithBuilder: React.FC = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [activeHero, setActiveHero] = useState<string | null>(null);
   const [activeCategory, setActiveCategory] = useState<(typeof CATEGORIES)[number]>('Zote');
   const [showVideoInModal, setShowVideoInModal] = useState(false);
@@ -101,6 +104,8 @@ export const FaithBuilder: React.FC = () => {
         const data = await getFaithHeroes();
         const mapped: HeroProfile[] = data.map((hero) => ({
           id: String(hero.id),
+          shareKey: String(hero.share_key || '').trim(),
+          shareUrl: String(hero.share_url || '').trim(),
           name: hero.name,
           title: hero.title,
           challenge: hero.challenge,
@@ -135,23 +140,100 @@ export const FaithBuilder: React.FC = () => {
     [activeHero, heroes],
   );
 
-  const handleHeroOpen = (id: string) => {
+  const setHeroQueryParam = (heroId: string | null, replace = false) => {
+    const next = new URLSearchParams(searchParams);
+    if (heroId) {
+      const selectedHero = heroes.find((hero) => hero.id === heroId);
+      if (selectedHero?.shareKey) {
+        next.set('share', selectedHero.shareKey);
+        next.delete('hero');
+      } else {
+        next.set('hero', heroId);
+        next.delete('share');
+      }
+    } else {
+      next.delete('share');
+      next.delete('hero');
+    }
+    setSearchParams(next, { replace });
+  };
+
+  const openHero = (id: string, syncUrl = true) => {
+    if (syncUrl) {
+      setHeroQueryParam(id);
+    }
     setActiveHero(id);
     setShowVideoInModal(false);
   };
 
+  const closeHero = (syncUrl = true) => {
+    if (syncUrl) {
+      setHeroQueryParam(null);
+    }
+    setActiveHero(null);
+    setShowVideoInModal(false);
+  };
+
+  useEffect(() => {
+    const rawShareKey = (searchParams.get('share') || '').trim().toLowerCase();
+    const rawHeroId = (searchParams.get('hero') || '').trim();
+
+    if (!rawShareKey && !rawHeroId) {
+      if (activeHero !== null) {
+        closeHero(false);
+      }
+      return;
+    }
+
+    if (rawShareKey) {
+      const matchedHero = heroes.find((hero) => hero.shareKey.toLowerCase() === rawShareKey);
+      if (matchedHero) {
+        if (activeHero !== matchedHero.id) {
+          openHero(matchedHero.id, false);
+        }
+        return;
+      }
+
+      if (heroes.length > 0) {
+        const next = new URLSearchParams(searchParams);
+        next.delete('share');
+        next.delete('hero');
+        setSearchParams(next, { replace: true });
+      }
+      return;
+    }
+
+    const matchedById = heroes.find((hero) => hero.id === rawHeroId);
+    if (matchedById) {
+      if (activeHero !== matchedById.id) {
+        openHero(matchedById.id, false);
+      }
+      return;
+    }
+
+    if (heroes.length > 0) {
+      const next = new URLSearchParams(searchParams);
+      next.delete('share');
+      next.delete('hero');
+      setSearchParams(next, { replace: true });
+    }
+  }, [searchParams, setSearchParams, heroes, activeHero]);
+
   const handleShare = async (hero: HeroProfile) => {
+    const parsedHeroId = Number.parseInt(hero.id, 10);
+    const heroId = Number.isInteger(parsedHeroId) && parsedHeroId > 0 ? parsedHeroId : undefined;
+    const shareUrl = hero.shareUrl || getFaithHeroSharePageUrl(hero.shareKey, heroId);
     const shareData = {
       title: `God Cares 365: ${hero.name}`,
       text: `${hero.name} - ${hero.title}`,
-      url: window.location.href,
+      url: shareUrl,
     };
     try {
       if (navigator.share) {
         await navigator.share(shareData);
         return;
       }
-      await copyShareText(hero);
+      await copyShareText(hero, shareUrl);
       window.alert('Link imenakiliwa. Unaweza kuipaste sasa.');
     } catch {
       // User cancelled share or browser blocked. No hard failure needed.
@@ -215,11 +297,11 @@ export const FaithBuilder: React.FC = () => {
               key={hero.id}
               role="button"
               tabIndex={0}
-              onClick={() => handleHeroOpen(hero.id)}
+              onClick={() => openHero(hero.id)}
               onKeyDown={(event) => {
                 if (event.key === 'Enter' || event.key === ' ') {
                   event.preventDefault();
-                  handleHeroOpen(hero.id);
+                  openHero(hero.id);
                 }
               }}
               className="group cursor-pointer rounded-2xl overflow-hidden border border-green-200/80 dark:border-slate-700 bg-white/95 dark:bg-slate-900/90 shadow-[0_8px_20px_rgba(15,23,42,0.04)] dark:shadow-[0_10px_26px_rgba(2,6,23,0.38)] hover:border-gold-400/80 hover:shadow-[0_14px_28px_rgba(212,154,20,0.12)] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-500/45"
@@ -282,7 +364,7 @@ export const FaithBuilder: React.FC = () => {
                     type="button"
                     onClick={(event) => {
                       event.stopPropagation();
-                      handleHeroOpen(hero.id);
+                      openHero(hero.id);
                     }}
                     className="inline-flex items-center gap-1.5 rounded-full border border-gold-300/80 bg-gold-100/70 px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.08em] text-gold-800 hover:bg-gold-200/80 transition-colors"
                   >
@@ -300,7 +382,7 @@ export const FaithBuilder: React.FC = () => {
         <div className="fixed inset-0 z-[500] bg-slate-950/70 backdrop-blur-sm p-2 sm:p-4">
           <div className="relative mx-auto h-full sm:h-[94vh] max-w-5xl overflow-hidden rounded-2xl border border-green-200/80 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-[0_18px_50px_rgba(15,23,42,0.28)]">
             <button
-              onClick={() => setActiveHero(null)}
+              onClick={() => closeHero()}
               className="absolute top-3 right-3 z-[510] inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 dark:border-slate-700 bg-white/95 dark:bg-slate-900 text-slate-500 dark:text-slate-300 hover:text-red-500 hover:border-red-200 dark:hover:border-red-500/40 transition-colors"
               aria-label="Funga"
             >
@@ -416,7 +498,7 @@ export const FaithBuilder: React.FC = () => {
 
                   <button
                     type="button"
-                    onClick={() => setActiveHero(null)}
+                    onClick={() => closeHero()}
                     className="inline-flex items-center gap-2 rounded-full bg-emerald-700 px-4 py-2 text-[10px] font-black uppercase tracking-[0.12em] text-white shadow-[0_8px_18px_rgba(5,150,105,0.22)] hover:bg-emerald-800 transition-colors"
                   >
                     <BookOpen size={12} />
