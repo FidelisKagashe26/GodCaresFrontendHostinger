@@ -160,7 +160,7 @@ export const FaithBuilder: React.FC = () => {
 
   return (
     <div className="animate-fade-in pb-28 md:pb-32 max-w-6xl mx-auto px-3 sm:px-4 md:px-6 space-y-6 md:space-y-8">
-      <section className="rounded-2xl border border-[color:var(--line-strong)] bg-[color:var(--surface-2)] p-4 sm:p-5 md:p-7 shadow-sm">
+      <section className="rounded-2xl border border-green-200/80 dark:border-slate-700 bg-white/95 dark:bg-slate-900/90 p-4 sm:p-5 md:p-7 shadow-[0_8px_20px_rgba(15,23,42,0.04)] dark:shadow-[0_10px_26px_rgba(2,6,23,0.38)]">
         <div className="inline-flex items-center gap-2 rounded-full border border-gold-500/30 bg-gold-100/60 dark:bg-gold-900/25 px-3 py-1.5">
           <Sparkles size={12} className="text-gold-600 dark:text-gold-300" />
           <span className="text-[10px] font-black uppercase tracking-[0.18em] text-gold-700 dark:text-gold-300">Kuza Imani Yako</span>
@@ -173,15 +173,15 @@ export const FaithBuilder: React.FC = () => {
         </p>
       </section>
 
-      <section className="flex flex-wrap gap-2">
+      <section className="flex flex-wrap gap-2.5">
         {CATEGORIES.map((cat) => (
           <button
             key={cat}
             onClick={() => setActiveCategory(cat)}
-            className={`px-4 py-2 rounded-full text-[10px] sm:text-xs font-black uppercase tracking-[0.12em] transition-colors border ${
+            className={`px-4 py-2 rounded-full text-[10px] sm:text-xs font-black uppercase tracking-[0.1em] transition-colors border ${
               activeCategory === cat
-                ? 'bg-gold-500 text-[#211600] border-gold-500'
-                : 'bg-[color:var(--surface-2)] text-[color:var(--text-muted)] border-[color:var(--line-strong)] hover:text-[color:var(--text-primary)]'
+                ? 'border-gold-300/80 bg-gold-100/70 text-gold-800 dark:border-gold-700/70 dark:bg-gold-900/35 dark:text-gold-200'
+                : 'border-green-200/80 dark:border-slate-700 bg-white/95 dark:bg-slate-900/90 text-slate-600 dark:text-slate-300 hover:border-gold-300/70 hover:text-slate-900 dark:hover:text-slate-100'
             }`}
           >
             {cat}
@@ -190,7 +190,7 @@ export const FaithBuilder: React.FC = () => {
       </section>
 
       {loading && (
-        <div className="rounded-xl border border-[color:var(--line-strong)] bg-[color:var(--surface-2)] px-4 py-4 text-center text-xs font-black uppercase tracking-[0.16em] text-[color:var(--text-muted)]">
+        <div className="rounded-xl border border-green-200/80 dark:border-slate-700 bg-white/95 dark:bg-slate-900/90 px-4 py-4 text-center text-xs font-black uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400">
           Inapakia mashujaa wa imani...
         </div>
       )}
@@ -202,14 +202,14 @@ export const FaithBuilder: React.FC = () => {
       )}
 
       {!loading && !error && filteredHeroes.length === 0 && (
-        <div className="rounded-xl border border-[color:var(--line-strong)] bg-[color:var(--surface-2)] px-4 py-7 text-center space-y-2">
-          <Shield size={24} className="mx-auto text-[color:var(--text-muted)]" />
-          <p className="text-xs font-black uppercase tracking-[0.14em] text-[color:var(--text-muted)]">Hakuna taarifa katika kundi hili.</p>
+        <div className="rounded-xl border border-green-200/80 dark:border-slate-700 bg-white/95 dark:bg-slate-900/90 px-4 py-7 text-center space-y-2">
+          <Shield size={24} className="mx-auto text-slate-500 dark:text-slate-400" />
+          <p className="text-xs font-black uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">Hakuna taarifa katika kundi hili.</p>
         </div>
       )}
 
       {!loading && !error && filteredHeroes.length > 0 && (
-        <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-5">
+        <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6">
           {filteredHeroes.map((hero) => (
             <article
               key={hero.id}
@@ -222,24 +222,24 @@ export const FaithBuilder: React.FC = () => {
                   handleHeroOpen(hero.id);
                 }
               }}
-              className="group rounded-2xl overflow-hidden border border-[color:var(--line-strong)] bg-[color:var(--surface-2)] shadow-sm hover:shadow-lg transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-500/60"
+              className="group cursor-pointer rounded-2xl overflow-hidden border border-green-200/80 dark:border-slate-700 bg-white/95 dark:bg-slate-900/90 shadow-[0_8px_20px_rgba(15,23,42,0.04)] dark:shadow-[0_10px_26px_rgba(2,6,23,0.38)] hover:border-gold-400/80 hover:shadow-[0_14px_28px_rgba(212,154,20,0.12)] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-500/45"
             >
-              <div className="relative h-48 bg-slate-900">
+              <div className="relative h-48 md:h-52 overflow-hidden bg-green-50 dark:bg-slate-800 border-b border-green-100 dark:border-slate-700">
                 {hero.image ? (
-                  <img src={hero.image} alt={hero.name} className="w-full h-full object-cover" />
+                  <img src={hero.image} alt={hero.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center text-[10px] font-black uppercase tracking-[0.14em] text-slate-300">
+                  <div className="w-full h-full flex items-center justify-center text-[10px] font-black uppercase tracking-[0.14em] text-slate-400 dark:text-slate-500">
                     Hakuna picha
                   </div>
                 )}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/20 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-slate-900/20 to-transparent" />
                 <button
                   type="button"
                   onClick={(event) => {
                     event.stopPropagation();
                     void handleShare(hero);
                   }}
-                  className="absolute top-3 right-3 inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/30 bg-black/35 text-white hover:bg-gold-500 hover:text-[#1f1600] hover:border-gold-500 transition-colors"
+                  className="absolute top-3 right-3 inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/35 bg-slate-900/45 text-white hover:bg-gold-500 hover:text-[#1f1600] hover:border-gold-500 transition-colors"
                   aria-label={`Shiriki ${hero.name}`}
                 >
                   <Share2 size={15} />
@@ -255,19 +255,28 @@ export const FaithBuilder: React.FC = () => {
                 </div>
               </div>
 
-              <div className="p-4 space-y-3">
+              <div className="p-4 md:p-5 space-y-3.5">
                 <p className="text-sm font-medium text-slate-700 dark:text-slate-300 leading-relaxed line-clamp-2">
                   {hero.challenge}
                 </p>
-                <div className="rounded-xl border border-gold-500/20 bg-gold-50/80 dark:bg-gold-900/20 px-3 py-2.5">
+                <div className="rounded-xl border border-gold-300/35 bg-gold-100/55 dark:border-gold-800/35 dark:bg-gold-900/20 px-3 py-2.5">
                   <p className="text-sm font-semibold italic text-slate-700 dark:text-slate-200 line-clamp-2">
                     "{hero.faithAction}"
                   </p>
                 </div>
 
-                <div className="flex items-center justify-between gap-3 pt-1">
-                  <span className="inline-flex items-center rounded-full bg-emerald-100 dark:bg-emerald-900/35 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.1em] text-emerald-800 dark:text-emerald-300">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="inline-flex items-center rounded-full border border-emerald-200 dark:border-emerald-700/50 bg-emerald-50 dark:bg-emerald-900/30 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.1em] text-emerald-800 dark:text-emerald-300">
                     {hero.category}
+                  </span>
+                  <span className="inline-flex items-center rounded-full border border-slate-200 dark:border-slate-700 bg-slate-100/80 dark:bg-slate-800 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.1em] text-slate-600 dark:text-slate-300">
+                    {hero.period}
+                  </span>
+                </div>
+
+                <div className="pt-3 border-t border-green-100/90 dark:border-slate-700 flex items-center justify-between gap-3">
+                  <span className="text-[11px] font-bold uppercase tracking-[0.08em] text-slate-500 dark:text-slate-400">
+                    Gusa kadi kusoma
                   </span>
                   <button
                     type="button"
@@ -275,10 +284,10 @@ export const FaithBuilder: React.FC = () => {
                       event.stopPropagation();
                       handleHeroOpen(hero.id);
                     }}
-                    className="inline-flex items-center gap-1.5 rounded-full bg-emerald-700 hover:bg-emerald-800 px-3.5 py-1.5 text-[10px] font-black uppercase tracking-[0.12em] text-white"
+                    className="inline-flex items-center gap-1.5 rounded-full border border-gold-300/80 bg-gold-100/70 px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.08em] text-gold-800 hover:bg-gold-200/80 transition-colors"
                   >
-                    Soma
-                    <ArrowRight size={12} />
+                    Zaidi
+                    <ArrowRight size={13} />
                   </button>
                 </div>
               </div>
@@ -288,11 +297,11 @@ export const FaithBuilder: React.FC = () => {
       )}
 
       {currentHero && (
-        <div className="fixed inset-0 z-[500] bg-slate-950/75 backdrop-blur-sm p-2 sm:p-4">
-          <div className="relative mx-auto h-full sm:h-[94vh] max-w-5xl overflow-hidden rounded-2xl border border-[color:var(--line-strong)] bg-[color:var(--surface-2)] shadow-2xl">
+        <div className="fixed inset-0 z-[500] bg-slate-950/70 backdrop-blur-sm p-2 sm:p-4">
+          <div className="relative mx-auto h-full sm:h-[94vh] max-w-5xl overflow-hidden rounded-2xl border border-green-200/80 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-[0_18px_50px_rgba(15,23,42,0.28)]">
             <button
               onClick={() => setActiveHero(null)}
-              className="absolute top-3 right-3 z-[510] inline-flex h-10 w-10 items-center justify-center rounded-full border border-[color:var(--line-strong)] bg-[color:var(--surface-2)] text-[color:var(--text-primary)] hover:text-red-500 transition-colors"
+              className="absolute top-3 right-3 z-[510] inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 dark:border-slate-700 bg-white/95 dark:bg-slate-900 text-slate-500 dark:text-slate-300 hover:text-red-500 hover:border-red-200 dark:hover:border-red-500/40 transition-colors"
               aria-label="Funga"
             >
               <X size={18} />
@@ -300,7 +309,7 @@ export const FaithBuilder: React.FC = () => {
 
             <div className="h-full overflow-y-auto">
               <div className="grid grid-cols-1 lg:grid-cols-2 min-h-full">
-                <div className="relative bg-slate-900 min-h-[260px] sm:min-h-[330px] lg:min-h-full">
+                <div className="relative bg-slate-900 min-h-[260px] sm:min-h-[330px] lg:min-h-full lg:border-r lg:border-green-100 dark:lg:border-slate-700">
                   {showVideoInModal ? (
                     currentHero.videoUrl ? (
                       <div className="w-full h-full">
@@ -340,13 +349,13 @@ export const FaithBuilder: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="p-4 sm:p-6 md:p-7 space-y-5 bg-[color:var(--surface-2)]">
+                <div className="p-4 sm:p-6 md:p-7 space-y-5 bg-white dark:bg-slate-900">
                   <div className="flex flex-wrap items-center gap-2">
                     {currentHero.videoUrl && (
                       <button
                         type="button"
                         onClick={() => setShowVideoInModal((prev) => !prev)}
-                        className="inline-flex items-center gap-2 rounded-full border border-[color:var(--line-strong)] bg-[color:var(--surface-3)] px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.12em] text-[color:var(--text-primary)] hover:border-gold-500/45"
+                        className="inline-flex items-center gap-2 rounded-full border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-3.5 py-1.5 text-[10px] font-black uppercase tracking-[0.1em] text-slate-700 dark:text-slate-200 hover:border-gold-300/70 dark:hover:border-gold-700/60 hover:text-gold-800 dark:hover:text-gold-200 transition-colors"
                       >
                         <Play size={12} />
                         {showVideoInModal ? 'Ficha Video' : 'Tazama Video'}
@@ -355,14 +364,14 @@ export const FaithBuilder: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => void handleShare(currentHero)}
-                      className="inline-flex items-center gap-2 rounded-full border border-[color:var(--line-strong)] bg-[color:var(--surface-3)] px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.12em] text-[color:var(--text-primary)] hover:border-gold-500/45"
+                      className="inline-flex items-center gap-2 rounded-full border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-3.5 py-1.5 text-[10px] font-black uppercase tracking-[0.1em] text-slate-700 dark:text-slate-200 hover:border-gold-300/70 dark:hover:border-gold-700/60 hover:text-gold-800 dark:hover:text-gold-200 transition-colors"
                     >
                       <Share2 size={12} />
                       Shiriki
                     </button>
                   </div>
 
-                  <section className="rounded-xl border border-gold-500/25 bg-gold-50/70 dark:bg-gold-900/20 px-4 py-3">
+                  <section className="rounded-xl border border-gold-300/35 bg-gold-100/55 dark:border-gold-800/35 dark:bg-gold-900/20 px-4 py-3">
                     <p className="text-sm sm:text-base font-semibold italic leading-relaxed text-slate-700 dark:text-slate-200">
                       "{currentHero.swahiliQuote}"
                     </p>
@@ -373,7 +382,7 @@ export const FaithBuilder: React.FC = () => {
                       <Sword size={13} className="text-red-500" />
                       Pambano la Imani
                     </h4>
-                    <div className="space-y-3">
+                    <div className="space-y-3 rounded-xl border border-green-100 dark:border-slate-700 bg-green-50/40 dark:bg-slate-900/60 px-4 py-3">
                       {splitParagraphs(currentHero.story).map((paragraph, index) => (
                         <p key={`${currentHero.id}-story-${index}`} className="text-sm sm:text-[15px] leading-7 text-slate-700 dark:text-slate-300">
                           {paragraph}
@@ -394,7 +403,7 @@ export const FaithBuilder: React.FC = () => {
                       <GraduationCap size={13} className="text-blue-500" />
                       Somo Kwako
                     </h4>
-                    <div className="rounded-xl border border-[color:var(--line-strong)] bg-[color:var(--surface-3)] px-4 py-3">
+                    <div className="rounded-xl border border-green-100 dark:border-slate-700 bg-white/95 dark:bg-slate-900/70 px-4 py-3">
                       <div className="space-y-3">
                         {splitParagraphs(currentHero.lesson).map((paragraph, index) => (
                           <p key={`${currentHero.id}-lesson-${index}`} className="text-sm sm:text-[15px] leading-7 text-slate-700 dark:text-slate-300">
@@ -408,7 +417,7 @@ export const FaithBuilder: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => setActiveHero(null)}
-                    className="inline-flex items-center gap-2 rounded-full bg-emerald-700 px-4 py-2 text-[10px] font-black uppercase tracking-[0.12em] text-white hover:bg-emerald-800"
+                    className="inline-flex items-center gap-2 rounded-full bg-emerald-700 px-4 py-2 text-[10px] font-black uppercase tracking-[0.12em] text-white shadow-[0_8px_18px_rgba(5,150,105,0.22)] hover:bg-emerald-800 transition-colors"
                   >
                     <BookOpen size={12} />
                     Rudi Kwenye Orodha
