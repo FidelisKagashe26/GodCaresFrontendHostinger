@@ -1,7 +1,8 @@
 
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useMemo } from 'react';
 import { StageConfig, StageId } from '../../types';
 import { DEFAULT_SITE_SETTINGS, SiteSettings } from '../../services/core/siteSettingsService';
+import { getTimelineSections, TimelineSectionApi } from '../../services/academy/timelineService';
 import { 
   Home, BookCheck, Microscope, ShieldAlert, MessageSquare, 
   ShoppingBag, Library, Newspaper, Heart, Gift, Info, Calendar, PlayCircle, 
@@ -248,6 +249,18 @@ export const Sidebar: React.FC<SidebarProps> = ({
 }) => {
   const [isVisible, setIsVisible] = useState(false);
   const [profilePic, setProfilePic] = useState<string>(localStorage.getItem('gc365_profile_pic') || '');
+  const [timelineSections, setTimelineSections] = useState<TimelineSectionApi[]>([]);
+  const [timelineLoading, setTimelineLoading] = useState(false);
+  const [timelineError, setTimelineError] = useState('');
+  const [timelineExpanded, setTimelineExpanded] = useState(true);
+  const [timelineQuery, setTimelineQuery] = useState('');
+  const [selectedTimelineId, setSelectedTimelineId] = useState(() => {
+    try {
+      return localStorage.getItem('gc365_active_timeline') || 'creation';
+    } catch {
+      return 'creation';
+    }
+  });
   const resolvedSettings = siteSettings || DEFAULT_SITE_SETTINGS;
   const resolvedLogoSrc = logoSrc || resolvedSettings.logo_url || `${import.meta.env.BASE_URL}Logo.png`;
 
@@ -276,6 +289,41 @@ export const Sidebar: React.FC<SidebarProps> = ({
     }
   }, [isOpen]);
 
+  useEffect(() => {
+    if (!isOpen) return;
+    let cancelled = false;
+    const loadTimelines = async () => {
+      setTimelineLoading(true);
+      setTimelineError('');
+      try {
+        const sections = await getTimelineSections();
+        if (cancelled) return;
+        setTimelineSections(Array.isArray(sections) ? sections : []);
+      } catch (error) {
+        if (cancelled) return;
+        setTimelineSections([]);
+        setTimelineError(error instanceof Error ? error.message : 'Imeshindikana kupakua ramani ya unabii.');
+      } finally {
+        if (!cancelled) {
+          setTimelineLoading(false);
+        }
+      }
+    };
+    loadTimelines();
+    return () => {
+      cancelled = true;
+    };
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    try {
+      setSelectedTimelineId(localStorage.getItem('gc365_active_timeline') || 'creation');
+    } catch {
+      setSelectedTimelineId('creation');
+    }
+  }, [isOpen]);
+
   if (!isVisible && !isOpen) return null;
 
   const sections = [
@@ -285,13 +333,31 @@ export const Sidebar: React.FC<SidebarProps> = ({
     },
     {
       title: "Uchunguzi wa Kiungu",
-      ids: [StageId.TIMELINE, StageId.EVIDENCE, StageId.DECEPTION_VAULT, StageId.QUESTION_VAULT, StageId.LIBRARY]
+      ids: [StageId.EVIDENCE, StageId.DECEPTION_VAULT, StageId.QUESTION_VAULT, StageId.LIBRARY]
     },
     {
       title: "Jumuiya ya Kimataifa",
       ids: [StageId.MEDIA, StageId.TESTIMONIES, StageId.PRAYERS, StageId.EVENTS, StageId.NEWS, StageId.SHOP, StageId.DONATE]
     }
   ];
+
+  const timelineList = timelineSections
+    .map((section) => ({
+      id: section.code || `timeline-${section.id}`,
+      title: section.swahili_title || section.title,
+      description: section.description,
+      milestoneCount: Array.isArray(section.milestones) ? section.milestones.length : 0,
+    }))
+    .filter((item) => item.title);
+
+  const filteredTimelineList = useMemo(() => {
+    const query = timelineQuery.trim().toLowerCase();
+    if (!query) return timelineList;
+    return timelineList.filter((item) => {
+      const haystack = `${item.title} ${item.description || ''}`.toLowerCase();
+      return haystack.includes(query);
+    });
+  }, [timelineList, timelineQuery]);
 
   const externalWebsites = [
     {
@@ -327,6 +393,137 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
       <div className="flex-1 overflow-y-auto overflow-x-hidden relative z-10 scrollbar-hide">
         <div className="p-6 md:p-12 max-w-7xl mx-auto space-y-12 animate-fade-in">
+          {/* RAMANI YA UNABII - Dedicated Section */}
+          <div className="space-y-5">
+            <div className="flex items-center justify-between gap-4">
+              <h3 className="text-sm sm:text-sm font-black text-green-700 dark:text-green-300 uppercase tracking-[0.1em] sm:tracking-[0.2em] px-1 flex items-center gap-4">
+                <span>Ramani ya Unabii</span>
+                <div className="h-[1px] flex-1 bg-gradient-to-r from-green-400/70 dark:from-green-500/50 to-transparent"></div>
+              </h3>
+              <button
+                onClick={() => setTimelineExpanded((prev) => !prev)}
+                className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400 hover:text-green-700 dark:hover:text-green-300 transition-colors"
+              >
+                {timelineExpanded ? 'Funga' : 'Fungua'}
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_2fr] gap-4">
+              <button
+                onClick={() => {
+                  try {
+                    localStorage.setItem('gc365_active_timeline', selectedTimelineId);
+                    window.dispatchEvent(new CustomEvent('gc365_timeline_select', { detail: selectedTimelineId }));
+                  } catch {
+                    // Ignore storage errors.
+                  }
+                  onStageChange(StageId.TIMELINE);
+                  onClose();
+                }}
+                className="group text-left rounded-2xl border border-green-200/80 dark:border-[#2b4a35] bg-[#f1f7e8] dark:bg-[#13261b] p-5 hover:border-gold-400/70 hover:shadow-[0_14px_28px_rgba(212,154,20,0.12)] transition-all"
+              >
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="p-2.5 rounded-xl bg-green-100/70 dark:bg-green-900/30 text-green-700 dark:text-green-300 group-hover:text-gold-700 dark:group-hover:text-gold-300 transition-colors">
+                    <Clock size={18} />
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">Kituo Kikuu</p>
+                    <h4 className="text-sm font-black uppercase tracking-wider text-slate-900 dark:text-white">Fungua Ramani</h4>
+                  </div>
+                </div>
+                <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+                  Mfuatano mkubwa wa nyakati za unabii. Bonyeza kufungua ramani kuu.
+                </p>
+              </button>
+
+              {timelineExpanded && (
+                <div className="rounded-2xl border border-green-200/80 dark:border-[#2b4a35] bg-white/90 dark:bg-[#0f1f16] p-4 sm:p-5">
+                  <div className="flex items-center justify-between gap-3 mb-3">
+                    <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
+                      Orodha ya Milolongo
+                    </h4>
+                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                      {timelineLoading ? 'Inapakia...' : `${filteredTimelineList.length} Ya ${timelineList.length}`}
+                    </span>
+                  </div>
+
+                  <input
+                    type="text"
+                    value={timelineQuery}
+                    onChange={(event) => setTimelineQuery(event.target.value)}
+                    placeholder="Tafuta mlolongo..."
+                    className="w-full mb-3 px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 text-[12px] text-slate-800 dark:text-slate-100 placeholder:text-slate-400 outline-none focus:border-gold-400/70"
+                  />
+
+                  {timelineError && (
+                    <div className="text-[11px] font-bold text-red-600 bg-red-500/10 border border-red-500/20 px-3 py-2 rounded-lg mb-3">
+                      {timelineError}
+                    </div>
+                  )}
+
+                  {!timelineLoading && timelineList.length === 0 && !timelineError && (
+                    <div className="text-[11px] font-bold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 px-3 py-2 rounded-lg">
+                      Hakuna milolongo iliyowekwa bado. Admin anaweza kuongeza kupitia panel ya admin.
+                    </div>
+                  )}
+
+                  {!timelineLoading && timelineList.length > 0 && filteredTimelineList.length === 0 && (
+                    <div className="text-[11px] font-bold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 px-3 py-2 rounded-lg">
+                      Hakuna matokeo kwenye utafutaji.
+                    </div>
+                  )}
+
+                  <div className="space-y-2 max-h-64 overflow-y-auto scrollbar-hide pr-1">
+                    {filteredTimelineList.map((item) => (
+                      <button
+                        key={item.id}
+                        onClick={() => {
+                          try {
+                            localStorage.setItem('gc365_active_timeline', item.id);
+                            window.dispatchEvent(new CustomEvent('gc365_timeline_select', { detail: item.id }));
+                          } catch {
+                            // Ignore storage errors.
+                          }
+                          setSelectedTimelineId(item.id);
+                          onStageChange(StageId.TIMELINE);
+                          onClose();
+                        }}
+                        className={`w-full text-left rounded-xl border px-3 py-2.5 transition-all ${
+                          selectedTimelineId === item.id
+                            ? 'border-gold-400/70 bg-gold-50 dark:bg-gold-900/20 shadow-[0_10px_20px_rgba(212,154,20,0.12)]'
+                            : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 hover:border-gold-400/70 hover:shadow-[0_10px_20px_rgba(212,154,20,0.12)]'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between gap-3">
+                          <p className="text-[12px] font-black text-slate-800 dark:text-slate-100 uppercase tracking-tight leading-tight">
+                            {item.title}
+                          </p>
+                          <span className="text-[10px] font-black text-green-700 dark:text-green-300 uppercase tracking-widest">
+                            {item.milestoneCount} siku
+                          </span>
+                        </div>
+                        {item.description && (
+                          <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed line-clamp-2">
+                            {item.description}
+                          </p>
+                        )}
+                      </button>
+                    ))}
+                  </div>
+
+                  <div className="mt-3 rounded-xl border border-dashed border-green-300/70 dark:border-green-800 px-3 py-2">
+                    <p className="text-[10px] font-black uppercase tracking-[0.16em] text-green-700 dark:text-green-300 mb-1">
+                      Mwongozo wa Admin
+                    </p>
+                    <p className="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed">
+                      Ongeza kwanza `Timeline Section`, kisha ongeza `Milestones` ndani yake kwa `sort_order`. Section mpya itaonekana moja kwa moja hapa.
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
           {/* Main Content Sections */}
           {sections.map((section, sIdx) => (
             <div key={sIdx} className="space-y-4">

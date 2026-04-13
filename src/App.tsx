@@ -110,7 +110,13 @@ const App: React.FC = () => {
 
   const [user, setUser] = useState<AuthUser | null>(null);
   const [isAuthBootstrapComplete, setIsAuthBootstrapComplete] = useState(false);
-  const [activeTimelineId, setActiveTimelineId] = useState('creation');
+  const [activeTimelineId, setActiveTimelineId] = useState(() => {
+    try {
+      return localStorage.getItem('gc365_active_timeline') || 'creation';
+    } catch {
+      return 'creation';
+    }
+  });
   const [notifications, setNotifications] = useState<ToastNotification[]>([]);
 
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
@@ -138,6 +144,40 @@ const App: React.FC = () => {
   const [theme, setTheme] = useState<ThemePreference>('system');
   const [siteSettings, setSiteSettings] = useState<SiteSettings>(DEFAULT_SITE_SETTINGS);
   const routeLoadingTimerRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('gc365_active_timeline', activeTimelineId);
+    } catch {
+      // Ignore storage errors.
+    }
+  }, [activeTimelineId]);
+
+  useEffect(() => {
+    const handleTimelineSelection = (event: Event) => {
+      const customEvent = event as CustomEvent<string>;
+      const nextTimelineId = String(customEvent.detail || '').trim();
+      if (!nextTimelineId) return;
+      setActiveTimelineId(nextTimelineId);
+    };
+
+    window.addEventListener('gc365_timeline_select', handleTimelineSelection as EventListener);
+    return () => {
+      window.removeEventListener('gc365_timeline_select', handleTimelineSelection as EventListener);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (currentStage !== StageId.TIMELINE) return;
+    try {
+      const storedTimelineId = localStorage.getItem('gc365_active_timeline') || '';
+      if (storedTimelineId && storedTimelineId !== activeTimelineId) {
+        setActiveTimelineId(storedTimelineId);
+      }
+    } catch {
+      // Ignore storage errors.
+    }
+  }, [currentStage, activeTimelineId]);
 
   const fallbackLogoSrc = `${import.meta.env.BASE_URL}Logo.png`;
   const logoSrc = siteSettings.logo_url || fallbackLogoSrc;

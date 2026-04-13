@@ -45,26 +45,6 @@ interface TimelineSection {
   milestones: Milestone[];
 }
 
-const TypewriterText = ({ text, delay = 15, className = "" }: { text: string, delay?: number, className?: string }) => {
-  const [displayedText, setDisplayedText] = useState('');
-  
-  useEffect(() => {
-    setDisplayedText('');
-    let i = 0;
-    const timer = setInterval(() => {
-      if (i < text.length) {
-        setDisplayedText((prev) => prev + text.charAt(i));
-        i++;
-      } else {
-        clearInterval(timer);
-      }
-    }, delay);
-    return () => clearInterval(timer);
-  }, [text, delay]);
-
-  return <p className={className}>{displayedText}</p>;
-};
-
 const TIMELINES: TimelineSection[] = [
   {
     id: 'creation',
@@ -528,116 +508,113 @@ export const PropheticTimeline: React.FC<PropheticTimelineProps> = ({ activeTime
       )}
 
       {selected && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-12 bg-black/95 backdrop-blur-3xl animate-fade-in">
-          {/* Minimum Bevel Modal Container - rounded-2xl */}
-          <div className="bg-white dark:bg-slate-950 w-full max-w-[95vw] h-full md:h-[90vh] rounded-2xl overflow-hidden shadow-2xl flex flex-col md:flex-row animate-scale-up border border-slate-200 dark:border-white/10">
-            {/* Image Side - Fixed height on mobile to ensure visibility */}
-            <div className="w-full h-[45vh] md:h-auto md:w-1/2 relative bg-slate-950 overflow-hidden border-b md:border-b-0 md:border-r border-slate-900">
-              <img src={selected.image} className="absolute inset-0 w-full h-full object-cover grayscale-[0.2] contrast-[1.2] animate-ken-burns" alt={selected.swahiliTitle || selected.title} />
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent"></div>
-              
-              <div className="absolute top-12 left-12">
-                 <div className="px-6 py-2 bg-white/10 backdrop-blur-md border border-white/20 rounded-lg text-white text-[10px] font-black uppercase tracking-[0.4em]">
-                   KUMBUKUMBU_SALAMA_{selected.id.toUpperCase()}
-                 </div>
-              </div>
-
-              <div className="absolute bottom-10 left-10 right-10 md:bottom-24 md:left-16 md:right-16 space-y-4 md:space-y-8">
-                <div className="inline-block px-6 py-2 md:px-10 md:py-4 bg-gold-400 text-primary-900 text-[10px] md:text-[14px] font-black uppercase rounded-lg tracking-[0.5em] shadow-lg">{selected.year}</div>
-                <h2 className="text-4xl md:text-6xl lg:text-8xl font-black text-white tracking-tighter italic uppercase leading-[0.8]">{selected.swahiliTitle || selected.title}</h2>
-                <div className="flex items-center gap-8 text-gold-400">
-                  <ScrollText size={32} className="md:w-14 md:h-14" />
-                  <p className="text-xl md:text-3xl lg:text-5xl font-black italic tracking-tight">{selected.verse}</p>
-                </div>
-              </div>
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-8 bg-black/80 animate-fade-in">
+          <div className="bg-white dark:bg-slate-950 w-full max-w-4xl max-h-[92vh] rounded-2xl overflow-hidden shadow-2xl border border-slate-200 dark:border-slate-800 flex flex-col">
+            <div className="p-5 md:p-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+              <button
+                onClick={() => setSelected(null)}
+                className="text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100 font-bold text-xs uppercase tracking-[0.2em]"
+              >
+                Rudi kwenye Ramani
+              </button>
+              <button
+                onClick={() => setSelected(null)}
+                className="p-2.5 rounded-full border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:border-slate-400 dark:hover:border-slate-500 transition-colors"
+                aria-label="Funga"
+              >
+                <X size={16} />
+              </button>
             </div>
 
-            {/* Content Side */}
-            <div className="flex-1 flex flex-col h-full bg-white dark:bg-slate-950 relative">
-              <div className="p-6 md:p-8 border-b border-slate-100 dark:border-white/5 flex justify-between items-center bg-white dark:bg-slate-950 sticky top-0 z-10">
-                <div className="flex items-center gap-6 text-primary-900 dark:text-white font-black text-xs uppercase tracking-[0.6em]">
-                  <Shield size={24} /> Maabara ya Nyaraka ya Chronos
+            <div className="flex-1 overflow-y-auto p-6 md:p-10">
+              <div className="space-y-4">
+                <h1 className="text-3xl md:text-4xl font-black text-slate-900 dark:text-slate-100 tracking-tight leading-tight">
+                  {selected.swahiliTitle || selected.title}
+                </h1>
+                <div className="flex flex-wrap items-center gap-3 text-xs font-bold text-slate-500 dark:text-slate-400">
+                  <span className="px-2.5 py-1 rounded-full border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200">
+                    {selected.year}
+                  </span>
+                  <span className="px-2.5 py-1 rounded-full border border-green-200 dark:border-green-800 text-green-700 dark:text-green-300">
+                    {selected.category}
+                  </span>
+                  {selected.verse && (
+                    <span className="px-2.5 py-1 rounded-full border border-gold-300/70 dark:border-gold-500/40 text-gold-700 dark:text-gold-300">
+                      {selected.verse}
+                    </span>
+                  )}
                 </div>
-                <button 
-                  onClick={() => setSelected(null)} 
-                  className="p-3 md:p-4 bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 text-slate-900 dark:text-white rounded-lg transition-all"
-                >
-                  <X size={20} />
-                </button>
               </div>
 
-              <div className="flex-1 overflow-y-auto scrollbar-hide p-8 md:p-14 space-y-12">
-                
-                {/* 1. Did You Know Section - Styled Distinctly */}
-                <div className="bg-gold-500/10 border border-gold-500/20 rounded-xl p-6 relative overflow-hidden">
-                   <div className="absolute top-0 right-0 p-4 opacity-10"><Lightbulb size={64} className="text-gold-500" /></div>
-                   <h4 className="text-[10px] font-black text-gold-500 uppercase tracking-widest flex items-center gap-2 mb-3 relative z-10">
-                     <Star size={12} fill="currentColor" /> Je, Wajua?
-                   </h4>
-                   {/* Typewriter Effect Applied Here */}
-                   <TypewriterText 
-                     text={`"${selected.didYouKnow}"`}
-                     className="text-slate-700 dark:text-slate-300 italic font-medium text-sm leading-relaxed relative z-10"
-                     delay={25}
-                   />
+              <div className="mt-8 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-900">
+                <img
+                  src={selected.image}
+                  className="w-full h-auto max-h-[60vh] object-contain"
+                  alt={selected.swahiliTitle || selected.title}
+                />
+              </div>
+
+              {selected.videoUrl && (
+                <div className="mt-8 space-y-3">
+                  <h4 className="text-[11px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                    <Video size={14} className="text-red-500" /> Tazama Video
+                  </h4>
+                  <div className="aspect-video w-full rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 bg-black">
+                    <iframe
+                      src={`${selected.videoUrl}?rel=0`}
+                      className="w-full h-full border-none"
+                      allow="autoplay; encrypted-media"
+                      allowFullScreen
+                    ></iframe>
+                  </div>
+                </div>
+              )}
+
+              <div className="mt-8 space-y-8">
+                <div className="prose prose-slate dark:prose-invert max-w-none">
+                  <h3>Muhtasari wa Siku</h3>
+                  <p className="font-serif text-[1rem] leading-7 text-slate-700 dark:text-slate-200">
+                    {selected.description}
+                  </p>
                 </div>
 
-                {/* 2. Video Section (New) */}
-                {selected.videoUrl && (
-                  <div className="space-y-4">
-                     <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                       <Video size={14} className="text-red-500" /> Tazama Video
-                     </h4>
-                     <div className="aspect-video w-full rounded-xl overflow-hidden shadow-2xl border border-slate-200 dark:border-white/10 bg-black">
-                        <iframe 
-                          src={`${selected.videoUrl}?rel=0`} 
-                          className="w-full h-full border-none"
-                          allow="autoplay; encrypted-media" 
-                          allowFullScreen
-                        ></iframe>
-                     </div>
-                  </div>
-                )}
-
-                {/* Narrative - Normal Text */}
-                <div className="space-y-6">
-                  <h4 className="text-[11px] font-black text-slate-400 uppercase tracking-[0.5em] flex items-center gap-4">
-                    <Navigation size={20} className="text-primary-600" /> Muhtasari
-                  </h4>
-                  <p className="text-sm md:text-base text-slate-700 dark:text-slate-300 leading-relaxed">
+                <div className="prose prose-slate dark:prose-invert max-w-none">
+                  <h3>Maelezo ya Siku Husika</h3>
+                  <p className="font-serif text-[1rem] leading-7 text-slate-700 dark:text-slate-200 whitespace-pre-wrap">
                     {selected.fullStory}
                   </p>
                 </div>
 
-                {/* Spiritual Insight - Normal Text (Removed Typewriter & Background Icon) */}
-                <div className="p-10 bg-primary-900 dark:bg-white/5 rounded-2xl border border-white/5 space-y-6 relative overflow-hidden group shadow-xl">
-                  {/* Removed Background Clock Icon */}
-                  <div className="flex items-center gap-6 relative z-10">
-                     <div className="w-10 h-1 bg-gold-400 rounded-full"></div>
-                     <h4 className="text-[11px] font-black text-gold-400 uppercase tracking-[0.5em]">Maelezo ya ziada</h4>
-                  </div>
-                  {/* Changed from TypewriterText to regular text */}
-                  <p className="text-lg md:text-xl text-white/90 leading-relaxed font-medium italic relative z-10 pl-4 border-l-2 border-white/20">
+                <div className="prose prose-slate dark:prose-invert max-w-none">
+                  <h3>Maelezo ya Ziada</h3>
+                  <p className="font-serif text-[1rem] leading-7 text-slate-700 dark:text-slate-200 whitespace-pre-wrap">
                     {selected.swahiliDeep}
                   </p>
                 </div>
 
-                {/* Action Buttons */}
-                <div className="pt-10 border-t border-slate-100 dark:border-white/5 flex flex-col md:flex-row gap-6 pb-20 md:pb-0">
-                  <button 
-                    onClick={() => { setSelected(null); onNavigate?.(StageId.BIBLE_STUDY); }}
-                    className="flex-1 px-10 py-5 bg-primary-900 text-gold-400 rounded-xl font-black text-xs uppercase tracking-[0.2em] hover:bg-primary-800 transition-all shadow-xl flex items-center justify-center gap-4"
-                  >
-                    <BookOpen size={20} /> Anza Somo la Kina
-                  </button>
-                  <button 
-                    onClick={handleDownload}
-                    className="flex-1 px-10 py-5 bg-slate-100 dark:bg-white/5 text-slate-900 dark:text-white rounded-xl font-black text-xs uppercase tracking-[0.2em] hover:bg-gold-400 hover:text-white transition-all flex items-center justify-center gap-4 group"
-                  >
-                    <Download size={20} /> Pakua Mwongozo
-                  </button>
+                <div className="rounded-xl border border-green-200/70 dark:border-green-800 bg-green-50 dark:bg-green-900/20 p-5">
+                  <h4 className="text-[11px] font-black text-green-700 dark:text-green-300 uppercase tracking-widest mb-2 flex items-center gap-2">
+                    <Lightbulb size={12} className="text-green-600" /> Je, Wajua?
+                  </h4>
+                  <p className="text-sm md:text-[15px] text-slate-700 dark:text-slate-200 font-serif italic leading-7">
+                    {selected.didYouKnow}
+                  </p>
                 </div>
+              </div>
 
+              <div className="mt-10 pt-6 border-t border-slate-100 dark:border-slate-800 flex flex-col md:flex-row gap-4">
+                <button
+                  onClick={() => { setSelected(null); onNavigate?.(StageId.BIBLE_STUDY); }}
+                  className="flex-1 px-5 py-3.5 rounded-full bg-green-700 text-white font-black text-xs uppercase tracking-[0.2em] hover:bg-green-800 transition-colors flex items-center justify-center gap-2"
+                >
+                  <BookOpen size={16} /> Anza Somo la Kina
+                </button>
+                <button
+                  onClick={handleDownload}
+                  className="flex-1 px-5 py-3.5 rounded-full border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white font-black text-xs uppercase tracking-[0.2em] hover:border-slate-500 dark:hover:border-slate-500 transition-colors flex items-center justify-center gap-2"
+                >
+                  <Download size={16} /> Pakua Mwongozo
+                </button>
               </div>
             </div>
           </div>
@@ -651,12 +628,7 @@ export const PropheticTimeline: React.FC<PropheticTimelineProps> = ({ activeTime
           90% { opacity: 1; }
           100% { transform: translateY(1000%); opacity: 0; }
         }
-        @keyframes ken-burns {
-          0% { transform: scale(1.1); }
-          100% { transform: scale(1); }
-        }
         .animate-photon { animation: photon 5s cubic-bezier(0.4, 0, 0.2, 1) infinite; }
-        .animate-ken-burns { animation: ken-burns 12s ease-out forwards; }
       `}</style>
     </div>
   );
