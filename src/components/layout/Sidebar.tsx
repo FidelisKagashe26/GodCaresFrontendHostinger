@@ -14,6 +14,35 @@ import {
   Globe, Zap, ExternalLink, Baby, Users
 } from 'lucide-react';
 
+const readStorageValue = (key: string, fallback = ''): string => {
+  try {
+    const value = localStorage.getItem(key);
+    return typeof value === 'string' ? value : fallback;
+  } catch {
+    return fallback;
+  }
+};
+
+const readCompletedModulesCount = (): number => {
+  try {
+    const parsed = JSON.parse(readStorageValue('gc365_completed_modules', '[]'));
+    return Array.isArray(parsed) ? parsed.length : 0;
+  } catch {
+    return 0;
+  }
+};
+
+const normalizeDisplayName = (value: unknown): string => {
+  if (typeof value !== 'string') return 'Mtumiaji';
+  const cleaned = value.trim();
+  return cleaned || 'Mtumiaji';
+};
+
+const normalizeOptionalUrl = (value: unknown): string => {
+  if (typeof value !== 'string') return '';
+  return value.trim();
+};
+
 interface SidebarProps {
   currentStage: StageId;
   onStageChange: (id: StageId) => void;
@@ -30,11 +59,12 @@ interface SidebarProps {
 
 export const ProfileModal: React.FC<{ user: any; onLogout: () => void; onClose: () => void; supportEmail?: string }> = ({ user, onLogout, onClose, supportEmail }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [profilePic, setProfilePic] = useState<string>(localStorage.getItem('gc365_profile_pic') || '');
+  const [profilePic, setProfilePic] = useState<string>(() => readStorageValue('gc365_profile_pic'));
   
-  const completedModulesCount = JSON.parse(localStorage.getItem('gc365_completed_modules') || '[]').length;
+  const completedModulesCount = readCompletedModulesCount();
   const kpPoints = completedModulesCount * 1500;
   const streak = 12;
+  const displayName = normalizeDisplayName(user?.name);
 
   const getUserTitle = () => {
     if (completedModulesCount === 0) return 'Mtafuta Ukweli';
@@ -85,7 +115,7 @@ export const ProfileModal: React.FC<{ user: any; onLogout: () => void; onClose: 
               <div className="w-20 h-20 p-0.5 rounded-full bg-gradient-to-tr from-gold-600 via-gold-400 to-gold-600 shadow-lg">
                 <div className="w-full h-full rounded-full bg-[#020617] overflow-hidden relative">
                   <img 
-                    src={profilePic || `https://ui-avatars.com/api/?name=${user.name}&background=020617&color=eab308&bold=true&size=128`} 
+                    src={profilePic || `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=020617&color=eab308&bold=true&size=128`} 
                     className="w-full h-full object-cover" 
                     alt="Wasifu wa mtumiaji"
                   />
@@ -104,7 +134,7 @@ export const ProfileModal: React.FC<{ user: any; onLogout: () => void; onClose: 
             </div>
             
             <div className="space-y-0.5">
-              <h3 className="text-xl font-black text-white uppercase tracking-tight leading-none">{user.name}</h3>
+              <h3 className="text-xl font-black text-white uppercase tracking-tight leading-none">{displayName}</h3>
               <p className="text-xs font-bold text-gold-500 uppercase tracking-[0.14em] mb-1 italic">{getUserTitle()}</p>
               <div className="flex gap-1.5 pt-1">
                 <span className="px-2 py-0.5 bg-blue-500/10 text-blue-400 rounded text-[10px] font-black uppercase tracking-[0.14em] border border-blue-500/20">Akaunti Hai</span>
@@ -248,25 +278,21 @@ export const Sidebar: React.FC<SidebarProps> = ({
   siteSettings
 }) => {
   const [isVisible, setIsVisible] = useState(false);
-  const [profilePic, setProfilePic] = useState<string>(localStorage.getItem('gc365_profile_pic') || '');
+  const [profilePic, setProfilePic] = useState<string>(() => readStorageValue('gc365_profile_pic'));
   const [timelineSections, setTimelineSections] = useState<TimelineSectionApi[]>([]);
   const [timelineLoading, setTimelineLoading] = useState(false);
   const [timelineError, setTimelineError] = useState('');
   const [timelineExpanded, setTimelineExpanded] = useState(true);
   const [timelineQuery, setTimelineQuery] = useState('');
   const [selectedTimelineId, setSelectedTimelineId] = useState(() => {
-    try {
-      return localStorage.getItem('gc365_active_timeline') || 'creation';
-    } catch {
-      return 'creation';
-    }
+    return readStorageValue('gc365_active_timeline', 'creation') || 'creation';
   });
   const resolvedSettings = siteSettings || DEFAULT_SITE_SETTINGS;
   const resolvedLogoSrc = logoSrc || resolvedSettings.logo_url || `${import.meta.env.BASE_URL}Logo.png`;
 
   useEffect(() => {
     const handleProfilePicSync = () => {
-      setProfilePic(localStorage.getItem('gc365_profile_pic') || '');
+      setProfilePic(readStorageValue('gc365_profile_pic'));
     };
     window.addEventListener('storage', handleProfilePicSync);
     window.addEventListener('gc365_profile_pic_updated', handleProfilePicSync as EventListener);
@@ -317,11 +343,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   useEffect(() => {
     if (!isOpen) return;
-    try {
-      setSelectedTimelineId(localStorage.getItem('gc365_active_timeline') || 'creation');
-    } catch {
-      setSelectedTimelineId('creation');
-    }
+    setSelectedTimelineId(readStorageValue('gc365_active_timeline', 'creation') || 'creation');
   }, [isOpen]);
 
   if (!isVisible && !isOpen) return null;
@@ -359,26 +381,33 @@ export const Sidebar: React.FC<SidebarProps> = ({
     });
   }, [timelineList, timelineQuery]);
 
+  const mainWebsiteUrl = normalizeOptionalUrl(resolvedSettings.website_main_url);
+  const kidsWebsiteUrl = normalizeOptionalUrl(resolvedSettings.website_kids_url);
+  const outreachWebsiteUrl = normalizeOptionalUrl(resolvedSettings.website_outreach_url);
+
   const externalWebsites = [
     {
       name: "PAMBANO KUU YESU ANASHINDA SHETANI ANASHINDWA",
-      url: resolvedSettings.website_main_url,
+      url: mainWebsiteUrl,
       desc: "Ushindi wa Milele",
       icon: <ShieldCheck size={18} className="text-gold-600 dark:text-gold-400" />
     },
     {
       name: "GODCARES 365 KIDS",
-      url: resolvedSettings.website_kids_url,
+      url: kidsWebsiteUrl,
       desc: "Ukweli kwa Wadogo",
       icon: <Baby size={18} className="text-blue-600 dark:text-blue-300" />
     },
     {
       name: "GODCARES 365 OUTREACH",
-      url: resolvedSettings.website_outreach_url,
+      url: outreachWebsiteUrl,
       desc: "Huduma kwa Jamii",
       icon: <Users size={18} className="text-green-600 dark:text-green-400" />
     }
-  ].filter((web) => Boolean(web.url && web.url.trim()));
+  ].filter((web) => web.url.length > 0);
+
+  const displayName = normalizeDisplayName(user?.name);
+  const displayFirstName = displayName.split(/\s+/)[0] || 'Mtumiaji';
 
   return (
     <div className={`fixed inset-0 z-[200] bg-[#f4f8ec]/98 dark:bg-[#040f0a] md:bg-[#eef6e1]/95 md:dark:bg-[#06130d]/96 backdrop-blur-sm md:backdrop-blur-md flex flex-col transition-all duration-700 ease-in-out ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
@@ -583,10 +612,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
         {user ? (
           <button onClick={onShowProfile} className="group flex items-center gap-2.5 bg-[#f4faee] dark:bg-[#12281b] p-1 pr-3.5 rounded-full border border-green-200/70 dark:border-green-900/60 hover:border-gold-500 transition-all shadow-xl backdrop-blur-md">
              <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-gold-500 to-gold-700 flex items-center justify-center text-[#020617] shadow-lg group-hover:scale-105 transition-transform overflow-hidden">
-                <img src={profilePic || `https://ui-avatars.com/api/?name=${user.name}&background=eab308&color=020617&bold=true`} className="w-full h-full object-cover" alt="" />
+                <img src={profilePic || `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=eab308&color=020617&bold=true`} className="w-full h-full object-cover" alt="" />
              </div>
              <div className="text-left pr-1.5">
-               <p className="text-slate-900 dark:text-white text-[11px] font-black uppercase tracking-tight leading-none mb-0.5">{user.name.split(' ')[0]}</p>
+               <p className="text-slate-900 dark:text-white text-[11px] font-black uppercase tracking-tight leading-none mb-0.5">{displayFirstName}</p>
                <p className="text-[10px] font-black uppercase text-gold-500 tracking-[0.14em] leading-none">Akaunti</p>
              </div>
           </button>
