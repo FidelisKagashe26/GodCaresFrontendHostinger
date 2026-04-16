@@ -68,6 +68,7 @@ const NOTIFICATION_STATE_KEY = 'gc365_center_notification_state_v1';
 const RESET_PASSWORD_PATH = '/reset-password';
 const ROUTE_LOADING_HIDE_DELAY_MS = 260;
 const ROUTE_LOADING_FAILSAFE_MS = 6000;
+const MAX_PROFILE_PIC_STORAGE_LENGTH = 350_000;
 
 type StageNavigationOptions = {
   replace?: boolean;
@@ -97,6 +98,19 @@ const loadNotificationStorageState = (): NotificationStorageState => {
 
 const saveNotificationStorageState = (state: NotificationStorageState) => {
   localStorage.setItem(NOTIFICATION_STATE_KEY, JSON.stringify(state));
+};
+
+const readSafeProfilePic = (): string => {
+  try {
+    const value = localStorage.getItem('gc365_profile_pic') || '';
+    if (value.length > MAX_PROFILE_PIC_STORAGE_LENGTH) {
+      localStorage.removeItem('gc365_profile_pic');
+      return '';
+    }
+    return value;
+  } catch {
+    return '';
+  }
 };
 
 const App: React.FC = () => {
@@ -751,7 +765,7 @@ const App: React.FC = () => {
                     <span className="w-10 h-10 rounded-full bg-gradient-to-tr from-gold-500 to-gold-700 text-[#020617] flex items-center justify-center overflow-hidden shadow-sm">
                       {user ? (
                         <img
-                          src={localStorage.getItem('gc365_profile_pic') || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=eab308&color=020617&bold=true`}
+                          src={readSafeProfilePic() || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=eab308&color=020617&bold=true`}
                           alt="Akaunti"
                           className="w-full h-full object-cover"
                         />

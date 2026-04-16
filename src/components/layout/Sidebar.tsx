@@ -14,6 +14,16 @@ import {
   Globe, Zap, ExternalLink, Baby, Users
 } from 'lucide-react';
 
+const MAX_PROFILE_PIC_STORAGE_LENGTH = 350_000;
+
+const safeRemoveStorageItem = (key: string) => {
+  try {
+    localStorage.removeItem(key);
+  } catch {
+    // Ignore storage write/delete errors.
+  }
+};
+
 const readStorageValue = (key: string, fallback = ''): string => {
   try {
     const value = localStorage.getItem(key);
@@ -43,6 +53,18 @@ const normalizeOptionalUrl = (value: unknown): string => {
   return value.trim();
 };
 
+const readProfilePicFromStorage = (): string => {
+  const value = readStorageValue('gc365_profile_pic');
+  if (!value) {
+    return '';
+  }
+  if (value.length > MAX_PROFILE_PIC_STORAGE_LENGTH) {
+    safeRemoveStorageItem('gc365_profile_pic');
+    return '';
+  }
+  return value;
+};
+
 interface SidebarProps {
   currentStage: StageId;
   onStageChange: (id: StageId) => void;
@@ -59,7 +81,7 @@ interface SidebarProps {
 
 export const ProfileModal: React.FC<{ user: any; onLogout: () => void; onClose: () => void; supportEmail?: string }> = ({ user, onLogout, onClose, supportEmail }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [profilePic, setProfilePic] = useState<string>(() => readStorageValue('gc365_profile_pic'));
+  const [profilePic, setProfilePic] = useState<string>(() => readProfilePicFromStorage());
   
   const completedModulesCount = readCompletedModulesCount();
   const kpPoints = completedModulesCount * 1500;
@@ -76,9 +98,19 @@ export const ProfileModal: React.FC<{ user: any; onLogout: () => void; onClose: 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      if (file.size > 1024 * 1024) {
+        alert("Picha ni kubwa sana. Tafadhali tumia picha chini ya 1MB.");
+        return;
+      }
       const reader = new FileReader();
       reader.onloadend = () => {
         const base64 = reader.result as string;
+        if (!base64 || base64.length > MAX_PROFILE_PIC_STORAGE_LENGTH) {
+          alert("Picha haikuhifadhiwa kwa sababu ni kubwa sana kwa simu nyingi. Tumia picha ndogo.");
+          safeRemoveStorageItem('gc365_profile_pic');
+          setProfilePic('');
+          return;
+        }
         setProfilePic(base64);
         localStorage.setItem('gc365_profile_pic', base64);
         window.dispatchEvent(new Event('gc365_profile_pic_updated'));
@@ -278,7 +310,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   siteSettings
 }) => {
   const [isVisible, setIsVisible] = useState(false);
-  const [profilePic, setProfilePic] = useState<string>(() => readStorageValue('gc365_profile_pic'));
+  const [profilePic, setProfilePic] = useState<string>(() => readProfilePicFromStorage());
   const [timelineSections, setTimelineSections] = useState<TimelineSectionApi[]>([]);
   const [timelineLoading, setTimelineLoading] = useState(false);
   const [timelineError, setTimelineError] = useState('');
@@ -292,7 +324,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   useEffect(() => {
     const handleProfilePicSync = () => {
-      setProfilePic(readStorageValue('gc365_profile_pic'));
+      setProfilePic(readProfilePicFromStorage());
     };
     window.addEventListener('storage', handleProfilePicSync);
     window.addEventListener('gc365_profile_pic_updated', handleProfilePicSync as EventListener);
