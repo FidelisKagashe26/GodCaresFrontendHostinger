@@ -410,8 +410,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const displayFirstName = displayName.split(/\s+/)[0] || 'Mtumiaji';
 
   return (
-    <div className={`fixed inset-0 z-[200] bg-[#f4f8ec]/98 dark:bg-[#040f0a] md:bg-[#eef6e1]/95 md:dark:bg-[#06130d]/96 backdrop-blur-sm md:backdrop-blur-md flex flex-col transition-all duration-700 ease-in-out ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
-      <div className="relative z-10 flex items-center justify-end px-4 py-2.5 md:p-6 border-b border-green-200/70 dark:border-green-900/60 bg-[#f8fbf1]/95 dark:bg-[#0a1a12]/92 backdrop-blur-md h-16 md:h-20">
+    <div className={`fixed inset-0 z-[200] bg-[#f4f8ec]/98 dark:bg-[#040f0a] md:bg-[#eef6e1]/95 md:dark:bg-[#06130d]/96 backdrop-blur-0 md:backdrop-blur-md flex flex-col transition-all duration-700 ease-in-out ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+      <div className="relative z-10 flex items-center justify-end px-4 py-2.5 md:p-6 border-b border-green-200/70 dark:border-green-900/60 bg-[#f8fbf1]/95 dark:bg-[#0a1a12]/92 backdrop-blur-0 md:backdrop-blur-md h-16 md:h-20">
         <div onClick={() => { onStageChange(StageId.HOME); onClose(); }} className="absolute left-1/2 -translate-x-1/2 flex items-center cursor-pointer group">
            <img src={resolvedLogoSrc} alt={resolvedSettings.site_name} className="h-14 md:h-20 w-auto group-hover:scale-105 transition-transform" />
         </div>
@@ -608,7 +608,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </div>
       </div>
 
-      <div className="px-4 py-3 md:px-12 md:py-5 border-t border-green-200/70 dark:border-green-900/60 bg-[#f8fbf1]/95 dark:bg-[#0a1a12]/92 backdrop-blur-md flex justify-end items-center relative z-10 shrink-0">
+      <div className="px-4 py-3 md:px-12 md:py-5 border-t border-green-200/70 dark:border-green-900/60 bg-[#f8fbf1]/95 dark:bg-[#0a1a12]/92 backdrop-blur-0 md:backdrop-blur-md flex justify-end items-center relative z-10 shrink-0">
         {user ? (
           <button onClick={onShowProfile} className="group flex items-center gap-2.5 bg-[#f4faee] dark:bg-[#12281b] p-1 pr-3.5 rounded-full border border-green-200/70 dark:border-green-900/60 hover:border-gold-500 transition-all shadow-xl backdrop-blur-md">
              <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-gold-500 to-gold-700 flex items-center justify-center text-[#020617] shadow-lg group-hover:scale-105 transition-transform overflow-hidden">
