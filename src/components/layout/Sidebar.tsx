@@ -378,8 +378,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
     setSelectedTimelineId(readStorageValue('gc365_active_timeline', 'creation') || 'creation');
   }, [isOpen]);
 
-  if (!isVisible && !isOpen) return null;
-
   const sections = [
     {
       title: "Sehemu za Msingi",
@@ -412,6 +410,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
       return haystack.includes(query);
     });
   }, [timelineList, timelineQuery]);
+
+  if (!isVisible && !isOpen) return null;
 
   const mainWebsiteUrl = normalizeOptionalUrl(resolvedSettings.website_main_url);
   const kidsWebsiteUrl = normalizeOptionalUrl(resolvedSettings.website_kids_url);
