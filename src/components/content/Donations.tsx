@@ -29,6 +29,11 @@ const PROJECTS: Project[] = [];
 const QUICK_AMOUNTS = [5000, 10000, 25000, 50000, 100000, 200000];
 
 const sanitizeAmountInput = (value: string) => value.replace(/[^\d]/g, '');
+const normalizeAmountInput = (value: string) => {
+  const digits = sanitizeAmountInput(value);
+  if (!digits) return '';
+  return digits.replace(/^0+(?=\d)/, '');
+};
 const parseAmount = (value: string): number => {
   const normalized = sanitizeAmountInput(value).replace(/^0+(?=\d)/, '');
   if (!normalized) return 0;
@@ -107,7 +112,7 @@ export const Donations: React.FC = () => {
   }, []);
 
   const handleAmountChange = (raw: string) => {
-    setAmountInput(sanitizeAmountInput(raw));
+    setAmountInput(normalizeAmountInput(raw));
     if (errorMessage) {
       setErrorMessage('');
     }
@@ -129,10 +134,6 @@ export const Donations: React.FC = () => {
     const phoneDigits = donorPhone.replace(/\D/g, '');
     if (paymentMethod === 'mobile' && phoneDigits.length !== 10 && phoneDigits.length !== 12) {
       setErrorMessage('Weka namba sahihi ya simu (mfano 07XXXXXXXX au 2557XXXXXXXX).');
-      return;
-    }
-    if (paymentMethod === 'mobile' && !donorEmail.trim()) {
-      setErrorMessage('Barua pepe inahitajika kwa malipo ya simu.');
       return;
     }
 
@@ -370,7 +371,7 @@ export const Donations: React.FC = () => {
               </div>
               <div className="space-y-1.5 sm:col-span-2">
                 <label className="text-[10px] font-black uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">
-                  Barua Pepe {paymentMethod === 'mobile' ? '(Lazima)' : '(Hiari)'}
+                  Barua Pepe (Hiari)
                 </label>
                 <input
                   type="email"
