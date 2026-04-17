@@ -1,10 +1,17 @@
-
-import React, { useEffect, useState } from 'react';
-import { 
-  Heart, CreditCard, Gift, ShieldCheck, Cross, 
-  Smartphone, Globe, BookOpen, Radio, Users, 
-  ArrowRight, CheckCircle2, PieChart, TrendingUp, Info, X, 
-  Sparkles, Shield, LayoutGrid, CircleDollarSign
+import React, { useEffect, useMemo, useState } from 'react';
+import {
+  ArrowRight,
+  BookOpen,
+  CheckCircle2,
+  CircleDollarSign,
+  CreditCard,
+  Heart,
+  LayoutGrid,
+  Loader2,
+  Radio,
+  ShieldCheck,
+  Smartphone,
+  Users,
 } from 'lucide-react';
 import { getDonationProjects, submitDonation } from '../../services/content/donationService';
 
@@ -19,26 +26,47 @@ interface Project {
 }
 
 const PROJECTS: Project[] = [];
+const QUICK_AMOUNTS = [5000, 10000, 25000, 50000, 100000, 200000];
+
+const sanitizeAmountInput = (value: string) => value.replace(/[^\d]/g, '');
+const parseAmount = (value: string): number => {
+  const normalized = sanitizeAmountInput(value).replace(/^0+(?=\d)/, '');
+  if (!normalized) return 0;
+  const parsed = Number.parseInt(normalized, 10);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : 0;
+};
 
 export const Donations: React.FC = () => {
   const [donationType, setDonationType] = useState<'general' | 'project'>('general');
   const [selectedProject, setSelectedProject] = useState<string | null>(null);
-  const [amount, setAmount] = useState<number>(10000);
+  const [amountInput, setAmountInput] = useState('10000');
   const [paymentMethod, setPaymentMethod] = useState<'mobile' | 'card'>('mobile');
   const [isProcessing, setIsProcessing] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [projects, setProjects] = useState<Project[]>(PROJECTS);
+  const [isLoadingProjects, setIsLoadingProjects] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [donorName, setDonorName] = useState('');
   const [donorEmail, setDonorEmail] = useState('');
+  const [donorPhone, setDonorPhone] = useState('');
+  const [paymentStatus, setPaymentStatus] = useState('pending');
+  const [providerOrderId, setProviderOrderId] = useState('');
+  const [successMessage, setSuccessMessage] = useState('Asante kwa sadaka yako.');
 
-  const formatTZS = (val: number) => {
-    return new Intl.NumberFormat('en-TZ', {
+  const amount = useMemo(() => parseAmount(amountInput), [amountInput]);
+  const activeProject = useMemo(
+    () => projects.find((project) => project.id === selectedProject) || null,
+    [projects, selectedProject],
+  );
+
+  const formatTZS = (value: number) =>
+    new Intl.NumberFormat('en-TZ', {
       style: 'currency',
       currency: 'TZS',
-      minimumFractionDigits: 0
-    }).format(val).replace('TZS', 'TSh');
-  };
+      minimumFractionDigits: 0,
+    })
+      .format(value)
+      .replace('TZS', 'TSh');
 
   const progressPercent = (goal: number, raised: number) => {
     if (!goal) return 0;
@@ -47,6 +75,8 @@ export const Donations: React.FC = () => {
 
   useEffect(() => {
     const loadProjects = async () => {
+      setIsLoadingProjects(true);
+      setErrorMessage('');
       try {
         const data = await getDonationProjects();
         const mapped: Project[] = data.map((project, index) => ({
@@ -56,312 +86,482 @@ export const Donations: React.FC = () => {
           image: project.image,
           goal: project.goal,
           raised: project.raised,
-          icon: index % 3 === 0 ? <BookOpen size={18} /> : index % 3 === 1 ? <Radio size={18} /> : <Users size={18} />,
+          icon:
+            index % 3 === 0
+              ? <BookOpen size={16} />
+              : index % 3 === 1
+                ? <Radio size={16} />
+                : <Users size={16} />,
         }));
         setProjects(mapped);
-        if (!selectedProject && mapped.length) {
-          setSelectedProject(mapped[0].id);
-        }
-      } catch (error) {
-        setErrorMessage('Imeshindikana kupata miradi.');
+        setSelectedProject((current) => current || (mapped.length ? mapped[0].id : null));
+      } catch {
+        setProjects([]);
+        setErrorMessage('Imeshindikana kupata miradi ya kuchangia.');
+      } finally {
+        setIsLoadingProjects(false);
       }
     };
 
-    loadProjects();
+    void loadProjects();
   }, []);
 
+  const handleAmountChange = (raw: string) => {
+    setAmountInput(sanitizeAmountInput(raw));
+    if (errorMessage) {
+      setErrorMessage('');
+    }
+  };
+
   const handleDonate = async () => {
-    setIsProcessing(true);
     setErrorMessage('');
+
+    if (amount <= 0) {
+      setErrorMessage('Weka kiasi halali kinachozidi sifuri.');
+      return;
+    }
+
+    if (donationType === 'project' && !selectedProject) {
+      setErrorMessage('Chagua mradi kwanza.');
+      return;
+    }
+
+    const phoneDigits = donorPhone.replace(/\D/g, '');
+    if (paymentMethod === 'mobile' && phoneDigits.length !== 10 && phoneDigits.length !== 12) {
+      setErrorMessage('Weka namba sahihi ya simu (mfano 07XXXXXXXX au 2557XXXXXXXX).');
+      return;
+    }
+    if (paymentMethod === 'mobile' && !donorEmail.trim()) {
+      setErrorMessage('Barua pepe inahitajika kwa malipo ya simu.');
+      return;
+    }
+
+    setIsProcessing(true);
     try {
       const result = await submitDonation({
         project: donationType === 'project' && selectedProject ? Number(selectedProject) : null,
         donor_name: donorName || undefined,
         donor_email: donorEmail || undefined,
+        donor_phone: paymentMethod === 'mobile' ? donorPhone : undefined,
         amount,
         payment_method: paymentMethod,
       });
-      setShowSuccess(true);
+
       if (donationType === 'project' && selectedProject) {
-        const raisedFromApi = Number(result?.new_raised || 0);
-        setProjects((prev) =>
-          prev.map((p) =>
-            p.id === selectedProject
-              ? { ...p, raised: raisedFromApi > 0 ? raisedFromApi : p.raised + amount }
-              : p
-          )
-        );
+        const newRaised = Number(result.new_raised || 0);
+        if (newRaised > 0) {
+          setProjects((prev) =>
+            prev.map((item) => (item.id === selectedProject ? { ...item, raised: newRaised } : item)),
+          );
+        }
       }
+
+      setPaymentStatus(result.payment_status || (result.requires_ussd_approval ? 'processing' : 'completed'));
+      setProviderOrderId(result.provider_order_id || '');
+      setSuccessMessage(
+        result.requires_ussd_approval
+          ? 'Ombi la malipo limetumwa kwenye simu yako. Kubali USSD prompt kwa kuingiza PIN ya mtandao wako.'
+          : result.detail || 'Asante kwa sadaka yako.',
+      );
+      setShowSuccess(true);
       setDonorName('');
       setDonorEmail('');
+      if (paymentMethod !== 'mobile') {
+        setDonorPhone('');
+      }
     } catch (error) {
-      setErrorMessage('Imeshindikana kutuma sadaka.');
+      setErrorMessage(error instanceof Error ? error.message : 'Imeshindikana kutuma sadaka.');
     } finally {
       setIsProcessing(false);
     }
   };
 
-  const handleProjectSelect = (id: string) => {
-    setSelectedProject(id);
-    setDonationType('project');
-  };
-
   return (
-    <div className="space-y-16 animate-fade-in pb-32 max-w-7xl mx-auto px-4 md:px-6">
-      
-      {/* 1. CINEMATIC HERO SECTION - Minimum Bevel rounded-2xl */}
-      <section className="relative bg-primary-950 rounded-2xl p-10 md:p-20 overflow-hidden shadow-[0_30px_60px_-15px_rgba(0,0,0,0.5)] border border-white/5">
-        <div className="absolute inset-0 opacity-40">
-           <img src="https://images.unsplash.com/photo-1469571486292-0ba58a3f068b?auto=format&fit=crop&q=80&w=2000" className="w-full h-full object-cover" alt="" />
-        </div>
-        <div className="absolute inset-0 bg-gradient-to-r from-primary-950 via-primary-950/80 to-transparent"></div>
-        
-        <div className="relative z-10 space-y-6 max-w-3xl">
-           <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-gold-500/10 border border-gold-500/20 text-gold-400 rounded-lg text-[9px] font-black uppercase tracking-[0.3em]">
-              <Heart size={12} fill="currentColor" className="animate-pulse" /> Sadaka ya Upendo
-           </div>
-           <h1 className="text-4xl md:text-7xl font-black text-white tracking-tighter uppercase leading-[0.9] drop-shadow-lg">
-             Ushirika wa <span className="text-gold-500">Upendo.</span>
-           </h1>
-           <p className="text-slate-300 text-lg md:text-xl font-medium leading-relaxed italic border-l-4 border-gold-500/50 pl-6">
-             "Toeni, nanyi mtapewa; kipimo cha kujaa, na kushindiliwa, na kusukwasukwa, hata kumwagika..." — Luka 6:38
-           </p>
-        </div>
-      </section>
-
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
-        
-        {/* LEFT: PROJECTS SELECTION */}
-        <div className="lg:col-span-7 space-y-8">
-          <div className="space-y-3 px-2">
-             <h3 className="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tight">Miradi ya Injili</h3>
-             <p className="text-slate-500 text-sm font-medium">Chagua mradi unaotaka kusaidia au changia mfuko wa kawaida.</p>
-          </div>
-
-          <div className={`space-y-4 transition-all duration-500 ${donationType === 'general' ? 'opacity-60 grayscale' : 'opacity-100'}`}>
-             {!projects.length && (
-               <div className="bg-slate-100 border border-slate-200 rounded-xl p-4 text-[10px] font-black uppercase tracking-widest text-slate-500">
-                 Hakuna miradi ya kuonyesha kwa sasa.
-               </div>
-             )}
-             {projects.map((project) => (
-               <div 
-                 key={project.id}
-                 onClick={() => handleProjectSelect(project.id)}
-                 className={`group relative bg-white dark:bg-slate-900/50 rounded-xl border transition-all duration-500 cursor-pointer overflow-hidden flex flex-col md:flex-row ${
-                   selectedProject === project.id && donationType === 'project' 
-                     ? 'border-gold-500 shadow-2xl scale-[1.01] bg-slate-50 dark:bg-white/5' 
-                     : 'border-slate-100 dark:border-white/5 hover:border-gold-500/30 shadow-sm'
-                 }`}
-               >
-                 <div className="w-full md:w-52 h-44 md:h-auto overflow-hidden relative">
-                    <img src={project.image} className="w-full h-full object-cover transition-all duration-1000 group-hover:scale-110" alt="" />
-                    <div className="absolute inset-0 bg-primary-900/10"></div>
-                 </div>
-                 <div className="p-6 md:p-8 flex-1 space-y-5">
-                    <div className="flex justify-between items-start">
-                       <div className="space-y-1">
-                          <div className="flex items-center gap-2 text-gold-600 dark:text-gold-500">
-                             {project.icon}
-                             <span className="text-[9px] font-black uppercase tracking-widest">Mradi_wa_Uinjilisti_Kidijitali</span>
-                          </div>
-                          <h4 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-tight leading-none">{project.title}</h4>
-                       </div>
-                       <div className={`p-2 rounded-full transition-all ${selectedProject === project.id && donationType === 'project' ? 'bg-gold-500 text-primary-950' : 'bg-slate-100 dark:bg-white/10 text-slate-400'}`}>
-                          <CheckCircle2 size={16} />
-                       </div>
-                    </div>
-                    
-                    <div className="space-y-4">
-                       <div className="h-1.5 w-full bg-slate-100 dark:bg-white/5 rounded-full overflow-hidden">
-                          <div 
-                            className="h-full bg-gold-500 shadow-[0_0_10px_#eab308] transition-all duration-1000" 
-                            style={{ width: `${progressPercent(project.goal, project.raised)}%` }}
-                          ></div>
-                       </div>
-                       <div className="flex justify-between items-end">
-                          <div>
-                            <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1">Mchango wa Sasa</p>
-                            <p className="text-lg font-black text-slate-900 dark:text-white">{formatTZS(project.raised)}</p>
-                            {project.raised > project.goal && (
-                              <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest mt-1">
-                                Imevuka lengo kwa {formatTZS(project.raised - project.goal)}
-                              </p>
-                            )}
-                          </div>
-                          <div className="text-right">
-                            <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1">Lengo Lengwa</p>
-                            <p className="text-xs font-bold text-slate-500 uppercase">{formatTZS(project.goal)}</p>
-                          </div>
-                       </div>
-                    </div>
-                 </div>
-               </div>
-             ))}
-          </div>
+    <div className="bg-white dark:bg-slate-950 min-h-screen pb-20 max-w-6xl mx-auto">
+      <div className="p-4 sm:p-6 md:p-12 border-b border-slate-100 dark:border-slate-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+        <div className="space-y-2">
+          <p className="inline-flex items-center gap-2 rounded-full border border-gold-300/60 bg-gold-100/60 px-3 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-gold-800">
+            <Heart size={12} className="fill-current" />
+            Sadaka ya Upendo
+          </p>
+          <h1 className="text-4xl font-black text-slate-900 dark:text-slate-100 tracking-tight">
+            God Cares <span className="text-gold-500">Changia</span>
+          </h1>
+          <p className="text-sm text-slate-600 dark:text-slate-300">
+            Toa sadaka kwa mfuko wa huduma au mradi maalum, kisha lipia kwa simu kwa USSD moja kwa moja.
+          </p>
         </div>
 
-        {/* RIGHT: DONATION FORM - Minimum Bevel rounded-xl */}
-        <div className="lg:col-span-5">
-           <div className="sticky top-28 bg-white dark:bg-slate-900 rounded-xl border border-slate-100 dark:border-white/5 shadow-2xl p-8 md:p-10 space-y-8">
-              
-              {/* Type Selection */}
-              <div className="bg-slate-100 dark:bg-white/5 p-1.5 rounded-xl flex">
-                 <button 
-                   onClick={() => { setDonationType('general'); setSelectedProject(null); }}
-                   className={`flex-1 py-3 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2 ${donationType === 'general' ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-md' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
-                 >
-                    <CircleDollarSign size={14} /> Sadaka ya Kawaida
-                 </button>
-                 <button 
-                   onClick={() => { setDonationType('project'); if(!selectedProject && projects.length) setSelectedProject(projects[0].id); }}
-                   className={`flex-1 py-3 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2 ${donationType === 'project' ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-md' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
-                 >
-                    <LayoutGrid size={14} /> Kupitia Mradi
-                 </button>
-              </div>
-
-              <div className="space-y-2 text-center">
-                 <h3 className="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">
-                    {donationType === 'general' ? 'Mfuko wa Huduma' : selectedProject ? projects.find(p => p.id === selectedProject)?.title : 'Chagua Mradi'}
-                 </h3>
-                 <div className="h-0.5 w-12 bg-gold-500 mx-auto"></div>
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 pt-2">
-                    {donationType === 'general' ? 'Sadaka yako inasaidia uendeshaji wa huduma kwa ujumla.' : 'Sadaka yako itaenda moja kwa moja kwenye mradi huu.'}
-                  </p>
-              </div>
-
-                {errorMessage && (
-                 <div className="bg-red-500/10 border border-red-500/20 text-red-500 text-[10px] font-bold uppercase tracking-widest px-4 py-2 rounded-lg">
-                  {errorMessage}
-                 </div>
-                )}
-
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Jina (Hiari)</label>
-                    <input value={donorName} onChange={(e) => setDonorName(e.target.value)} className="w-full px-4 py-3 bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl outline-none text-sm font-bold text-slate-900 dark:text-white focus:border-gold-500 transition-all" placeholder="Mtoa Sadaka" />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Barua Pepe (Hiari)</label>
-                    <input type="email" value={donorEmail} onChange={(e) => setDonorEmail(e.target.value)} className="w-full px-4 py-3 bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl outline-none text-sm font-bold text-slate-900 dark:text-white focus:border-gold-500 transition-all" placeholder="barua.pepe@mfano.com" />
-                  </div>
-                </div>
-
-              {/* Amount Selection */}
-              <div className="space-y-4">
-                 <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Kiasi cha Kuchangia (TSh)</p>
-                 <div className="grid grid-cols-2 gap-2">
-                    {[5000, 10000, 50000, 100000].map(amt => (
-                      <button 
-                        key={amt}
-                        onClick={() => setAmount(amt)}
-                        className={`py-3 rounded-lg font-black text-[11px] border transition-all ${amount === amt ? 'bg-primary-950 text-gold-400 border-primary-950 shadow-xl' : 'bg-transparent text-slate-500 border-slate-100 dark:border-white/5 hover:border-gold-500/50'}`}
-                      >
-                        {formatTZS(amt)}
-                      </button>
-                    ))}
-                 </div>
-                 <div className="relative">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-black text-xs">TSh</span>
-                    <input 
-                      type="number"
-                      value={amount}
-                      onChange={(e) => setAmount(Number(e.target.value))}
-                      className="w-full pl-12 pr-4 py-4 bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl outline-none text-slate-900 dark:text-white font-black text-lg focus:border-gold-500 transition-all"
-                      placeholder="Kiasi kingine..."
-                    />
-                 </div>
-              </div>
-
-              {/* Payment Method */}
-              <div className="space-y-4">
-                 <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Njia ya Malipo</p>
-                 <div className="grid grid-cols-2 gap-3">
-                    <button 
-                      onClick={() => setPaymentMethod('mobile')}
-                      className={`flex flex-col items-center gap-3 p-5 rounded-xl border transition-all ${paymentMethod === 'mobile' ? 'bg-primary-950 text-gold-400 border-primary-950 shadow-lg' : 'bg-transparent border-slate-100 dark:border-white/5 text-slate-400'}`}
-                    >
-                       <Smartphone size={24} />
-                       <span className="text-[10px] font-black uppercase tracking-widest">Malipo ya Simu</span>
-                    </button>
-                    <button 
-                      onClick={() => setPaymentMethod('card')}
-                      className={`flex flex-col items-center gap-3 p-5 rounded-xl border transition-all ${paymentMethod === 'card' ? 'bg-primary-950 text-gold-400 border-primary-950 shadow-lg' : 'bg-transparent border-slate-100 dark:border-white/5 text-slate-400'}`}
-                    >
-                       <CreditCard size={24} />
-                       <span className="text-[10px] font-black uppercase tracking-widest">Kadi ya Benki</span>
-                    </button>
-                 </div>
-              </div>
-
-              <button 
-                onClick={handleDonate}
-                disabled={isProcessing}
-                className="w-full py-5 bg-gold-500 text-primary-950 rounded-xl font-black text-xs uppercase tracking-[0.4em] shadow-xl hover:bg-slate-900 hover:text-white transition-all disabled:opacity-50 active:scale-95"
-              >
-                {isProcessing ? 'INACHAKATA...' : 'TOA SASA'}
-              </button>
-
-              <div className="flex items-center justify-center gap-2 text-slate-400">
-                 <ShieldCheck size={14} className="text-green-500" />
-                 <span className="text-[8px] font-black uppercase tracking-[0.2em]">Muunganisho Salama wa SSL (Biti 256)</span>
-              </div>
-           </div>
+        <div className="w-full md:w-72 rounded-2xl border border-green-200/80 dark:border-slate-700 bg-green-50/70 dark:bg-slate-900/70 px-4 py-3">
+          <p className="text-[10px] font-black uppercase tracking-[0.16em] text-green-700 dark:text-green-300">
+            Lengo Lililochaguliwa
+          </p>
+          <p className="mt-1 text-base font-black text-slate-900 dark:text-slate-100">
+            {donationType === 'general' ? 'Mfuko wa Huduma' : activeProject?.title || 'Chagua Mradi'}
+          </p>
+          <p className="mt-1 text-xs text-slate-600 dark:text-slate-400">
+            {donationType === 'general'
+              ? 'Mchango wako utaendesha huduma kwa ujumla.'
+              : 'Mchango wako utaenda moja kwa moja kwenye mradi huu.'}
+          </p>
         </div>
       </div>
 
-      {/* 3. SCIENTIFIC TRANSPARENCY SECTION - Minimum Bevel rounded-xl */}
-      <section className="space-y-12 py-16">
-         <div className="text-center space-y-4">
-            <h3 className="text-[10px] font-black text-gold-500 uppercase tracking-[0.4em]">KITAALAMU & UWAZI</h3>
-            <h2 className="text-3xl md:text-5xl font-black text-slate-900 dark:text-white tracking-tighter uppercase leading-none">Matumizi ya Kila Shilingi</h2>
-            <div className="w-16 h-1 bg-gold-500 mx-auto rounded-full"></div>
-         </div>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-12 p-3 sm:p-4 md:p-12">
+        <div className="md:col-span-2 space-y-5">
+          <div className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50/80 dark:bg-slate-900/70 p-1.5 flex">
+            <button
+              type="button"
+              onClick={() => setDonationType('general')}
+              className={`flex-1 rounded-xl px-3 py-3 text-[10px] font-black uppercase tracking-[0.16em] transition-colors inline-flex items-center justify-center gap-2 ${
+                donationType === 'general'
+                  ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm'
+                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
+              }`}
+            >
+              <CircleDollarSign size={14} />
+              Mfuko wa Kawaida
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setDonationType('project');
+                if (!selectedProject && projects.length > 0) {
+                  setSelectedProject(projects[0].id);
+                }
+              }}
+              className={`flex-1 rounded-xl px-3 py-3 text-[10px] font-black uppercase tracking-[0.16em] transition-colors inline-flex items-center justify-center gap-2 ${
+                donationType === 'project'
+                  ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm'
+                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
+              }`}
+            >
+              <LayoutGrid size={14} />
+              Mradi Maalum
+            </button>
+          </div>
 
-         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {[
-              { icon: <PieChart size={24} />, title: "90% Misheni", desc: "Fedha huenda moja kwa moja kwenye miradi ya uinjilisti bila kupitia urasimu wa ofisi." },
-              { icon: <TrendingUp size={24} />, title: "Ukuaji", desc: "Kila Shilingi 1,000 inatusaidia kufikisha ujumbe kwa watu wapya wasiopungua watano duniani." },
-              { icon: <Shield size={24} />, title: "Uwajibikaji", desc: "Kila mfadhili hupata ripoti ya kila robo mwaka ikionyesha picha na takwimu za mradi husika." }
-            ].map((item, i) => (
-              <div key={i} className="bg-white dark:bg-white/5 p-8 rounded-xl border border-slate-100 dark:border-white/5 space-y-5 group hover:bg-slate-50 dark:hover:bg-white/[0.08] transition-all shadow-sm hover:shadow-xl">
-                 <div className="p-4 bg-primary-950 text-gold-400 rounded-lg w-fit group-hover:scale-110 transition-transform shadow-lg">{item.icon}</div>
-                 <h4 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-tight">{item.title}</h4>
-                 <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed italic">"{item.desc}"</p>
-              </div>
+          {isLoadingProjects && (
+            <div className="text-xs uppercase tracking-widest text-slate-400 dark:text-slate-500 font-black">
+              Inapakia miradi...
+            </div>
+          )}
+          {!isLoadingProjects && projects.length === 0 && (
+            <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">
+              Hakuna miradi ya kuonyesha kwa sasa.
+            </div>
+          )}
+
+          <div className={`space-y-4 transition-opacity ${donationType === 'general' ? 'opacity-60' : 'opacity-100'}`}>
+            {projects.map((project) => (
+              <article
+                key={project.id}
+                className={`group cursor-pointer rounded-2xl border bg-white/95 dark:bg-slate-900/90 p-3.5 sm:p-4 md:p-5 shadow-[0_8px_20px_rgba(15,23,42,0.04)] dark:shadow-[0_10px_26px_rgba(2,6,23,0.38)] transition-all ${
+                  selectedProject === project.id && donationType === 'project'
+                    ? 'border-gold-400/90'
+                    : 'border-green-200/80 dark:border-slate-700 hover:border-gold-400/80'
+                }`}
+                onClick={() => {
+                  setSelectedProject(project.id);
+                  setDonationType('project');
+                }}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    setSelectedProject(project.id);
+                    setDonationType('project');
+                  }
+                }}
+              >
+                <div className="flex flex-col md:flex-row gap-4 md:gap-6">
+                  <div className="flex-1 space-y-3">
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="inline-flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-300">
+                        <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-gold-100 text-gold-700 dark:bg-gold-400/20 dark:text-gold-200">
+                          {project.icon}
+                        </span>
+                        Mradi wa Huduma
+                      </div>
+                      <span
+                        className={`inline-flex h-7 w-7 items-center justify-center rounded-full border ${
+                          selectedProject === project.id && donationType === 'project'
+                            ? 'border-gold-500 bg-gold-500 text-primary-950'
+                            : 'border-slate-300 dark:border-slate-600 text-slate-500'
+                        }`}
+                      >
+                        <CheckCircle2 size={14} />
+                      </span>
+                    </div>
+
+                    <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100 leading-tight">
+                      {project.title}
+                    </h2>
+                    <p className="text-slate-600 dark:text-slate-300 text-sm leading-relaxed line-clamp-2">
+                      {project.description}
+                    </p>
+
+                    <div className="space-y-2">
+                      <div className="h-2 w-full rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
+                        <div
+                          className="h-full bg-gradient-to-r from-gold-500 to-gold-600 transition-all duration-700"
+                          style={{ width: `${progressPercent(project.goal, project.raised)}%` }}
+                        />
+                      </div>
+                      <div className="flex items-center justify-between text-xs text-slate-600 dark:text-slate-400">
+                        <span className="font-bold">{formatTZS(project.raised)} imekusanywa</span>
+                        <span className="font-semibold">Lengo: {formatTZS(project.goal)}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="w-full md:w-48 md:h-32 min-h-[10.5rem] md:min-h-0 shrink-0 rounded-xl overflow-hidden bg-green-50 dark:bg-slate-800 border border-green-100 dark:border-slate-700 flex items-center justify-center">
+                    {project.image ? (
+                      <img
+                        src={project.image}
+                        className="block w-full h-auto md:h-full object-contain md:object-cover md:group-hover:scale-105 transition-transform duration-500"
+                        alt={project.title}
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">
+                        Hakuna picha
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="mt-4 pt-3 border-t border-green-100/90 dark:border-slate-700 flex items-center justify-between gap-3">
+                  <span className="text-[11px] font-bold uppercase tracking-[0.08em] text-slate-500 dark:text-slate-400">
+                    Chagua mradi huu
+                  </span>
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-gold-300/80 bg-gold-100/70 px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.08em] text-gold-800">
+                    Endelea
+                    <ArrowRight size={13} />
+                  </span>
+                </div>
+              </article>
             ))}
-         </div>
-      </section>
+          </div>
+        </div>
 
-      {/* 4. SUCCESS MODAL - Minimum Bevel rounded-3xl */}
+        <div className="md:col-span-1">
+          <div className="md:sticky md:top-28 space-y-5 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white/95 dark:bg-slate-900/90 p-4 sm:p-5 shadow-[0_8px_20px_rgba(15,23,42,0.04)] dark:shadow-[0_10px_26px_rgba(2,6,23,0.38)]">
+            <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 px-4 py-3">
+              <p className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400">
+                Kiasi cha Sasa
+              </p>
+              <p className="mt-1 text-2xl font-black text-slate-900 dark:text-slate-100">
+                {amount > 0 ? formatTZS(amount) : 'TSh 0'}
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="space-y-1.5 sm:col-span-2">
+                <label className="text-[10px] font-black uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">
+                  Jina (Hiari)
+                </label>
+                <input
+                  value={donorName}
+                  onChange={(event) => setDonorName(event.target.value)}
+                  className="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-3 py-2.5 text-sm text-slate-900 dark:text-slate-100 outline-none focus:border-gold-500"
+                  placeholder="Mtoa sadaka"
+                />
+              </div>
+              <div className="space-y-1.5 sm:col-span-2">
+                <label className="text-[10px] font-black uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">
+                  Barua Pepe {paymentMethod === 'mobile' ? '(Lazima)' : '(Hiari)'}
+                </label>
+                <input
+                  type="email"
+                  value={donorEmail}
+                  onChange={(event) => setDonorEmail(event.target.value)}
+                  className="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-3 py-2.5 text-sm text-slate-900 dark:text-slate-100 outline-none focus:border-gold-500"
+                  placeholder="barua.pepe@mfano.com"
+                />
+              </div>
+              <div className="space-y-1.5 sm:col-span-2">
+                <label className="text-[10px] font-black uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">
+                  Namba ya Simu {paymentMethod === 'mobile' ? '(Lazima)' : '(Hiari)'}
+                </label>
+                <input
+                  value={donorPhone}
+                  onChange={(event) => setDonorPhone(event.target.value)}
+                  className="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-3 py-2.5 text-sm text-slate-900 dark:text-slate-100 outline-none focus:border-gold-500"
+                  placeholder="07XXXXXXXX au 2557XXXXXXXX"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <p className="text-[10px] font-black uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">
+                Chagua Kiasi (TSh)
+              </p>
+              <div className="grid grid-cols-2 gap-2">
+                {QUICK_AMOUNTS.map((preset) => (
+                  <button
+                    key={preset}
+                    type="button"
+                    onClick={() => handleAmountChange(String(preset))}
+                    className={`rounded-lg border px-2 py-2 text-xs font-black transition-colors ${
+                      amount === preset
+                        ? 'border-primary-950 bg-primary-950 text-gold-400'
+                        : 'border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-gold-400'
+                    }`}
+                  >
+                    {formatTZS(preset)}
+                  </button>
+                ))}
+              </div>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-black text-slate-400">
+                  TSh
+                </span>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  value={amountInput}
+                  onFocus={(event) => event.currentTarget.select()}
+                  onBlur={() => {
+                    const nextAmount = parseAmount(amountInput);
+                    setAmountInput(nextAmount > 0 ? String(nextAmount) : '');
+                  }}
+                  onChange={(event) => handleAmountChange(event.target.value)}
+                  className="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 pl-12 pr-3 py-3 text-base font-black text-slate-900 dark:text-slate-100 outline-none focus:border-gold-500"
+                  placeholder="Weka kiasi..."
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <p className="text-[10px] font-black uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">
+                Njia ya Malipo
+              </p>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => setPaymentMethod('mobile')}
+                  className={`rounded-xl border px-3 py-3 text-xs font-black uppercase tracking-[0.08em] transition-colors inline-flex items-center justify-center gap-1.5 ${
+                    paymentMethod === 'mobile'
+                      ? 'border-primary-950 bg-primary-950 text-gold-400'
+                      : 'border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-gold-400'
+                  }`}
+                >
+                  <Smartphone size={14} />
+                  Simu
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPaymentMethod('card')}
+                  className={`rounded-xl border px-3 py-3 text-xs font-black uppercase tracking-[0.08em] transition-colors inline-flex items-center justify-center gap-1.5 ${
+                    paymentMethod === 'card'
+                      ? 'border-primary-950 bg-primary-950 text-gold-400'
+                      : 'border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-gold-400'
+                  }`}
+                >
+                  <CreditCard size={14} />
+                  Kadi
+                </button>
+              </div>
+            </div>
+
+            {errorMessage && (
+              <div className="bg-red-500/10 border border-red-500/20 text-red-600 text-xs font-bold px-3 py-2 rounded-lg">
+                {errorMessage}
+              </div>
+            )}
+
+            <button
+              type="button"
+              onClick={handleDonate}
+              disabled={isProcessing}
+              className="w-full rounded-xl bg-gold-500 text-primary-950 py-4 text-[11px] font-black uppercase tracking-[0.24em] hover:bg-gold-400 transition-colors disabled:opacity-60 disabled:cursor-not-allowed inline-flex items-center justify-center gap-2"
+            >
+              {isProcessing ? (
+                <>
+                  <Loader2 size={14} className="animate-spin" />
+                  Inachakata...
+                </>
+              ) : (
+                'Toa Sasa'
+              )}
+            </button>
+
+            <p className="inline-flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-[0.12em] text-slate-500 dark:text-slate-400">
+              <ShieldCheck size={12} className="text-emerald-600" />
+              Muamala Salama wa SSL
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div className="px-3 sm:px-4 md:px-12">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {[
+            {
+              title: 'USSD Moja kwa Moja',
+              desc: 'Ukichagua malipo ya simu, request inatumwa kwenye simu yako moja kwa moja kuthibitisha kwa PIN.',
+            },
+            {
+              title: 'Uwajibikaji',
+              desc: 'Kila sadaka huhifadhiwa na kufuatiliwa ili kuonyesha maendeleo ya mradi kwa uwazi.',
+            },
+            {
+              title: 'Kipaumbele cha Misheni',
+              desc: 'Michango ya mradi maalum huenda moja kwa moja kwenye lengo ulilochagua.',
+            },
+          ].map((item) => (
+            <div
+              key={item.title}
+              className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 py-5"
+            >
+              <h3 className="text-sm font-black uppercase tracking-[0.1em] text-slate-900 dark:text-slate-100">{item.title}</h3>
+              <p className="mt-2 text-sm text-slate-600 dark:text-slate-300 leading-relaxed">{item.desc}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
       {showSuccess && (
-        <div className="fixed inset-0 z-[600] flex items-center justify-center p-4 bg-black/95 backdrop-blur-xl animate-fade-in">
-           <div className="bg-white dark:bg-slate-950 w-full max-w-md rounded-3xl p-10 md:p-14 text-center space-y-8 shadow-[0_0_100px_rgba(0,0,0,0.8)] border border-white/10 animate-scale-up">
-              <div className="w-24 h-24 bg-green-500 rounded-full flex items-center justify-center text-white mx-auto shadow-[0_0_40px_rgba(34,197,94,0.4)] animate-bounce">
-                 <CheckCircle2 size={48} />
-              </div>
-              <div className="space-y-4">
-                 <h3 className="text-4xl font-black text-slate-900 dark:text-white uppercase leading-none italic">Barikiwa!</h3>
-                 <p className="text-slate-500 dark:text-slate-400 text-sm font-medium">Mungu amekutumia leo kuwa nuru kwa wengine. Sadaka yako imethibitishwa na imepokelewa kwa usalama.</p>
-              </div>
-              <div className="p-6 bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/10 rounded-xl">
-                 <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Stakabadhi No:</p>
-                 <p className="text-2xl font-black text-primary-950 dark:text-gold-500 font-mono">GC-GIFT-8839</p>
-                 <p className="text-[10px] font-bold uppercase text-slate-500 mt-2">
-                    {donationType === 'general' ? 'Mfuko wa Kawaida' : 'Mradi Maalum'}
-                 </p>
-              </div>
-              <button 
-                onClick={() => setShowSuccess(false)}
-                className="w-full py-5 bg-primary-950 text-gold-400 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-gold-500 hover:text-primary-950 transition-all shadow-xl"
-              >Rudi Kwenye Huduma</button>
-           </div>
+        <div className="fixed inset-0 z-[600] flex items-center justify-center p-4 bg-black/85 backdrop-blur-sm animate-fade-in">
+          <div className="w-full max-w-md rounded-3xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 p-8 text-center space-y-5">
+            <div className="mx-auto h-16 w-16 rounded-full bg-green-500 text-white inline-flex items-center justify-center">
+              <CheckCircle2 size={30} />
+            </div>
+            <h3 className="text-2xl font-black text-slate-900 dark:text-slate-100">Muamala Umetumwa</h3>
+            <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">{successMessage}</p>
+
+            <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 px-4 py-3 text-left space-y-2">
+              <p className="text-[10px] font-black uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">
+                Hali ya Malipo
+              </p>
+              <p className="text-sm font-black text-slate-900 dark:text-slate-100 uppercase">{paymentStatus}</p>
+              {providerOrderId && (
+                <>
+                  <p className="text-[10px] font-black uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400 pt-1">
+                    Namba ya Oda
+                  </p>
+                  <p className="text-xs font-mono font-bold break-all text-slate-800 dark:text-slate-200">{providerOrderId}</p>
+                </>
+              )}
+            </div>
+
+            {paymentStatus === 'processing' && (
+              <p className="text-xs font-semibold text-slate-600 dark:text-slate-300">
+                Tafadhali fungua USSD prompt kwenye simu yako na weka PIN kuthibitisha muamala.
+              </p>
+            )}
+
+            <button
+              type="button"
+              onClick={() => setShowSuccess(false)}
+              className="w-full rounded-xl bg-primary-950 text-gold-400 py-3 text-[11px] font-black uppercase tracking-[0.2em] hover:bg-slate-800 transition-colors"
+            >
+              Endelea
+            </button>
+          </div>
         </div>
       )}
-
     </div>
   );
 };
-
-

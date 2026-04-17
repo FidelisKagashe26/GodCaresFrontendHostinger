@@ -34,9 +34,17 @@ export const submitDonation = async (payload: {
   project?: number | null;
   donor_name?: string;
   donor_email?: string;
+  donor_phone?: string;
   amount: number;
   payment_method: "mobile" | "card";
-}): Promise<{ detail: string; project_id?: number | null; new_raised?: number | null }> => {
+}): Promise<{
+  detail: string;
+  project_id?: number | null;
+  new_raised?: number | null;
+  payment_status?: string;
+  provider_order_id?: string;
+  requires_ussd_approval?: boolean;
+}> => {
   const response = await fetch(`${API_BASE_URL}/api/donations/`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
