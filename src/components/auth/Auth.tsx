@@ -102,6 +102,7 @@ export const Auth: React.FC<AuthProps> = ({ onLogin, onClose, resetParams, onRes
   const [errorMessage, setErrorMessage] = useState('');
   const [infoMessage, setInfoMessage] = useState('');
   const [fieldErrors, setFieldErrors] = useState<FormErrors>({});
+  const [loginCooldownSeconds, setLoginCooldownSeconds] = useState(0);
 
   const usernameInputRef = useRef<HTMLInputElement | null>(null);
   const firstNameInputRef = useRef<HTMLInputElement | null>(null);
@@ -116,6 +117,7 @@ export const Auth: React.FC<AuthProps> = ({ onLogin, onClose, resetParams, onRes
   const otpCode = useMemo(() => otpDigits.join(''), [otpDigits]);
   const isLoginOtpOverlay = isOtpMode && otpContext === 'login';
   const isRegisterOtpMode = isOtpMode && otpContext === 'register';
+  const isLoginRateLimited = isLogin && !isResetMode && !isRegisterOtpMode && loginCooldownSeconds > 0;
   const selectedCountry = useMemo(
     () =>
       COUNTRY_DIAL_OPTIONS.find((country) => country.iso2 === phoneCountryIso)
@@ -150,6 +152,16 @@ export const Auth: React.FC<AuthProps> = ({ onLogin, onClose, resetParams, onRes
     }
   }, [isOtpMode, otpContext]);
 
+  useEffect(() => {
+    if (loginCooldownSeconds <= 0) return;
+    const timerId = window.setTimeout(() => {
+      setLoginCooldownSeconds((prev) => (prev > 0 ? prev - 1 : 0));
+    }, 1000);
+    return () => {
+      window.clearTimeout(timerId);
+    };
+  }, [loginCooldownSeconds]);
+
   const clearOtpInputs = () => {
     setOtpDigits(Array.from({ length: OTP_LENGTH }, () => ''));
   };
@@ -180,6 +192,7 @@ export const Auth: React.FC<AuthProps> = ({ onLogin, onClose, resetParams, onRes
     setPendingPhone('');
     setPendingEmail('');
     setIsLogin(true);
+    setLoginCooldownSeconds(0);
     if (message) {
       setInfoMessage(message);
     }
@@ -194,6 +207,7 @@ export const Auth: React.FC<AuthProps> = ({ onLogin, onClose, resetParams, onRes
     setIsLogin(true);
     setErrorMessage('');
     setFieldErrors({});
+    setLoginCooldownSeconds(0);
     setInfoMessage(message);
   };
 
@@ -238,6 +252,9 @@ export const Auth: React.FC<AuthProps> = ({ onLogin, onClose, resetParams, onRes
       setFieldErrors(mappedErrors);
       if (Object.keys(mappedErrors).length) {
         focusFirstError(mappedErrors);
+      }
+      if (error.code === 'too_many_attempts' && (error.retryAfterSeconds || 0) > 0) {
+        setLoginCooldownSeconds(error.retryAfterSeconds || 0);
       }
       setErrorMessage(error.message || fallback);
       return;
@@ -374,6 +391,11 @@ export const Auth: React.FC<AuthProps> = ({ onLogin, onClose, resetParams, onRes
     const localErrors: FormErrors = {};
     const normalizedIdentifier = email.trim().toLowerCase();
 
+    if (loginCooldownSeconds > 0) {
+      setErrorMessage(`Jaribu tena baada ya sekunde ${loginCooldownSeconds}.`);
+      return;
+    }
+
     if (!normalizedIdentifier) {
       localErrors.email = 'Weka barua pepe au jina la mtumiaji.';
     }
@@ -393,6 +415,7 @@ export const Auth: React.FC<AuthProps> = ({ onLogin, onClose, resetParams, onRes
     try {
       await loginUser({ email: normalizedIdentifier, password });
       const user = await getCurrentUser();
+      setLoginCooldownSeconds(0);
       onLogin(user);
     } catch (error) {
       if (error instanceof AuthRequestError && error.code === 'verification_required') {
@@ -404,6 +427,7 @@ export const Auth: React.FC<AuthProps> = ({ onLogin, onClose, resetParams, onRes
         );
         return;
       }
+      setPassword('');
       applyError(error, 'Imeshindikana kuingia.');
     } finally {
       setLoading(false);
@@ -676,6 +700,11 @@ export const Auth: React.FC<AuthProps> = ({ onLogin, onClose, resetParams, onRes
                   {infoMessage}
                 </div>
               )}
+              {isLoginRateLimited && (
+                <div className="bg-amber-500/10 border border-amber-500/30 text-amber-700 dark:text-amber-300 text-[11px] font-semibold px-4 py-2 rounded-lg">
+                  Ulinzi wa kuzuia brute-force umewashwa. Jaribu tena baada ya sekunde {loginCooldownSeconds}.
+                </div>
+              )}
               {!isLogin && !isResetMode && !isRegisterOtpMode && (
                 <div className="space-y-1">
                   <div className="relative group">
@@ -906,11 +935,13 @@ export const Auth: React.FC<AuthProps> = ({ onLogin, onClose, resetParams, onRes
               )}
 
               <button 
-                type="submit" disabled={loading || isLoginOtpOverlay}
+                type="submit" disabled={loading || isLoginOtpOverlay || isLoginRateLimited}
                 className="w-full bg-emerald-800 dark:bg-gold-500 text-white dark:text-[#1f1800] py-4 rounded-lg font-black text-xs uppercase tracking-[0.3em] flex items-center justify-center gap-3 hover:bg-emerald-900 dark:hover:bg-gold-400 transition-all shadow-xl active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
               >
                 {loading
                   ? 'Inachakata...'
+                  : isLoginRateLimited
+                    ? `SUBIRI ${loginCooldownSeconds}s`
                   : isLoginOtpOverlay
                     ? 'THIBITISHA OTP KWANZA'
                     : isResetMode
@@ -920,7 +951,7 @@ export const Auth: React.FC<AuthProps> = ({ onLogin, onClose, resetParams, onRes
                         : isLogin
                           ? 'INGIA'
                           : 'JISAJILI'}
-                {!loading && !isLoginOtpOverlay && <ArrowRight size={16} />}
+                {!loading && !isLoginOtpOverlay && !isLoginRateLimited && <ArrowRight size={16} />}
               </button>
             </form>
           </div>

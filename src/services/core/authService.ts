@@ -38,6 +38,7 @@ interface AuthRequestErrorOptions {
   phone?: string;
   email?: string;
   status?: number;
+  retryAfterSeconds?: number;
 }
 
 export class AuthRequestError extends Error {
@@ -46,6 +47,7 @@ export class AuthRequestError extends Error {
   phone?: string;
   email?: string;
   status?: number;
+  retryAfterSeconds?: number;
 
   constructor(message: string, options: AuthRequestErrorOptions = {}) {
     super(message);
@@ -55,6 +57,7 @@ export class AuthRequestError extends Error {
     this.phone = options.phone;
     this.email = options.email;
     this.status = options.status;
+    this.retryAfterSeconds = options.retryAfterSeconds;
   }
 }
 
@@ -120,8 +123,13 @@ const toAuthRequestError = async (response: Response, fallback: string): Promise
   const payload = await response.json().catch(() => ({} as any));
   const code = typeof payload?.code === "string" ? payload.code.trim() : undefined;
   const fieldErrors = buildFieldErrors(payload);
+  const retryAfterRaw = payload?.retry_after_seconds ?? payload?.retry_after;
+  const retryAfterNumeric = Number.parseInt(String(retryAfterRaw ?? ""), 10);
+  const retryAfterSeconds = Number.isFinite(retryAfterNumeric) && retryAfterNumeric > 0
+    ? retryAfterNumeric
+    : undefined;
 
-  if (code && code !== "verification_required" && !fieldErrors.code) {
+  if (code && code !== "verification_required" && code !== "too_many_attempts" && !fieldErrors.code) {
     fieldErrors.code = code;
   }
 
@@ -142,6 +150,7 @@ const toAuthRequestError = async (response: Response, fallback: string): Promise
     phone: typeof payload?.phone === "string" ? payload.phone : undefined,
     email: typeof payload?.email === "string" ? payload.email : undefined,
     status: response.status,
+    retryAfterSeconds,
   });
 };
 
