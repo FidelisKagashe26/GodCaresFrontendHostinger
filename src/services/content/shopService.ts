@@ -12,7 +12,6 @@ export interface ShopProductApi {
   reviews: number;
   sold: number;
   is_choice: boolean;
-  free_shipping: boolean;
   description: string;
   colors: string[];
   specs: string[];

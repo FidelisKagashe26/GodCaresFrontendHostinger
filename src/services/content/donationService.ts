@@ -1,4 +1,3 @@
-import { invalidateCachedResult, withCachedResult } from "../core/cacheService";
 import { getApiBaseUrl, resolveApiAssetUrl } from "../core/urlService";
 
 export interface DonationProjectApi {
@@ -53,21 +52,15 @@ const extractApiErrorMessage = (value: unknown): string => {
 };
 
 export const getDonationProjects = async (): Promise<DonationProjectApi[]> => {
-  return withCachedResult(
-    "donation_projects_v1",
-    async () => {
-      const response = await fetch(`${API_BASE_URL}/api/donations/projects/`);
-      if (!response.ok) {
-        throw new Error("Imeshindikana kupata miradi.");
-      }
-      const payload = (await response.json()) as DonationProjectApi[];
-      return payload.map((item) => ({
-        ...item,
-        image: resolveApiAssetUrl(item.image, API_BASE_URL),
-      }));
-    },
-    { ttlMs: 5 * 60 * 1000, persist: true },
-  );
+  const response = await fetch(`${API_BASE_URL}/api/donations/projects/`, { cache: "no-store" });
+  if (!response.ok) {
+    throw new Error("Imeshindikana kupata miradi.");
+  }
+  const payload = (await response.json()) as DonationProjectApi[];
+  return payload.map((item) => ({
+    ...item,
+    image: resolveApiAssetUrl(item.image, API_BASE_URL),
+  }));
 };
 
 export const submitDonation = async (payload: {
@@ -84,6 +77,9 @@ export const submitDonation = async (payload: {
   payment_status?: string;
   provider_order_id?: string;
   requires_ussd_approval?: boolean;
+  requires_manual_payment?: boolean;
+  card_payment_label?: string;
+  card_payment_number?: string;
 }> => {
   const response = await fetch(`${API_BASE_URL}/api/donations/`, {
     method: "POST",
@@ -107,7 +103,6 @@ export const submitDonation = async (payload: {
   }
 
   const result = await response.json().catch(() => ({ detail: "Asante kwa sadaka yako." }));
-  invalidateCachedResult("donation_projects_v1");
   return result;
 };
 

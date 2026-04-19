@@ -18,6 +18,8 @@ export interface SiteSettings {
   contact_phone: string;
   contact_email: string;
   support_email: string;
+  donation_card_label: string;
+  donation_card_number: string;
   facebook_url: string;
   x_url: string;
   instagram_url: string;
@@ -44,6 +46,8 @@ export const DEFAULT_SITE_SETTINGS: SiteSettings = {
   contact_phone: "+255 744 780 244",
   contact_email: "fathercares365@gmail.com",
   support_email: "support@godcares365.org",
+  donation_card_label: "",
+  donation_card_number: "",
   facebook_url: "",
   x_url: "https://x.com/Godcares365",
   instagram_url: "https://www.instagram.com/god_cares365?igsh=MXdmdmJ4b3c5OTdlYQ==",
