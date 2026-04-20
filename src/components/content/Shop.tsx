@@ -45,10 +45,6 @@ interface CheckoutFormState {
 }
 
 const SHIPPING_FEE = 5000;
-const MASONRY_IMAGE_HEIGHTS = ['h-44', 'h-56', 'h-48', 'h-64', 'h-52', 'h-60'] as const;
-
-const getMasonryImageHeightClass = (index: number): string =>
-  MASONRY_IMAGE_HEIGHTS[index % MASONRY_IMAGE_HEIGHTS.length];
 
 const getInitialCheckoutForm = (): CheckoutFormState => {
   try {
@@ -424,7 +420,7 @@ export const Shop: React.FC = () => {
             )}
 
             <div className="columns-2 gap-2 sm:gap-3 [column-fill:_balance]">
-              {filteredProducts.map((product, index) => (
+              {filteredProducts.map((product) => (
                 <article
                   key={product.id}
                   className="group mb-2 sm:mb-3 break-inside-avoid cursor-pointer rounded-2xl border border-green-200/80 dark:border-slate-700 bg-white/95 dark:bg-slate-900/90 overflow-hidden shadow-[0_8px_20px_rgba(15,23,42,0.04)] dark:shadow-[0_10px_26px_rgba(2,6,23,0.38)] hover:border-gold-400/80 hover:shadow-[0_14px_28px_rgba(212,154,20,0.12)] transition-all"
@@ -438,11 +434,11 @@ export const Shop: React.FC = () => {
                     }
                   }}
                 >
-                  <div className={`w-full ${getMasonryImageHeightClass(index)} overflow-hidden bg-green-50 dark:bg-slate-800 flex items-center justify-center`}>
+                  <div className="w-full overflow-hidden bg-green-50 dark:bg-slate-800 flex items-center justify-center">
                     {product.image ? (
                       <img
                         src={product.image}
-                        className="block w-full h-full object-contain group-hover:scale-[1.02] transition-transform duration-500"
+                        className="block w-full h-auto object-contain group-hover:scale-[1.01] transition-transform duration-500"
                         alt={product.title}
                       />
                     ) : (
@@ -498,7 +494,7 @@ export const Shop: React.FC = () => {
                     </div>
                   </div>
 
-                  <div className="mt-3 pt-3 border-t border-green-100/90 dark:border-slate-700 flex flex-col items-stretch gap-2">
+                  <div className="mt-3 px-3.5 sm:px-4 pb-3.5 sm:pb-4 pt-3 border-t border-green-100/90 dark:border-slate-700 flex flex-col items-stretch gap-2">
                     <div className="flex items-baseline gap-2">
                       <span className="text-base font-black text-slate-900 dark:text-slate-100">{formatPrice(product.price)}</span>
                       {product.originalPrice > product.price && (
