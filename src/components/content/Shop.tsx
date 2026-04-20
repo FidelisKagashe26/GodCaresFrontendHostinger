@@ -3,14 +3,12 @@ import {
   ArrowRight,
   CheckCircle2,
   ChevronRight,
-  Clock,
   CreditCard,
   Heart,
   Minus,
   Package,
   Plus,
   Search,
-  ShieldCheck,
   ShoppingBag,
   ShoppingCart,
   Smartphone,
@@ -43,8 +41,6 @@ interface CheckoutFormState {
   city: string;
   country: string;
 }
-
-const SHIPPING_FEE = 5000;
 
 const getInitialCheckoutForm = (): CheckoutFormState => {
   try {
@@ -124,7 +120,7 @@ export const Shop: React.FC = () => {
   );
 
   const subtotalAmount = selectedProduct ? selectedProduct.price * orderQuantity : 0;
-  const totalAmount = selectedProduct ? subtotalAmount + SHIPPING_FEE : 0;
+  const totalAmount = selectedProduct ? subtotalAmount : 0;
 
   const resetOrderFlow = () => {
     setOrderStep('detail');
@@ -535,17 +531,6 @@ export const Shop: React.FC = () => {
               ))}
             </div>
 
-            <h3 className="font-black text-sm uppercase tracking-widest text-slate-900 dark:text-slate-100 pt-4">Huduma</h3>
-            <div className="space-y-3">
-              <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 px-3 py-3">
-                <p className="text-xs font-black text-slate-700 dark:text-slate-200">Usafirishaji wa kawaida</p>
-                <p className="text-[11px] text-slate-500 dark:text-slate-400">TSh {SHIPPING_FEE.toLocaleString('en-TZ')} | siku 2-5 za kazi</p>
-              </div>
-              <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 px-3 py-3">
-                <p className="text-xs font-black text-slate-700 dark:text-slate-200">Usalama wa oda</p>
-                <p className="text-[11px] text-slate-500 dark:text-slate-400">Taarifa zako zinalindwa kwa SSL.</p>
-              </div>
-            </div>
           </div>
         </div>
       )}
@@ -645,10 +630,6 @@ export const Shop: React.FC = () => {
                       <span className="font-bold text-slate-600 dark:text-slate-300">Jumla ya bidhaa</span>
                       <span className="font-black text-slate-900 dark:text-slate-100">{formatPrice(subtotalAmount)}</span>
                     </div>
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="font-bold text-slate-600 dark:text-slate-300">Usafiri wa kawaida</span>
-                      <span className="font-black text-slate-900 dark:text-slate-100">{formatPrice(SHIPPING_FEE)}</span>
-                    </div>
                     <div className="pt-2 border-t border-slate-200 dark:border-slate-700 flex items-center justify-between">
                       <span className="text-xs font-black uppercase tracking-[0.1em] text-slate-700 dark:text-slate-200">Jumla ya kulipa</span>
                       <span className="text-lg font-black text-primary-950 dark:text-gold-400">{formatPrice(totalAmount)}</span>
@@ -683,10 +664,6 @@ export const Shop: React.FC = () => {
                     <div className="flex items-center justify-between text-xs">
                       <span className="font-bold text-slate-600 dark:text-slate-300">Bidhaa x{orderQuantity}</span>
                       <span className="font-black text-slate-900 dark:text-slate-100">{formatPrice(subtotalAmount)}</span>
-                    </div>
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="font-bold text-slate-600 dark:text-slate-300">Usafiri</span>
-                      <span className="font-black text-slate-900 dark:text-slate-100">{formatPrice(SHIPPING_FEE)}</span>
                     </div>
                     <div className="pt-2 border-t border-slate-200 dark:border-slate-700 flex items-center justify-between">
                       <span className="text-xs font-black uppercase tracking-[0.1em] text-slate-700 dark:text-slate-200">Jumla</span>
@@ -768,38 +745,6 @@ export const Shop: React.FC = () => {
         </div>
       )}
 
-      <div className="px-3 sm:px-4 md:px-12">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {[
-            {
-              title: 'Usafiri wa Kawaida',
-              desc: 'Oda zote zinasafirishwa kwa utaratibu wa kawaida na gharama ya usafiri huongezwa kwenye oda.',
-              icon: Clock,
-            },
-            {
-              title: 'Ufuatiliaji wa Oda',
-              desc: 'Baada ya kuagiza utapokea tracking code ya kufuatilia hatua ya oda yako wakati wowote.',
-              icon: Package,
-            },
-            {
-              title: 'Muamala Salama',
-              desc: 'Taarifa zako zinapitia mfumo salama wa SSL kulinda oda na mawasiliano yako.',
-              icon: ShieldCheck,
-            },
-          ].map((item) => (
-            <div
-              key={item.title}
-              className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 py-5"
-            >
-              <h3 className="text-sm font-black uppercase tracking-[0.1em] text-slate-900 dark:text-slate-100 inline-flex items-center gap-2">
-                <item.icon size={14} />
-                {item.title}
-              </h3>
-              <p className="mt-2 text-sm text-slate-600 dark:text-slate-300 leading-relaxed">{item.desc}</p>
-            </div>
-          ))}
-        </div>
-      </div>
     </div>
   );
 };
