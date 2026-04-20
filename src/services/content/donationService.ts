@@ -16,7 +16,15 @@ const isRecord = (value: unknown): value is Record<string, unknown> =>
 
 const extractApiErrorMessage = (value: unknown): string => {
   if (typeof value === "string") {
-    return value.trim();
+    const trimmed = value.trim();
+    if (!trimmed) {
+      return "";
+    }
+    const looksLikeHtml = /^<!doctype html/i.test(trimmed) || /^<html[\s>]/i.test(trimmed);
+    if (looksLikeHtml) {
+      return "";
+    }
+    return trimmed;
   }
 
   if (Array.isArray(value)) {
@@ -99,7 +107,13 @@ export const submitDonation = async (payload: {
     }
 
     const errorMessage = extractApiErrorMessage(errorPayload);
-    throw new Error(errorMessage || "Imeshindikana kutuma sadaka.");
+    if (errorMessage) {
+      throw new Error(errorMessage);
+    }
+    if (response.status >= 500) {
+      throw new Error("Huduma ya malipo ina hitilafu kwa sasa. Tafadhali jaribu tena baada ya muda mfupi.");
+    }
+    throw new Error("Imeshindikana kutuma sadaka.");
   }
 
   const result = await response.json().catch(() => ({ detail: "Asante kwa sadaka yako." }));
