@@ -9,6 +9,14 @@ export interface DonationProjectApi {
   raised: number;
 }
 
+export interface DonationStatusApi {
+  detail: string;
+  donation_id?: number;
+  payment_status?: string;
+  provider_order_id?: string;
+  is_final?: boolean;
+}
+
 const API_BASE_URL = getApiBaseUrl();
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
@@ -120,4 +128,31 @@ export const submitDonation = async (payload: {
   return result;
 };
 
+export const getDonationStatus = async (providerOrderId: string): Promise<DonationStatusApi> => {
+  const orderId = (providerOrderId || "").trim();
+  if (!orderId) {
+    throw new Error("order_id inahitajika.");
+  }
+
+  const response = await fetch(
+    `${API_BASE_URL}/api/donations/status/?order_id=${encodeURIComponent(orderId)}`,
+    { cache: "no-store" },
+  );
+
+  if (!response.ok) {
+    const rawError = await response.text().catch(() => "");
+    let errorPayload: unknown = rawError;
+    if (rawError) {
+      try {
+        errorPayload = JSON.parse(rawError);
+      } catch {
+        errorPayload = rawError;
+      }
+    }
+    const errorMessage = extractApiErrorMessage(errorPayload);
+    throw new Error(errorMessage || "Imeshindikana kupata hali ya malipo.");
+  }
+
+  return (await response.json()) as DonationStatusApi;
+};
 

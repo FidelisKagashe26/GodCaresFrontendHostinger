@@ -11,8 +11,9 @@ import {
   ShieldCheck,
   Smartphone,
   Users,
+  XCircle,
 } from 'lucide-react';
-import { getDonationProjects, submitDonation } from '../../services/content/donationService';
+import { getDonationProjects, getDonationStatus, submitDonation } from '../../services/content/donationService';
 import { getSiteSettings } from '../../services/core/siteSettingsService';
 
 interface Project {
@@ -59,6 +60,8 @@ export const Donations: React.FC = () => {
   const [successMessage, setSuccessMessage] = useState('Asante kwa sadaka yako.');
   const [cardPaymentLabel, setCardPaymentLabel] = useState('');
   const [cardPaymentNumber, setCardPaymentNumber] = useState('');
+  const [isCheckingPayment, setIsCheckingPayment] = useState(false);
+  const [processingSeconds, setProcessingSeconds] = useState(0);
 
   const amount = useMemo(() => parseAmount(amountInput), [amountInput]);
   const activeProject = useMemo(
@@ -66,6 +69,11 @@ export const Donations: React.FC = () => {
     [projects, selectedProject],
   );
   const isCardPaymentAvailable = Boolean(cardPaymentNumber.trim());
+  const isPaymentProcessing = paymentStatus === 'processing';
+  const isPaymentCompleted = paymentStatus === 'completed';
+  const isPaymentFailed = paymentStatus === 'failed';
+  const canCancelProcessingWait = processingSeconds >= 60;
+  const processingCountdown = Math.max(0, 60 - processingSeconds);
 
   const formatTZS = (value: number) =>
     new Intl.NumberFormat('en-TZ', {
@@ -129,6 +137,75 @@ export const Donations: React.FC = () => {
     }
   }, [isCardPaymentAvailable, paymentMethod]);
 
+  useEffect(() => {
+    if (!showSuccess || !isPaymentProcessing) {
+      setProcessingSeconds(0);
+      return;
+    }
+
+    setProcessingSeconds(0);
+    const intervalId = window.setInterval(() => {
+      setProcessingSeconds((prev) => prev + 1);
+    }, 1000);
+
+    return () => {
+      window.clearInterval(intervalId);
+    };
+  }, [showSuccess, isPaymentProcessing, providerOrderId]);
+
+  useEffect(() => {
+    if (!showSuccess || !isPaymentProcessing || !providerOrderId) {
+      setIsCheckingPayment(false);
+      return;
+    }
+
+    let stopped = false;
+    let inFlight = false;
+
+    const pollStatus = async () => {
+      if (stopped || inFlight) return;
+      inFlight = true;
+      setIsCheckingPayment(true);
+
+      try {
+        const statusResult = await getDonationStatus(providerOrderId);
+        if (stopped) return;
+
+        const nextStatus = (statusResult.payment_status || '').trim().toLowerCase();
+        if (nextStatus === 'completed') {
+          setPaymentStatus('completed');
+          setSuccessMessage(statusResult.detail || 'Malipo tayari yamepokelewa (already paid). Asante kwa sadaka yako.');
+        } else if (nextStatus === 'failed') {
+          setPaymentStatus('failed');
+          setSuccessMessage(statusResult.detail || 'Muamala haujakamilika. Tafadhali jaribu tena.');
+        }
+      } catch {
+        // Keep polling silently while payment confirmation is pending.
+      } finally {
+        inFlight = false;
+        if (!stopped) {
+          setIsCheckingPayment(false);
+        }
+      }
+    };
+
+    void pollStatus();
+    const intervalId = window.setInterval(() => {
+      void pollStatus();
+    }, 5000);
+
+    return () => {
+      stopped = true;
+      window.clearInterval(intervalId);
+    };
+  }, [showSuccess, isPaymentProcessing, providerOrderId]);
+
+  const closeSuccessModal = () => {
+    setShowSuccess(false);
+    setIsCheckingPayment(false);
+    setProcessingSeconds(0);
+  };
+
   const handleAmountChange = (raw: string) => {
     setAmountInput(normalizeAmountInput(raw));
     if (errorMessage) {
@@ -181,6 +258,8 @@ export const Donations: React.FC = () => {
 
       setPaymentStatus(result.payment_status || (result.requires_ussd_approval ? 'processing' : 'completed'));
       setProviderOrderId(result.provider_order_id || '');
+      setIsCheckingPayment(Boolean(result.requires_ussd_approval && result.provider_order_id));
+      setProcessingSeconds(0);
       const resolvedCardLabel = (result.card_payment_label || cardPaymentLabel || 'Namba ya Kadi').trim();
       const resolvedCardNumber = (result.card_payment_number || cardPaymentNumber || '').trim();
       setSuccessMessage(
@@ -494,6 +573,14 @@ export const Donations: React.FC = () => {
               </div>
             </div>
 
+            {paymentMethod === 'mobile' && (
+              <div className="rounded-xl border border-amber-300/60 bg-amber-50/70 px-3 py-2">
+                <p className="text-[11px] font-semibold text-amber-800">
+                  Mtandao au mtoa huduma wa malipo anaweza kuongeza tozo ndogo za muamala (mfano TSh 200 kuwa TSh 212).
+                </p>
+              </div>
+            )}
+
             {paymentMethod === 'card' && isCardPaymentAvailable && (
               <div className="rounded-xl border border-amber-300/70 bg-amber-50/80 px-4 py-3 space-y-2">
                 <p className="text-[10px] font-black uppercase tracking-[0.14em] text-amber-700">
@@ -567,10 +654,26 @@ export const Donations: React.FC = () => {
       {showSuccess && (
         <div className="fixed inset-0 z-[600] flex items-center justify-center p-4 bg-black/85 backdrop-blur-sm animate-fade-in">
           <div className="w-full max-w-md rounded-3xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 p-8 text-center space-y-5">
-            <div className="mx-auto h-16 w-16 rounded-full bg-green-500 text-white inline-flex items-center justify-center">
-              <CheckCircle2 size={30} />
+            <div
+              className={`mx-auto h-16 w-16 rounded-full text-white inline-flex items-center justify-center ${
+                isPaymentCompleted
+                  ? 'bg-green-500'
+                  : isPaymentFailed
+                    ? 'bg-red-500'
+                    : 'bg-amber-500'
+              }`}
+            >
+              {isPaymentCompleted ? (
+                <CheckCircle2 size={30} />
+              ) : isPaymentFailed ? (
+                <XCircle size={30} />
+              ) : (
+                <Loader2 size={30} className="animate-spin" />
+              )}
             </div>
-            <h3 className="text-2xl font-black text-slate-900 dark:text-slate-100">Muamala Umetumwa</h3>
+            <h3 className="text-2xl font-black text-slate-900 dark:text-slate-100">
+              {isPaymentCompleted ? 'Malipo Yamekamilika' : isPaymentFailed ? 'Malipo Hayajakamilika' : 'Inasubiri Uthibitisho'}
+            </h3>
             <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">{successMessage}</p>
 
             <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 px-4 py-3 text-left space-y-2">
@@ -588,19 +691,41 @@ export const Donations: React.FC = () => {
               )}
             </div>
 
-            {paymentStatus === 'processing' && (
-              <p className="text-xs font-semibold text-slate-600 dark:text-slate-300">
-                Tafadhali fungua ombi la malipo kwenye simu yako na weka PIN kuthibitisha muamala.
-              </p>
+            {isPaymentProcessing && (
+              <div className="space-y-3">
+                <p className="text-xs font-semibold text-slate-600 dark:text-slate-300">
+                  Tafadhali fungua ombi la malipo kwenye simu yako na weka PIN kuthibitisha muamala.
+                </p>
+                <p className="text-[11px] font-bold text-slate-500 dark:text-slate-400 inline-flex items-center gap-2 justify-center">
+                  <Loader2 size={12} className={`${isCheckingPayment ? 'animate-spin' : ''}`} />
+                  Inasubiri mrejesho wa malipo...
+                </p>
+              </div>
             )}
 
-            <button
-              type="button"
-              onClick={() => setShowSuccess(false)}
-              className="w-full rounded-xl bg-primary-950 text-gold-400 py-3 text-[11px] font-black uppercase tracking-[0.2em] hover:bg-slate-800 transition-colors"
-            >
-              Endelea
-            </button>
+            {isPaymentProcessing ? (
+              canCancelProcessingWait ? (
+                <button
+                  type="button"
+                  onClick={closeSuccessModal}
+                  className="w-full rounded-xl border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200 py-3 text-[11px] font-black uppercase tracking-[0.2em] hover:border-red-400 hover:text-red-600 transition-colors"
+                >
+                  Ghairi
+                </button>
+              ) : (
+                <div className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 py-3 text-[11px] font-black uppercase tracking-[0.12em] text-slate-500 dark:text-slate-400">
+                  Unaweza kughairi baada ya sekunde {processingCountdown}
+                </div>
+              )
+            ) : (
+              <button
+                type="button"
+                onClick={closeSuccessModal}
+                className="w-full rounded-xl bg-primary-950 text-gold-400 py-3 text-[11px] font-black uppercase tracking-[0.2em] hover:bg-slate-800 transition-colors"
+              >
+                Endelea
+              </button>
+            )}
           </div>
         </div>
       )}

@@ -45,6 +45,10 @@ interface CheckoutFormState {
 }
 
 const SHIPPING_FEE = 5000;
+const MASONRY_IMAGE_HEIGHTS = ['h-44', 'h-56', 'h-48', 'h-64', 'h-52', 'h-60'] as const;
+
+const getMasonryImageHeightClass = (index: number): string =>
+  MASONRY_IMAGE_HEIGHTS[index % MASONRY_IMAGE_HEIGHTS.length];
 
 const getInitialCheckoutForm = (): CheckoutFormState => {
   try {
@@ -419,37 +423,51 @@ export const Shop: React.FC = () => {
               </div>
             )}
 
-            {filteredProducts.map((product) => (
-              <article
-                key={product.id}
-                className="group cursor-pointer rounded-2xl border border-green-200/80 dark:border-slate-700 bg-white/95 dark:bg-slate-900/90 p-3.5 sm:p-4 md:p-5 shadow-[0_8px_20px_rgba(15,23,42,0.04)] dark:shadow-[0_10px_26px_rgba(2,6,23,0.38)] hover:border-gold-400/80 hover:shadow-[0_14px_28px_rgba(212,154,20,0.12)] transition-all"
-                onClick={() => openProduct(product)}
-                role="button"
-                tabIndex={0}
-                onKeyDown={(event) => {
-                  if (event.key === 'Enter' || event.key === ' ') {
-                    event.preventDefault();
-                    openProduct(product);
-                  }
-                }}
-              >
-                <div className="flex flex-col md:flex-row gap-4 md:gap-6">
-                  <div className="flex-1 space-y-3">
+            <div className="columns-2 gap-3 sm:gap-4 [column-fill:_balance]">
+              {filteredProducts.map((product, index) => (
+                <article
+                  key={product.id}
+                  className="group mb-3 sm:mb-4 break-inside-avoid cursor-pointer rounded-2xl border border-green-200/80 dark:border-slate-700 bg-white/95 dark:bg-slate-900/90 p-3.5 sm:p-4 shadow-[0_8px_20px_rgba(15,23,42,0.04)] dark:shadow-[0_10px_26px_rgba(2,6,23,0.38)] hover:border-gold-400/80 hover:shadow-[0_14px_28px_rgba(212,154,20,0.12)] transition-all"
+                  onClick={() => openProduct(product)}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter' || event.key === ' ') {
+                      event.preventDefault();
+                      openProduct(product);
+                    }
+                  }}
+                >
+                  <div className={`w-full ${getMasonryImageHeightClass(index)} rounded-xl overflow-hidden bg-green-50 dark:bg-slate-800 border border-green-100 dark:border-slate-700 flex items-center justify-center`}>
+                    {product.image ? (
+                      <img
+                        src={product.image}
+                        className="block w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        alt={product.title}
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">
+                        Hakuna picha
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="mt-4 space-y-3">
                     <div className="flex items-center justify-between gap-3 text-xs font-bold text-slate-700 dark:text-slate-300">
-                      <span className="inline-flex items-center gap-2">
-                        <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-gold-100 text-gold-700 dark:bg-gold-400/20 dark:text-gold-200">
+                      <span className="inline-flex items-center gap-2 min-w-0">
+                        <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-gold-100 text-gold-700 dark:bg-gold-400/20 dark:text-gold-200 shrink-0">
                           <ShoppingBag size={13} />
                         </span>
-                        {product.category}
+                        <span className="truncate">{product.category}</span>
                       </span>
                       {product.isChoice && (
-                        <span className="px-2 py-1 rounded-full border border-gold-300/80 bg-gold-100/70 text-[10px] font-black uppercase tracking-[0.08em] text-gold-800">
+                        <span className="px-2 py-1 rounded-full border border-gold-300/80 bg-gold-100/70 text-[10px] font-black uppercase tracking-[0.08em] text-gold-800 shrink-0">
                           Chaguo
                         </span>
                       )}
                     </div>
 
-                    <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100 group-hover:text-gold-700 dark:group-hover:text-gold-300 transition-colors leading-tight">
+                    <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100 group-hover:text-gold-700 dark:group-hover:text-gold-300 transition-colors leading-tight line-clamp-2">
                       {product.title}
                     </h2>
 
@@ -458,7 +476,7 @@ export const Shop: React.FC = () => {
                     </p>
 
                     <div className="pt-1 flex items-center justify-between gap-4">
-                      <div className="flex items-center gap-4 text-xs text-slate-500 dark:text-slate-400 flex-wrap">
+                      <div className="flex items-center gap-3 text-xs text-slate-500 dark:text-slate-400 flex-wrap">
                         <span className="inline-flex items-center gap-1">
                           <Star size={12} className="text-gold-500 fill-gold-500" />
                           {product.rating || 0}
@@ -480,42 +498,28 @@ export const Shop: React.FC = () => {
                     </div>
                   </div>
 
-                  <div className="w-full md:w-48 md:h-32 min-h-[10.5rem] md:min-h-0 shrink-0 rounded-xl overflow-hidden bg-green-50 dark:bg-slate-800 border border-green-100 dark:border-slate-700 flex items-center justify-center">
-                    {product.image ? (
-                      <img
-                        src={product.image}
-                        className="block w-full h-auto md:h-full object-contain md:object-cover md:group-hover:scale-105 transition-transform duration-500"
-                        alt={product.title}
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">
-                        Hakuna picha
-                      </div>
-                    )}
+                  <div className="mt-4 pt-3 border-t border-green-100/90 dark:border-slate-700 flex items-center justify-between gap-3">
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-base font-black text-slate-900 dark:text-slate-100">{formatPrice(product.price)}</span>
+                      {product.originalPrice > product.price && (
+                        <span className="text-xs font-bold text-slate-400 line-through">{formatPrice(product.originalPrice)}</span>
+                      )}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        openProduct(product);
+                      }}
+                      className="inline-flex items-center gap-1.5 rounded-full border border-gold-300/80 bg-gold-100/70 px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.08em] text-gold-800 hover:bg-gold-200/80 transition-colors"
+                    >
+                      Angalia
+                      <ArrowRight size={13} />
+                    </button>
                   </div>
-                </div>
-
-                <div className="mt-4 pt-3 border-t border-green-100/90 dark:border-slate-700 flex items-center justify-between gap-3">
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-base font-black text-slate-900 dark:text-slate-100">{formatPrice(product.price)}</span>
-                    {product.originalPrice > product.price && (
-                      <span className="text-xs font-bold text-slate-400 line-through">{formatPrice(product.originalPrice)}</span>
-                    )}
-                  </div>
-                  <button
-                    type="button"
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      openProduct(product);
-                    }}
-                    className="inline-flex items-center gap-1.5 rounded-full border border-gold-300/80 bg-gold-100/70 px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.08em] text-gold-800 hover:bg-gold-200/80 transition-colors"
-                  >
-                    Angalia
-                    <ArrowRight size={13} />
-                  </button>
-                </div>
-              </article>
-            ))}
+                </article>
+              ))}
+            </div>
           </div>
 
           <div className="space-y-8 border-l border-slate-100 dark:border-slate-800 pl-8 hidden md:block">
