@@ -9,7 +9,7 @@ export const STAGES: StageConfig[] = [
   { id: StageId.EVIDENCE, title: 'Hifadhi ya Ushahidi', description: 'Sayansi na Historia', icon: 'microscope' },
   { id: StageId.DECEPTION_VAULT, title: 'Ukweli vs Uongo', description: 'Fichua Udanganyifu', icon: 'shield-alert' },
   { id: StageId.QUESTION_VAULT, title: 'Maswali & Majibu', description: 'Majibu ya Biblia', icon: 'message-square' },
-  { id: StageId.MEDIA, title: 'Kituo cha Midia', description: 'Video na Mafundisho', icon: 'play-circle' },
+  { id: StageId.MEDIA, title: 'Kituo cha Habari', description: 'Video na Mafundisho', icon: 'play-circle' },
   { id: StageId.TESTIMONIES, title: 'Shuhuda', description: 'Matendo ya Mungu', icon: 'message-square-quote' },
   { id: StageId.SHOP, title: 'Duka', description: 'Vitabu na Vifaa', icon: 'shopping-bag' },
   { id: StageId.LIBRARY, title: 'Maktaba', description: 'Nyaraka za Bure', icon: 'library' },
