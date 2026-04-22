@@ -896,6 +896,7 @@ export const EvidenceVault: React.FC = () => {
 
   // Filter items based on active folder
   const folderItems = activeFolder ? vaultItems.filter(i => i.category === activeFolder) : [];
+  const topHeadline = vaultItems[0]?.title || 'Hakuna faili za ushahidi kwa sasa.';
 
   useEffect(() => {
     if (activeFolder && !folders.includes(activeFolder)) {
@@ -909,7 +910,7 @@ export const EvidenceVault: React.FC = () => {
   };
 
   return (
-    <div className="space-y-12 animate-fade-in pb-20 max-w-7xl mx-auto px-4">
+    <div className="bg-white dark:bg-slate-950 min-h-screen pb-20 max-w-6xl mx-auto animate-fade-in">
       
       {/* RENDER MODALS BASED ON VIEW MODE */}
       {selectedItem && viewMode === 'summary' && (
@@ -937,75 +938,89 @@ export const EvidenceVault: React.FC = () => {
         />
       )}
 
-      {/* HEADER SECTION */}
-      <section className="relative h-[250px] md:h-[300px] rounded-xl overflow-hidden bg-slate-900 border border-white/5">
-        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
-        <div className="absolute inset-0 bg-gradient-to-br from-primary-950 to-black"></div>
-        <div className="relative z-10 h-full flex flex-col justify-center p-6 md:p-16 space-y-4 text-center md:text-left">
-          <div className="flex items-center justify-center md:justify-start gap-3 text-gold-400">
-            <Microscope size={20} />
-            <span className="text-[10px] font-black uppercase tracking-[0.4em]">Kumbukumbu za Uthibitisho</span>
+      <div className="p-4 sm:p-6 md:p-12 border-b border-slate-100 dark:border-slate-800 space-y-5">
+        <div className="flex items-center gap-3">
+          <div className="bg-slate-100 dark:bg-slate-900 p-2.5 rounded-xl text-primary-900 dark:text-gold-400 border border-slate-200 dark:border-slate-800">
+            <Microscope size={22} />
           </div>
-          <h1 className="text-4xl md:text-6xl font-black text-white tracking-tighter uppercase leading-none">
-            Hifadhi ya <span className="text-slate-500">Ushahidi</span>
-          </h1>
-          <p className="text-slate-400 text-sm md:text-lg max-w-xl font-medium mx-auto md:mx-0">
-            Nyumba ya ushahidi uliothibitishwa wa kihistoria, kiakiolojia, na matamko rasmi.
-          </p>
+          <div className="space-y-1">
+            <h1 className="text-3xl sm:text-4xl font-black text-slate-900 dark:text-slate-100 tracking-tight leading-none">
+              Hifadhi ya <span className="text-gold-600 dark:text-gold-400">Ushahidi</span>
+            </h1>
+            <p className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-[0.12em]">
+              Nyaraka, vielelezo na uthibitisho wa uchunguzi wa kiungu
+            </p>
+          </div>
         </div>
-      </section>
+        <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 px-4 py-3 flex items-center gap-3">
+          <span className="shrink-0 px-2 py-1 rounded-full bg-white dark:bg-slate-800 text-[10px] font-black uppercase tracking-[0.12em] text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700">
+            Highlight
+          </span>
+          <p className="min-w-0 flex-1 text-xs md:text-sm font-bold text-slate-700 dark:text-slate-200 truncate">
+            {topHeadline}
+          </p>
+          <ChevronRight size={16} className="shrink-0 text-slate-500 dark:text-slate-300" />
+        </div>
+      </div>
 
       {/* NAVIGATION / FOLDERS VIEW */}
       {!activeFolder && (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        <div className="p-3 sm:p-4 md:p-8 grid grid-cols-1 md:grid-cols-2 gap-5">
            {vaultError && (
              <div className="col-span-full bg-red-500/10 border border-red-500/20 text-red-500 text-[10px] font-bold uppercase tracking-widest px-4 py-2 rounded-lg">
                {vaultError}
              </div>
            )}
            {loadingVault && (
-             <div className="col-span-full py-6 text-center text-xs font-black uppercase tracking-widest text-slate-400">
+             <div className="col-span-full py-6 text-center text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">
                Inapakia ushahidi...
              </div>
            )}
            {!loadingVault && folders.length === 0 && (
-             <div className="col-span-full py-6 text-center text-xs font-black uppercase tracking-widest text-slate-400">
+             <div className="col-span-full py-6 text-center text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">
                Hakuna taarifa za ushahidi kwa sasa.
              </div>
            )}
            {folders.map(folder => {
              const count = vaultItems.filter(i => i.category === folder).length;
              return (
-               <button 
-                 key={folder}
-                 onClick={() => setActiveFolder(folder)}
-                 className="group bg-slate-900/40 border border-white/5 p-8 rounded-2xl flex flex-col items-center justify-center gap-4 hover:bg-slate-800/60 hover:border-gold-500/30 transition-all duration-300"
-               >
-                  <div className="p-4 bg-blue-500/10 rounded-full text-blue-400 group-hover:text-gold-400 group-hover:bg-gold-500/10 transition-colors">
-                     <Folder size={32} fill="currentColor" className="opacity-80" />
-                  </div>
-                  <div className="text-center space-y-1">
-                     <h3 className="font-bold text-white text-sm uppercase tracking-wider">{folder}</h3>
-                     <p className="text-[10px] text-slate-500 font-mono">{count} Faili</p>
-                  </div>
-               </button>
-             );
+                 <button 
+                  key={folder}
+                  onClick={() => setActiveFolder(folder)}
+                  className="group text-left rounded-2xl border border-green-200/80 dark:border-slate-700 bg-white/95 dark:bg-slate-900/90 p-4 sm:p-5 shadow-[0_8px_20px_rgba(15,23,42,0.04)] dark:shadow-[0_10px_26px_rgba(2,6,23,0.38)] hover:border-gold-400/80 hover:shadow-[0_14px_28px_rgba(212,154,20,0.12)] transition-all"
+                >
+                   <div className="flex items-center gap-3">
+                      <div className="h-11 w-11 rounded-xl border border-green-200 dark:border-slate-700 bg-green-50 dark:bg-slate-800 text-green-700 dark:text-emerald-300 inline-flex items-center justify-center group-hover:border-gold-300 dark:group-hover:border-gold-700 group-hover:text-gold-700 dark:group-hover:text-gold-300 transition-colors">
+                        <Folder size={20} />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <h3 className="font-bold text-slate-900 dark:text-slate-100 text-base leading-tight line-clamp-2">
+                          {folder}
+                        </h3>
+                        <p className="mt-1 text-[11px] font-bold uppercase tracking-[0.08em] text-slate-500 dark:text-slate-400">
+                          {count} faili
+                        </p>
+                      </div>
+                      <ChevronRight size={16} className="text-slate-400 dark:text-slate-500 group-hover:text-gold-600 dark:group-hover:text-gold-300 transition-colors" />
+                   </div>
+                </button>
+              );
            })}
         </div>
       )}
 
       {/* ITEMS LIST (INSIDE A FOLDER) - GALLERY STYLE WITH CATEGORY GROUPING */}
       {activeFolder && (
-        <div className="space-y-8 animate-slide-up">
-           <div className="flex items-center gap-4 pb-4 border-b border-white/5">
+        <div className="p-3 sm:p-4 md:p-8 space-y-8 animate-slide-up">
+           <div className="flex items-center gap-4 pb-4 border-b border-slate-200 dark:border-slate-800">
               <button 
                 onClick={() => setActiveFolder(null)}
-                className="p-2 hover:bg-white/10 rounded-lg text-slate-400 hover:text-white transition-all flex items-center gap-2"
+                className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg text-slate-500 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-all flex items-center gap-2"
               >
                  <ArrowLeft size={18} /> <span className="text-xs font-bold uppercase">Rudi Kwenye Folda</span>
               </button>
-              <div className="h-6 w-px bg-white/10"></div>
-              <div className="flex items-center gap-2 text-gold-500">
+              <div className="h-6 w-px bg-slate-200 dark:bg-slate-700"></div>
+              <div className="flex items-center gap-2 text-gold-600 dark:text-gold-400">
                  <FolderOpen size={18} />
                  <span className="text-sm font-black uppercase tracking-widest">{activeFolder}</span>
               </div>
@@ -1016,10 +1031,10 @@ export const EvidenceVault: React.FC = () => {
              <div key={subCat} className="space-y-6 mb-12">
                 {/* Updated Divider Style */}
                 <div className="flex items-center gap-4">
-                   <h3 className="text-xs font-black text-white uppercase tracking-[0.2em] flex items-center gap-2 whitespace-nowrap">
+                   <h3 className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-[0.2em] flex items-center gap-2 whitespace-nowrap">
                       {subCat}
                    </h3>
-                   <div className="h-px bg-gold-500/30 flex-1 max-w-md"></div>
+                   <div className="h-px bg-gold-500/40 flex-1 max-w-md"></div>
                 </div>
                 
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -1027,40 +1042,45 @@ export const EvidenceVault: React.FC = () => {
                     <div 
                       key={item.id} 
                       onClick={() => { setSelectedItem(item); setViewMode('summary'); }}
-                      className="group relative bg-slate-900/40 border border-white/5 rounded-xl overflow-hidden hover:border-gold-500/50 transition-all duration-500 cursor-pointer flex flex-col animate-scale-up"
+                      className="group relative rounded-2xl border border-green-200/80 dark:border-slate-700 bg-white/95 dark:bg-slate-900/90 overflow-hidden hover:border-gold-400/80 transition-all duration-300 cursor-pointer flex flex-col animate-scale-up shadow-[0_8px_20px_rgba(15,23,42,0.04)] dark:shadow-[0_10px_26px_rgba(2,6,23,0.38)] hover:shadow-[0_14px_28px_rgba(212,154,20,0.12)]"
                       style={{ animationDelay: `${index * 100}ms` }}
                     >
-                      <div className="absolute top-2 right-2 z-10">
-                         <div className="bg-black/60 backdrop-blur-md p-1.5 rounded-full border border-white/10 text-white opacity-0 group-hover:opacity-100 transition-all duration-500 transform translate-y-2 group-hover:translate-y-0">
-                            <Search size={12} />
-                         </div>
+                      <div className="absolute top-2 right-2 z-10 rounded-full border border-white/70 bg-white/95 dark:border-slate-700 dark:bg-slate-900 p-1.5 text-slate-500 dark:text-slate-300 shadow-sm opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Search size={12} />
                       </div>
 
-                      <div className="aspect-[4/5] relative overflow-hidden bg-black">
-                        {renderMediaCover(item, 'w-full h-full object-cover grayscale opacity-60 group-hover:grayscale-0 group-hover:opacity-40 transition-all duration-700 group-hover:scale-110')}
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent"></div>
-                        
-                        {/* Reveal Hint Overlay */}
-                        <div className="absolute inset-0 flex items-center justify-center bg-black/80 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-all duration-500 z-20">
-                           <div className="transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500 px-4 text-center">
-                              <div className="w-8 h-0.5 bg-gold-500 mx-auto mb-2"></div>
-                              <p className="text-gold-400 font-black text-[10px] uppercase tracking-widest mb-1">Ushahidi</p>
-                              <p className="text-white font-bold text-sm leading-tight italic">"{item.hint}"</p>
-                           </div>
-                        </div>
-                        
-                        <div className="absolute bottom-0 left-0 right-0 p-4 space-y-2 z-10">
-                           <h3 className="text-xs md:text-sm font-black text-white uppercase tracking-tight leading-tight line-clamp-2">{item.title}</h3>
-                           
-                           <div className="flex items-center gap-2 pt-2 border-t border-white/10">
-                             <div className="flex items-center gap-1">
-                                <img src={item.author.image} className="w-4 h-4 rounded-full border border-white/10" alt="" />
-                                <span className="text-[7px] font-black text-slate-400 uppercase tracking-widest truncate max-w-[80px]">{item.author.name}</span>
-                             </div>
-                             <div className="flex items-center gap-1 text-[7px] font-black text-green-500 uppercase tracking-widest ml-auto">
-                                <CheckCircle2 size={8} /> Verified
-                             </div>
-                           </div>
+                      <div className="aspect-[4/3] relative overflow-hidden bg-slate-100 dark:bg-slate-800">
+                        {renderMediaCover(item, 'w-full h-full object-cover transition-transform duration-500 group-hover:scale-105')}
+                      </div>
+
+                      <div className="p-4 space-y-3">
+                        <span className="inline-flex items-center rounded-full border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.08em] text-slate-600 dark:text-slate-300">
+                          {item.type}
+                        </span>
+                        <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 leading-tight line-clamp-2">
+                          {item.title}
+                        </h3>
+                        <p className="text-xs text-slate-600 dark:text-slate-300 italic leading-relaxed line-clamp-2">
+                          "{item.hint}"
+                        </p>
+
+                        <div className="pt-3 border-t border-green-100/90 dark:border-slate-700 flex items-center justify-between gap-2">
+                          <div className="flex items-center gap-2 min-w-0">
+                            {item.author.image ? (
+                              <img src={item.author.image} className="w-6 h-6 rounded-full border border-slate-200 dark:border-slate-700" alt={item.author.name} />
+                            ) : (
+                              <div className="w-6 h-6 rounded-full border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 dark:text-slate-300">
+                                <User size={12} />
+                              </div>
+                            )}
+                            <span className="text-[10px] font-bold text-slate-600 dark:text-slate-300 truncate">
+                              {item.author.name}
+                            </span>
+                          </div>
+                          <span className="inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-[0.08em] text-emerald-700 dark:text-emerald-300">
+                            <CheckCircle2 size={10} />
+                            Verified
+                          </span>
                         </div>
                       </div>
                     </div>

@@ -103,6 +103,7 @@ export const DeceptionVault: React.FC = () => {
     c.topic.toLowerCase().includes(search.toLowerCase()) || 
     c.id.toLowerCase().includes(search.toLowerCase())
   );
+  const topHeadline = filteredCases[0]?.topic || cases[0]?.topic || 'Hakuna uchunguzi kwa sasa.';
 
   const openCase = (caseItem: CaseStudy) => {
     setActiveCaseId(caseItem.id);
@@ -141,74 +142,115 @@ export const DeceptionVault: React.FC = () => {
   };
 
   return (
-    <div className="min-h-[calc(100vh-100px)] bg-[#020617] text-slate-300 overflow-hidden relative p-4 md:p-8">
-      
-      <div className="max-w-7xl mx-auto space-y-12">
-        <div className="flex flex-col md:flex-row justify-between items-end gap-6 border-b border-white/5 pb-12">
-           <div className="space-y-4">
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-red-500/10 rounded-lg text-red-500 border border-red-500/20 text-[9px] font-black uppercase tracking-widest">
-                 <ShieldAlert size={14} /> Maabara ya Kufichua Udanganyifu
-              </div>
-              <h1 className="text-4xl md:text-7xl font-black text-white uppercase tracking-tighter italic leading-none">
-                Ukweli vs <span className="text-red-600">Uongo</span>
+    <div className="bg-white dark:bg-slate-950 min-h-screen pb-20 max-w-6xl mx-auto animate-fade-in">
+      <div className="p-4 sm:p-6 md:p-12 border-b border-slate-100 dark:border-slate-800 space-y-5">
+        <div className="flex flex-col md:flex-row justify-between items-center gap-6">
+          <div className="flex items-center gap-3">
+            <div className="bg-slate-100 dark:bg-slate-900 p-2.5 rounded-xl text-primary-900 dark:text-gold-400 border border-slate-200 dark:border-slate-800">
+              <ShieldAlert size={22} />
+            </div>
+            <div className="space-y-1">
+              <h1 className="text-3xl sm:text-4xl font-black text-slate-900 dark:text-slate-100 tracking-tight leading-none">
+                Uchunguzi wa <span className="text-red-600">Kiungu</span>
               </h1>
-              <p className="text-slate-500 text-lg max-w-xl font-medium">Chunguza mapokeo ya wanadamu dhidi ya ukweli wa Biblia. Usikubali kudanganywa tena.</p>
-           </div>
-           
-           <div className="w-full md:w-96 relative">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-600" size={18} />
-              <input 
-                type="text" 
-                placeholder="Tafuta mada ya uongo..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-6 outline-none focus:border-red-500/50 transition-all text-white text-sm"
-              />
-           </div>
+              <p className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-[0.12em]">
+                Ukweli dhidi ya uongo kwa ushahidi wa maandiko
+              </p>
+            </div>
+          </div>
+          <div className="relative w-full md:w-72">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" size={18} />
+            <input
+              type="text"
+              placeholder="Tafuta kesi..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 bg-slate-50 dark:bg-slate-900 border border-transparent dark:border-slate-800 rounded-full text-sm text-slate-800 dark:text-slate-100 outline-none focus:ring-1 focus:ring-slate-300 dark:focus:ring-slate-600"
+            />
+          </div>
         </div>
+        <div className="rounded-xl border border-red-200 bg-red-50/90 dark:border-red-500/30 dark:bg-red-500/10 px-4 py-3 flex items-center gap-3">
+          <span className="shrink-0 px-2 py-1 rounded-full bg-white dark:bg-slate-900 text-[10px] font-black uppercase tracking-[0.12em] text-red-600 dark:text-red-300 border border-red-200 dark:border-red-500/40">
+            Tahadhari
+          </span>
+          <p className="min-w-0 flex-1 text-xs md:text-sm font-bold text-red-700 dark:text-red-200 truncate">
+            {topHeadline}
+          </p>
+          <ArrowRight size={16} className="shrink-0 text-red-600 dark:text-red-300" />
+        </div>
+      </div>
 
+      <div className="p-3 sm:p-4 md:p-8 space-y-5">
         {casesError && (
           <div className="bg-red-500/10 border border-red-500/20 text-red-500 text-[10px] font-bold uppercase tracking-widest px-4 py-2 rounded-lg">
             {casesError}
           </div>
         )}
         {loadingCases && (
-          <div className="py-6 text-center text-xs font-black uppercase tracking-widest text-slate-500">
-            Inapakia data...
-          </div>
+          <div className="text-xs uppercase tracking-widest text-slate-400 dark:text-slate-500 font-black">Inapakia uchunguzi...</div>
         )}
         {!loadingCases && filteredCases.length === 0 && (
-          <div className="py-6 text-center text-xs font-black uppercase tracking-widest text-slate-500">
+          <div className="bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 text-[10px] font-bold uppercase tracking-widest px-4 py-3 rounded-lg">
             Hakuna taarifa kwa sasa.
           </div>
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 pb-32">
-            {filteredCases.map(c => (
-              <button
-                key={c.id}
-                onClick={() => openCase(c)}
-                className="group text-left p-8 rounded-xl bg-white/[0.02] border border-white/5 hover:border-red-500/40 hover:bg-white/[0.04] transition-all duration-500 relative overflow-hidden flex flex-col h-full shadow-sm hover:shadow-2xl"
-              >
-               <div className="flex justify-between items-center mb-8">
-                  <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-600 group-hover:text-red-500 transition-colors">
-                    Kesi #{c.id}
-                  </span>
-                  <div className={`w-2 h-2 rounded-full ${c.threatLevel === 'CRITICAL' ? 'bg-red-500 animate-pulse shadow-[0_0_10px_rgba(239,68,68,0.5)]' : 'bg-orange-500 shadow-[0_0_10px_rgba(249,115,22,0.5)]'}`}></div>
-               </div>
-               
-               <h4 className="text-2xl font-black leading-none text-slate-400 group-hover:text-white transition-all uppercase mb-6 flex-1">
-                  Inawezekana ukawa umedanganywa kuhusu <span className="text-red-500 italic">{c.topic}</span>?
-               </h4>
-               
-               <div className="mt-auto pt-6 border-t border-white/5 flex items-center justify-between">
-                  <span className="text-[10px] font-black text-slate-700 uppercase tracking-widest">{c.category}</span>
-                  <div className="flex items-center gap-2 text-[10px] font-black text-red-500">
-                     CHUNGUZA <ChevronRight size={14} />
-                  </div>
-               </div>
-             </button>
-           ))}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          {filteredCases.map((c) => (
+            <article
+              key={c.id}
+              className="group cursor-pointer rounded-2xl border border-green-200/80 dark:border-slate-700 bg-white/95 dark:bg-slate-900/90 p-4 sm:p-5 shadow-[0_8px_20px_rgba(15,23,42,0.04)] dark:shadow-[0_10px_26px_rgba(2,6,23,0.38)] hover:border-gold-400/80 hover:shadow-[0_14px_28px_rgba(212,154,20,0.12)] transition-all"
+              onClick={() => openCase(c)}
+              role="button"
+              tabIndex={0}
+              aria-label={`Fungua kesi ${c.id}`}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                  event.preventDefault();
+                  openCase(c);
+                }
+              }}
+            >
+              <div className="flex items-center justify-between gap-3 mb-4">
+                <span className="inline-flex items-center px-2.5 py-1 rounded-full border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 text-[10px] font-black uppercase tracking-[0.1em] text-slate-600 dark:text-slate-300">
+                  Kesi #{c.id}
+                </span>
+                <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-[0.1em] ${
+                  c.threatLevel === 'CRITICAL'
+                    ? 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300'
+                    : c.threatLevel === 'HIGH'
+                      ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300'
+                      : 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300'
+                }`}>
+                  {c.threatLevel}
+                </span>
+              </div>
+
+              <h4 className="text-xl font-bold text-slate-900 dark:text-slate-100 group-hover:text-gold-700 dark:group-hover:text-gold-300 transition-colors leading-tight">
+                {c.topic}
+              </h4>
+              <p className="mt-2 text-slate-600 dark:text-slate-300 text-sm leading-relaxed line-clamp-2 font-serif">
+                {c.tradition}
+              </p>
+
+              <div className="mt-4 pt-3 border-t border-green-100/90 dark:border-slate-700 flex items-center justify-between gap-3">
+                <span className="text-[11px] font-bold uppercase tracking-[0.08em] text-slate-500 dark:text-slate-400">
+                  {c.category}
+                </span>
+                <button
+                  type="button"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    openCase(c);
+                  }}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-gold-300/80 bg-gold-100/70 px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.08em] text-gold-800 hover:bg-gold-200/80 transition-colors"
+                >
+                  Chunguza
+                  <ChevronRight size={13} />
+                </button>
+              </div>
+            </article>
+          ))}
         </div>
       </div>
 

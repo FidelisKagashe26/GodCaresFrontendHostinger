@@ -158,6 +158,7 @@ export const QuestionVault: React.FC = () => {
       return matchesSearch && matchesCategory;
     });
   }, [searchTerm, activeCategory, questions]);
+  const topHeadline = filteredQuestions[0]?.q || questions[0]?.q || 'Hakuna maswali mapya kwa sasa.';
 
   const openQuestion = (item: QuestionItem) => {
     setSelectedQuestion(item);
@@ -237,20 +238,43 @@ export const QuestionVault: React.FC = () => {
   };
 
   return (
-    <div className="space-y-8 animate-fade-in max-w-7xl mx-auto pb-32 px-4 text-slate-900 dark:text-slate-100">
-      <section className="relative bg-slate-100 dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(234,179,8,0.18),transparent_55%)]"></div>
-        <div className="relative z-10 px-6 py-10 md:px-10 md:py-12 space-y-3">
-          <p className="text-[10px] font-black uppercase tracking-[0.35em] text-gold-600 dark:text-gold-500">Hazina ya Maswali</p>
-          <h1 className="text-3xl md:text-5xl font-black tracking-tight uppercase leading-none">Maswali na <span className="text-gold-600 dark:text-gold-500 italic">Majibu</span></h1>
-          <p className="text-sm md:text-base text-slate-600 dark:text-slate-400 max-w-2xl">
-            Chuja maswali kwa mada, soma majibu ya Biblia kwa kina, na tazama video za maelezo bila kutoka kwenye ukurasa.
-          </p>
+    <div className="bg-white dark:bg-slate-950 min-h-screen pb-20 max-w-6xl mx-auto animate-fade-in text-slate-900 dark:text-slate-100">
+      <div className="p-4 sm:p-6 md:p-12 border-b border-slate-100 dark:border-slate-800 space-y-5">
+        <div className="flex flex-col md:flex-row justify-between items-center gap-6">
+          <div className="flex items-center gap-3">
+            <div className="bg-slate-100 dark:bg-slate-900 p-2.5 rounded-xl text-primary-900 dark:text-gold-400 border border-slate-200 dark:border-slate-800">
+              <MessageSquare size={22} />
+            </div>
+            <div className="space-y-1">
+              <h1 className="text-3xl sm:text-4xl font-black text-slate-900 dark:text-slate-100 tracking-tight leading-none">
+                Maswali na <span className="text-gold-600 dark:text-gold-400">Majibu</span>
+              </h1>
+              <p className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-[0.12em]">
+                Hazina ya majibu ya Biblia kwa uchunguzi wa kiungu
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={() => setShowAskForm(true)}
+            className="inline-flex items-center gap-2 rounded-full bg-gold-500 px-4 py-2 text-[11px] font-black uppercase tracking-[0.1em] text-primary-950 hover:bg-gold-400 transition-colors"
+          >
+            <PlusCircle size={14} />
+            Uliza Swali
+          </button>
         </div>
-      </section>
+        <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 px-4 py-3 flex items-center gap-3">
+          <span className="shrink-0 px-2 py-1 rounded-full bg-white dark:bg-slate-800 text-[10px] font-black uppercase tracking-[0.12em] text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700">
+            Mada
+          </span>
+          <p className="min-w-0 flex-1 text-xs md:text-sm font-bold text-slate-700 dark:text-slate-200 truncate">
+            {topHeadline}
+          </p>
+          <ChevronRight size={16} className="shrink-0 text-slate-500 dark:text-slate-300" />
+        </div>
+      </div>
       
       {/* Search & Fixed Filter Bar - Solid background to prevent see-through "moving" effect */}
-      <section className="bg-white dark:bg-[#020617] p-4 rounded-xl border border-slate-200 dark:border-slate-800 sticky top-20 z-40 shadow-xl dark:shadow-2xl ring-1 ring-slate-100 dark:ring-white/5">
+      <section className="mx-3 mt-4 sm:mx-4 md:mx-8 bg-white dark:bg-[#020617] p-4 rounded-xl border border-slate-200 dark:border-slate-800 sticky top-20 z-40 shadow-lg dark:shadow-2xl ring-1 ring-slate-100 dark:ring-white/5">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-center">
           <div className="lg:col-span-4 relative group">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 group-focus-within:text-gold-500 transition-colors" size={18} />
@@ -281,7 +305,7 @@ export const QuestionVault: React.FC = () => {
       </section>
 
       {/* Grid Results */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 pt-2">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 pt-5 px-3 sm:px-4 md:px-8">
         <div className="lg:col-span-8 space-y-4">
            {questionsError && (
              <div className="bg-red-500/10 border border-red-500/20 text-red-500 text-[10px] font-bold uppercase tracking-widest px-4 py-2 rounded-lg">
@@ -294,28 +318,53 @@ export const QuestionVault: React.FC = () => {
              </div>
            )}
             {filteredQuestions.map((item) => (
-              <div 
+              <article 
                 key={item.id} 
                 onClick={() => openQuestion(item)}
-                className="group bg-white dark:bg-slate-900/60 p-6 rounded-xl border border-slate-200 dark:border-slate-800 hover:border-gold-500/40 dark:hover:bg-slate-900 transition-all duration-300 cursor-pointer shadow-sm relative overflow-hidden"
+                className="group cursor-pointer rounded-2xl border border-green-200/80 dark:border-slate-700 bg-white/95 dark:bg-slate-900/90 p-4 sm:p-5 shadow-[0_8px_20px_rgba(15,23,42,0.04)] dark:shadow-[0_10px_26px_rgba(2,6,23,0.38)] hover:border-gold-400/80 hover:shadow-[0_14px_28px_rgba(212,154,20,0.12)] transition-all"
+                role="button"
+                tabIndex={0}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    openQuestion(item);
+                  }
+                }}
               >
-               <div className="flex justify-between items-start mb-4">
-                  <span className="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-gold-600 dark:text-gold-500 text-[8px] font-black uppercase tracking-widest rounded border border-slate-200 dark:border-slate-700">
+                <div className="flex justify-between items-start mb-4">
+                  <span className="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-[10px] font-black uppercase tracking-[0.1em] rounded-full border border-slate-200 dark:border-slate-700">
                     {item.category}
                   </span>
-                  <ChevronRight size={16} className="text-slate-400 dark:text-slate-600 group-hover:text-gold-500 transition-all group-hover:translate-x-1" />
-               </div>
-               <h3 className="text-xl font-black text-slate-900 dark:text-white uppercase leading-tight mb-3">
-                 {item.q}
-               </h3>
-               <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed italic line-clamp-1">
+                  <ChevronRight size={16} className="text-slate-400 dark:text-slate-600 group-hover:text-gold-500 transition-colors group-hover:translate-x-1" />
+                </div>
+                <h3 className="text-xl font-bold text-slate-900 dark:text-white leading-tight mb-3 group-hover:text-gold-700 dark:group-hover:text-gold-300 transition-colors">
+                  {item.q}
+                </h3>
+               <p className="text-slate-600 dark:text-slate-300 text-sm leading-relaxed italic line-clamp-2 font-serif">
                  "{item.a}"
                </p>
-               <div className="mt-4 pt-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-[9px] font-black uppercase tracking-widest text-slate-500 group-hover:text-gold-500 transition-colors">
-                  <span className="flex items-center gap-2"><BookOpen size={12} /> {item.ref}</span>
-                  {item.videoUrl && <span className="flex items-center gap-1 text-red-500"><Youtube size={12}/> Video</span>}
+               <div className="mt-4 pt-3 border-t border-green-100/90 dark:border-slate-700 flex items-center justify-between gap-3">
+                  <span className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.08em] text-slate-500 dark:text-slate-400"><BookOpen size={12} /> {item.ref}</span>
+                  {item.videoUrl ? (
+                    <span className="inline-flex items-center gap-1 rounded-full bg-red-100 px-2 py-1 text-[10px] font-black uppercase tracking-[0.08em] text-red-700 dark:bg-red-900/40 dark:text-red-300">
+                      <Youtube size={11}/>
+                      Video
+                    </span>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        openQuestion(item);
+                      }}
+                      className="inline-flex items-center gap-1.5 rounded-full border border-gold-300/80 bg-gold-100/70 px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.08em] text-gold-800 hover:bg-gold-200/80 transition-colors"
+                    >
+                      Zaidi
+                      <ChevronRight size={13} />
+                    </button>
+                  )}
                </div>
-             </div>
+             </article>
            ))}
            {!loadingQuestions && filteredQuestions.length === 0 && (
              <div className="py-20 text-center space-y-4 opacity-30">
@@ -327,7 +376,7 @@ export const QuestionVault: React.FC = () => {
 
         {/* Sidebar Panel - Fixed Static Position */}
         <div className="lg:col-span-4">
-           <div className="bg-white dark:bg-slate-900 p-8 rounded-xl text-slate-900 dark:text-white shadow-xl border border-slate-200 dark:border-slate-800 space-y-6 sticky top-44">
+           <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl text-slate-900 dark:text-white shadow-[0_12px_26px_rgba(15,23,42,0.08)] border border-green-200/80 dark:border-slate-700 space-y-5 sticky top-44">
               <h4 className="text-sm font-black tracking-widest uppercase italic flex items-center gap-2">
                  <ShieldCheck size={18} className="text-gold-500" /> Kanuni ya Kweli
               </h4>
@@ -337,7 +386,7 @@ export const QuestionVault: React.FC = () => {
               <div className="h-px bg-slate-200 dark:bg-slate-800 w-full"></div>
               <button 
                 onClick={() => setShowAskForm(true)}
-                className="w-full py-4 bg-gold-500 text-primary-950 rounded-lg font-black text-[10px] uppercase tracking-widest hover:bg-white transition-all shadow-lg flex items-center justify-center gap-2"
+                className="w-full py-3.5 bg-gold-500 text-primary-950 rounded-full font-black text-[11px] uppercase tracking-[0.1em] hover:bg-gold-400 transition-all shadow-lg flex items-center justify-center gap-2"
               >
                 <PlusCircle size={14} /> Uliza Swali Lako
               </button>

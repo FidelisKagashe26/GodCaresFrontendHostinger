@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { 
   FileText, Download, PlayCircle, BookOpen, Headphones, 
   Video, Search, Filter, Sparkles, ChevronRight, 
-  ArrowDownToLine, Clock, Layers, Star, Image as ImageIcon,
+  ArrowDownToLine, Clock, Star, Image as ImageIcon,
   ExternalLink, Play, Eye, FileDigit, X, ArrowLeft, Maximize2,
   Volume2, Music, Pause, ChevronLeft, Share2, FolderHeart, LayoutGrid
 } from 'lucide-react';
@@ -197,6 +197,7 @@ export const Library: React.FC = () => {
                           item.swahiliTitle.toLowerCase().includes(search.toLowerCase());
     return matchesTab && matchesSearch;
   });
+  const topHeadline = filteredItems[0]?.title || items[0]?.title || 'Hakuna faili za maktaba kwa sasa.';
 
   const renderPdfList = (items: LibraryItem[]) => (
     <div className="space-y-3">
@@ -323,30 +324,65 @@ export const Library: React.FC = () => {
   );
 
   return (
-    <div className="max-w-7xl mx-auto space-y-8 animate-fade-in pb-24">
-      {/* Header */}
-      <div className="bg-slate-900 rounded-3xl p-10 md:p-14 text-white relative overflow-hidden">
-        <div className="absolute top-0 right-0 p-10 opacity-[0.03] rotate-12"><Layers size={250} /></div>
-        <div className="relative z-10 space-y-4">
-          <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/10 rounded-lg text-[10px] font-black uppercase tracking-[0.3em]">Hazina ya Vifaa vya Kidijitali</div>
-          <h1 className="text-4xl md:text-6xl font-black tracking-tighter">Maktaba ya <span className="text-gold-500">Ukweli</span></h1>
-          <p className="text-slate-400 text-lg max-w-2xl">Vifaa vya utafiti, mafundisho ya sauti, video na nyumba ya picha zote katika sehemu moja.</p>
-          <div className="pt-6 relative max-w-xl">
-             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
-             <input type="text" placeholder="Tafuta faili yoyote..." value={search} onChange={(e) => setSearch(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-6 outline-none focus:bg-white/10 focus:border-gold-500/50 transition-all text-sm"/>
+    <div className="bg-white dark:bg-slate-950 min-h-screen pb-20 max-w-6xl mx-auto animate-fade-in">
+      <div className="p-4 sm:p-6 md:p-12 border-b border-slate-100 dark:border-slate-800 space-y-5">
+        <div className="flex flex-col md:flex-row justify-between items-center gap-6">
+          <div className="flex items-center gap-3">
+            <div className="bg-slate-100 dark:bg-slate-900 p-2.5 rounded-xl text-primary-900 dark:text-gold-400 border border-slate-200 dark:border-slate-800">
+              <BookOpen size={22} />
+            </div>
+            <div className="space-y-1">
+              <h1 className="text-3xl sm:text-4xl font-black text-slate-900 dark:text-slate-100 tracking-tight leading-none">
+                Maktaba ya <span className="text-gold-600 dark:text-gold-400">Ukweli</span>
+              </h1>
+              <p className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-[0.12em]">
+                Vifaa vya utafiti, sauti, video na nyaraka
+              </p>
+            </div>
           </div>
+          <div className="relative w-full md:w-80">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" size={18} />
+            <input
+              type="text"
+              placeholder="Tafuta faili yoyote..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 bg-slate-50 dark:bg-slate-900 border border-transparent dark:border-slate-800 rounded-full text-sm text-slate-800 dark:text-slate-100 outline-none focus:ring-1 focus:ring-slate-300 dark:focus:ring-slate-600"
+            />
+          </div>
+        </div>
+        <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 px-4 py-3 flex items-center gap-3">
+          <span className="shrink-0 px-2 py-1 rounded-full bg-white dark:bg-slate-800 text-[10px] font-black uppercase tracking-[0.12em] text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700">
+            Highlight
+          </span>
+          <p className="min-w-0 flex-1 text-xs md:text-sm font-bold text-slate-700 dark:text-slate-200 truncate">
+            {topHeadline}
+          </p>
+          <ChevronRight size={16} className="shrink-0 text-slate-500 dark:text-slate-300" />
         </div>
       </div>
 
       {/* Tabs */}
-      <div className="flex flex-wrap items-center gap-3 border-b border-slate-200 dark:border-white/5 pb-6">
-        {(['Zote', 'PDF', 'Video', 'Audio', 'Image'] as const).map(tab => (
-          <button key={tab} onClick={() => setActiveTab(tab)} className={`px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === tab ? 'bg-primary-950 text-gold-400 shadow-xl' : 'bg-slate-50 dark:bg-white/5 text-slate-500 hover:text-slate-900 dark:hover:text-white'}`}>{tab}</button>
-        ))}
+      <div className="px-3 sm:px-4 md:px-8 pt-4">
+        <div className="flex flex-wrap items-center gap-2.5 border-b border-slate-200 dark:border-slate-700 pb-5">
+          {(['Zote', 'PDF', 'Video', 'Audio', 'Image'] as const).map(tab => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`px-5 py-2 rounded-full text-[10px] font-black uppercase tracking-[0.1em] transition-all border ${
+                activeTab === tab
+                  ? 'bg-gold-100 text-gold-800 border-gold-300 dark:bg-gold-900/35 dark:text-gold-200 dark:border-gold-700'
+                  : 'bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-gold-300 dark:hover:border-gold-700 hover:text-slate-900 dark:hover:text-slate-100'
+              }`}
+            >
+              {tab}
+            </button>
+          ))}
+        </div>
       </div>
 
       {notice && (
-        <div className={`rounded-xl border px-4 py-3 text-[10px] font-black uppercase tracking-widest ${
+        <div className={`mx-3 mt-5 sm:mx-4 md:mx-8 rounded-xl border px-4 py-3 text-[10px] font-black uppercase tracking-widest ${
           notice.type === 'success'
             ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500'
             : 'bg-red-500/10 border-red-500/20 text-red-500'
@@ -356,7 +392,7 @@ export const Library: React.FC = () => {
       )}
 
       {/* Main Content Area */}
-      <div className="space-y-12">
+      <div className="space-y-12 px-3 sm:px-4 md:px-8 pt-6">
         {loading && (
           <div className="py-10 text-center text-xs font-black uppercase tracking-widest text-slate-400">Inapakia maktaba...</div>
         )}
