@@ -274,7 +274,7 @@ export const QuestionVault: React.FC = () => {
       </div>
       
       {/* Search & Fixed Filter Bar - Solid background to prevent see-through "moving" effect */}
-      <section className="mx-3 mt-4 sm:mx-4 md:mx-8 bg-white dark:bg-[#020617] p-4 rounded-xl border border-slate-200 dark:border-slate-800 sticky top-20 z-40 shadow-lg dark:shadow-2xl ring-1 ring-slate-100 dark:ring-white/5">
+      <section className="mx-3 mt-4 sm:mx-4 md:mx-8 bg-white dark:bg-[#020617] p-4 rounded-xl border border-slate-200 dark:border-slate-800 lg:sticky lg:top-24 z-30 shadow-lg dark:shadow-2xl ring-1 ring-slate-100 dark:ring-white/5">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-center">
           <div className="lg:col-span-4 relative group">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 group-focus-within:text-gold-500 transition-colors" size={18} />
