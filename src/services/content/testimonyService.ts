@@ -6,7 +6,6 @@ export interface TestimonyApi {
   name: string;
   location: string;
   story: string;
-  verified: boolean;
   stars: number;
   testimony_type: "text" | "video";
   profile_image?: string;
