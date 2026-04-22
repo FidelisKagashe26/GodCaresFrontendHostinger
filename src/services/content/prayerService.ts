@@ -31,7 +31,7 @@ export const getAnsweredPrayers = async (): Promise<PrayerRequestPublic[]> => {
     async () => {
       const response = await fetch(`${API_BASE_URL}/api/prayers/answered/`);
       if (!response.ok) {
-        throw new Error("Imeshindikana kupata maombi yaliyojibiwa.");
+        throw new Error("Imeshindikana kupata shuhuda za maombi.");
       }
       return (await response.json()) as PrayerRequestPublic[];
     },

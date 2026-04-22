@@ -20,43 +20,19 @@ interface QuestionItem {
   videoThumbnail?: string;
 }
 
-const ARCHIVED_QUESTIONS: QuestionItem[] = [
-  { 
-    id: 1, 
-    category: "Wokovu",
-    q: "Je, dhambi ya mauti ni ipi?", 
-    a: "Dhambi ya mauti inayotajwa katika 1 Yohana 5:16 ni kukataa kwa makusudi sauti ya Roho Mtakatifu mpaka moyo unakuwa mgumu kabisa.", 
-    detailedResponse: "Biblia inatufundisha kuwa kila dhambi inaweza kusamehewa isipokuwa kumkufuru Roho Mtakatifu. Hii si tendo la mara moja la bahati mbaya, bali ni msimamo thabiti wa kukataa wito wa Mungu wa toba. Unapokataa nuru mara kwa mara, hatimaye giza linakuwa nuru kwako.",
-    ref: "Mathayo 12:31-32", 
-    tags: ["Sin", "Judgment"],
-    isPopular: true,
-    videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-    videoThumbnail: "https://images.unsplash.com/photo-1512412023212-f05419bb100d?auto=format&fit=crop&q=80&w=800"
-  },
-  { 
-    id: 2, 
-    category: "Sabato",
-    q: "Kwa nini Sabato ni muhimu kuliko siku nyingine?", 
-    a: "Kwa sababu Mungu aliibariki na kuitakasa siku hiyo pekee tangu uumbaji kama ukumbusho wa uwezo wake wa kuumba na kukomboa.", 
-    detailedResponse: "Sabato si siku ya mapumziko tu kwa ajili ya mwili, bali ni 'ishara' kati ya Mungu na watu wake. Katika Kutoka 31:13, Mungu anasema ni ishara ili tujue kuwa Yeye ndiye anayetutakasa. Ni ukumbusho wa mamlaka yake kama Muumba wa mbingu na nchi.",
-    ref: "Mwanzo 2:2-3", 
-    tags: ["Sabato"],
-    isPopular: true,
-    videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-    videoThumbnail: "https://images.unsplash.com/photo-1543336783-bb59efd935a6?auto=format&fit=crop&q=80&w=800"
-  },
-  {
-    id: 3,
-    category: "Hali ya Wafu",
-    q: "Nini hutokea mtu akifa?",
-    a: "Biblia inafananisha kifo na usingizi mzito mpaka asubuhi ya ufufuo ambapo hakuna ufahamu wa mambo ya duniani.",
-    detailedResponse: "Biblia inasema 'wafu hawajui neno lo lote' (Mhubiri 9:5). Yesu mwenyewe alimwita Lazaro 'rafiki yetu amelala'. Tunangoja tarumbeta ya mwisho ambapo wenye haki watafufuliwa katika mwili mpya usioharibika.",
-    ref: "1 Wathesalonike 4:16",
-    tags: ["Death", "Resurrection"],
-    videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-    videoThumbnail: "https://images.unsplash.com/photo-1533105079780-92b9be482077?auto=format&fit=crop&q=80&w=800"
+const questionHashPrefix = '#swali-';
+
+const getQuestionIdFromHash = (): number | null => {
+  const hash = (window.location.hash || '').trim();
+  if (!hash.toLowerCase().startsWith(questionHashPrefix)) {
+    return null;
   }
-];
+  const raw = hash.slice(questionHashPrefix.length);
+  const parsed = Number(raw);
+  return Number.isFinite(parsed) ? parsed : null;
+};
+
+const buildQuestionHash = (id: number): string => `${questionHashPrefix}${id}`;
 
 const normalizeVideoUrl = (value: string): string => {
   const raw = (value || '').trim();
@@ -153,6 +129,17 @@ export const QuestionVault: React.FC = () => {
     loadQuestions();
   }, []);
 
+  useEffect(() => {
+    if (!questions.length) return;
+    const questionIdFromHash = getQuestionIdFromHash();
+    if (!questionIdFromHash) return;
+    const found = questions.find((item) => item.id === questionIdFromHash);
+    if (found) {
+      setSelectedQuestion(found);
+      setActiveView('text');
+    }
+  }, [questions]);
+
   const categories = useMemo(
     () => ['Zote', ...Array.from(new Set(questions.map((item) => item.category).filter(Boolean)))],
     [questions]
@@ -172,11 +159,23 @@ export const QuestionVault: React.FC = () => {
     });
   }, [searchTerm, activeCategory, questions]);
 
+  const openQuestion = (item: QuestionItem) => {
+    setSelectedQuestion(item);
+    setActiveView('text');
+    window.history.replaceState(null, '', `${window.location.pathname}${window.location.search}${buildQuestionHash(item.id)}`);
+  };
+
+  const closeQuestion = () => {
+    setSelectedQuestion(null);
+    window.history.replaceState(null, '', `${window.location.pathname}${window.location.search}`);
+  };
+
   const handleShare = async (item: QuestionItem) => {
+    const shareUrl = `${window.location.origin}${window.location.pathname}${window.location.search}${buildQuestionHash(item.id)}`;
     const shareData = {
       title: `God Cares 365: ${item.q}`,
       text: `${item.q}\n\nJibu la Biblia: ${item.a}`,
-      url: window.location.href
+      url: shareUrl,
     };
     if (navigator.share) {
       try {
@@ -294,12 +293,12 @@ export const QuestionVault: React.FC = () => {
                Inapakia maswali...
              </div>
            )}
-           {filteredQuestions.map((item) => (
-             <div 
-               key={item.id} 
-               onClick={() => { setSelectedQuestion(item); setActiveView('text'); }}
-               className="group bg-white dark:bg-slate-900/60 p-6 rounded-xl border border-slate-200 dark:border-slate-800 hover:border-gold-500/40 dark:hover:bg-slate-900 transition-all duration-300 cursor-pointer shadow-sm relative overflow-hidden"
-             >
+            {filteredQuestions.map((item) => (
+              <div 
+                key={item.id} 
+                onClick={() => openQuestion(item)}
+                className="group bg-white dark:bg-slate-900/60 p-6 rounded-xl border border-slate-200 dark:border-slate-800 hover:border-gold-500/40 dark:hover:bg-slate-900 transition-all duration-300 cursor-pointer shadow-sm relative overflow-hidden"
+              >
                <div className="flex justify-between items-start mb-4">
                   <span className="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-gold-600 dark:text-gold-500 text-[8px] font-black uppercase tracking-widest rounded border border-slate-200 dark:border-slate-700">
                     {item.category}
@@ -354,7 +353,7 @@ export const QuestionVault: React.FC = () => {
             {/* Header / Control Bar - Fixed Positions to prevent Shifting */}
             <div className="bg-slate-950 px-6 py-4 flex items-center justify-between border-b border-slate-800 shrink-0">
                <div className="flex items-center gap-4 w-1/3">
-                  <button onClick={() => setSelectedQuestion(null)} className="p-2 bg-slate-800 rounded-lg text-slate-300 hover:text-white transition-all"><ArrowLeft size={18} /></button>
+                  <button onClick={closeQuestion} className="p-2 bg-slate-800 rounded-lg text-slate-300 hover:text-white transition-all"><ArrowLeft size={18} /></button>
                   <span className="hidden md:block text-[10px] font-black text-slate-500 uppercase tracking-widest truncate">Namba ya Swali: #{selectedQuestion.id}</span>
                </div>
                
@@ -451,8 +450,8 @@ export const QuestionVault: React.FC = () => {
                   <ShieldCheck size={14} className="text-green-500" />
                   <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Uadilifu Uliothibitishwa</span>
                </div>
-               <button onClick={() => setSelectedQuestion(null)} className="px-10 py-3 bg-gold-500 text-primary-950 rounded-lg text-[10px] font-black uppercase tracking-widest hover:opacity-90 transition-all">Funga</button>
-            </div>
+               <button onClick={closeQuestion} className="px-10 py-3 bg-gold-500 text-primary-950 rounded-lg text-[10px] font-black uppercase tracking-widest hover:opacity-90 transition-all">Funga</button>
+             </div>
           </div>
         </div>
       )}
@@ -499,6 +498,7 @@ export const QuestionVault: React.FC = () => {
     </div>
   );
 };
+
 
 
 

@@ -71,6 +71,25 @@ const CATEGORY_LABELS: Record<'Seminar' | 'Summit' | 'Revival', string> = {
   Revival: 'Mwamsho',
 };
 
+const mapEventFromApi = (item: EventApi): Event => ({
+  id: String(item.id),
+  title: item.title,
+  date: toDate(item.starts_at) || new Date(),
+  endDate: toDate(item.ends_at || null),
+  location: item.location || 'Hakuna taarifa',
+  image: item.image || '',
+  description: item.description || '',
+  type: item.event_type,
+  category: item.category,
+  attendees: Number(item.attendees || 0),
+  maxAttendees: Number(item.max_attendees || 0),
+  speakers: Array.isArray(item.speakers) ? item.speakers : [],
+  resources: Array.isArray(item.resources) ? item.resources : [],
+});
+
+const isEventFull = (event: Event): boolean =>
+  event.maxAttendees > 0 && event.attendees >= event.maxAttendees;
+
 const SpeakerAvatar: React.FC<{ speaker: Speaker; className?: string; iconSize?: number }> = ({
   speaker,
   className = 'w-12 h-12',
@@ -129,36 +148,22 @@ export const Events: React.FC = () => {
   const [eventsError, setEventsError] = useState('');
   const [loadingEvents, setLoadingEvents] = useState(false);
 
-  useEffect(() => {
-    const loadEvents = async () => {
-      setLoadingEvents(true);
-      setEventsError('');
-      try {
-        const data = await getEvents();
-        const mapped = data.map((item): Event => ({
-          id: String(item.id),
-          title: item.title,
-          date: toDate(item.starts_at) || new Date(),
-          endDate: toDate(item.ends_at || null),
-          location: item.location,
-          image: item.image,
-          description: item.description,
-          type: item.event_type,
-          category: item.category,
-          attendees: item.attendees,
-          maxAttendees: item.max_attendees,
-          speakers: item.speakers || [],
-          resources: item.resources || [],
-        }));
-        setEvents(mapped);
-      } catch (error) {
-        setEventsError('Imeshindikana kupata matukio.');
-      } finally {
-        setLoadingEvents(false);
-      }
-    };
+  const loadEvents = async () => {
+    setLoadingEvents(true);
+    setEventsError('');
+    try {
+      const data = await getEvents();
+      setEvents(data.map(mapEventFromApi));
+    } catch {
+      setEventsError('Imeshindikana kupata matukio.');
+      setEvents([]);
+    } finally {
+      setLoadingEvents(false);
+    }
+  };
 
-    loadEvents();
+  useEffect(() => {
+    void loadEvents();
   }, []);
 
   const upcomingEvent = useMemo(() => {
@@ -208,15 +213,28 @@ export const Events: React.FC = () => {
 
     const ev = events.find(event => event.id === id);
     if (!ev) return;
+    if (isEventFull(ev)) {
+      alert('Nafasi za tukio hili zimejaa.');
+      return;
+    }
 
     const registrant = resolveRegistrant();
     if (!registrant) return;
 
     setRegisteringId(id);
     try {
-      await registerForEvent(Number(id), registrant);
+      const response = await registerForEvent(Number(id), registrant);
       setRegisteredIds((prev) => prev.includes(id) ? prev : [...prev, id]);
-      alert(`Usajili umekamilika kwa "${ev.title}". Utaarifiwa kabla ya tukio.`);
+
+      if (response.event) {
+        const mappedEvent = mapEventFromApi(response.event);
+        setEvents((prev) => prev.map((eventItem) => (eventItem.id === id ? mappedEvent : eventItem)));
+        setSelectedEvent((prev) => (prev && prev.id === id ? mappedEvent : prev));
+      } else {
+        void loadEvents();
+      }
+
+      alert(response.detail || `Usajili umekamilika kwa "${ev.title}". Utaarifiwa kabla ya tukio.`);
     } catch (error: any) {
       alert(error?.message || 'Imeshindikana kusajili.');
     } finally {
@@ -291,6 +309,8 @@ export const Events: React.FC = () => {
         )}
         {filtered.map(event => {
           const daysLeft = getDaysLeft(event.date);
+          const full = isEventFull(event);
+          const registered = registeredIds.includes(event.id);
 
           return (
           <div
@@ -353,10 +373,10 @@ export const Events: React.FC = () => {
                   </div>
                   <button 
                     onClick={(e) => handleRegister(e, event.id)}
-                    disabled={registeringId === event.id}
-                    className={`px-6 py-2.5 rounded-sm text-[10px] font-black uppercase tracking-widest transition-all ${registeredIds.includes(event.id) ? 'bg-green-600 text-white' : 'bg-primary-950 text-gold-400 hover:bg-gold-500 hover:text-primary-950'}`}
+                    disabled={registeringId === event.id || (full && !registered)}
+                    className={`px-6 py-2.5 rounded-sm text-[10px] font-black uppercase tracking-widest transition-all disabled:opacity-60 disabled:cursor-not-allowed ${registered ? 'bg-green-600 text-white' : full ? 'bg-slate-300 dark:bg-slate-700 text-slate-600 dark:text-slate-300' : 'bg-primary-950 text-gold-400 hover:bg-gold-500 hover:text-primary-950'}`}
                   >
-                    {registeredIds.includes(event.id) ? 'Umesajiliwa' : registeringId === event.id ? 'Inasajili...' : 'Jiunge Sasa'}
+                    {registered ? 'Umesajiliwa' : full ? 'Nafasi Zimejaa' : registeringId === event.id ? 'Inasajili...' : 'Jiunge Sasa'}
                   </button>
                </div>
             </div>
@@ -432,16 +452,32 @@ export const Events: React.FC = () => {
                        <section className="space-y-6">
                           <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em]">Nyenzo za Unabii</h4>
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                             {selectedEvent.resources.map((res, i) => (
-                               <div key={i} className="flex items-center justify-between p-5 bg-white dark:bg-slate-900 border border-slate-100 dark:border-white/10 rounded-sm group hover:border-gold-500/50 transition-all shadow-sm">
-                                  <div className="flex items-center gap-4">
-                                     <div className="p-3 bg-red-50 dark:bg-red-500/10 text-red-500 rounded-sm">
-                                        {res.type === 'PDF' ? <FileText size={20}/> : <Play size={20}/>}
-                                     </div>
-                                     <span className="text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide">{res.name}</span>
-                                  </div>
-                                  <Download size={18} className="text-slate-300 group-hover:text-gold-500 cursor-pointer" />
+                             {selectedEvent.resources.length === 0 && (
+                               <div className="md:col-span-2 rounded-3xl border border-dashed border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/[0.03] px-6 py-8 text-center text-[10px] font-black uppercase tracking-widest text-slate-400">
+                                 Hakuna nyenzo za tukio hili kwa sasa.
                                </div>
+                             )}
+                             {selectedEvent.resources.map((res, i) => (
+                               <a
+                                 key={i}
+                                 href={res.url || '#'}
+                                 target="_blank"
+                                 rel="noopener noreferrer"
+                                 onClick={(event) => {
+                                   if (!res.url) event.preventDefault();
+                                 }}
+                                 className="flex items-center justify-between p-5 bg-white dark:bg-slate-900 border border-slate-100 dark:border-white/10 rounded-sm group hover:border-gold-500/50 transition-all shadow-sm no-underline"
+                               >
+                                 <div className="flex items-center gap-4 min-w-0">
+                                    <div className="p-3 bg-red-50 dark:bg-red-500/10 text-red-500 rounded-sm">
+                                       {res.type === 'PDF' ? <FileText size={20}/> : <Play size={20}/>}
+                                    </div>
+                                    <span className="text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide truncate">
+                                      {res.name || 'Rasilimali'}
+                                    </span>
+                                 </div>
+                                 <Download size={18} className="text-slate-300 group-hover:text-gold-500 cursor-pointer shrink-0" />
+                               </a>
                              ))}
                           </div>
                        </section>
@@ -474,19 +510,37 @@ export const Events: React.FC = () => {
 
                           <div className="p-6 bg-white dark:bg-slate-900 border border-slate-100 dark:border-white/5 rounded-sm text-center space-y-3 shadow-inner">
                              <Users size={32} className="mx-auto text-slate-300" />
-                             <h5 className="text-2xl font-black text-slate-900 dark:text-white">{selectedEvent.attendees} / {selectedEvent.maxAttendees}</h5>
-                              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Nafasi Zilizobaki: {selectedEvent.maxAttendees - selectedEvent.attendees}</p>
+                             <h5 className="text-2xl font-black text-slate-900 dark:text-white">
+                               {selectedEvent.maxAttendees > 0
+                                 ? `${selectedEvent.attendees} / ${selectedEvent.maxAttendees}`
+                                 : `${selectedEvent.attendees} Waliojiunga`}
+                             </h5>
+                              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                                Nafasi Zilizobaki:{' '}
+                                {selectedEvent.maxAttendees > 0
+                                  ? Math.max(0, selectedEvent.maxAttendees - selectedEvent.attendees)
+                                  : 'Bila kikomo'}
+                              </p>
                              <div className="h-1.5 w-full bg-slate-100 dark:bg-white/5 rounded-full overflow-hidden">
-                                <div className="h-full bg-gold-500" style={{ width: `${(selectedEvent.attendees / selectedEvent.maxAttendees) * 100}%` }}></div>
+                                <div
+                                  className="h-full bg-gold-500"
+                                  style={{
+                                    width: `${
+                                      selectedEvent.maxAttendees > 0
+                                        ? Math.min(100, (selectedEvent.attendees / selectedEvent.maxAttendees) * 100)
+                                        : 0
+                                    }%`,
+                                  }}
+                                ></div>
                              </div>
                           </div>
 
                           <button 
                             onClick={(e) => handleRegister(e, selectedEvent.id)}
-                            disabled={registeringId === selectedEvent.id}
-                            className={`w-full py-5 rounded-sm font-black text-xs uppercase tracking-[0.2em] transition-all shadow-md ${registeredIds.includes(selectedEvent.id) ? 'bg-green-600 text-white' : 'bg-primary-950 text-gold-400 hover:bg-gold-500 hover:text-primary-950'}`}
+                            disabled={registeringId === selectedEvent.id || (isEventFull(selectedEvent) && !registeredIds.includes(selectedEvent.id))}
+                            className={`w-full py-5 rounded-sm font-black text-xs uppercase tracking-[0.2em] transition-all shadow-md disabled:opacity-60 disabled:cursor-not-allowed ${registeredIds.includes(selectedEvent.id) ? 'bg-green-600 text-white' : isEventFull(selectedEvent) ? 'bg-slate-300 dark:bg-slate-700 text-slate-600 dark:text-slate-300' : 'bg-primary-950 text-gold-400 hover:bg-gold-500 hover:text-primary-950'}`}
                           >
-                             {registeredIds.includes(selectedEvent.id) ? 'Umesajiliwa Tayari' : registeringId === selectedEvent.id ? 'Inasajili...' : 'Hifadhi Nafasi Yangu'}
+                             {registeredIds.includes(selectedEvent.id) ? 'Umesajiliwa Tayari' : isEventFull(selectedEvent) ? 'Nafasi Zimejaa' : registeringId === selectedEvent.id ? 'Inasajili...' : 'Hifadhi Nafasi Yangu'}
                           </button>
                        </div>
 

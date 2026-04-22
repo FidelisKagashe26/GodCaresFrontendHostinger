@@ -15,7 +15,27 @@ export interface NewsItemApi {
   published_at: string;
 }
 
+export interface NewsViewResponse {
+  id: number;
+  views: number;
+  item?: NewsItemApi;
+}
+
 const API_BASE_URL = getApiBaseUrl();
+
+const normalizeNewsPayload = (item: NewsItemApi): NewsItemApi => ({
+  ...item,
+  title: String(item.title || "").trim(),
+  category: String(item.category || "Habari").trim() || "Habari",
+  image: resolveApiAssetUrl(item.image, API_BASE_URL),
+  excerpt: String(item.excerpt || ""),
+  content: String(item.content || ""),
+  author: String(item.author || "Admin").trim() || "Admin",
+  author_image: resolveApiAssetUrl(item.author_image || "", API_BASE_URL),
+  featured: Boolean(item.featured),
+  views: Number(item.views || 0),
+  published_at: String(item.published_at || ""),
+});
 
 export const getNewsItems = async (): Promise<NewsItemApi[]> => {
   return withCachedResult(
@@ -26,17 +46,13 @@ export const getNewsItems = async (): Promise<NewsItemApi[]> => {
         throw new Error("Imeshindikana kupata habari.");
       }
       const payload = (await response.json()) as NewsItemApi[];
-      return payload.map((item) => ({
-        ...item,
-        image: resolveApiAssetUrl(item.image, API_BASE_URL),
-        author_image: resolveApiAssetUrl(item.author_image, API_BASE_URL),
-      }));
+      return payload.map(normalizeNewsPayload);
     },
     { ttlMs: 3 * 60 * 1000, persist: true },
   );
 };
 
-export const registerNewsView = async (newsId: number): Promise<number> => {
+export const registerNewsView = async (newsId: number): Promise<NewsViewResponse> => {
   const response = await fetch(`${API_BASE_URL}/api/news/${newsId}/view/`, {
     method: "POST",
   });
@@ -45,9 +61,13 @@ export const registerNewsView = async (newsId: number): Promise<number> => {
     throw new Error("Imeshindikana kusasisha idadi ya wasomaji.");
   }
 
-  const data = (await response.json()) as { views?: number };
+  const data = (await response.json()) as { id?: number; views?: number; item?: NewsItemApi };
   invalidateCachedResult("news_items_v1");
-  return Number(data.views || 0);
+  return {
+    id: Number(data.id || newsId),
+    views: Number(data.views || 0),
+    item: data.item ? normalizeNewsPayload(data.item) : undefined,
+  };
 };
 
 

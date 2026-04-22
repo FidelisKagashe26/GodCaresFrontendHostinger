@@ -26,68 +26,25 @@ interface CaseStudy {
   detailedDescription: string;
 }
 
-const CASES: CaseStudy[] = [
-  {
-    id: 'TRUTH-001',
-    topic: 'Hali ya Wafu',
-    category: 'Misingi ya Roho',
-    threatLevel: 'CRITICAL',
-    tradition: "Inasemekana kuwa wapendwa wetu waliokufa wanatuona, wanatulinda, au wanaishi sehemu fulani mara tu baada ya kukata roho.",
-    traditionSource: "Mapokeo ya Gnostic na Mafundisho ya 'Spiritism'",
-    scripture: "Biblia inafundisha kuwa kifo ni usingizi mzito; wafu hawajui neno lo lote na hawana sehemu tena katika mambo yanayofanyika chini ya jua mpaka ufufuo.",
-    reference: "Mhubiri 9:5-6, Yohana 11:11",
-    logic: "Ikiwa mtu anaenda mbinguni mara moja akifa, ufufuo wa mwisho hautakuwa na maana yoyote.",
-    history: "Fundisho la roho kutokufa lilianzia katika falsafa za Kigiriki (Plato) na kuingizwa kanisani karne ya pili.",
-    videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-    shareText: "Nimegundua kuwa wafu wamelala wakimngojea Yesu. #GodCares365 #Ukweli",
-    detailedDescription: "Suala la hali ya wafu ni moja ya udanganyifu mkubwa wa shetani tangu bustani ya Edeni pale aliposema 'Hamtakufa hakika'. Biblia inafuta dhana ya kwamba wafu wanaweza kuwasiliana na walio hai, ikionyesha kuwa kifo ni mapumziko kabisa ya mwili na roho hadi siku ya ufufuo mkuu Yesu atakaporejea. Hii inatulinda dhidi ya udanganyifu wa roho chafu zinazojifanya kuwa ndugu zetu."
-  },
-  {
-    id: 'TRUTH-002',
-    topic: 'Siku ya Ibada (Sabato)',
-    category: 'Mamlaka ya Mungu',
-    threatLevel: 'CRITICAL',
-    tradition: "Jumapili ndiyo siku ya Bwana; utakatifu ulihamishwa kutoka Jumamosi kwa mamlaka ya kanisa.",
-    traditionSource: "The Convert’s Catechism of Catholic Doctrine, p. 50",
-    scripture: "Mungu alibariki na kuitakasa siku ya saba tangu uumbaji kama ukumbusho wa milele. Hakuna andiko hata moja linaloamuru Jumapili kuwa siku takatifu.",
-    reference: "Kutoka 20:8-11, Luka 4:16, Malaki 3:6",
-    logic: "Ikiwa mwanadamu anaweza kubadili sheria ya Mungu, basi mwanadamu amekuwa juu ya Mungu. 'The Convert’s Catechism' inakiri wazi: 'Q: Why do we observe Sunday? A: Because the Church transferred the solemnity.'",
-    history: "Father Peter Geiermann anathibitisha kuwa Kanisa Katoliki lilihamisha utakatifu huo. Mwaka 321 BK Konstantino alitoa amri ya kwanza ya Jumapili.",
-    videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-    shareText: "Sabato bado ni ishara ya utii kwa Muumba. #BibleTruth #GodCares365",
-    detailedDescription: "Uchunguzi wa 'The Convert’s Catechism' unaonyesha kuwa mabadiliko haya hayana msingi wa Biblia bali ni mamlaka ya kanisa. Kitabu hicho kinasema Maandiko lazima yaeleweke katika maana ambayo Kanisa pekee linashikilia (Uk. 139)."
-  },
-  {
-    id: 'TRUTH-004',
-    topic: 'Mamlaka ya Kasisi',
-    category: 'Mamlaka ya Kidini',
-    threatLevel: 'CRITICAL',
-    tradition: "Kasisi ana nguvu ya funguo za kuokoa watu kutoka kuzimu, na Mungu analazimika kufuata hukumu ya makasisi wake.",
-    traditionSource: "The Catholic Priest (Michael Müller, p. 78-79)",
-    scripture: "Mungu pekee ndiye mwenye mamlaka ya kusamehe dhambi na kuhukumu kwa haki. 'Nani awezaye kusamehe dhambi isipokuwa Mungu pekee?'",
-    reference: "Marko 2:7, 1 Timotheo 2:5",
-    logic: "Kufundisha kuwa Mungu analazimika kufuata hukumu ya mwanadamu ni kumpindua Muumba kwenye kiti chake cha enzi. Kasisi anapewa hadhi ya 'Nuru ya Ulimwengu'.",
-    history: "Michael Müller anadai: 'God himself is obliged to abide by the judgment of his priests, and either not to forgive or to forgive.' Hii inapingana na upatanishi wa Kristo.",
-    videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-    shareText: "Yesu pekee ndiye mpatanishi wetu. #GodCares365 #Truth",
-    detailedDescription: "Nyaraka kama 'The Catholic Priest' na 'Faith of Millions' zinadai kanisa lina mamlaka hata juu ya Biblia kwa sababu kanisa liliitangulia Biblia. Huu ni udanganyifu wa kujiinua juu ya Neno la Mungu."
-  },
-  {
-    id: 'TRUTH-003',
-    topic: 'Moto wa Jehanamu',
-    category: 'Tabia ya Mungu',
-    threatLevel: 'HIGH',
-    tradition: "Watu wanasema Mungu atawachoma waovu motoni milele na milele bila mwisho.",
-    traditionSource: "Divine Comedy (Inferno) ya Dante Alighieri",
-    scripture: "Mshahara wa dhambi ni mauti (kifo), si maisha ya mateso. Moto wa mwisho utawaangamiza waovu kabisa na kuwa majivu.",
-    reference: "Warumi 6:23, Malaki 4:1-3",
-    logic: "Mungu wa upendo hawezi kutesa kiumbe chake milele kwa ajili ya dhambi za maisha mafupi. Hii inaharibu sifa ya upendo wa Mungu.",
-    history: "Dhana ya moto usiozimika ilikuzwa wakati wa zama za giza ili kutisha watu watoe fedha kwa kanisa.",
-    videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-    shareText: "Mungu ni wa haki. Waovu wataangamizwa kabisa, si kuteswa milele. #GodIsLove",
-    detailedDescription: "Mungu ni pendo lakini pia ni moto ulao dhidi ya dhambi. Jehanamu ni tukio la mwisho la kusafisha ulimwengu kutokana na dhambi na waasi."
+const caseHashPrefix = '#kesi-';
+
+const getCaseIdFromHash = (): string | null => {
+  const hash = (window.location.hash || '').trim();
+  if (!hash.toLowerCase().startsWith(caseHashPrefix)) {
+    return null;
   }
-];
+  const raw = hash.slice(caseHashPrefix.length);
+  if (!raw) {
+    return null;
+  }
+  try {
+    return decodeURIComponent(raw);
+  } catch {
+    return raw;
+  }
+};
+
+const buildCaseHash = (caseId: string): string => `${caseHashPrefix}${encodeURIComponent(caseId)}`;
 
 export const DeceptionVault: React.FC = () => {
   const [activeCaseId, setActiveCaseId] = useState<string | null>(null);
@@ -128,6 +85,16 @@ export const DeceptionVault: React.FC = () => {
     loadCases();
   }, []);
 
+  useEffect(() => {
+    if (!cases.length) return;
+    const caseIdFromHash = getCaseIdFromHash();
+    if (!caseIdFromHash) return;
+    const foundCase = cases.find((item) => item.id === caseIdFromHash);
+    if (foundCase) {
+      setActiveCaseId(foundCase.id);
+    }
+  }, [cases]);
+
   const activeCase = useMemo(() => 
     cases.find(c => c.id === activeCaseId), 
   [activeCaseId, cases]);
@@ -137,13 +104,39 @@ export const DeceptionVault: React.FC = () => {
     c.id.toLowerCase().includes(search.toLowerCase())
   );
 
-  const handleShare = () => {
-    if (activeCase && navigator.share) {
-      navigator.share({ 
-        title: activeCase.topic, 
-        text: activeCase.shareText, 
-        url: window.location.href 
-      });
+  const openCase = (caseItem: CaseStudy) => {
+    setActiveCaseId(caseItem.id);
+    window.history.replaceState(null, '', `${window.location.pathname}${window.location.search}${buildCaseHash(caseItem.id)}`);
+  };
+
+  const closeCase = () => {
+    setActiveCaseId(null);
+    window.history.replaceState(null, '', `${window.location.pathname}${window.location.search}`);
+  };
+
+  const handleShare = async () => {
+    if (!activeCase) return;
+
+    const shareUrl = `${window.location.origin}${window.location.pathname}${window.location.search}${buildCaseHash(activeCase.id)}`;
+    const sharePayload = {
+      title: activeCase.topic,
+      text: activeCase.shareText,
+      url: shareUrl,
+    };
+
+    if (navigator.share) {
+      try {
+        await navigator.share(sharePayload);
+        return;
+      } catch {
+        // Fallback below when user cancels or device blocks share sheet.
+      }
+    }
+
+    try {
+      await navigator.clipboard.writeText(`${sharePayload.text}\n${sharePayload.url}`);
+    } catch {
+      window.prompt('Nakili link hii ya kushare:', shareUrl);
     }
   };
 
@@ -191,12 +184,12 @@ export const DeceptionVault: React.FC = () => {
         )}
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 pb-32">
-           {filteredCases.map(c => (
-             <button
-               key={c.id}
-               onClick={() => setActiveCaseId(c.id)}
-               className="group text-left p-8 rounded-xl bg-white/[0.02] border border-white/5 hover:border-red-500/40 hover:bg-white/[0.04] transition-all duration-500 relative overflow-hidden flex flex-col h-full shadow-sm hover:shadow-2xl"
-             >
+            {filteredCases.map(c => (
+              <button
+                key={c.id}
+                onClick={() => openCase(c)}
+                className="group text-left p-8 rounded-xl bg-white/[0.02] border border-white/5 hover:border-red-500/40 hover:bg-white/[0.04] transition-all duration-500 relative overflow-hidden flex flex-col h-full shadow-sm hover:shadow-2xl"
+              >
                <div className="flex justify-between items-center mb-8">
                   <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-600 group-hover:text-red-500 transition-colors">
                     Kesi #{c.id}
@@ -225,7 +218,7 @@ export const DeceptionVault: React.FC = () => {
            <header className="h-16 bg-black/40 border-b border-white/5 flex items-center justify-between px-6 shrink-0">
               <div className="flex items-center gap-4">
                  <button 
-                   onClick={() => setActiveCaseId(null)}
+                   onClick={closeCase}
                    className="p-2 bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white rounded-lg transition-all flex items-center gap-2 group"
                  >
                     <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform" />
@@ -244,7 +237,7 @@ export const DeceptionVault: React.FC = () => {
                     <Share2 size={20} />
                  </button>
                  <div className="h-6 w-[1px] bg-white/5 mx-1"></div>
-                 <button onClick={() => setActiveCaseId(null)} className="p-2 text-slate-500 hover:text-red-500 transition-colors">
+                 <button onClick={closeCase} className="p-2 text-slate-500 hover:text-red-500 transition-colors">
                     <X size={20} />
                  </button>
               </div>
@@ -376,5 +369,6 @@ export const DeceptionVault: React.FC = () => {
     </div>
   );
 };
+
 
 

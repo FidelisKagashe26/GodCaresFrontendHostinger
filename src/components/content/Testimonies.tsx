@@ -593,7 +593,7 @@ export const Testimonies: React.FC = () => {
                       value={formData.name}
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                       className="w-full px-5 py-4 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl outline-none text-sm font-bold text-slate-900 dark:text-white focus:border-gold-500 transition-all"
-                      placeholder="Mfano: Mtafuta Ukweli"
+                      placeholder="Mfano: Joseph Moses"
                     />
                   </div>
                   <div className="space-y-2">

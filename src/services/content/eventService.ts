@@ -30,7 +30,26 @@ export interface EventApi {
   resources: EventResource[];
 }
 
+export interface EventRegisterResponse {
+  detail: string;
+  created?: boolean;
+  event?: EventApi;
+}
+
 const API_BASE_URL = getApiBaseUrl();
+
+const normalizeEventPayload = (item: EventApi): EventApi => ({
+  ...item,
+  image: resolveApiAssetUrl(item.image, API_BASE_URL),
+  speakers: (item.speakers || []).map((speaker) => ({
+    ...speaker,
+    img: resolveApiAssetUrl(speaker.img, API_BASE_URL),
+  })),
+  resources: (item.resources || []).map((resource) => ({
+    ...resource,
+    url: resolveApiAssetUrl(resource.url || "", API_BASE_URL),
+  })),
+});
 
 export const getEvents = async (): Promise<EventApi[]> => {
   return withCachedResult(
@@ -41,20 +60,16 @@ export const getEvents = async (): Promise<EventApi[]> => {
         throw new Error("Imeshindikana kupata matukio.");
       }
       const payload = (await response.json()) as EventApi[];
-      return payload.map((item) => ({
-        ...item,
-        image: resolveApiAssetUrl(item.image, API_BASE_URL),
-        speakers: (item.speakers || []).map((speaker) => ({
-          ...speaker,
-          img: resolveApiAssetUrl(speaker.img, API_BASE_URL),
-        })),
-      }));
+      return payload.map(normalizeEventPayload);
     },
     { ttlMs: 3 * 60 * 1000, persist: true },
   );
 };
 
-export const registerForEvent = async (eventId: number, payload: { name: string; email: string }) => {
+export const registerForEvent = async (
+  eventId: number,
+  payload: { name: string; email: string },
+): Promise<EventRegisterResponse> => {
   const response = await fetch(`${API_BASE_URL}/api/events/${eventId}/register/`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -66,9 +81,12 @@ export const registerForEvent = async (eventId: number, payload: { name: string;
     throw new Error(error?.detail || "Imeshindikana kusajili.");
   }
 
-  const result = await response.json().catch(() => ({}));
+  const result = (await response.json().catch(() => ({}))) as EventRegisterResponse;
   invalidateCachedResult("events_list_v1");
-  return result;
+  return {
+    ...result,
+    event: result.event ? normalizeEventPayload(result.event) : undefined,
+  };
 };
 
 

@@ -37,6 +37,7 @@ export const Prayers: React.FC<Props> = ({ aiLanguage = 'en' }) => {
    const [answeredRequests, setAnsweredRequests] = useState<PrayerRequest[]>([]);
    const [isLoadingAnswered, setIsLoadingAnswered] = useState(false);
    const [answeredError, setAnsweredError] = useState('');
+   const [actionMessage, setActionMessage] = useState('');
 
    const formatTimeAgo = (isoDate: string) => {
       const created = new Date(isoDate).getTime();
@@ -58,6 +59,39 @@ export const Prayers: React.FC<Props> = ({ aiLanguage = 'en' }) => {
       prayingCount: item.praying_count || 0,
       timeAgo: formatTimeAgo(item.created_at),
    });
+
+   const copyToClipboard = async (value: string): Promise<boolean> => {
+      try {
+         if (navigator.clipboard?.writeText) {
+            await navigator.clipboard.writeText(value);
+            return true;
+         }
+      } catch {
+         // fallback below
+      }
+
+      try {
+         const textArea = document.createElement('textarea');
+         textArea.value = value;
+         textArea.style.position = 'fixed';
+         textArea.style.left = '-9999px';
+         document.body.appendChild(textArea);
+         textArea.focus();
+         textArea.select();
+         const copied = document.execCommand('copy');
+         document.body.removeChild(textArea);
+         return copied;
+      } catch {
+         return false;
+      }
+   };
+
+   const handleShareAnsweredPrayer = async (item: PrayerRequest) => {
+      const url = `${window.location.origin}${window.location.pathname}#shuhuda-za-maombi-${item.id}`;
+      const text = `${item.name}: ${item.request}`;
+      const copied = await copyToClipboard(`${text}\n${url}`);
+      setActionMessage(copied ? 'Kiungo cha shuhuda ya maombi kimenakiliwa.' : 'Imeshindikana kunakili kiungo.');
+   };
 
    const mappedWall = useMemo(() => publicRequests, [publicRequests]);
 
@@ -83,7 +117,7 @@ export const Prayers: React.FC<Props> = ({ aiLanguage = 'en' }) => {
             const data = await getAnsweredPrayers();
             setAnsweredRequests(data.map(mapPrayerItem));
          } catch (error) {
-            setAnsweredError('Imeshindikana kupakua maombi yaliyojibiwa.');
+            setAnsweredError('Imeshindikana kupakua shuhuda za maombi.');
             setAnsweredRequests([]);
          } finally {
             setIsLoadingAnswered(false);
@@ -93,6 +127,12 @@ export const Prayers: React.FC<Props> = ({ aiLanguage = 'en' }) => {
       loadWall();
       loadAnswered();
    }, []);
+
+   useEffect(() => {
+      if (!actionMessage) return;
+      const timer = window.setTimeout(() => setActionMessage(''), 2200);
+      return () => window.clearTimeout(timer);
+   }, [actionMessage]);
 
   const handleGeneratePrayer = async () => {
     if (!request.trim()) return;
@@ -243,11 +283,16 @@ export const Prayers: React.FC<Props> = ({ aiLanguage = 'en' }) => {
                  onClick={() => setActiveTab('answered')}
                  className={`flex-1 md:flex-none px-4 sm:px-6 md:px-8 py-3 rounded-lg font-black text-[10px] uppercase tracking-widest transition-all flex items-center justify-center gap-2 whitespace-nowrap ${activeTab === 'answered' ? 'bg-white dark:bg-slate-800 text-green-600 shadow-xl' : 'text-slate-500'}`}
               >
-                 <CheckCircle2 size={14} /> Yaliyojibiwa
+                 <CheckCircle2 size={14} /> Shuhuda za Maombi
               </button>
            </div>
 
                 <div className="space-y-4">
+                     {actionMessage && (
+                        <div className="bg-green-500/10 border border-green-500/20 text-green-700 dark:text-green-300 text-xs font-bold px-4 py-2 rounded-lg">
+                           {actionMessage}
+                        </div>
+                     )}
                      {activeTab === 'wall' ? (
                         <>
                            {isLoadingWall && (
@@ -290,22 +335,36 @@ export const Prayers: React.FC<Props> = ({ aiLanguage = 'en' }) => {
                   </div>
                 ) : answeredRequests.length === 0 ? (
                   <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-50 dark:border-white/5 text-slate-400 text-xs uppercase tracking-widest font-black">
-                    Hakuna taarifa za maombi yaliyojibiwa kwa sasa.
+                    Hakuna taarifa za shuhuda za maombi kwa sasa.
                   </div>
                 ) : (
                 answeredRequests.map((ans) => (
-                  <div key={ans.id} className="bg-green-500/5 dark:bg-green-500/10 p-6 md:p-8 rounded-2xl border border-green-500/20 shadow-sm relative overflow-hidden group">
-                     <div className="absolute top-0 right-0 p-6 text-green-500/10 rotate-12 group-hover:scale-110 transition-transform"><CheckCircle2 size={100} /></div>
-                     <div className="relative z-10 space-y-4">
-                        <div className="flex items-center gap-3">
-                           <div className="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center text-white"><CheckCircle2 size={16}/></div>
-                           <h4 className="text-sm font-black text-green-700 dark:text-green-400 uppercase tracking-tight">Ombi Lililojibiwa: {ans.name}</h4>
+                  <div key={ans.id} id={`shuhuda-za-maombi-${ans.id}`} className="group rounded-2xl border border-green-200/80 dark:border-slate-700 bg-white/95 dark:bg-slate-900/90 p-5 sm:p-6 shadow-[0_8px_20px_rgba(15,23,42,0.04)] dark:shadow-[0_10px_26px_rgba(2,6,23,0.38)] hover:border-gold-400/80 hover:shadow-[0_14px_28px_rgba(212,154,20,0.12)] transition-all">
+                     <div className="flex items-center justify-between gap-3 mb-4">
+                        <div className="flex items-center gap-3 min-w-0">
+                           <div className="w-10 h-10 rounded-full border border-green-200 dark:border-slate-700 bg-green-100 dark:bg-slate-800 flex items-center justify-center font-black text-green-800 dark:text-slate-200 shrink-0">
+                              {ans.name.charAt(0)}
+                           </div>
+                           <div className="min-w-0">
+                              <h4 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-tight truncate">Shuhuda ya Maombi: {ans.name}</h4>
+                              <p className="text-[10px] font-bold text-slate-500 dark:text-slate-300 uppercase tracking-[0.08em]">{ans.timeAgo}</p>
+                           </div>
                         </div>
-                        <p className="text-slate-700 dark:text-slate-200 text-base md:text-lg font-serif italic leading-relaxed">"{ans.request}"</p>
-                        <div className="flex items-center justify-between pt-4 border-t border-green-500/10">
-                           <span className="text-[9px] font-bold text-slate-500 uppercase">Imechapishwa: {ans.timeAgo}</span>
-                           <button className="text-green-600 hover:text-green-700 transition-colors"><Share2 size={16}/></button>
-                        </div>
+                        <span className="px-2.5 py-1 rounded-full border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-[9px] font-black uppercase tracking-[0.08em] text-slate-700 dark:text-slate-200 whitespace-nowrap">
+                           {ans.category || 'Maombi'}
+                        </span>
+                     </div>
+                     <p className="text-slate-700 dark:text-slate-200 text-sm sm:text-base leading-7 italic font-serif">"{ans.request}"</p>
+                     <div className="mt-4 pt-3 border-t border-green-100 dark:border-slate-700 flex items-center justify-between gap-3">
+                        <span className="text-[10px] font-bold uppercase tracking-[0.08em] text-green-700 dark:text-green-300">Shuhuda ya Majibu</span>
+                        <button
+                           type="button"
+                           onClick={() => { void handleShareAnsweredPrayer(ans); }}
+                           className="inline-flex items-center justify-center h-8 w-8 rounded-full border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-300 hover:border-gold-400 hover:text-gold-700 transition-colors"
+                           aria-label="Shiriki shuhuda ya maombi"
+                        >
+                           <Share2 size={15} />
+                        </button>
                      </div>
                   </div>
                 ))

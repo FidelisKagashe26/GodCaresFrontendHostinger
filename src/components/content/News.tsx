@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Calendar, Clock, Newspaper, ArrowRight, X, Share2, Eye, User } from 'lucide-react';
-import { getNewsItems, registerNewsView } from '../../services/content/newsService';
+import { NewsItemApi, getNewsItems, registerNewsView } from '../../services/content/newsService';
 import { subscribeNewsletter } from '../../services/content/newsletterService';
 
 interface NewsItem {
@@ -60,6 +60,35 @@ const translateCategory = (category: string): string => {
 
 const containsHtml = (value: string): boolean => /<[a-z][\s\S]*>/i.test(value || '');
 
+const formatNewsDate = (value: string): string => {
+  if (!value) return 'Hakuna taarifa';
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return 'Hakuna taarifa';
+  return parsed.toLocaleDateString('sw-TZ');
+};
+
+const mapNewsFromApi = (item: NewsItemApi): NewsItem => ({
+  id: Number(item.id),
+  title: (item.title || '').trim() || 'Hakuna kichwa cha habari',
+  date: formatNewsDate(item.published_at),
+  category: (item.category || 'Habari').trim() || 'Habari',
+  image: item.image || '',
+  excerpt: item.excerpt || 'Hakuna taarifa.',
+  content: item.content || '',
+  author: (item.author || 'Hakuna taarifa').trim() || 'Hakuna taarifa',
+  authorImage: item.author_image || '',
+  views: Number(item.views || 0),
+  featured: Boolean(item.featured),
+});
+
+const getNewsIdFromHash = (): number | null => {
+  const hash = (window.location.hash || '').trim();
+  const match = hash.match(/^#habari-(\d+)$/i);
+  if (!match) return null;
+  const parsed = Number(match[1]);
+  return Number.isFinite(parsed) ? parsed : null;
+};
+
 export const News: React.FC = () => {
   const [activeCategory, setActiveCategory] = useState('all');
   const [selectedNews, setSelectedNews] = useState<NewsItem | null>(null);
@@ -70,8 +99,14 @@ export const News: React.FC = () => {
   const [newsletterMessage, setNewsletterMessage] = useState('');
 
   const categories = useMemo(() => {
-    const unique = new Set(items.map((item) => item.category).filter(Boolean));
-    return ['all', ...Array.from(unique)];
+    const unique = new Map<string, string>();
+    items.forEach((item) => {
+      const category = (item.category || '').trim();
+      if (!category) return;
+      const key = category.toLowerCase();
+      if (!unique.has(key)) unique.set(key, category);
+    });
+    return ['all', ...Array.from(unique.values())];
   }, [items]);
 
   useEffect(() => {
@@ -80,20 +115,7 @@ export const News: React.FC = () => {
       setErrorMessage('');
       try {
         const data = await getNewsItems();
-        const mapped: NewsItem[] = data.map((item) => ({
-          id: item.id,
-          title: item.title,
-          date: item.published_at ? new Date(item.published_at).toLocaleDateString('sw-TZ') : 'Hakuna taarifa',
-          category: item.category || 'Habari',
-          image: item.image || '',
-          excerpt: item.excerpt || 'Hakuna taarifa.',
-          content: item.content || '',
-          author: item.author || 'Hakuna taarifa',
-          authorImage: item.author_image || '',
-          views: Number(item.views || 0),
-          featured: item.featured,
-        }));
-        setItems(mapped);
+        setItems(data.map(mapNewsFromApi));
       } catch {
         setErrorMessage('Imeshindikana kupakua habari.');
         setItems([]);
@@ -106,18 +128,47 @@ export const News: React.FC = () => {
   }, []);
 
   useEffect(() => {
+    if (!items.length) return;
+    const hashNewsId = getNewsIdFromHash();
+    if (!hashNewsId) return;
+    const matched = items.find((item) => item.id === hashNewsId);
+    if (matched) {
+      setSelectedNews((prev) => (prev?.id === matched.id ? prev : matched));
+    }
+  }, [items]);
+
+  const openNews = (news: NewsItem) => {
+    setSelectedNews(news);
+    window.history.replaceState(null, '', `${window.location.pathname}${window.location.search}#habari-${news.id}`);
+  };
+
+  const closeNews = () => {
+    setSelectedNews(null);
+    window.history.replaceState(null, '', `${window.location.pathname}${window.location.search}`);
+  };
+
+  useEffect(() => {
     if (!selectedNews) return;
     let cancelled = false;
+    const selectedNewsId = selectedNews.id;
 
     const saveView = async () => {
       try {
-        const latestViews = await registerNewsView(selectedNews.id);
+        const payload = await registerNewsView(selectedNewsId);
         if (cancelled) return;
 
-        setItems((prev) =>
-          prev.map((item) => (item.id === selectedNews.id ? { ...item, views: latestViews } : item))
-        );
-        setSelectedNews((prev) => (prev && prev.id === selectedNews.id ? { ...prev, views: latestViews } : prev));
+        const mappedItem = payload.item ? mapNewsFromApi(payload.item) : null;
+
+        setItems((prev) => prev.map((item) => {
+          if (item.id !== selectedNewsId) return item;
+          if (mappedItem) return { ...item, ...mappedItem, views: payload.views };
+          return { ...item, views: payload.views };
+        }));
+        setSelectedNews((prev) => {
+          if (!prev || prev.id !== selectedNewsId) return prev;
+          if (mappedItem) return { ...prev, ...mappedItem, views: payload.views };
+          return { ...prev, views: payload.views };
+        });
       } catch {
         // View counter is optional.
       }
@@ -131,7 +182,7 @@ export const News: React.FC = () => {
   }, [selectedNews?.id]);
 
   const handleShare = async (news: NewsItem) => {
-    const url = `${window.location.origin}${window.location.pathname}#habari-${news.id}`;
+    const url = `${window.location.origin}${window.location.pathname}${window.location.search}#habari-${news.id}`;
     const text = `${news.title}\n\n${news.excerpt}`;
 
     try {
@@ -156,9 +207,12 @@ export const News: React.FC = () => {
     }
   };
 
-  const filteredNews = activeCategory === 'all' ? items : items.filter((item) => item.category === activeCategory);
+  const filteredNews = activeCategory === 'all'
+    ? items
+    : items.filter((item) => item.category.toLowerCase() === activeCategory.toLowerCase());
   const featuredNews = items.filter((item) => item.featured);
-  const topHeadline = featuredNews[0]?.title || items[0]?.title || 'Hakuna taarifa za habari kwa sasa.';
+  const topHeadlineItem = featuredNews[0] || items[0] || null;
+  const topHeadline = topHeadlineItem?.title || 'Hakuna taarifa za habari kwa sasa.';
 
   return (
     <div className="space-y-12 animate-fade-in pb-20 max-w-7xl mx-auto px-4 md:px-0">
@@ -174,7 +228,12 @@ export const News: React.FC = () => {
             </div>
           </div>
 
-          <div className="w-full bg-red-600 text-white rounded-xl p-1 shadow-lg shadow-red-600/20 overflow-hidden relative group cursor-pointer">
+          <div
+            onClick={() => {
+              if (topHeadlineItem) openNews(topHeadlineItem);
+            }}
+            className={`w-full bg-red-600 text-white rounded-xl p-1 shadow-lg shadow-red-600/20 overflow-hidden relative group ${topHeadlineItem ? 'cursor-pointer' : ''}`}
+          >
             <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-20"></div>
             <div className="relative flex items-center gap-4 py-3 px-4">
               <div className="bg-white text-red-600 text-[10px] font-black uppercase px-3 py-1 rounded animate-pulse shadow-sm shrink-0">
@@ -196,7 +255,7 @@ export const News: React.FC = () => {
           {featuredNews.map((news) => (
             <div
               key={news.id}
-              onClick={() => setSelectedNews(news)}
+              onClick={() => openNews(news)}
               className="relative h-[400px] rounded-3xl overflow-hidden group cursor-pointer shadow-xl border border-slate-200 hover:shadow-2xl transition-all"
             >
               {renderImage(news.image, news.title, 'w-full h-full object-cover transition-transform duration-700 group-hover:scale-110')}
@@ -264,7 +323,7 @@ export const News: React.FC = () => {
           {filteredNews.map((item) => (
             <div
               key={item.id}
-              onClick={() => setSelectedNews(item)}
+              onClick={() => openNews(item)}
               className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-xl hover:border-gold-500/30 transition-all group flex flex-col h-full cursor-pointer"
             >
               <div className="h-48 overflow-hidden relative">
@@ -344,7 +403,7 @@ export const News: React.FC = () => {
               {renderImage(selectedNews.image, selectedNews.title, 'w-full h-full object-cover')}
               <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent"></div>
               <button
-                onClick={() => setSelectedNews(null)}
+                onClick={closeNews}
                 className="absolute top-4 right-4 bg-black/40 hover:bg-red-600 text-white p-2 rounded-full transition-all backdrop-blur-md z-10"
               >
                 <X size={20} />
