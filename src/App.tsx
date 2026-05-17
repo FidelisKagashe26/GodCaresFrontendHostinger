@@ -628,7 +628,6 @@ const App: React.FC = () => {
           />
         </Suspense>
       )}
-
       {isThemeOpen && (
         <Suspense fallback={null}>
           <ThemeCenter
@@ -639,7 +638,6 @@ const App: React.FC = () => {
           />
         </Suspense>
       )}
-
       {showFloatingTools && (
         <div
           className="fixed right-3 md:right-6 z-[90] pointer-events-auto"
