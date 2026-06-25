@@ -4,6 +4,7 @@ import { Sidebar, ProfileModal } from './components/layout/Sidebar';
 import { Home } from './components/layout/Home';
 import { StageId, ToastNotification, LanguageCode, ThemePreference } from './types';
 import { ToastContainer } from './components/ui/Toast';
+import { ErrorBoundary } from './components/system/ErrorBoundary';
 import { Sun, Moon, Menu, Bell, User, Monitor, ChevronDown, LogOut, ArrowLeft, ChevronRight, Plus, X } from 'lucide-react';
 import { AuthUser, clearTokens, getCurrentUser } from './services/core/authService';
 import { getSystemMessages } from './services/core/systemMessageService';
@@ -19,12 +20,47 @@ import {
   normalizePath,
 } from './routes/stageRoutes';
 
+const CHUNK_RELOAD_FLAG = 'gc365_chunk_reload';
+
+// Dynamic imports occasionally fail (flaky network, or a stale chunk hash after
+// a new deploy). Retry a few times, then force ONE fresh reload as a last resort
+// so navigation works without the user manually retrying several times.
+const retryDynamicImport = async <T,>(
+  loader: () => Promise<T>,
+  retries = 3,
+  delayMs = 350,
+): Promise<T> => {
+  try {
+    const module = await loader();
+    try {
+      sessionStorage.removeItem(CHUNK_RELOAD_FLAG);
+    } catch {
+      // Ignore storage errors.
+    }
+    return module;
+  } catch (error) {
+    if (retries > 0) {
+      await new Promise((resolve) => setTimeout(resolve, delayMs));
+      return retryDynamicImport(loader, retries - 1, Math.round(delayMs * 1.7));
+    }
+    try {
+      if (typeof window !== 'undefined' && !sessionStorage.getItem(CHUNK_RELOAD_FLAG)) {
+        sessionStorage.setItem(CHUNK_RELOAD_FLAG, '1');
+        window.location.reload();
+      }
+    } catch {
+      // Ignore storage errors and just rethrow below.
+    }
+    throw error;
+  }
+};
+
 const lazyNamed = <T extends Record<string, unknown>, K extends keyof T>(
   loader: () => Promise<T>,
   exportName: K,
 ) =>
   lazy(async () => {
-    const module = await loader();
+    const module = await retryDynamicImport(loader);
     return {
       default: module[exportName] as React.ComponentType<any>,
     };
@@ -98,6 +134,14 @@ const loadNotificationStorageState = (): NotificationStorageState => {
 
 const saveNotificationStorageState = (state: NotificationStorageState) => {
   localStorage.setItem(NOTIFICATION_STATE_KEY, JSON.stringify(state));
+};
+
+const hasStoredAccessToken = (): boolean => {
+  try {
+    return !!localStorage.getItem('gc365_access_token');
+  } catch {
+    return false;
+  }
 };
 
 const readSafeProfilePic = (): string => {
@@ -233,7 +277,9 @@ const App: React.FC = () => {
     const { replace = false, scrollBehavior = 'smooth' } = options;
     const targetPath = normalizePath(getStagePath(id));
 
-    if (isRestrictedStage(id) && !user) {
+    // Allow navigation if a session token exists even before the async auth
+    // bootstrap has populated `user`, so logged-in users are not bounced back.
+    if (isRestrictedStage(id) && !user && !hasStoredAccessToken()) {
       openAuthModal('login');
       if (currentPath !== getStagePath(StageId.HOME)) {
         startRouteLoading();
@@ -322,9 +368,15 @@ const App: React.FC = () => {
         const currentUser = await getCurrentUser();
         setUser(currentUser);
         localStorage.setItem('gc365_user', JSON.stringify(currentUser));
-      } catch {
-        clearTokens();
-        localStorage.removeItem('gc365_user');
+      } catch (error) {
+        // Only drop the session on a real auth failure. A transient network
+        // error must NOT log the user out (it would bounce them off restricted
+        // pages until they retry/reload).
+        if ((error as { code?: string })?.code !== 'network_unavailable') {
+          clearTokens();
+          localStorage.removeItem('gc365_user');
+          setUser(null);
+        }
       } finally {
         setIsAuthBootstrapComplete(true);
       }
@@ -858,19 +910,21 @@ const App: React.FC = () => {
             ref={mainContentRef}
             className={`gc-content-scroll flex-1 overflow-y-auto scroll-smooth pb-16 ${isImmersive ? 'pt-20' : showStageBreadcrumb ? 'pt-32' : 'pt-20'}`}
           >
-            <Suspense fallback={stageLoader}>
-              <Routes>
-                {STAGE_ROUTE_ENTRIES.map(([stage, path]) => (
-                  <Route
-                    key={stage}
-                    path={path}
-                    element={renderStageContent(stage)}
-                  />
-                ))}
-                <Route path={RESET_PASSWORD_PATH} element={renderStageContent(StageId.HOME)} />
-                <Route path="*" element={<Navigate to={getStagePath(StageId.HOME)} replace />} />
-              </Routes>
-            </Suspense>
+            <ErrorBoundary resetKey={currentPath}>
+              <Suspense fallback={stageLoader}>
+                <Routes>
+                  {STAGE_ROUTE_ENTRIES.map(([stage, path]) => (
+                    <Route
+                      key={stage}
+                      path={path}
+                      element={renderStageContent(stage)}
+                    />
+                  ))}
+                  <Route path={RESET_PASSWORD_PATH} element={renderStageContent(StageId.HOME)} />
+                  <Route path="*" element={<Navigate to={getStagePath(StageId.HOME)} replace />} />
+                </Routes>
+              </Suspense>
+            </ErrorBoundary>
             {!isImmersive && (
               <Suspense fallback={null}>
                 <Footer onNavigate={handleStageChange} siteSettings={siteSettings} />
