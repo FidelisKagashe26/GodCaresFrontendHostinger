@@ -319,8 +319,17 @@ export const Sidebar: React.FC<SidebarProps> = ({
 }) => {
   const [isVisible, setIsVisible] = useState(false);
   const [profilePic, setProfilePic] = useState<string>(() => readProfilePicFromStorage());
+  const [scrollProgress, setScrollProgress] = useState(0);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
   const resolvedSettings = siteSettings || DEFAULT_SITE_SETTINGS;
   const resolvedLogoSrc = logoSrc || resolvedSettings.logo_url || `${import.meta.env.BASE_URL}Logo.png`;
+
+  const handleMenuScroll = () => {
+    const el = scrollContainerRef.current;
+    if (!el) return;
+    const scrollable = el.scrollHeight - el.clientHeight;
+    setScrollProgress(scrollable > 0 ? Math.min(100, Math.max(0, (el.scrollTop / scrollable) * 100)) : 0);
+  };
 
   useEffect(() => {
     const handleProfilePicSync = () => {
@@ -401,19 +410,28 @@ export const Sidebar: React.FC<SidebarProps> = ({
         <button onClick={onClose} className="rounded-xl border border-[color:var(--border-subtle)] bg-[color:var(--surface-3)] p-2 text-[color:var(--text-muted)] transition-all hover:border-[color:var(--accent)] hover:text-[color:var(--accent-strong)]">
           <X size={19} />
         </button>
+        {/* Scroll progress: fills as the sections below are scrolled through */}
+        <div
+          className="absolute bottom-0 left-0 h-[3px] bg-[color:var(--accent)] transition-[width] duration-150 ease-out"
+          style={{ width: `${scrollProgress}%` }}
+        />
       </div>
 
       {/* Desktop-only logo panel: fixed in the viewport (never scrolls/moves), centered
           in the reserved left column between the header and footer bars. */}
       <div
         onClick={() => { onStageChange(StageId.HOME); onClose(); }}
-        className="hidden cursor-pointer md:fixed md:left-0 md:top-14 md:bottom-20 md:z-20 md:flex md:w-52 md:items-center md:justify-center lg:w-64 group"
+        className="hidden cursor-pointer md:fixed md:left-0 md:top-14 md:bottom-20 md:z-20 md:flex md:w-52 md:items-center md:justify-center lg:w-64 2xl:w-72 group"
       >
         <img src={resolvedLogoSrc} alt={resolvedSettings.site_name} className="h-40 lg:h-52 w-auto group-hover:scale-105 transition-transform" />
       </div>
 
-      <div className="flex-1 overflow-y-auto overflow-x-hidden relative z-10 scrollbar-hide">
-        <div className="p-6 md:p-10 md:pl-56 lg:pl-72 max-w-7xl mx-auto animate-fade-in space-y-12">
+      <div
+        ref={scrollContainerRef}
+        onScroll={handleMenuScroll}
+        className="flex-1 overflow-y-auto overflow-x-hidden relative z-10 scrollbar-hide"
+      >
+        <div className="p-6 md:p-10 md:pl-56 lg:pl-72 2xl:pl-80 max-w-[1600px] animate-fade-in space-y-12">
           {/* Main Content Sections */}
           {sections.map((section, sIdx) => (
             <div key={sIdx} className="space-y-4">
@@ -421,7 +439,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   <span>{section.title}</span>
                   <div className="h-px flex-1 bg-[color:var(--border-strong)]"></div>
                 </h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3 sm:gap-4">
                   {isOpen && section.ids.map((id, idx) => {
                     const s = stages.find(st => st.id === id);
                     if (!s) return null;

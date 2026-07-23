@@ -700,8 +700,8 @@ export const Auth: React.FC<AuthProps> = ({ onLogin, onClose, resetParams, onRes
 
         <div className="p-6 md:p-8 pt-8 relative overflow-y-auto">
           <div className="text-center space-y-2 mb-6">
-            <div className="flex justify-center mb-4">
-              <img src={resolvedLogoSrc} alt="God Cares 365" className="h-20 w-auto" />
+            <div className="relative z-30 flex items-center justify-center mb-4">
+              <img src={resolvedLogoSrc} alt="God Cares 365" className="h-28 w-auto drop-shadow-sm" />
             </div>
             <h3 className="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">
               {isResetMode ? 'Badili Nenosiri' : isRegisterOtpMode ? 'Thibitisha OTP' : isLogin ? 'Karibu Tena' : 'Jiunge Nasi'}
@@ -1027,11 +1027,6 @@ export const Auth: React.FC<AuthProps> = ({ onLogin, onClose, resetParams, onRes
                   : (isLogin ? 'Hujawahi kujiunga? Jisajili' : 'Tayari unayo akaunti? Ingia')}
               </button>
             )}
-            
-            <div className="flex items-center justify-center gap-2 text-slate-400">
-              <ShieldCheck size={12} className="text-green-500" />
-              <span className="text-[8px] font-bold uppercase tracking-widest">GC-SHIELD INATUMIKA</span>
-            </div>
           </div>
         </div>
       </div>
