@@ -7,6 +7,7 @@ import {
   forgotPassword,
   getCurrentUser,
   loginUser,
+  loginWithGoogle,
   registerUser,
   resendRegistrationOtp,
   resetPassword,
@@ -69,15 +70,6 @@ const mapServerFieldErrors = (errors: Record<string, string>): FormErrors => {
   });
   return mapped;
 };
-
-const GoogleMark: React.FC = () => (
-  <svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true">
-    <path fill="#FFC107" d="M43.6 20H42V19.9H24V28H35.3C33.6 32.7 29.2 36 24 36C17.4 36 12 30.6 12 24S17.4 12 24 12C27 12 29.7 13.1 31.8 15L37.5 9.3C33.9 5.9 29.2 4 24 4C13 4 4 13 4 24S13 44 24 44C35 44 44 35 44 24C44 22.7 43.9 21.3 43.6 20Z" />
-    <path fill="#FF3D00" d="M6.3 14.7L12.9 19.5C14.7 15 19 12 24 12C27 12 29.7 13.1 31.8 15L37.5 9.3C33.9 5.9 29.2 4 24 4C16.3 4 9.6 8.3 6.3 14.7Z" />
-    <path fill="#4CAF50" d="M24 44C29 44 33.5 42.1 37.1 38.9L30.8 33.6C28.8 35.1 26.5 36 24 36C18.8 36 14.4 32.7 12.7 28.1L6.1 33.2C9.3 39.8 16 44 24 44Z" />
-    <path fill="#1976D2" d="M43.6 20H42V19.9H24V28H35.3C34.5 30.3 33 32.2 30.8 33.6L30.8 33.6L37.1 38.9C36.7 39.2 44 34 44 24C44 22.7 43.9 21.3 43.6 20Z" />
-  </svg>
-);
 
 export const Auth: React.FC<AuthProps> = ({ onLogin, onClose, resetParams, onResetComplete, logoSrc, initialMode = 'login' }) => {
   const resolvedLogoSrc = logoSrc || `${import.meta.env.BASE_URL}Logo.png`;
@@ -499,10 +491,67 @@ export const Auth: React.FC<AuthProps> = ({ onLogin, onClose, resetParams, onRes
     await submitRegistration();
   };
 
-  const handleGoogleLogin = () => {
-    setInfoMessage('');
-    setErrorMessage('Kuingia kwa Google bado haijaunganishwa. Tumia barua pepe na nenosiri.');
-  };
+  const googleButtonRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (isResetMode || isRegisterOtpMode) return;
+
+    const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+    if (!clientId) return;
+
+    let cancelled = false;
+    let attempts = 0;
+
+    const handleCredentialResponse = async (response: { credential?: string }) => {
+      if (!response?.credential) return;
+      setLoading(true);
+      setErrorMessage('');
+      setInfoMessage('');
+      setFieldErrors({});
+      try {
+        await loginWithGoogle(response.credential);
+        const user = await getCurrentUser();
+        onLogin(user);
+      } catch (error) {
+        applyError(error, 'Imeshindikana kuingia kwa Google. Tafadhali jaribu tena.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    const tryRender = () => {
+      if (cancelled) return;
+      const win = window as any;
+      const container = googleButtonRef.current;
+      if (!win.google?.accounts?.id || !container) {
+        if (attempts < 20) {
+          attempts += 1;
+          window.setTimeout(tryRender, 150);
+        }
+        return;
+      }
+
+      win.google.accounts.id.initialize({
+        client_id: clientId,
+        callback: handleCredentialResponse,
+      });
+
+      const measuredWidth = container.parentElement?.offsetWidth || 320;
+      win.google.accounts.id.renderButton(container, {
+        type: 'standard',
+        theme: document.documentElement.classList.contains('dark') ? 'filled_black' : 'outline',
+        size: 'large',
+        shape: 'pill',
+        text: isLogin ? 'signin_with' : 'signup_with',
+        width: Math.max(200, Math.min(400, measuredWidth)),
+      });
+    };
+
+    tryRender();
+    return () => {
+      cancelled = true;
+    };
+  }, [isLogin, isResetMode, isRegisterOtpMode]);
 
   const handleForgotPassword = async () => {
     const normalizedEmail = email.trim().toLowerCase();
@@ -671,15 +720,10 @@ export const Auth: React.FC<AuthProps> = ({ onLogin, onClose, resetParams, onRes
           <div className="space-y-3">
             {!isResetMode && !isRegisterOtpMode && (
               <>
-                {/* Google Login Button */}
-                <button 
-                  onClick={handleGoogleLogin}
-                  disabled={loading}
-                  className="w-full py-3 px-6 bg-white dark:bg-[#10231a] border border-slate-200 dark:border-[#2b4a35] rounded-xl flex items-center justify-center gap-3 text-slate-700 dark:text-[#eaf5e8] font-bold text-sm hover:bg-slate-50 dark:hover:bg-[#163326] transition-all shadow-sm active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
-                >
-                  <GoogleMark />
-                  <span>Endelea na Google</span>
-                </button>
+                {/* Google Login Button (rendered by Google Identity Services) */}
+                <div className={`flex w-full justify-center ${loading ? 'pointer-events-none opacity-70' : ''}`}>
+                  <div ref={googleButtonRef} />
+                </div>
 
                 <div className="flex items-center gap-4 py-1">
                   <div className="h-px flex-1 bg-slate-100 dark:bg-white/5"></div>

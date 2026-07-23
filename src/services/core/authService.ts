@@ -330,6 +330,21 @@ export const loginUser = async (payload: {
   setTokens(data);
 };
 
+export const loginWithGoogle = async (credential: string): Promise<void> => {
+  const response = await safeFetch(`${API_BASE_URL}/api/auth/google/`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ credential }),
+  });
+
+  if (!response.ok) {
+    throw await toAuthRequestError(response, "Imeshindikana kuingia kwa Google. Tafadhali jaribu tena.");
+  }
+
+  const data = (await response.json()) as TokenPair;
+  setTokens(data);
+};
+
 export const getCurrentUser = async (): Promise<AuthUser> => {
   const response = await request("/api/auth/me/");
 
