@@ -52,6 +52,12 @@ const normalizeOptionalUrl = (value: unknown): string => {
   return value.trim();
 };
 
+const toSentenceCase = (value: string): string => {
+  const trimmed = (value || '').trim();
+  if (!trimmed) return trimmed;
+  return trimmed.charAt(0).toUpperCase() + trimmed.slice(1).toLowerCase();
+};
+
 const readProfilePicFromStorage = (): string => {
   const value = readStorageValue('gc365_profile_pic');
   if (!value) {
@@ -284,10 +290,10 @@ const Tile: React.FC<TileProps> = ({ stage, isActive, onClick, index }) => {
         {getIcon(stage.id)}
       </div>
 
-      <h3 className={`min-w-0 flex-1 truncate text-[13px] font-bold uppercase tracking-[0.03em] leading-tight transition-colors ${
+      <h3 className={`min-w-0 flex-1 truncate text-[13.5px] font-bold leading-tight transition-colors ${
         isActive ? '' : 'group-hover:text-[color:var(--accent-strong)]'
       }`}>
-        {stage.title}
+        {toSentenceCase(stage.title)}
       </h3>
 
       <ChevronRight
@@ -388,17 +394,26 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   return (
     <div className={`fixed inset-0 z-[200] bg-[color:var(--page-bg)] flex flex-col transition-all duration-500 ease-in-out ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
-      <div className="relative z-10 flex h-16 items-center justify-end border-b border-[color:var(--border-subtle)] bg-[color:var(--surface-2)] px-4 py-2.5 md:h-20 md:p-6">
-        <div onClick={() => { onStageChange(StageId.HOME); onClose(); }} className="absolute left-1/2 -translate-x-1/2 flex items-center cursor-pointer group">
-           <img src={resolvedLogoSrc} alt={resolvedSettings.site_name} className="h-14 md:h-20 w-auto group-hover:scale-105 transition-transform" />
+      <div className="relative z-10 flex h-14 items-center justify-end border-b border-[color:var(--border-subtle)] bg-[color:var(--surface-2)] px-4 py-2 md:px-8">
+        <div onClick={() => { onStageChange(StageId.HOME); onClose(); }} className="absolute left-1/2 -translate-x-1/2 flex items-center cursor-pointer group md:hidden">
+           <img src={resolvedLogoSrc} alt={resolvedSettings.site_name} className="h-10 w-auto group-hover:scale-105 transition-transform" />
         </div>
-        <button onClick={onClose} className="rounded-xl border border-[color:var(--border-subtle)] bg-[color:var(--surface-3)] p-2.5 text-[color:var(--text-muted)] transition-all hover:border-[color:var(--accent)] hover:text-[color:var(--accent-strong)] md:p-3">
-          <X size={21} />
+        <button onClick={onClose} className="rounded-xl border border-[color:var(--border-subtle)] bg-[color:var(--surface-3)] p-2 text-[color:var(--text-muted)] transition-all hover:border-[color:var(--accent)] hover:text-[color:var(--accent-strong)]">
+          <X size={19} />
         </button>
       </div>
 
       <div className="flex-1 overflow-y-auto overflow-x-hidden relative z-10 scrollbar-hide">
-        <div className="p-6 md:p-12 max-w-7xl mx-auto space-y-12 animate-fade-in">
+        <div className="p-6 md:p-10 max-w-7xl mx-auto animate-fade-in md:flex md:items-start md:gap-10">
+          {/* Desktop-only logo column: sits left, stays put while the links scroll on the right */}
+          <div
+            onClick={() => { onStageChange(StageId.HOME); onClose(); }}
+            className="hidden shrink-0 cursor-pointer items-center md:sticky md:top-2 md:flex md:w-40 lg:w-48 group"
+          >
+            <img src={resolvedLogoSrc} alt={resolvedSettings.site_name} className="h-20 lg:h-24 w-auto group-hover:scale-105 transition-transform" />
+          </div>
+
+          <div className="min-w-0 flex-1 space-y-12">
           {/* Main Content Sections */}
           {sections.map((section, sIdx) => (
             <div key={sIdx} className="space-y-4">
@@ -451,10 +466,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 ))}
              </div>
           </div>
+          </div>
         </div>
       </div>
 
-      <div className="relative z-10 flex shrink-0 items-center justify-end border-t border-[color:var(--border-subtle)] bg-[color:var(--surface-2)] px-4 py-3 md:px-12 md:py-5">
+      <div className="relative z-10 flex shrink-0 items-center justify-end border-t border-[color:var(--border-subtle)] bg-[color:var(--surface-2)] px-4 py-2.5 md:px-12 md:py-3">
         {user ? (
           <button onClick={onShowProfile} className="group flex items-center gap-2.5 rounded-full border border-[color:var(--border-subtle)] bg-[color:var(--surface-3)] p-1 pr-3.5 shadow-sm transition-all hover:border-[color:var(--accent)]">
              <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-gold-500 to-gold-700 flex items-center justify-center text-[#020617] shadow-lg group-hover:scale-105 transition-transform overflow-hidden">
