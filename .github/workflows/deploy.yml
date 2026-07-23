@@ -163,18 +163,22 @@ jobs:
              # install and enable nginx site config
              test -f "$NGINX_SOURCE"
              NGINX_DUMP="$(run_privileged nginx -T 2>/dev/null || true)"
+             INSTALLED_CONF="$NGINX_SITE"
              if echo "$NGINX_DUMP" | grep -qE "include\\s+/etc/nginx/sites-enabled/\\*"; then
                run_privileged mkdir -p /etc/nginx/sites-available /etc/nginx/sites-enabled
                run_privileged cp "$NGINX_SOURCE" "$NGINX_SITE"
                run_privileged ln -sfn "$NGINX_SITE" "$NGINX_SITE_ENABLED"
+               INSTALLED_CONF="$NGINX_SITE"
              elif echo "$NGINX_DUMP" | grep -qE "include\\s+/etc/nginx/conf\\.d/\\*\\.conf"; then
                run_privileged mkdir -p /etc/nginx/conf.d
                run_privileged cp "$NGINX_SOURCE" "$NGINX_CONF_D"
+               INSTALLED_CONF="$NGINX_CONF_D"
              else
                # fallback to common Debian/Ubuntu layout
                run_privileged mkdir -p /etc/nginx/sites-available /etc/nginx/sites-enabled
                run_privileged cp "$NGINX_SOURCE" "$NGINX_SITE"
                run_privileged ln -sfn "$NGINX_SITE" "$NGINX_SITE_ENABLED"
+               INSTALLED_CONF="$NGINX_SITE"
              fi
 
              # disable default site if present to avoid refresh 404 from wrong vhost
@@ -194,15 +198,28 @@ jobs:
              run_privileged nginx -t
              run_privileged systemctl reload nginx
 
+              # Read back the exact file we just installed (not the whole multi-site
+              # `nginx -T` dump: on a shared VPS that command needs to load every other
+              # vhost + cert too, and a sudoers restriction on "nginx -T" for the deploy
+              # user makes it fail silently/empty, which previously made these checks
+              # fail even when our own config was perfectly fine).
+              INSTALLED_CONTENT="$(cat "$INSTALLED_CONF" 2>/dev/null || run_privileged cat "$INSTALLED_CONF" 2>/dev/null || true)"
+              if [ -z "$INSTALLED_CONTENT" ]; then
+                echo "ERROR: Could not read installed Nginx config at $INSTALLED_CONF."
+                exit 1
+              fi
+
               # hard check: active config should contain a try_files fallback to /index.html
-              if ! run_privileged nginx -T 2>/dev/null | grep -qE "try_files[[:space:]].*/index\\.html;"; then
+              if ! echo "$INSTALLED_CONTENT" | grep -qE "try_files[[:space:]].*/index\\.html;"; then
                 echo "ERROR: Active Nginx config has no SPA fallback to /index.html."
+                echo "$INSTALLED_CONTENT"
                 exit 1
               fi
 
               # hard check: media handler must be protected from regex override (use ^~ /media/)
-              if ! run_privileged nginx -T 2>/dev/null | grep -qE "location[[:space:]]+\\^~[[:space:]]+/media/"; then
+              if ! echo "$INSTALLED_CONTENT" | grep -qE "location[[:space:]]+\\^~[[:space:]]+/media/"; then
                 echo "ERROR: Active Nginx config has no '^~ /media/' block. Media may return 404."
+                echo "$INSTALLED_CONTENT"
                 exit 1
               fi
 
