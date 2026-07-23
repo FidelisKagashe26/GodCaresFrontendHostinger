@@ -403,17 +403,17 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </button>
       </div>
 
-      <div className="flex-1 overflow-y-auto overflow-x-hidden relative z-10 scrollbar-hide">
-        <div className="p-6 md:p-10 max-w-7xl mx-auto animate-fade-in md:flex md:items-start md:gap-10">
-          {/* Desktop-only logo column: sits left, stays put while the links scroll on the right */}
-          <div
-            onClick={() => { onStageChange(StageId.HOME); onClose(); }}
-            className="hidden shrink-0 cursor-pointer items-center md:sticky md:top-2 md:flex md:w-40 lg:w-48 group"
-          >
-            <img src={resolvedLogoSrc} alt={resolvedSettings.site_name} className="h-20 lg:h-24 w-auto group-hover:scale-105 transition-transform" />
-          </div>
+      {/* Desktop-only logo panel: fixed in the viewport (never scrolls/moves), centered
+          in the reserved left column between the header and footer bars. */}
+      <div
+        onClick={() => { onStageChange(StageId.HOME); onClose(); }}
+        className="hidden cursor-pointer md:fixed md:left-0 md:top-14 md:bottom-20 md:z-20 md:flex md:w-44 md:items-center md:justify-center lg:w-56 group"
+      >
+        <img src={resolvedLogoSrc} alt={resolvedSettings.site_name} className="h-28 lg:h-32 w-auto group-hover:scale-105 transition-transform" />
+      </div>
 
-          <div className="min-w-0 flex-1 space-y-12">
+      <div className="flex-1 overflow-y-auto overflow-x-hidden relative z-10 scrollbar-hide">
+        <div className="p-6 md:p-10 md:pl-48 lg:pl-64 max-w-7xl mx-auto animate-fade-in space-y-12">
           {/* Main Content Sections */}
           {sections.map((section, sIdx) => (
             <div key={sIdx} className="space-y-4">
@@ -465,7 +465,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   </a>
                 ))}
              </div>
-          </div>
           </div>
         </div>
       </div>
