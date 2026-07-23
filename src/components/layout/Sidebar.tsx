@@ -269,28 +269,31 @@ const Tile: React.FC<TileProps> = ({ stage, isActive, onClick, index }) => {
   return (
     <button
       onClick={onClick}
-      style={{ animationDelay: `${index * 60}ms` }}
-      className={`group relative flex h-[64px] w-full items-center justify-start gap-2 rounded-2xl border px-3.5 py-2 text-left transition-all duration-300 animate-morph-in shadow-sm sm:h-[108px] sm:flex-col sm:items-center sm:justify-center sm:gap-3 sm:px-4 sm:py-5 sm:text-center ${
-         isActive 
-          ? 'bg-gradient-to-br from-gold-200 to-gold-300 dark:from-[#6f5314] dark:to-[#8d6b1f] text-green-950 dark:text-gold-100 border-gold-500 dark:border-[#b38829] shadow-[0_12px_22px_rgba(212,154,20,0.22)] dark:shadow-[0_14px_26px_rgba(145,106,24,0.32)]'
-          : 'bg-[#f1f7e8] dark:bg-[#13261b] border-green-200/80 dark:border-[#2b4a35] hover:-translate-y-0.5 hover:border-gold-400/70 hover:bg-[#f8fcef] dark:hover:bg-[#1a3324]'
-       }`}
+      style={{ animationDelay: `${index * 45}ms` }}
+      className={`group relative flex h-[68px] w-full items-center gap-3.5 rounded-2xl border px-4 text-left transition-all duration-300 animate-morph-in shadow-sm ${
+        isActive
+          ? 'border-transparent bg-[linear-gradient(135deg,var(--accent),var(--accent-strong))] text-[color:var(--accent-ink)] shadow-[0_10px_24px_rgba(238,183,32,0.28)]'
+          : 'border-[color:var(--border-subtle)] bg-[color:var(--surface-2)] text-[color:var(--text-primary)] hover:-translate-y-0.5 hover:border-[color:var(--accent)] hover:bg-[color:var(--surface-3)]'
+      }`}
     >
-      <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl transition-all duration-300 sm:h-12 sm:w-12 sm:rounded-2xl ${
-         isActive
-           ? 'bg-white/75 dark:bg-slate-900/80 text-green-900 dark:text-gold-200 shadow-sm'
-           : 'bg-green-100 text-green-700 dark:bg-[#1d3a29] dark:text-green-200 group-hover:bg-gold-100 group-hover:text-gold-700 dark:group-hover:bg-[#3e3112] dark:group-hover:text-gold-200'
-       }`}>
-         {getIcon(stage.id)}
+      <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl transition-all duration-300 ${
+        isActive
+          ? 'bg-black/10 text-[color:var(--accent-ink)]'
+          : 'bg-[color:var(--surface-3)] text-[color:var(--text-primary)] group-hover:bg-[color:var(--accent-soft)] group-hover:text-[color:var(--accent-strong)]'
+      }`}>
+        {getIcon(stage.id)}
       </div>
 
-      <div className="w-full min-w-0">
-        <h3 className={`line-clamp-2 text-[15px] sm:text-xs font-black uppercase tracking-[0.04em] sm:tracking-[0.12em] leading-tight transition-colors ${
-            isActive ? 'text-green-900 dark:text-gold-100' : 'text-slate-800 dark:text-[#f2f8ef] group-hover:text-gold-700 dark:group-hover:text-gold-300'
-        }`}>
-          {stage.title}
-        </h3>
-      </div>
+      <h3 className={`min-w-0 flex-1 truncate text-[13px] font-bold uppercase tracking-[0.03em] leading-tight transition-colors ${
+        isActive ? '' : 'group-hover:text-[color:var(--accent-strong)]'
+      }`}>
+        {stage.title}
+      </h3>
+
+      <ChevronRight
+        size={15}
+        className={`shrink-0 -translate-x-1 opacity-0 transition-all duration-300 group-hover:translate-x-0 group-hover:opacity-60 ${isActive ? 'translate-x-0 opacity-70' : ''}`}
+      />
     </button>
   );
 };
@@ -384,12 +387,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const displayFirstName = displayName.split(/\s+/)[0] || 'Mtumiaji';
 
   return (
-    <div className={`fixed inset-0 z-[200] bg-[#f4f8ec]/[0.995] dark:bg-[#040f0a]/[0.995] md:bg-[#eef6e1]/[0.99] md:dark:bg-[#06130d]/[0.99] backdrop-blur-md md:backdrop-blur-xl flex flex-col transition-all duration-700 ease-in-out ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
-      <div className="relative z-10 flex items-center justify-end px-4 py-2.5 md:p-6 border-b border-green-200/70 dark:border-green-900/60 bg-[#f8fbf1]/95 dark:bg-[#0a1a12]/92 backdrop-blur-0 md:backdrop-blur-md h-16 md:h-20">
+    <div className={`fixed inset-0 z-[200] bg-[color:var(--page-bg)] flex flex-col transition-all duration-500 ease-in-out ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+      <div className="relative z-10 flex h-16 items-center justify-end border-b border-[color:var(--border-subtle)] bg-[color:var(--surface-2)] px-4 py-2.5 md:h-20 md:p-6">
         <div onClick={() => { onStageChange(StageId.HOME); onClose(); }} className="absolute left-1/2 -translate-x-1/2 flex items-center cursor-pointer group">
            <img src={resolvedLogoSrc} alt={resolvedSettings.site_name} className="h-14 md:h-20 w-auto group-hover:scale-105 transition-transform" />
         </div>
-        <button onClick={onClose} className="p-2.5 md:p-3 bg-white dark:bg-[#12281b] text-slate-500 dark:text-slate-300 hover:text-gold-700 dark:hover:text-gold-300 transition-all rounded-xl border border-green-200/70 dark:border-green-900/60 hover:border-gold-500/45">
+        <button onClick={onClose} className="rounded-xl border border-[color:var(--border-subtle)] bg-[color:var(--surface-3)] p-2.5 text-[color:var(--text-muted)] transition-all hover:border-[color:var(--accent)] hover:text-[color:var(--accent-strong)] md:p-3">
           <X size={21} />
         </button>
       </div>
@@ -399,9 +402,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
           {/* Main Content Sections */}
           {sections.map((section, sIdx) => (
             <div key={sIdx} className="space-y-4">
-                <h3 className="text-sm sm:text-sm font-black text-green-700 dark:text-green-300 uppercase tracking-[0.1em] sm:tracking-[0.2em] px-1 flex items-center gap-4">
+                <h3 className="flex items-center gap-4 px-1 text-sm font-black uppercase tracking-[0.14em] text-[color:var(--accent-strong)]">
                   <span>{section.title}</span>
-                  <div className="h-[1px] flex-1 bg-gradient-to-r from-green-400/70 dark:from-green-500/50 to-transparent"></div>
+                  <div className="h-px flex-1 bg-[color:var(--border-strong)]"></div>
                 </h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
                   {isOpen && section.ids.map((id, idx) => {
@@ -417,31 +420,31 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
           {/* OUR WEBSITES SECTION */}
           <div className="space-y-6 pt-4 pb-12">
-             <h3 className="text-sm sm:text-sm font-black text-green-700 dark:text-green-300 uppercase tracking-[0.1em] sm:tracking-[0.2em] px-1 flex items-center gap-4">
+             <h3 className="flex items-center gap-4 px-1 text-sm font-black uppercase tracking-[0.14em] text-[color:var(--accent-strong)]">
                  <span>Tovuti Zetu</span>
-                <div className="h-[1px] flex-1 bg-gradient-to-r from-green-400/70 dark:from-green-500/50 to-transparent"></div>
+                <div className="h-px flex-1 bg-[color:var(--border-strong)]"></div>
              </h3>
              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pb-12">
                 {externalWebsites.map((web, idx) => (
-                  <a 
-                    key={idx} 
-                    href={web.url} 
-                    target="_blank" 
+                  <a
+                    key={idx}
+                    href={web.url}
+                    target="_blank"
                     rel="noopener noreferrer"
-                    className="group relative flex min-h-[64px] items-center gap-3 p-3 bg-[#f1f7e8] dark:bg-[#13261b] border border-green-200/80 dark:border-[#2b4a35] rounded-2xl hover:border-green-500/55 hover:shadow-[0_14px_32px_rgba(47,104,51,0.16)] backdrop-blur-md transition-all duration-300"
+                    className="group relative flex min-h-[64px] items-center gap-3 rounded-2xl border border-[color:var(--border-subtle)] bg-[color:var(--surface-2)] p-3 transition-all duration-300 hover:-translate-y-0.5 hover:border-[color:var(--accent)] hover:bg-[color:var(--surface-3)]"
                   >
-                    <div className="p-2.5 bg-green-100/65 dark:bg-green-900/25 rounded-xl text-green-700 dark:text-green-300 group-hover:text-gold-700 dark:group-hover:text-gold-300 group-hover:bg-gold-100/80 dark:group-hover:bg-gold-900/25 transition-all shrink-0">
+                    <div className="shrink-0 rounded-xl bg-[color:var(--surface-3)] p-2.5 text-[color:var(--text-primary)] transition-all group-hover:bg-[color:var(--accent-soft)] group-hover:text-[color:var(--accent-strong)]">
                        {web.icon}
                     </div>
                     <div className="flex-1 min-w-0">
-                       <h4 className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-tight leading-tight group-hover:text-green-700 dark:group-hover:text-green-300 transition-colors line-clamp-2">
+                       <h4 className="line-clamp-2 text-xs font-black uppercase leading-tight tracking-tight text-[color:var(--text-primary)] transition-colors group-hover:text-[color:var(--accent-strong)]">
                           {web.name}
                        </h4>
-                       <p className="hidden sm:block text-[11px] text-slate-500 dark:text-slate-400 font-bold uppercase mt-1 truncate">
+                       <p className="mt-1 hidden truncate text-[11px] font-bold uppercase text-[color:var(--text-muted)] sm:block">
                           {web.desc}
                        </p>
                     </div>
-                    <div className="text-slate-400 dark:text-slate-600 group-hover:text-blue-600 dark:group-hover:text-blue-300 transition-colors shrink-0">
+                    <div className="shrink-0 text-[color:var(--text-muted)] transition-colors group-hover:text-[color:var(--accent-strong)]">
                        <ExternalLink size={14} />
                     </div>
                   </a>
@@ -451,28 +454,28 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </div>
       </div>
 
-      <div className="px-4 py-3 md:px-12 md:py-5 border-t border-green-200/70 dark:border-green-900/60 bg-[#f8fbf1]/95 dark:bg-[#0a1a12]/92 backdrop-blur-0 md:backdrop-blur-md flex justify-end items-center relative z-10 shrink-0">
+      <div className="relative z-10 flex shrink-0 items-center justify-end border-t border-[color:var(--border-subtle)] bg-[color:var(--surface-2)] px-4 py-3 md:px-12 md:py-5">
         {user ? (
-          <button onClick={onShowProfile} className="group flex items-center gap-2.5 bg-[#f4faee] dark:bg-[#12281b] p-1 pr-3.5 rounded-full border border-green-200/70 dark:border-green-900/60 hover:border-gold-500 transition-all shadow-xl backdrop-blur-md">
+          <button onClick={onShowProfile} className="group flex items-center gap-2.5 rounded-full border border-[color:var(--border-subtle)] bg-[color:var(--surface-3)] p-1 pr-3.5 shadow-sm transition-all hover:border-[color:var(--accent)]">
              <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-gold-500 to-gold-700 flex items-center justify-center text-[#020617] shadow-lg group-hover:scale-105 transition-transform overflow-hidden">
                 <img src={profilePic || `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=eab308&color=020617&bold=true`} className="w-full h-full object-cover" alt="" />
              </div>
              <div className="text-left pr-1.5">
-               <p className="text-slate-900 dark:text-white text-[11px] font-black uppercase tracking-tight leading-none mb-0.5">{displayFirstName}</p>
-               <p className="text-[10px] font-black uppercase text-gold-500 tracking-[0.14em] leading-none">Akaunti</p>
+               <p className="mb-0.5 text-[11px] font-black uppercase leading-none tracking-tight text-[color:var(--text-primary)]">{displayFirstName}</p>
+               <p className="text-[10px] font-black uppercase leading-none tracking-[0.14em] text-[color:var(--accent-strong)]">Akaunti</p>
              </div>
           </button>
         ) : (
-          <button 
+          <button
             onClick={onShowAuth}
-            className="group flex items-center gap-2.5 bg-[#f4faee] dark:bg-[#12281b] p-1 pr-3.5 rounded-full border border-green-200/70 dark:border-green-900/60 hover:border-gold-500 transition-all shadow-xl backdrop-blur-md"
+            className="group flex items-center gap-2.5 rounded-full border border-[color:var(--border-subtle)] bg-[color:var(--surface-3)] p-1 pr-3.5 shadow-sm transition-all hover:border-[color:var(--accent)]"
           >
-             <div className="w-9 h-9 rounded-full bg-green-100/75 dark:bg-green-900/25 flex items-center justify-center text-green-700 dark:text-green-300 group-hover:text-gold-500 transition-colors shadow-lg">
+             <div className="w-9 h-9 rounded-full bg-[color:var(--surface-2)] flex items-center justify-center text-[color:var(--text-primary)] group-hover:text-[color:var(--accent-strong)] transition-colors shadow-sm">
                 <User size={18} />
              </div>
              <div className="text-left pr-1.5">
-               <p className="text-slate-900 dark:text-white text-[11px] font-black uppercase tracking-tight leading-none mb-0.5">Mgeni</p>
-               <p className="text-[10px] font-black uppercase text-gold-500 tracking-[0.14em] leading-none">Ingia Sasa</p>
+               <p className="mb-0.5 text-[11px] font-black uppercase leading-none tracking-tight text-[color:var(--text-primary)]">Mgeni</p>
+               <p className="text-[10px] font-black uppercase leading-none tracking-[0.14em] text-[color:var(--accent-strong)]">Ingia Sasa</p>
              </div>
           </button>
         )}

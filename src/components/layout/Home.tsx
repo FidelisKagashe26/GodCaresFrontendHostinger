@@ -307,23 +307,21 @@ export const Home: React.FC<HomeProps> = ({ onNavigate, siteSettings }) => {
                <div className="h-1 w-24 bg-gold-500 mx-auto rounded-full"></div>
             </ScrollReveal>
 
-            <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5 sm:gap-6 md:gap-8 xl:gap-10">
+            <div className="max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-5">
                {TOOLS.map((tool, index) => (
                   <ScrollReveal key={index} threshold={0.2}>
                     <div
                       onClick={() => onNavigate(tool.id)}
-                      className="group relative min-h-[210px] sm:min-h-[220px] bg-white/95 dark:bg-slate-900/90 border border-green-200/80 dark:border-slate-700 rounded-3xl p-5 sm:p-6 md:p-7 cursor-pointer hover:-translate-y-1 hover:border-gold-400/80 hover:shadow-[0_14px_28px_rgba(212,154,20,0.12)] transition-all duration-300 flex flex-col items-center justify-center text-center gap-4"
+                      className="group relative flex items-center gap-4 bg-white/95 dark:bg-slate-900/90 border border-green-200/80 dark:border-slate-700 rounded-2xl p-4 sm:p-5 cursor-pointer hover:-translate-y-0.5 hover:border-gold-400/80 hover:shadow-[0_10px_22px_rgba(212,154,20,0.12)] transition-all duration-300"
                     >
-                       <div className={`w-14 h-14 md:w-16 md:h-16 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl flex items-center justify-center ${tool.color} group-hover:bg-gold-500 group-hover:text-black group-hover:border-gold-500 transition-all duration-400 shadow-sm` }>
+                       <div className={`shrink-0 w-12 h-12 md:w-14 md:h-14 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl flex items-center justify-center ${tool.color} group-hover:bg-gold-500 group-hover:text-black group-hover:border-gold-500 transition-all duration-400 shadow-sm` }>
                           {tool.icon}
                        </div>
-                       <div className="space-y-2">
-                          <h3 className="text-[13px] md:text-[15px] font-black text-slate-900 dark:text-white uppercase tracking-wider group-hover:text-gold-500 transition-colors">{tool.title}</h3>
-                          <p className="text-[11px] md:text-[12px] text-slate-600 dark:text-slate-400 font-light opacity-85 italic">{tool.desc}</p>
+                       <div className="min-w-0 flex-1">
+                          <h3 className="text-[13px] md:text-[14px] font-black text-slate-900 dark:text-white uppercase tracking-wide group-hover:text-gold-500 transition-colors">{tool.title}</h3>
+                          <p className="text-[11px] md:text-[12px] text-slate-600 dark:text-slate-400 font-light opacity-85 italic truncate">{tool.desc}</p>
                        </div>
-                       <div className="opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0">
-                          <span className="text-[10px] font-black uppercase tracking-widest text-gold-500 flex items-center gap-1">FUNGUA <ArrowRight size={8}/></span>
-                       </div>
+                       <ArrowRight size={15} className="shrink-0 text-slate-400 dark:text-slate-600 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 group-hover:text-gold-500 transition-all duration-300" />
                     </div>
                   </ScrollReveal>
                ))}

@@ -132,11 +132,11 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, siteSettings }) => {
         </div>
 
         {/* Copyright */}
-        <div className="flex flex-col items-center gap-2">
-          <p className="text-slate-600 text-[9px] font-black uppercase tracking-[0.4em] text-center">
+        <div className="flex flex-col items-center gap-2 px-4">
+          <p className="text-slate-500 text-[11px] font-bold uppercase tracking-[0.18em] text-center leading-relaxed">
             Haki zote zimehifadhiwa 2026 - Mradi wa Wamishenari wa Kidijitali wa God Cares 365.
           </p>
-          <p className="text-slate-700 text-[8px] font-bold uppercase tracking-widest">
+          <p className="text-slate-600 text-[10px] font-bold uppercase tracking-[0.14em]">
             Sola Scriptura | Sola Gratia | Sola Fide
           </p>
         </div>
