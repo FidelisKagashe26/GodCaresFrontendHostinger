@@ -771,19 +771,29 @@ const App: React.FC = () => {
               <div className="flex items-center gap-2 md:gap-4">
                 <button
                   onClick={() => setIsMenuOpen(true)}
-                  className="gc-icon-button p-2.5 md:p-3.5 rounded-full group"
+                  className="gc-icon-button p-2.5 md:p-3.5 rounded-full group lg:hidden"
                   aria-label="Fungua menyu"
                 >
                   <Menu size={20} className="group-hover:text-[color:var(--accent)] transition-colors" />
                 </button>
-                <div onClick={() => handleStageChange(StageId.HOME)} className="hidden md:flex items-center gap-3 cursor-pointer group">
-                  <img src={logoSrc} alt={siteSettings.site_name} className="h-12 md:h-14 w-auto" />
-                  <div className="flex flex-col leading-tight">
+                <div onClick={() => handleStageChange(StageId.HOME)} className="flex items-center gap-3 cursor-pointer group">
+                  <img src={logoSrc} alt={siteSettings.site_name} className="h-10 md:h-12 w-auto" />
+                  <div className="hidden sm:flex flex-col leading-tight">
                     <span className="text-sm font-display tracking-[0.2em] text-[color:var(--text-primary)]">{siteSettings.site_name}</span>
                     <span className="text-[10px] uppercase tracking-[0.32em] text-[color:var(--text-muted)]">{siteSettings.site_tagline}</span>
                   </div>
                 </div>
               </div>
+
+              {/* Main Navigation - Desktop Only */}
+              <nav className="hidden lg:flex items-center gap-5 xl:gap-8 ml-auto mr-6">
+                <button onClick={() => handleStageChange(StageId.MEDIA)} className={`text-[11px] xl:text-[12px] font-black uppercase tracking-widest hover:text-[color:var(--accent)] transition-colors ${currentStage === StageId.MEDIA ? 'text-[color:var(--accent)]' : 'text-[color:var(--text-primary)]'}`}>Tazama</button>
+                <button onClick={() => handleStageChange(StageId.BIBLE_STUDY)} className={`text-[11px] xl:text-[12px] font-black uppercase tracking-widest hover:text-[color:var(--accent)] transition-colors ${currentStage === StageId.BIBLE_STUDY ? 'text-[color:var(--accent)]' : 'text-[color:var(--text-primary)]'}`}>Jifunze</button>
+                <button onClick={() => handleStageChange(StageId.BLOG)} className={`text-[11px] xl:text-[12px] font-black uppercase tracking-widest hover:text-[color:var(--accent)] transition-colors ${currentStage === StageId.BLOG ? 'text-[color:var(--accent)]' : 'text-[color:var(--text-primary)]'}`}>Habari</button>
+                <button onClick={() => handleStageChange(StageId.ABOUT)} className={`text-[11px] xl:text-[12px] font-black uppercase tracking-widest hover:text-[color:var(--accent)] transition-colors ${currentStage === StageId.ABOUT ? 'text-[color:var(--accent)]' : 'text-[color:var(--text-primary)]'}`}>Kuhusu Sisi</button>
+                <button onClick={() => handleStageChange(StageId.SHOP)} className={`text-[11px] xl:text-[12px] font-black uppercase tracking-widest hover:text-[color:var(--accent)] transition-colors ${currentStage === StageId.SHOP ? 'text-[color:var(--accent)]' : 'text-[color:var(--text-primary)]'}`}>Duka</button>
+                <button onClick={() => handleStageChange(StageId.DONATE)} className={`px-4 py-2 bg-[color:var(--accent)] text-[color:var(--accent-ink)] rounded-full text-[11px] xl:text-[12px] font-black uppercase tracking-widest hover:bg-[color:var(--accent-strong)] hover:shadow-md transition-all`}>Changia</button>
+              </nav>
 
               <div className="flex items-center gap-1.5 md:gap-3">
                 <button

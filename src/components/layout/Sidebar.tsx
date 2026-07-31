@@ -358,16 +358,20 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   const sections = [
     {
-      title: "Sehemu za Msingi",
-      ids: [StageId.HOME, StageId.BLOG, StageId.TIMELINE, StageId.ABOUT, StageId.BIBLE_STUDY, StageId.FAITH_BUILDER]
+      title: "Menyu Kuu",
+      ids: [StageId.HOME, StageId.MEDIA, StageId.BIBLE_STUDY, StageId.BLOG, StageId.SHOP, StageId.DONATE]
+    },
+    {
+      title: "Zana za Kiroho",
+      ids: [StageId.FAITH_BUILDER, StageId.TIMELINE, StageId.PRAYERS, StageId.LIBRARY]
     },
     {
       title: "Uchunguzi wa Kiungu",
-      ids: [StageId.EVIDENCE, StageId.DECEPTION_VAULT, StageId.QUESTION_VAULT, StageId.LIBRARY]
+      ids: [StageId.EVIDENCE, StageId.DECEPTION_VAULT, StageId.QUESTION_VAULT]
     },
     {
-      title: "Jumuiya ya Kimataifa",
-      ids: [StageId.MEDIA, StageId.TESTIMONIES, StageId.PRAYERS, StageId.EVENTS, StageId.NEWS, StageId.SHOP, StageId.DONATE]
+      title: "Taarifa na Jumuiya",
+      ids: [StageId.EVENTS, StageId.NEWS, StageId.ABOUT, StageId.TESTIMONIES]
     }
   ];
 
