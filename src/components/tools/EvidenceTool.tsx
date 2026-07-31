@@ -1,7 +1,8 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
-import { Microscope, ChevronRight, ChevronLeft, X, Fingerprint, MapPin, Lightbulb, Info, CheckCircle2, Loader2 } from 'lucide-react';
+import { Microscope, ChevronRight, ChevronLeft, X, Fingerprint, MapPin, Lightbulb, Info, CheckCircle2, Loader2, Image as ImageIcon } from 'lucide-react';
 import { EvidenceHighlightApi, getEvidenceHighlights } from '../../services/tools/globalToolService';
+import { DEFAULT_SITE_SETTINGS, SiteSettings } from '../../services/core/siteSettingsService';
 
 interface EvidenceFact {
   id: number;
@@ -59,9 +60,7 @@ const FALLBACK_FACTS: EvidenceFact[] = [
   }
 ];
 
-const DEFAULT_EVIDENCE_IMAGE = 'https://images.unsplash.com/photo-1548013146-72479768bbaa?q=80&w=1600';
-
-const mapEvidenceToFact = (item: EvidenceHighlightApi, index: number): EvidenceFact => {
+const mapEvidenceToFact = (item: EvidenceHighlightApi, index: number, defaultImage: string): EvidenceFact => {
   const hints = (item.hints || []).slice(0, 3);
   return {
     id: Number(item.id) || index + 1,
@@ -69,26 +68,29 @@ const mapEvidenceToFact = (item: EvidenceHighlightApi, index: number): EvidenceF
     evidence: item.evidence || 'Hakuna maelezo ya ushahidi kwa sasa.',
     didYouKnow: item.did_you_know || item.evidence || 'Hakuna dondoo ya ziada kwa sasa.',
     hints: hints.length > 0 ? hints : ['Ushahidi huu umetolewa kwenye hazina ya ushahidi ya mfumo.'],
-    image: item.image || DEFAULT_EVIDENCE_IMAGE,
-    year: item.year_label || 'N/A',
-    location: item.location || 'Haijajulikana',
+    image: item.image || defaultImage,
+    year: item.year_label || 'Haikujulikana',
+    location: item.location || 'Mahali Mbalimbali',
   };
 };
 
-interface Props {
+interface EvidenceToolProps {
   onGoToVault?: () => void;
+  siteSettings?: SiteSettings;
 }
 
-export const EvidenceTool: React.FC<Props> = ({ onGoToVault }) => {
+export const EvidenceTool: React.FC<EvidenceToolProps> = ({ onGoToVault, siteSettings }) => {
+  const resolvedSiteSettings = siteSettings || DEFAULT_SITE_SETTINGS;
+  const defaultImage = resolvedSiteSettings.evidence_hero_image || "";
   const [isOpen, setIsOpen] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [facts, setFacts] = useState<EvidenceFact[]>(FALLBACK_FACTS);
+  const [facts, setFacts] = useState<EvidenceFact[]>(FALLBACK_FACTS.map(f => ({...f, image: defaultImage})));
   const [isLoadingFacts, setIsLoadingFacts] = useState(false);
   const [factsError, setFactsError] = useState('');
   const [hasLoadedFacts, setHasLoadedFacts] = useState(false);
 
-  const activeFacts = useMemo(() => (facts.length > 0 ? facts : FALLBACK_FACTS), [facts]);
-  const activeFact = activeFacts[currentIndex] || FALLBACK_FACTS[0];
+  const activeFacts = useMemo(() => (facts.length > 0 ? facts : FALLBACK_FACTS.map(f => ({...f, image: defaultImage}))), [facts, defaultImage]);
+  const activeFact = activeFacts[currentIndex] || activeFacts[0];
 
   useEffect(() => {
     if (currentIndex >= activeFacts.length) {
@@ -101,11 +103,14 @@ export const EvidenceTool: React.FC<Props> = ({ onGoToVault }) => {
     setFactsError('');
     try {
       const payload = await getEvidenceHighlights();
-      const mapped = payload.map((item, index) => mapEvidenceToFact(item, index));
-      setFacts(mapped.length > 0 ? mapped : FALLBACK_FACTS);
+      if (payload && payload.length > 0) {
+        setFacts(payload.map((item, idx) => mapEvidenceToFact(item, idx, defaultImage)));
+      } else {
+        setFacts(FALLBACK_FACTS.map(f => ({...f, image: defaultImage})));
+      }
     } catch {
       setFactsError('Imeshindikana kupakua sehemu ya Je, Wajua?. Tunaonyesha data ya msingi.');
-      setFacts(FALLBACK_FACTS);
+      setFacts(FALLBACK_FACTS.map(f => ({...f, image: defaultImage})));
     } finally {
       setIsLoadingFacts(false);
       setHasLoadedFacts(true);
@@ -160,11 +165,17 @@ export const EvidenceTool: React.FC<Props> = ({ onGoToVault }) => {
                   <>
                     {/* Main Content & Larger Hero Image */}
                     <div className="relative h-[350px] md:h-[400px] bg-black group shrink-0">
-                       <img 
-                         src={activeFact.image} 
-                         className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-all duration-700 group-hover:scale-105" 
-                         alt="Ushahidi" 
-                       />
+                       {activeFact.image ? (
+                        <img 
+                          src={activeFact.image} 
+                          className="w-full h-full object-cover transition-transform duration-1000 hover:scale-110 opacity-80 group-hover:opacity-100" 
+                          alt={activeFact.title} 
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-slate-900 flex items-center justify-center">
+                           <ImageIcon className="text-slate-700" size={48} />
+                        </div>
+                      )}
                        <div className="absolute inset-0 bg-gradient-to-t from-[#0f172a] via-transparent to-black/60"></div>
                        
                        {/* Overlay Info - Bottom Left with Separator */}

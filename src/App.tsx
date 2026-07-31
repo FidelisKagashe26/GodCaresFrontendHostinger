@@ -580,7 +580,7 @@ const App: React.FC = () => {
       case StageId.LIBRARY: return <Library />;
       case StageId.EVENTS: return <Events />;
       case StageId.NEWS: return <News />;
-      case StageId.PRAYERS: return <Prayers aiLanguage={aiLanguage} />;
+      case StageId.PRAYERS: return <Prayers aiLanguage={aiLanguage} siteSettings={siteSettings} />;
       case StageId.DONATE: return <Donations />;
       case StageId.ABOUT: return <AboutUs />;
       default: return <Home onNavigate={handleStageChange} siteSettings={siteSettings} />;
@@ -699,10 +699,10 @@ const App: React.FC = () => {
             <div className="flex flex-col items-end gap-2 md:gap-3">
               {isQuickToolsOpen && (
                 <div className="gc-floating-tools flex flex-col gap-2 md:gap-3 saturate-75 animate-fade-in">
-                  <HistoryTool aiLanguage={aiLanguage} onGoToTimeline={() => handleStageChange(StageId.TIMELINE)} />
+                  <HistoryTool aiLanguage={aiLanguage} siteSettings={siteSettings} onGoToTimeline={() => handleStageChange(StageId.TIMELINE)} />
                   <QuestionTool onGoToVault={() => handleStageChange(StageId.QUESTION_VAULT)} />
                   <DeceptionTool onGoToVault={() => handleStageChange(StageId.DECEPTION_VAULT)} />
-                  <EvidenceTool onGoToVault={() => handleStageChange(StageId.EVIDENCE)} />
+                  <EvidenceTool siteSettings={siteSettings} onGoToVault={() => handleStageChange(StageId.EVIDENCE)} />
                 </div>
               )}
               <button

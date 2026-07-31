@@ -47,7 +47,7 @@ export const Home: React.FC<HomeProps> = ({ onNavigate, siteSettings }) => {
 
   const HERO_SLIDES = [
     {
-      image: resolvedSiteSettings.home_truth_story_1_image || "https://images.unsplash.com/photo-1493612276216-ee3925520721?q=80&w=2500",
+      image: resolvedSiteSettings.home_truth_story_1_image,
       title: "Ukweli Unaoweka Huru",
       subtitle: "Gundua mafundisho ya kina ya Biblia, kuelewa Pambano Kuu, na kumkaribia Mungu.",
       tag: "Mafundisho Mapya",
@@ -55,7 +55,7 @@ export const Home: React.FC<HomeProps> = ({ onNavigate, siteSettings }) => {
       stageId: StageId.BIBLE_STUDY
     },
     {
-      image: resolvedSiteSettings.home_hope_story_1_image || "https://images.unsplash.com/photo-1478147427282-58a87a120781?q=80&w=2500",
+      image: resolvedSiteSettings.home_hope_story_1_image,
       title: "Ramani ya Unabii",
       subtitle: "Fahamu matukio ya siku za mwisho na ujumbe wa malaika watatu kwa wakati wetu.",
       tag: "Unabii wa Biblia",
@@ -63,7 +63,7 @@ export const Home: React.FC<HomeProps> = ({ onNavigate, siteSettings }) => {
       stageId: StageId.TIMELINE
     },
     {
-      image: resolvedSiteSettings.home_deception_story_1_image || "https://images.unsplash.com/photo-1504052434569-70ad5836ab65?q=80&w=2500",
+      image: resolvedSiteSettings.home_deception_story_1_image,
       title: "Kituo cha Habari",
       subtitle: "Tazama mahubiri, vipindi, na mafundisho ya moja kwa moja ya GodCares 365.",
       tag: "Vipindi vya Televisheni",
@@ -90,9 +90,9 @@ export const Home: React.FC<HomeProps> = ({ onNavigate, siteSettings }) => {
   ];
 
   const DEEP_DIVE_SECTIONS = [
-    { id: StageId.TIMELINE, title: "Ramani ya Unabii", icon: <Clock size={20} />, img: resolvedSiteSettings.home_truth_story_2_image || "https://images.unsplash.com/photo-1534430480872-3498384e54e6?q=80&w=1000", desc: "Tazama historia ya dunia kwa mtazamo wa kinabii." },
-    { id: StageId.EVIDENCE, title: "Hifadhi ya Ushahidi", icon: <Microscope size={20} />, img: resolvedSiteSettings.home_deception_story_2_image || "https://images.unsplash.com/photo-1532094349884-543bc11b234d?q=80&w=1000", desc: "Sayansi na akiolojia zinazothibitisha ukweli wa Biblia." },
-    { id: StageId.DECEPTION_VAULT, title: "Kutambua Uongo", icon: <ShieldCheck size={20} />, img: resolvedSiteSettings.home_hope_story_2_image || "https://images.unsplash.com/photo-1512436991641-6745cdb1723f?q=80&w=1000", desc: "Jilinde dhidi ya mafundisho potofu ya siku za mwisho." },
+    { id: StageId.TIMELINE, title: "Ramani ya Unabii", icon: <Clock size={20} />, img: resolvedSiteSettings.home_truth_story_2_image, desc: "Tazama historia ya dunia kwa mtazamo wa kinabii." },
+    { id: StageId.EVIDENCE, title: "Hifadhi ya Ushahidi", icon: <Microscope size={20} />, img: resolvedSiteSettings.home_deception_story_2_image, desc: "Sayansi na akiolojia zinazothibitisha ukweli wa Biblia." },
+    { id: StageId.DECEPTION_VAULT, title: "Kutambua Uongo", icon: <ShieldCheck size={20} />, img: resolvedSiteSettings.home_hope_story_2_image, desc: "Jilinde dhidi ya mafundisho potofu ya siku za mwisho." },
   ];
 
   return (
@@ -106,11 +106,15 @@ export const Home: React.FC<HomeProps> = ({ onNavigate, siteSettings }) => {
             className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${currentSlide === index ? 'opacity-100 z-10' : 'opacity-0 z-0'}`}
           >
             <div className="absolute inset-0 bg-black/60 z-10" />
-            <img 
-              src={slide.image} 
-              alt={slide.title} 
-              className={`absolute inset-0 w-full h-full object-cover transition-transform duration-[10s] ease-out ${currentSlide === index ? 'scale-105' : 'scale-100'}`} 
-            />
+            {slide.image ? (
+              <img 
+                src={slide.image} 
+                alt={slide.title} 
+                className={`absolute inset-0 w-full h-full object-cover transition-transform duration-[10s] ease-out ${currentSlide === index ? 'scale-105' : 'scale-100'}`} 
+              />
+            ) : (
+              <div className="absolute inset-0 w-full h-full bg-slate-900" />
+            )}
             <div className="absolute inset-0 flex items-center justify-center z-20 px-4 md:px-10">
               <div className="text-center max-w-4xl space-y-6">
                 <span className="inline-block px-4 py-1.5 bg-[color:var(--accent)]/90 backdrop-blur text-[color:var(--accent-ink)] font-black text-xs uppercase tracking-[0.2em] rounded-full">
@@ -193,11 +197,15 @@ export const Home: React.FC<HomeProps> = ({ onNavigate, siteSettings }) => {
                 <div onClick={() => onNavigate(section.id)} className="block w-full h-[400px] rounded-3xl overflow-hidden relative shadow-lg">
                   <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors z-10" />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent z-10" />
-                  <img 
-                    src={section.img} 
-                    alt={section.title}
-                    className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                  />
+                  {section.img ? (
+                    <img 
+                      src={section.img} 
+                      alt={section.title}
+                      className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                    />
+                  ) : (
+                    <div className="absolute inset-0 w-full h-full bg-slate-800" />
+                  )}
                   <div className="absolute bottom-0 left-0 right-0 p-8 z-20">
                     <div className="flex items-center gap-3 mb-3 text-[color:var(--accent)]">
                       {section.icon}

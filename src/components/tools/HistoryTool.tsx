@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { CalendarClock, ChevronRight, ChevronLeft, ArrowRight, X, MapPin, Layers, Loader2, Calendar as CalendarIcon } from 'lucide-react';
 import { LanguageCode } from '../../types';
 import { HistoryMomentApi, getHistoryMoments } from '../../services/tools/globalToolService';
+import { DEFAULT_SITE_SETTINGS, SiteSettings } from '../../services/core/siteSettingsService';
 
 interface HistoryEvent {
   id: string;
@@ -56,9 +57,7 @@ const FALLBACK_HISTORY_EVENTS: HistoryEvent[] = [
   },
 ];
 
-const GENERIC_EVENT_IMAGE = 'https://images.unsplash.com/photo-1461360370896-922624d12aa1?q=80&w=1600';
-
-const mapBackendEvent = (item: HistoryMomentApi): HistoryEvent => {
+const mapBackendEvent = (item: HistoryMomentApi, defaultImage: string): HistoryEvent => {
   return {
     id: `history-${item.id}`,
     month: Number(item.month) || 1,
@@ -67,7 +66,7 @@ const mapBackendEvent = (item: HistoryMomentApi): HistoryEvent => {
     title: item.title || 'Tukio la Kihistoria',
     description: item.description || `Tukio la ${item.title} limehifadhiwa kwenye mfumo wa historia.`,
     significance: item.significance || 'Tukio hili lina mchango kwenye mkondo wa historia ya wokovu.',
-    image: item.image || GENERIC_EVENT_IMAGE,
+    image: item.image || defaultImage,
     tag: (item.tag || 'KUMBUKUMBU').toUpperCase(),
     location: item.location || 'Mahali pa tukio',
   };
@@ -80,7 +79,7 @@ const formatDateInput = (date: Date) => {
   return `${year}-${month}-${day}`;
 };
 
-const resolveEventByDate = (date: Date, events: HistoryEvent[]) => {
+const resolveEventByDate = (date: Date, events: HistoryEvent[], defaultImage: string) => {
   const month = date.getMonth() + 1;
   const day = date.getDate();
 
@@ -97,23 +96,27 @@ const resolveEventByDate = (date: Date, events: HistoryEvent[]) => {
     title: 'Tukio la Kihistoria',
     description: `Katika tarehe hii ya ${date.toLocaleDateString('sw-TZ', { day: 'numeric', month: 'long' })}, matukio mbalimbali ya kiimani yalitokea ulimwenguni kote yakichagiza mpango wa Mungu.`,
     significance: 'Kila siku ni ukurasa mpya katika kitabu cha historia ya ukombozi.',
-    image: GENERIC_EVENT_IMAGE,
+    image: defaultImage,
     tag: 'KUMBUKUMBU',
     location: 'Ulimwenguni',
   };
 };
 
-interface Props {
-  aiLanguage?: LanguageCode;
+interface HistoryToolProps {
   onGoToTimeline?: () => void;
+  aiLanguage?: LanguageCode;
+  siteSettings?: SiteSettings;
 }
 
-export const HistoryTool: React.FC<Props> = ({ onGoToTimeline }) => {
+export const HistoryTool: React.FC<HistoryToolProps> = ({ onGoToTimeline, aiLanguage = 'en', siteSettings }) => {
+  const resolvedSiteSettings = siteSettings || DEFAULT_SITE_SETTINGS;
+  const defaultImage = resolvedSiteSettings.history_hero_image || "";
+  
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [todaysEvent, setTodaysEvent] = useState<HistoryEvent | null>(null);
-  const [historyEvents, setHistoryEvents] = useState<HistoryEvent[]>(FALLBACK_HISTORY_EVENTS);
+  const [historyEvents, setHistoryEvents] = useState<HistoryEvent[]>(FALLBACK_HISTORY_EVENTS.map(e => ({...e, image: e.image || defaultImage})));
   const [eventsError, setEventsError] = useState('');
   const [hasLoadedEvents, setHasLoadedEvents] = useState(false);
   
@@ -121,7 +124,7 @@ export const HistoryTool: React.FC<Props> = ({ onGoToTimeline }) => {
   const dateInputValue = formatDateInput(currentDate);
 
   const fetchHistoryForDate = (date: Date, sourceEvents: HistoryEvent[] = historyEvents) => {
-    setTodaysEvent(resolveEventByDate(date, sourceEvents));
+    setTodaysEvent(resolveEventByDate(date, sourceEvents, defaultImage));
   };
 
   const loadBackendEvents = async (targetDate: Date) => {
@@ -129,18 +132,17 @@ export const HistoryTool: React.FC<Props> = ({ onGoToTimeline }) => {
     setEventsError('');
     try {
       const backendEvents = await getHistoryMoments();
-      const mapped = backendEvents
-        .map(mapBackendEvent);
+      const mapped = backendEvents.map(item => mapBackendEvent(item, defaultImage));
 
-      const sourceEvents = mapped.length > 0 ? mapped : FALLBACK_HISTORY_EVENTS;
+      const sourceEvents = mapped.length > 0 ? mapped : FALLBACK_HISTORY_EVENTS.map(e => ({...e, image: e.image || defaultImage}));
       setHistoryEvents(sourceEvents);
       setHasLoadedEvents(true);
       fetchHistoryForDate(targetDate, sourceEvents);
     } catch {
       setEventsError('Imeshindikana kupakua tukio la siku katika historia. Tunaonyesha data ya msingi.');
-      setHistoryEvents(FALLBACK_HISTORY_EVENTS);
+      setHistoryEvents(FALLBACK_HISTORY_EVENTS.map(e => ({...e, image: e.image || defaultImage})));
       setHasLoadedEvents(true);
-      fetchHistoryForDate(targetDate, FALLBACK_HISTORY_EVENTS);
+      fetchHistoryForDate(targetDate, FALLBACK_HISTORY_EVENTS.map(e => ({...e, image: e.image || defaultImage})));
     } finally {
       setLoading(false);
     }
@@ -200,11 +202,17 @@ export const HistoryTool: React.FC<Props> = ({ onGoToTimeline }) => {
                   <>
                     {/* Left: Image & Year (Hero Section) */}
                     <div className="w-full md:w-1/2 relative h-64 md:h-auto bg-slate-900 overflow-hidden group">
-                       <img 
-                         src={todaysEvent.image} 
-                         className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-all duration-1000 group-hover:scale-110" 
-                         alt="Tukio" 
-                       />
+                       {todaysEvent.image ? (
+                          <img 
+                            src={todaysEvent.image} 
+                            className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-all duration-1000 group-hover:scale-110" 
+                            alt="Tukio" 
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center bg-slate-800">
+                             <Layers className="text-slate-700" size={48} />
+                          </div>
+                        )}
                        <div className="absolute inset-0 bg-gradient-to-t from-[#0f172a] via-transparent to-transparent"></div>
                        
                        <div className="absolute top-6 left-6">

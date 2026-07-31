@@ -29,6 +29,20 @@ export interface SiteSettings {
   website_main_url: string;
   website_kids_url: string;
   website_outreach_url: string;
+  dashboard_hero_1_title: string;
+  dashboard_hero_1_subtitle: string;
+  dashboard_hero_1_image: string;
+  dashboard_hero_2_title: string;
+  dashboard_hero_2_subtitle: string;
+  dashboard_hero_2_image: string;
+  dashboard_hero_3_title: string;
+  dashboard_hero_3_subtitle: string;
+  dashboard_hero_3_image: string;
+  prayers_hero_image: string;
+  history_hero_image: string;
+  evidence_hero_image: string;
+  prophecy_hero_image_1: string;
+  prophecy_hero_image_2: string;
 }
 
 export const DEFAULT_SITE_SETTINGS: SiteSettings = {
@@ -57,6 +71,20 @@ export const DEFAULT_SITE_SETTINGS: SiteSettings = {
   website_main_url: "https://godcares365.org/pambano-kuu",
   website_kids_url: "https://kids.godcares365.org",
   website_outreach_url: "https://outreach.godcares365.org",
+  dashboard_hero_1_title: "Mungu Anakujali",
+  dashboard_hero_1_subtitle: "Gundua jinsi Kristo anavyotuombea katika patakatifu pa mbinguni.",
+  dashboard_hero_1_image: "",
+  dashboard_hero_2_title: "Misingi ya Ukweli",
+  dashboard_hero_2_subtitle: "Zifahamu amri kumi kama kioo cha upendo wa Mungu kwa mwanadamu.",
+  dashboard_hero_2_image: "",
+  dashboard_hero_3_title: "Saa ya Hukumu",
+  dashboard_hero_3_subtitle: "Matumaini yapo katika ujumbe wa malaika watatu. Jiandae kwa marejeo ya Yesu.",
+  dashboard_hero_3_image: "",
+  prayers_hero_image: "",
+  history_hero_image: "",
+  evidence_hero_image: "",
+  prophecy_hero_image_1: "",
+  prophecy_hero_image_2: "",
 };
 
 const normalizeSettings = (input: Partial<SiteSettings>): SiteSettings => ({
@@ -71,6 +99,14 @@ const normalizeSettings = (input: Partial<SiteSettings>): SiteSettings => ({
   home_deception_story_3_image: resolveApiAssetUrl((input.home_deception_story_3_image || "").trim(), API_BASE_URL),
   home_hope_story_1_image: resolveApiAssetUrl((input.home_hope_story_1_image || "").trim(), API_BASE_URL),
   home_hope_story_2_image: resolveApiAssetUrl((input.home_hope_story_2_image || "").trim(), API_BASE_URL),
+  dashboard_hero_1_image: resolveApiAssetUrl((input.dashboard_hero_1_image || "").trim(), API_BASE_URL),
+  dashboard_hero_2_image: resolveApiAssetUrl((input.dashboard_hero_2_image || "").trim(), API_BASE_URL),
+  dashboard_hero_3_image: resolveApiAssetUrl((input.dashboard_hero_3_image || "").trim(), API_BASE_URL),
+  prayers_hero_image: resolveApiAssetUrl((input.prayers_hero_image || "").trim(), API_BASE_URL),
+  history_hero_image: resolveApiAssetUrl((input.history_hero_image || "").trim(), API_BASE_URL),
+  evidence_hero_image: resolveApiAssetUrl((input.evidence_hero_image || "").trim(), API_BASE_URL),
+  prophecy_hero_image_1: resolveApiAssetUrl((input.prophecy_hero_image_1 || "").trim(), API_BASE_URL),
+  prophecy_hero_image_2: resolveApiAssetUrl((input.prophecy_hero_image_2 || "").trim(), API_BASE_URL),
 });
 
 export const getSiteSettings = async (): Promise<SiteSettings> => {

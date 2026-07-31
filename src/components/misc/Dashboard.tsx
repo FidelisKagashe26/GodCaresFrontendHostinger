@@ -8,6 +8,8 @@ import {
 } from 'lucide-react';
 import { GoogleGenAI } from "@google/genai";
 
+import { DEFAULT_SITE_SETTINGS, SiteSettings } from '../../services/core/siteSettingsService';
+
 interface DashboardProps {
   userName?: string;
   completedStages: StageId[];
@@ -16,51 +18,8 @@ interface DashboardProps {
   currentActiveStage: StageId;
   onNavigate: (id: StageId) => void;
   awards: Award[];
+  siteSettings?: SiteSettings;
 }
-
-const HERO_CARDS = [
-  {
-    prompt: "Cinematic digital painting of a majestic heavenly sanctuary, golden light streaming from the throne, seventh-day adventist sanctuary doctrine style, highly detailed, spiritual atmosphere, 4k",
-    tag: "Huduma ya Patakatifu",
-    title: "Mungu Anakujali",
-    swahiliTitle: "UPENDO WA MILELE",
-    subtitle: "Gundua jinsi Kristo anavyotuombea katika patakatifu pa mbinguni.",
-    cta: "Anza Safari",
-    image: "https://images.unsplash.com/photo-1543165731-0d29792694b8?auto=format&fit=crop&q=80&w=2000"
-  },
-  {
-    prompt: "Bamba la kale la mawe lenye Amri Kumi likiangaziwa na nuru ya mbinguni kutoka juu, mawingu mazito nyuma, mandhari ya sheria na neema, 4k",
-    tag: "Sheria na Neema",
-    title: "Misingi ya Ukweli",
-    swahiliTitle: "AMRI ZA MUNGU",
-    subtitle: "Zifahamu amri kumi kama kioo cha upendo wa Mungu kwa mwanadamu.",
-    cta: "Jifunze Zaidi",
-    image: "https://images.unsplash.com/photo-1504052434569-70ad5836ab65?auto=format&fit=crop&q=80&w=2000"
-  },
-  {
-    prompt: "Three angels flying in the midst of heaven against a vibrant sunset sky, holding golden trumpets, proclaiming the everlasting gospel to every nation, SDA three angels message theme, 4k",
-    tag: "Ujumbe wa Mwisho",
-    title: "Saa ya Hukumu",
-    swahiliTitle: "UJUMBE WA MALAIKA",
-    subtitle: "Matumaini yapo katika ujumbe wa malaika watatu. Jiandae kwa marejeo ya Yesu.",
-    cta: "Gundua Unabii",
-    image: "https://images.unsplash.com/photo-1447069387593-a5de0862481e?auto=format&fit=crop&q=80&w=2000"
-  }
-];
-
-const buildSparklinePath = (data: number[], width: number, height: number) => {
-  const max = Math.max(...data);
-  const min = Math.min(...data);
-  const range = Math.max(1, max - min);
-  const step = width / (data.length - 1);
-  return data
-    .map((value, index) => {
-      const x = index * step;
-      const y = height - ((value - min) / range) * height;
-      return `${index === 0 ? "M" : "L"} ${x.toFixed(2)} ${y.toFixed(2)}`;
-    })
-    .join(" ");
-};
 
 export const Dashboard: React.FC<DashboardProps> = ({ 
   userName = "Mtafutaji", 
@@ -69,23 +28,58 @@ export const Dashboard: React.FC<DashboardProps> = ({
   stages, 
   currentActiveStage,
   onNavigate,
-  awards
+  awards,
+  siteSettings
 }) => {
   const [scrollY, setScrollY] = useState(0);
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [heroImages, setHeroImages] = useState<string[]>(HERO_CARDS.map(c => c.image));
+
+  const resolvedSiteSettings = siteSettings || DEFAULT_SITE_SETTINGS;
+
+  const HERO_CARDS = [
+    {
+      tag: "Huduma ya Patakatifu",
+      title: resolvedSiteSettings.dashboard_hero_1_title || "Mungu Anakujali",
+      swahiliTitle: "UPENDO WA MILELE",
+      subtitle: resolvedSiteSettings.dashboard_hero_1_subtitle || "Gundua jinsi Kristo anavyotuombea katika patakatifu pa mbinguni.",
+      cta: "Anza Safari",
+      image: resolvedSiteSettings.dashboard_hero_1_image,
+      prompt: "A beautiful, serene sanctuary in heaven, light-filled, ethereal, high quality digital art"
+    },
+    {
+      tag: "Sheria na Neema",
+      title: resolvedSiteSettings.dashboard_hero_2_title || "Misingi ya Ukweli",
+      swahiliTitle: "AMRI ZA MUNGU",
+      subtitle: resolvedSiteSettings.dashboard_hero_2_subtitle || "Zifahamu amri kumi kama kioo cha upendo wa Mungu kwa mwanadamu.",
+      cta: "Jifunze Zaidi",
+      image: resolvedSiteSettings.dashboard_hero_2_image,
+      prompt: "Stone tablets with ten commandments, glowing, ancient, spiritual, cinematic light, 8k"
+    },
+    {
+      tag: "Ujumbe wa Mwisho",
+      title: resolvedSiteSettings.dashboard_hero_3_title || "Saa ya Hukumu",
+      swahiliTitle: "UJUMBE WA MALAIKA",
+      subtitle: resolvedSiteSettings.dashboard_hero_3_subtitle || "Matumaini yapo katika ujumbe wa malaika watatu. Jiandae kwa marejeo ya Yesu.",
+      cta: "Gundua Unabii",
+      image: resolvedSiteSettings.dashboard_hero_3_image,
+      prompt: "Three angels flying in the sky, dramatic clouds, golden hour, prophetic atmosphere, epic style"
+    }
+  ];
+
+  const [heroImages, setHeroImages] = useState<string[]>(HERO_CARDS.map(c => c.image || ""));
   
   const nextStage = stages.find(s => s.id === currentActiveStage && s.id !== StageId.HOME) || stages[1];
 
   useEffect(() => {
     const generateImages = async () => {
       try {
-        const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+        const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || "" });
         const newImages = [...heroImages];
         for (let i = 0; i < HERO_CARDS.length; i++) {
+          if (newImages[i]) continue;
           try {
             const response = await ai.models.generateContent({
-              model: 'gemini-2.5-flash-image', 
+              model: 'gemini-2.0-flash-exp', 
               contents: { parts: [{ text: HERO_CARDS[i].prompt }] }
             });
             const part = response.candidates?.[0]?.content?.parts.find(p => p.inlineData);
@@ -117,8 +111,21 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
   const zoomScale = Math.max(1, 1.1 - scrollY / 5000);
 
+  const buildSparklinePath = (data: number[], width: number, height: number) => {
+    const max = Math.max(...data);
+    const min = Math.min(...data);
+    const range = Math.max(1, max - min);
+    const step = width / (data.length - 1);
+    return data
+      .map((value, index) => {
+        const x = index * step;
+        const y = height - ((value - min) / range) * height;
+        return `${index === 0 ? "M" : "L"} ${x.toFixed(2)} ${y.toFixed(2)}`;
+      })
+      .join(" ");
+  };
+
   const weeklyEngagement = [24, 32, 28, 46, 52, 41, 60];
-  const prayerTrend = [12, 18, 15, 21, 19, 26, 30];
   const contentMix = [
     { label: "Maktaba", value: 68 },
     { label: "Video", value: 52 },
@@ -132,7 +139,11 @@ export const Dashboard: React.FC<DashboardProps> = ({
         {heroImages.map((img, index) => (
           <div key={index} className={`absolute inset-0 transition-opacity duration-1000 ${index === currentSlide ? 'opacity-100' : 'opacity-0'}`}>
             <div className="absolute inset-0 transition-transform duration-300" style={{ transform: `scale(${zoomScale})` }}>
-              <img src={img} className="w-full h-full object-cover brightness-[0.35] contrast-125" alt="Hero" />
+              {img ? (
+                <img src={img} className="w-full h-full object-cover brightness-[0.35] contrast-125" alt="Hero" />
+              ) : (
+                <div className="w-full h-full bg-primary-950" />
+              )}
               <div className="absolute inset-0 bg-gradient-to-t from-primary-950 via-transparent to-primary-950/50"></div>
             </div>
           </div>

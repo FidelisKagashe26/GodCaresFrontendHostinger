@@ -1,5 +1,5 @@
-
 import React, { useState } from 'react';
+import { DEFAULT_SITE_SETTINGS, SiteSettings } from '../../services/core/siteSettingsService';
 import { 
   CheckCircle2, ChevronRight, History, ScrollText, 
   Layers, FileText, Play, BookOpen, 
@@ -48,7 +48,25 @@ const FULL_14_PROPHECIES: Lesson[] = Array.from({ length: 14 }).map((_, i) => {
   };
 });
 
-export const StageThreeProphecy: React.FC<{ onComplete: () => void }> = ({ onComplete }) => {
+interface ProphecyProps {
+  onComplete: () => void;
+  siteSettings?: SiteSettings;
+}
+
+export const StageThreeProphecy: React.FC<ProphecyProps> = ({ onComplete, siteSettings }) => {
+  const resolvedSiteSettings = siteSettings || DEFAULT_SITE_SETTINGS;
+
+  const getHeroImage = (id: string, defaultImg: string) => {
+    if (id === 'p-1') return resolvedSiteSettings.prophecy_hero_image_1 || defaultImg;
+    if (id === 'p-2') return resolvedSiteSettings.prophecy_hero_image_2 || defaultImg;
+    return defaultImg;
+  };
+
+  const FULL_PROPHECIES_WITH_IMAGES: Lesson[] = FULL_14_PROPHECIES.map(lesson => ({
+    ...lesson,
+    heroImage: getHeroImage(lesson.id, lesson.heroImage)
+  }));
+
   const [activeId, setActiveId] = useState<string | null>(null);
   const [completed, setCompleted] = useState<string[]>([]);
   const [showExam, setShowExam] = useState(false);
@@ -58,8 +76,8 @@ export const StageThreeProphecy: React.FC<{ onComplete: () => void }> = ({ onCom
   const [sideOpen, setSideOpen] = useState(false);
   const [showLevelFinish, setShowLevelFinish] = useState(false);
 
-  const lessonIdx = activeId ? FULL_14_PROPHECIES.findIndex(l => l.id === activeId) : -1;
-  const lesson = FULL_14_PROPHECIES[lessonIdx];
+  const lessonIdx = activeId ? FULL_PROPHECIES_WITH_IMAGES.findIndex(l => l.id === activeId) : -1;
+  const lesson = FULL_PROPHECIES_WITH_IMAGES[lessonIdx];
 
   const handleAnswerSelect = (questionIndex: number, optionIndex: number) => {
     setAnswers({ ...answers, [questionIndex]: optionIndex });
@@ -76,10 +94,10 @@ export const StageThreeProphecy: React.FC<{ onComplete: () => void }> = ({ onCom
   };
 
   const handleNextAction = () => {
-    if (lessonIdx === FULL_14_PROPHECIES.length - 1) {
+    if (lessonIdx === FULL_PROPHECIES_WITH_IMAGES.length - 1) {
       setShowLevelFinish(true);
     } else {
-      setActiveId(FULL_14_PROPHECIES[lessonIdx + 1].id);
+      setActiveId(FULL_PROPHECIES_WITH_IMAGES[lessonIdx + 1].id);
       setShowExam(false);
       setAnswers({});
       setResult(null);
@@ -112,7 +130,7 @@ export const StageThreeProphecy: React.FC<{ onComplete: () => void }> = ({ onCom
   if (!lesson) {
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {FULL_14_PROPHECIES.map((l, idx) => (
+        {FULL_PROPHECIES_WITH_IMAGES.map((l, idx) => (
           <button key={l.id} onClick={() => setActiveId(l.id)} className="group bg-slate-900 border border-white/5 p-6 rounded-2xl text-left relative overflow-hidden hover:border-blue-500/50 shadow-xl">
             <div className="absolute inset-0 opacity-10 grayscale group-hover:grayscale-0 transition-all"><img src={l.heroImage} className="w-full h-full object-cover" alt="" /></div>
             <div className="relative z-10">

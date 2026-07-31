@@ -8,6 +8,7 @@ import {
 import { GoogleGenAI } from "@google/genai";
 import { LanguageCode } from '../../types';
 import { getAnsweredPrayers, getPublicPrayers, submitPrayer } from '../../services/content/prayerService';
+import { DEFAULT_SITE_SETTINGS, SiteSettings } from '../../services/core/siteSettingsService';
 
 interface PrayerRequest {
   id: string;
@@ -21,9 +22,11 @@ interface PrayerRequest {
 
 interface Props {
   aiLanguage?: LanguageCode;
+  siteSettings?: SiteSettings;
 }
 
-export const Prayers: React.FC<Props> = ({ aiLanguage = 'en' }) => {
+export const Prayers: React.FC<Props> = ({ aiLanguage = 'en', siteSettings }) => {
+  const resolvedSiteSettings = siteSettings || DEFAULT_SITE_SETTINGS;
   const [request, setRequest] = useState('');
   const [activeTab, setActiveTab] = useState<'wall' | 'answered'>('wall');
   const [isPublic, setIsPublic] = useState(true);
@@ -182,7 +185,11 @@ export const Prayers: React.FC<Props> = ({ aiLanguage = 'en' }) => {
       {/* Hero Section - Minimum Bevel */}
       <section className="relative bg-primary-950 rounded-2xl p-6 md:p-20 overflow-hidden shadow-2xl border border-white/5">
         <div className="absolute inset-0 opacity-20">
-           <img src="https://images.unsplash.com/photo-1512412023212-f05419bb100d?auto=format&fit=crop&q=80&w=2000" className="w-full h-full object-cover" alt="" />
+           {resolvedSiteSettings.prayers_hero_image ? (
+             <img src={resolvedSiteSettings.prayers_hero_image} className="w-full h-full object-cover" alt="" />
+           ) : (
+             <div className="w-full h-full bg-slate-900" />
+           )}
         </div>
         <div className="absolute inset-0 bg-gradient-to-r from-primary-950 via-primary-950/80 to-transparent"></div>
         <div className="relative z-10 max-w-2xl space-y-6">
