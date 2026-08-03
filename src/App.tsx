@@ -5,7 +5,7 @@ import { Home } from './components/layout/Home';
 import { StageId, ToastNotification, LanguageCode, ThemePreference } from './types';
 import { ToastContainer } from './components/ui/Toast';
 import { ErrorBoundary } from './components/system/ErrorBoundary';
-import { Sun, Moon, Menu, Bell, User, Monitor, ChevronDown, LogOut, ArrowLeft, ChevronRight, Plus, X } from 'lucide-react';
+import { Sun, Moon, Menu, Bell, User, Monitor, ChevronDown, ChevronUp, LogOut, ArrowLeft, ChevronRight, Plus, X } from 'lucide-react';
 import { AuthUser, clearTokens, getCurrentUser } from './services/core/authService';
 import { getSystemMessages } from './services/core/systemMessageService';
 import { DEFAULT_SITE_SETTINGS, getSiteSettings, SiteSettings } from './services/core/siteSettingsService';
@@ -767,7 +767,7 @@ const App: React.FC = () => {
       <div className="relative z-10 flex h-screen overflow-hidden">
         <main className="flex-1 flex flex-col relative w-full h-full bg-[color:var(--page-surface)] backdrop-blur-md">
           {!isImmersive && (
-            <header className="fixed top-0 left-0 right-0 h-20 px-3 sm:px-5 md:px-10 flex items-center justify-between z-[50] gc-header">
+            <header className="fixed top-0 left-0 right-0 h-16 px-3 sm:px-5 md:px-10 flex items-center justify-between z-[50] gc-header">
               <div className="flex items-center gap-2 md:gap-4">
                 <button
                   onClick={() => setIsMenuOpen(true)}
@@ -798,19 +798,19 @@ const App: React.FC = () => {
               <div className="flex items-center gap-1.5 md:gap-3">
                 <button
                   onClick={() => setIsThemeOpen(!isThemeOpen)}
-                  className="gc-icon-button p-2.5 md:p-3.5 rounded-full"
+                  className="gc-icon-button h-10 w-10 md:h-11 md:w-11 rounded-full flex items-center justify-center"
                   aria-label="Mandhari"
                 >
                   {theme === 'light' ? <Sun size={16} /> : theme === 'dark' ? <Moon size={16} /> : <Monitor size={16} />}
                 </button>
                 <button
                   onClick={() => setIsNotificationOpen(!isNotificationOpen)}
-                  className={`relative gc-icon-button p-2.5 md:p-3.5 rounded-full ${isNotificationOpen ? 'is-active' : ''}`}
+                  className={`relative gc-icon-button h-10 w-10 md:h-11 md:w-11 rounded-full flex items-center justify-center ${isNotificationOpen ? 'is-active' : ''}`}
                   aria-label="Arifa"
                 >
                   <Bell size={16} />
                   {unreadCount > 0 && (
-                    <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-[color:var(--accent)] rounded-full"></span>
+                    <span className="absolute top-2.5 right-2.5 md:top-3 md:right-3 w-2 h-2 bg-[color:var(--accent)] rounded-full"></span>
                   )}
                 </button>
                 <div ref={accountMenuRef} className="relative">
@@ -818,11 +818,11 @@ const App: React.FC = () => {
                     onClick={() => {
                       setIsAccountMenuOpen((prev) => !prev);
                     }}
-                    className={`gc-icon-button rounded-full pl-1.5 pr-2 py-1.5 flex items-center gap-2 ${isAccountMenuOpen ? 'is-active' : ''}`}
+                    className={`gc-icon-button rounded-full h-10 md:h-11 pl-1 md:pl-1.5 pr-2 flex items-center gap-2 ${isAccountMenuOpen ? 'is-active' : ''}`}
                     aria-label={user ? 'Akaunti yako' : 'Menyu ya akaunti'}
                     aria-expanded={isAccountMenuOpen}
                   >
-                    <span className="w-10 h-10 rounded-full bg-gradient-to-tr from-gold-500 to-gold-700 text-[#020617] flex items-center justify-center overflow-hidden shadow-sm">
+                    <span className="w-8 h-8 md:w-9 md:h-9 rounded-full bg-gradient-to-tr from-gold-500 to-gold-700 text-[#020617] flex items-center justify-center overflow-hidden shadow-sm">
                       {user ? (
                         <img
                           src={readSafeProfilePic() || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=eab308&color=020617&bold=true`}
@@ -841,7 +841,7 @@ const App: React.FC = () => {
                         {user ? 'Akaunti' : 'Ingia/Jisajili'}
                       </span>
                     </div>
-                    <ChevronDown size={14} className={`text-[color:var(--text-muted)] transition-transform ${isAccountMenuOpen ? 'rotate-180' : ''}`} />
+                    {isAccountMenuOpen ? <ChevronUp size={14} className="text-[color:var(--text-muted)]" /> : <ChevronDown size={14} className="text-[color:var(--text-muted)]" />}
                   </button>
 
                   {isAccountMenuOpen && (
@@ -889,7 +889,7 @@ const App: React.FC = () => {
           )}
 
           {showStageBreadcrumb && (
-            <div className="fixed top-20 left-0 right-0 h-12 px-4 md:px-10 z-[45] bg-[color:var(--page-surface)]/90 backdrop-blur-md border-b border-[color:var(--line-strong)]">
+            <div className="fixed top-16 left-0 right-0 h-12 px-4 md:px-10 z-[45] bg-[color:var(--page-surface)]/90 backdrop-blur-md border-b border-[color:var(--line-strong)]">
               <div className="h-full flex items-center gap-3">
                 <button
                   type="button"
@@ -918,7 +918,7 @@ const App: React.FC = () => {
 
           <div
             ref={mainContentRef}
-            className={`gc-content-scroll flex-1 overflow-y-auto scroll-smooth pb-16 ${isImmersive ? 'pt-20' : showStageBreadcrumb ? 'pt-32' : 'pt-20'}`}
+            className={`gc-content-scroll flex-1 overflow-y-auto scroll-smooth pb-16 ${isImmersive ? 'pt-16' : showStageBreadcrumb ? 'pt-28' : 'pt-16'}`}
           >
             <ErrorBoundary resetKey={currentPath}>
               <Suspense fallback={stageLoader}>

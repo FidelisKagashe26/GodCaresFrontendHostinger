@@ -193,10 +193,10 @@ export const BibleStudyJourney: React.FC = () => {
   }, [completedCount]);
 
   const SidebarContent = () => (
-    <div className="flex flex-col h-full bg-white dark:bg-slate-950 border-r border-slate-200 dark:border-white/5">
-      <div className="p-6 bg-gradient-to-br from-white to-slate-100 dark:from-slate-900 dark:to-black border-b border-slate-200 dark:border-white/5">
-        <div className="flex items-center gap-4 mb-4">
-          <div className="w-14 h-14 rounded-full p-0.5 bg-gradient-to-tr from-gold-600 to-gold-300">
+    <div className="flex flex-col h-[100dvh] bg-white dark:bg-slate-950 border-r border-slate-200 dark:border-white/5">
+      <div className="p-3 sm:p-4 lg:p-6 bg-gradient-to-br from-white to-slate-100 dark:from-slate-900 dark:to-black border-b border-slate-200 dark:border-white/5 shrink-0">
+        <div className="flex items-center gap-3 lg:gap-4 mb-3 lg:mb-4">
+          <div className="w-10 h-10 lg:w-14 lg:h-14 rounded-full p-0.5 bg-gradient-to-tr from-gold-600 to-gold-300 shrink-0">
             <div className="w-full h-full rounded-full bg-slate-900 overflow-hidden">
               <img
                 src={localStorage.getItem('gc365_profile_pic') || `https://ui-avatars.com/api/?name=${userProfile?.name || 'Mwanafunzi'}&background=0f172a&color=eab308`}
@@ -228,7 +228,7 @@ export const BibleStudyJourney: React.FC = () => {
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto scrollbar-hide p-4 space-y-4">
+      <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain scrollbar-hide p-3 lg:p-4 space-y-3 lg:space-y-4 -webkit-overflow-scrolling-touch">
         <h3 className="text-[9px] font-black text-slate-500 uppercase tracking-[0.4em] mb-2 pl-2">Curriculum</h3>
         <div className="space-y-2">
           {modules.map((module, index) => {
@@ -245,14 +245,14 @@ export const BibleStudyJourney: React.FC = () => {
                   setCurrentModuleIndex(index);
                   setIsSidebarOpen(false);
                 }}
-                className={`w-full p-3 rounded-xl text-left transition-all relative group flex items-center gap-3 border ${
+                className={`w-full p-2.5 lg:p-3 rounded-xl text-left transition-all relative group flex items-center gap-3 border ${
                   isActive
                     ? 'bg-gold-500/10 border-gold-500/50'
                     : 'bg-transparent border-transparent hover:bg-slate-50 dark:hover:bg-white/5'
                 } ${isLocked ? 'opacity-40 cursor-not-allowed' : ''}`}
               >
                 <div
-                  className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
+                  className={`w-8 h-8 lg:w-10 lg:h-10 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
                     isActive
                       ? 'bg-gold-500 text-slate-950 shadow-lg'
                       : isDone
@@ -269,7 +269,7 @@ export const BibleStudyJourney: React.FC = () => {
                   </h4>
                   <div className="flex items-center gap-2 mt-0.5">
                     <span className="text-[8px] text-slate-500 font-black uppercase tracking-wider">{module.lessons_count} Lessons</span>
-                    <span className="text-[8px] text-slate-600 font-medium">•</span>
+                    <span className="text-[8px] text-slate-600 font-medium">â€¢</span>
                     <span className="text-[8px] text-gold-600 font-bold">{module.kp_points} KP</span>
                   </div>
                 </div>
@@ -281,9 +281,9 @@ export const BibleStudyJourney: React.FC = () => {
         </div>
       </div>
 
-      <div className="p-4 bg-slate-50 dark:bg-black/20 border-t border-slate-200 dark:border-white/5">
-        <p className="text-[10px] text-slate-600 dark:text-slate-400 leading-relaxed">
-          Darasa hili linatumia taarifa kutoka kwenye mfumo. Hakikisha moduli na masomo vimejazwa kwenye paneli ya usimamizi.
+      <div className="p-2.5 lg:p-4 bg-slate-50 dark:bg-black/20 border-t border-slate-200 dark:border-white/5 shrink-0">
+        <p className="text-[9px] lg:text-[10px] text-slate-600 dark:text-slate-400 leading-relaxed">
+          Hakikisha moduli na masomo vimejazwa kwenye paneli ya usimamizi.
         </p>
       </div>
     </div>
@@ -323,7 +323,7 @@ export const BibleStudyJourney: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#020617] animate-fade-in flex flex-col h-screen overflow-hidden text-slate-900 dark:text-slate-200">
+    <div className="bg-slate-50 dark:bg-[#020617] animate-fade-in flex flex-col overflow-hidden text-slate-900 dark:text-slate-200" style={{ height: '100dvh' }}>
       <header className="lg:hidden h-16 border-b border-slate-200 dark:border-white/5 bg-white dark:bg-slate-950 px-4 flex items-center justify-between shrink-0 shadow-2xl z-[60]">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 bg-gold-500 rounded-lg flex items-center justify-center text-primary-950">
@@ -342,9 +342,9 @@ export const BibleStudyJourney: React.FC = () => {
         </aside>
 
         {isSidebarOpen && (
-          <div className="lg:hidden fixed inset-0 z-[100] flex">
+          <div className="lg:hidden fixed inset-0 z-[100] flex" style={{ height: '100dvh' }}>
             <div className="absolute inset-0 bg-black/60 dark:bg-black/90 backdrop-blur-sm" onClick={() => setIsSidebarOpen(false)} />
-            <div className="relative w-80 max-w-[85vw] h-full bg-white dark:bg-slate-950 shadow-2xl animate-slide-in">
+            <div className="relative w-80 max-w-[85vw] bg-white dark:bg-slate-950 shadow-2xl animate-slide-in overflow-hidden" style={{ height: '100dvh' }}>
               <button
                 onClick={() => setIsSidebarOpen(false)}
                 className="absolute top-2 -right-12 p-2 text-slate-900 dark:text-white bg-white/80 dark:bg-white/10 rounded-full"
