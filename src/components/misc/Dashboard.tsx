@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { StageConfig, StageId, Award } from '../../types';
 import { 
   Trophy, ArrowRight, Lock, CheckCircle2, 
@@ -36,7 +36,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
   const resolvedSiteSettings = siteSettings || DEFAULT_SITE_SETTINGS;
 
-  const HERO_CARDS = [
+  const HERO_CARDS = useMemo(() => [
     {
       tag: "Huduma ya Patakatifu",
       title: resolvedSiteSettings.dashboard_hero_1_title || "Mungu Anakujali",
@@ -64,19 +64,37 @@ export const Dashboard: React.FC<DashboardProps> = ({
       image: resolvedSiteSettings.dashboard_hero_3_image,
       prompt: "Three angels flying in the sky, dramatic clouds, golden hour, prophetic atmosphere, epic style"
     }
-  ];
+  ], [
+    resolvedSiteSettings.dashboard_hero_1_image,
+    resolvedSiteSettings.dashboard_hero_1_title,
+    resolvedSiteSettings.dashboard_hero_1_subtitle,
+    resolvedSiteSettings.dashboard_hero_2_image,
+    resolvedSiteSettings.dashboard_hero_2_title,
+    resolvedSiteSettings.dashboard_hero_2_subtitle,
+    resolvedSiteSettings.dashboard_hero_3_image,
+    resolvedSiteSettings.dashboard_hero_3_title,
+    resolvedSiteSettings.dashboard_hero_3_subtitle,
+  ]);
 
-  const [heroImages, setHeroImages] = useState<string[]>(HERO_CARDS.map(c => c.image || ""));
+  const configuredHeroImages = useMemo(() => HERO_CARDS.map(c => c.image || ""), [HERO_CARDS]);
+  const [heroImages, setHeroImages] = useState<string[]>(configuredHeroImages);
   
   const nextStage = stages.find(s => s.id === currentActiveStage && s.id !== StageId.HOME) || stages[1];
 
   useEffect(() => {
+    setHeroImages((currentImages) =>
+      configuredHeroImages.map((configuredImage, index) => configuredImage || currentImages[index] || "")
+    );
+  }, [configuredHeroImages]);
+
+  useEffect(() => {
+    let cancelled = false;
+
     const generateImages = async () => {
       try {
         const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || "" });
-        const newImages = [...heroImages];
         for (let i = 0; i < HERO_CARDS.length; i++) {
-          if (newImages[i]) continue;
+          if (configuredHeroImages[i]) continue;
           try {
             const response = await ai.models.generateContent({
               model: 'gemini-2.0-flash-exp', 
@@ -84,8 +102,15 @@ export const Dashboard: React.FC<DashboardProps> = ({
             });
             const part = response.candidates?.[0]?.content?.parts.find(p => p.inlineData);
             if (part) {
-               newImages[i] = `data:image/png;base64,${part.inlineData.data}`;
-               setHeroImages([...newImages]);
+               const generatedImage = `data:image/png;base64,${part.inlineData.data}`;
+               setHeroImages((currentImages) => {
+                 if (cancelled || configuredHeroImages[i] || currentImages[i]) {
+                   return currentImages;
+                 }
+                 const newImages = [...currentImages];
+                 newImages[i] = generatedImage;
+                 return newImages;
+               });
             }
           } catch (e: any) {
             console.warn("Dashboard image generation skipped:", e);
@@ -95,8 +120,13 @@ export const Dashboard: React.FC<DashboardProps> = ({
         console.error("Dashboard AI Init Error:", e);
       }
     };
-    generateImages();
-  }, []);
+    if (configuredHeroImages.some((image) => !image)) {
+      generateImages();
+    }
+    return () => {
+      cancelled = true;
+    };
+  }, [HERO_CARDS, configuredHeroImages]);
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentSlide(prev => (prev + 1) % HERO_CARDS.length), 7000);
@@ -140,11 +170,11 @@ export const Dashboard: React.FC<DashboardProps> = ({
           <div key={index} className={`absolute inset-0 transition-opacity duration-1000 ${index === currentSlide ? 'opacity-100' : 'opacity-0'}`}>
             <div className="absolute inset-0 transition-transform duration-300" style={{ transform: `scale(${zoomScale})` }}>
               {img ? (
-                <img src={img} className="w-full h-full object-cover brightness-[0.35] contrast-125" alt="Hero" />
+                <img src={img} className="w-full h-full object-cover brightness-[0.82] contrast-110" alt={HERO_CARDS[index]?.title || "Hero"} />
               ) : (
                 <div className="w-full h-full bg-primary-950" />
               )}
-              <div className="absolute inset-0 bg-gradient-to-t from-primary-950 via-transparent to-primary-950/50"></div>
+              <div className="absolute inset-0 bg-gradient-to-t from-primary-950/90 via-primary-950/35 to-primary-950/50"></div>
             </div>
           </div>
         ))}
@@ -155,11 +185,11 @@ export const Dashboard: React.FC<DashboardProps> = ({
               <Book size={12} /> {HERO_CARDS[currentSlide].tag}
             </div>
             
-            <h1 className="text-4xl md:text-6xl font-black text-white leading-tight tracking-tighter">
+            <h1 className="text-4xl md:text-6xl font-black text-white leading-tight tracking-normal break-words [overflow-wrap:anywhere] drop-shadow-2xl">
               {HERO_CARDS[currentSlide].title}
             </h1>
             
-            <p className="text-lg md:text-xl text-slate-300 font-medium leading-relaxed italic border-l-2 border-gold-400 pl-6">
+            <p className="text-lg md:text-xl text-white font-semibold leading-relaxed italic border-l-2 border-gold-400 pl-6 drop-shadow-lg">
               "{HERO_CARDS[currentSlide].subtitle}"
             </p>
 

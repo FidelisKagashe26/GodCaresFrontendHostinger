@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { StageId } from '../../types';
 import { DEFAULT_SITE_SETTINGS, SiteSettings } from '../../services/core/siteSettingsService';
+import { getApiBaseUrl } from '../../services/core/urlService';
 import { 
   ArrowRight, BookOpen, ShieldCheck, Microscope, PlayCircle, 
   Clock, ChevronRight, ChevronLeft, Calendar, Newspaper, BookMarked, Play,
@@ -44,28 +45,38 @@ const ScrollReveal: React.FC<{ children: React.ReactNode; className?: string; th
 export const Home: React.FC<HomeProps> = ({ onNavigate, siteSettings }) => {
   const resolvedSiteSettings = siteSettings || DEFAULT_SITE_SETTINGS;
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [latestVideos, setLatestVideos] = useState<any[]>([]);
+
+  useEffect(() => {
+    fetch(`${getApiBaseUrl()}/api/media/videos/latest/`)
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data)) setLatestVideos(data);
+      })
+      .catch(err => console.error("Failed to fetch videos", err));
+  }, []);
 
   const HERO_SLIDES = [
     {
-      image: resolvedSiteSettings.home_truth_story_1_image,
-      title: "Ukweli Unaoweka Huru",
-      subtitle: "Gundua mafundisho ya kina ya Biblia, kuelewa Pambano Kuu, na kumkaribia Mungu.",
+      image: resolvedSiteSettings.dashboard_hero_1_image,
+      title: resolvedSiteSettings.dashboard_hero_1_title || "Mungu Anakujali",
+      subtitle: resolvedSiteSettings.dashboard_hero_1_subtitle || "Gundua jinsi Kristo anavyotuombea katika patakatifu pa mbinguni.",
       tag: "Mafundisho Mapya",
       action: "Anza Kujifunza",
       stageId: StageId.BIBLE_STUDY
     },
     {
-      image: resolvedSiteSettings.home_hope_story_1_image,
-      title: "Ramani ya Unabii",
-      subtitle: "Fahamu matukio ya siku za mwisho na ujumbe wa malaika watatu kwa wakati wetu.",
+      image: resolvedSiteSettings.dashboard_hero_2_image,
+      title: resolvedSiteSettings.dashboard_hero_2_title || "Misingi ya Ukweli",
+      subtitle: resolvedSiteSettings.dashboard_hero_2_subtitle || "Zifahamu amri kumi kama kioo cha upendo wa Mungu kwa mwanadamu.",
       tag: "Unabii wa Biblia",
       action: "Chunguza Unabii",
       stageId: StageId.TIMELINE
     },
     {
-      image: resolvedSiteSettings.home_deception_story_1_image,
-      title: "Kituo cha Habari",
-      subtitle: "Tazama mahubiri, vipindi, na mafundisho ya moja kwa moja ya GodCares 365.",
+      image: resolvedSiteSettings.dashboard_hero_3_image,
+      title: resolvedSiteSettings.dashboard_hero_3_title || "Saa ya Hukumu",
+      subtitle: resolvedSiteSettings.dashboard_hero_3_subtitle || "Matumaini yapo katika ujumbe wa malaika watatu. Jiandae kwa marejeo ya Yesu.",
       tag: "Vipindi vya Televisheni",
       action: "Tazama Sasa",
       stageId: StageId.MEDIA
@@ -99,64 +110,120 @@ export const Home: React.FC<HomeProps> = ({ onNavigate, siteSettings }) => {
     <div className="w-full min-h-screen bg-[color:var(--page-bg)] text-[color:var(--text-primary)] font-sans overflow-x-hidden">
       
       {/* --- DYNAMIC CAROUSEL HERO --- */}
-      <section className="relative w-full h-[75vh] md:h-[85vh] overflow-hidden group">
-        {HERO_SLIDES.map((slide, index) => (
-          <div 
-            key={index} 
-            className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${currentSlide === index ? 'opacity-100 z-10' : 'opacity-0 z-0'}`}
-          >
-            <div className="absolute inset-0 bg-black/60 z-10" />
-            {slide.image ? (
-              <img 
-                src={slide.image} 
-                alt={slide.title} 
-                className={`absolute inset-0 w-full h-full object-cover transition-transform duration-[10s] ease-out ${currentSlide === index ? 'scale-105' : 'scale-100'}`} 
-              />
-            ) : (
-              <div className="absolute inset-0 w-full h-full bg-slate-900" />
-            )}
-            <div className="absolute inset-0 flex items-center justify-center z-20 px-4 md:px-10">
-              <div className="text-center max-w-4xl space-y-6">
-                <span className="inline-block px-4 py-1.5 bg-[color:var(--accent)]/90 backdrop-blur text-[color:var(--accent-ink)] font-black text-xs uppercase tracking-[0.2em] rounded-full">
-                  {slide.tag}
-                </span>
-                <h1 className="text-4xl md:text-6xl lg:text-7xl font-black text-white uppercase tracking-tight leading-[1.1] drop-shadow-xl">
-                  {slide.title}
-                </h1>
-                <p className="text-lg md:text-2xl text-slate-200 font-medium max-w-2xl mx-auto drop-shadow-md">
-                  {slide.subtitle}
-                </p>
-                <div className="pt-4">
-                  <button 
-                    onClick={() => onNavigate(slide.stageId)} 
-                    className="inline-flex items-center gap-3 px-8 py-4 bg-white text-slate-900 font-black uppercase tracking-widest text-sm rounded-full hover:bg-[color:var(--accent)] hover:text-[color:var(--accent-ink)] transition-colors shadow-[0_0_40px_rgba(255,255,255,0.3)]"
-                  >
-                    {slide.action} <ArrowRight size={18} />
-                  </button>
+      <section className="relative w-full h-[85vh] md:h-[95vh] min-h-[600px] overflow-hidden group bg-slate-950">
+        {HERO_SLIDES.map((slide, index) => {
+          const isActive = currentSlide === index;
+          return (
+            <div 
+              key={index} 
+              className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${isActive ? 'opacity-100 z-10 pointer-events-auto' : 'opacity-0 z-0 pointer-events-none'}`}
+            >
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-950/35 to-slate-950/20 z-10" />
+              {slide.image ? (
+                <img 
+                  src={slide.image} 
+                  alt={slide.title} 
+                  className={`absolute inset-0 w-full h-full object-cover brightness-[0.82] transition-opacity duration-1000 ease-out ${isActive ? 'opacity-100' : 'opacity-80'}`} 
+                />
+              ) : (
+                <div className="absolute inset-0 w-full h-full bg-slate-900" />
+              )}
+              
+              <div className="absolute inset-0 flex items-center justify-center z-20 px-4 md:px-10">
+                <div className="text-center max-w-5xl space-y-6 md:space-y-8 flex flex-col items-center mt-10">
+                  
+                  <div className={`overflow-hidden transition-all duration-1000 delay-100 ${isActive ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+                    <span className="inline-flex items-center gap-4 text-white font-bold text-sm md:text-base uppercase tracking-[0.25em]">
+                      <span className="w-3 h-3 md:w-4 md:h-4 rounded-full bg-[color:var(--accent)] animate-pulse"></span>
+                      {slide.tag}
+                    </span>
+                  </div>
+
+                  <h1 className={`max-w-full text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-black text-white uppercase tracking-normal leading-[1.05] drop-shadow-2xl break-words [overflow-wrap:anywhere] transition-all duration-1000 delay-300 ${isActive ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}>
+                    {slide.title}
+                  </h1>
+
+                  <p className={`text-base sm:text-lg md:text-2xl text-white font-semibold max-w-3xl mx-auto drop-shadow-lg leading-relaxed transition-all duration-1000 delay-500 ${isActive ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+                    {slide.subtitle}
+                  </p>
+
+
+
                 </div>
               </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
 
-        {/* Carousel Navigation Arrows */}
-        <button onClick={prevSlide} className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 z-30 p-3 rounded-full bg-black/30 text-white backdrop-blur-sm border border-white/20 hover:bg-black/50 transition-all opacity-0 group-hover:opacity-100">
-          <ChevronLeft size={24} />
-        </button>
-        <button onClick={nextSlide} className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 z-30 p-3 rounded-full bg-black/30 text-white backdrop-blur-sm border border-white/20 hover:bg-black/50 transition-all opacity-0 group-hover:opacity-100">
-          <ChevronRight size={24} />
-        </button>
+        {/* Modern Navigation Arrows */}
+        <div className="absolute inset-y-0 left-0 flex items-center px-4 md:px-8 z-30 pointer-events-none">
+          <button onClick={prevSlide} className="pointer-events-auto p-4 rounded-full bg-white/5 text-white backdrop-blur-md border border-white/10 hover:bg-white/20 hover:scale-110 transition-all opacity-0 group-hover:opacity-100 hover:shadow-[0_0_20px_rgba(255,255,255,0.1)]">
+            <ChevronLeft size={28} />
+          </button>
+        </div>
+        <div className="absolute inset-y-0 right-0 flex items-center px-4 md:px-8 z-30 pointer-events-none">
+          <button onClick={nextSlide} className="pointer-events-auto p-4 rounded-full bg-white/5 text-white backdrop-blur-md border border-white/10 hover:bg-white/20 hover:scale-110 transition-all opacity-0 group-hover:opacity-100 hover:shadow-[0_0_20px_rgba(255,255,255,0.1)]">
+            <ChevronRight size={28} />
+          </button>
+        </div>
 
-        {/* Carousel Indicators */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-30 flex gap-3">
+        {/* Modern Floating Indicators */}
+        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-30 flex gap-2 px-5 py-3 bg-black/40 backdrop-blur-xl border border-white/10 rounded-full shadow-2xl">
           {HERO_SLIDES.map((_, index) => (
             <button 
               key={index} 
               onClick={() => setCurrentSlide(index)}
-              className={`transition-all duration-300 rounded-full h-1.5 ${currentSlide === index ? 'w-8 bg-white' : 'w-2 bg-white/40'}`}
+              className={`transition-all duration-500 rounded-full h-1.5 ${currentSlide === index ? 'w-10 bg-[color:var(--accent)] shadow-[0_0_10px_var(--accent)]' : 'w-3 bg-white/30 hover:bg-white/50'}`}
               aria-label={`Go to slide ${index + 1}`}
             />
           ))}
+        </div>
+      </section>
+
+      {/* --- LATEST VIDEOS --- */}
+      <section className="py-16 md:py-24 px-4 md:px-10 bg-[color:var(--page-bg)]">
+        <div className="max-w-7xl mx-auto space-y-10">
+          <ScrollReveal>
+            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6">
+              <div>
+                <h3 className="text-3xl md:text-4xl font-black text-[color:var(--text-primary)] tracking-tight">Vipindi Vipya</h3>
+              </div>
+              <button onClick={() => onNavigate(StageId.MEDIA)} className="flex items-center gap-2 text-sm font-bold text-[color:var(--accent)] hover:text-[color:var(--text-primary)] transition-colors group">
+                Tazama video zote <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+              </button>
+            </div>
+          </ScrollReveal>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {latestVideos.map((video: any, idx: number) => (
+              <ScrollReveal key={video.id || idx} threshold={0.2} className="group cursor-pointer">
+                <div onClick={() => onNavigate(StageId.MEDIA)} className="flex flex-col h-full bg-[color:var(--surface-2)] rounded-3xl border border-[color:var(--line-strong)] hover:border-[color:var(--accent)] hover:shadow-2xl transition-all duration-300 overflow-hidden">
+                  <div className="relative aspect-video overflow-hidden bg-slate-900">
+                    <img src={video.thumbnail || "https://images.unsplash.com/photo-1493612276216-ee3925520721?q=80&w=800&auto=format&fit=crop"} alt={video.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+                    <div className="absolute inset-0 bg-black/10 group-hover:bg-black/0 transition-colors" />
+                    <div className="absolute top-4 left-4 bg-black/60 backdrop-blur-md rounded-full p-2">
+                       <PlayCircle size={24} className="text-white opacity-90 group-hover:text-gold-400 transition-colors" />
+                    </div>
+                  </div>
+                  <div className="p-6 md:p-8 flex flex-col flex-grow">
+                    <span className="inline-block px-3 py-1 bg-[color:var(--surface-3)] border border-[color:var(--line-strong)] text-[color:var(--text-muted)] text-[9px] font-black uppercase tracking-widest rounded-full mb-4 w-fit">
+                      {video.category || "Video Mpya"}
+                    </span>
+                    <h4 className="text-xl font-black text-[color:var(--text-primary)] mb-3 group-hover:text-[color:var(--accent)] transition-colors line-clamp-2">
+                      {video.title}
+                    </h4>
+                    <p className="text-sm text-[color:var(--text-muted)] leading-relaxed line-clamp-3 mb-6 flex-grow">
+                      {video.description || "Tazama video hii mpya yenye mafundisho ya kiroho."}
+                    </p>
+                    <div className="mt-auto flex justify-between items-center text-xs font-bold text-[color:var(--text-muted)] opacity-70">
+                      <span>{video.date || video.posted_at || ""}</span>
+                      {video.duration && <span>{video.duration} min</span>}
+                    </div>
+                  </div>
+                </div>
+              </ScrollReveal>
+            ))}
+          </div>
         </div>
       </section>
 

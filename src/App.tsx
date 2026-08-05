@@ -203,6 +203,28 @@ const App: React.FC = () => {
   const [siteSettings, setSiteSettings] = useState<SiteSettings>(DEFAULT_SITE_SETTINGS);
   const routeLoadingTimerRef = useRef<number | null>(null);
 
+  const [isScrollingDown, setIsScrollingDown] = useState(false);
+  const lastScrollYRef = useRef(0);
+
+  useEffect(() => {
+    const el = mainContentRef.current;
+    if (!el) return;
+
+    const handleScroll = () => {
+      const currentScrollY = el.scrollTop;
+      
+      if (currentScrollY > lastScrollYRef.current + 15) {
+        setIsScrollingDown(true);
+        lastScrollYRef.current = currentScrollY;
+      } else if (currentScrollY < lastScrollYRef.current - 15) {
+        setIsScrollingDown(false);
+        lastScrollYRef.current = currentScrollY;
+      }
+    };
+
+    el.addEventListener('scroll', handleScroll, { passive: true });
+    return () => el.removeEventListener('scroll', handleScroll);
+  }, []);
   useEffect(() => {
     try {
       localStorage.setItem('gc365_active_timeline', activeTimelineId);
@@ -436,7 +458,7 @@ const App: React.FC = () => {
   useEffect(() => {
     const loadSiteSettings = async () => {
       try {
-        const settings = await getSiteSettings();
+        const settings = await getSiteSettings({ forceRefresh: true });
         setSiteSettings(settings);
       } catch {
         // Keep defaults when API is unavailable.
@@ -787,6 +809,7 @@ const App: React.FC = () => {
 
               {/* Main Navigation - Desktop Only */}
               <nav className="hidden lg:flex items-center gap-5 xl:gap-8 ml-auto mr-6">
+                <button onClick={() => handleStageChange(StageId.HOME)} className={`text-[11px] xl:text-[12px] font-black uppercase tracking-widest hover:text-[color:var(--accent)] transition-colors ${currentStage === StageId.HOME ? 'text-[color:var(--accent)]' : 'text-[color:var(--text-primary)]'}`}>Mwanzo</button>
                 <button onClick={() => handleStageChange(StageId.MEDIA)} className={`text-[11px] xl:text-[12px] font-black uppercase tracking-widest hover:text-[color:var(--accent)] transition-colors ${currentStage === StageId.MEDIA ? 'text-[color:var(--accent)]' : 'text-[color:var(--text-primary)]'}`}>Tazama</button>
                 <button onClick={() => handleStageChange(StageId.BIBLE_STUDY)} className={`text-[11px] xl:text-[12px] font-black uppercase tracking-widest hover:text-[color:var(--accent)] transition-colors ${currentStage === StageId.BIBLE_STUDY ? 'text-[color:var(--accent)]' : 'text-[color:var(--text-primary)]'}`}>Jifunze</button>
                 <button onClick={() => handleStageChange(StageId.BLOG)} className={`text-[11px] xl:text-[12px] font-black uppercase tracking-widest hover:text-[color:var(--accent)] transition-colors ${currentStage === StageId.BLOG ? 'text-[color:var(--accent)]' : 'text-[color:var(--text-primary)]'}`}>Habari</button>
@@ -889,7 +912,10 @@ const App: React.FC = () => {
           )}
 
           {showStageBreadcrumb && (
-            <div className="fixed top-16 left-0 right-0 h-12 px-4 md:px-10 z-[45] bg-[color:var(--page-surface)]/90 backdrop-blur-md border-b border-[color:var(--line-strong)]">
+            <div 
+              className="fixed top-16 left-0 right-0 h-12 px-4 md:px-10 z-[45] bg-[color:var(--page-surface)]/90 backdrop-blur-md border-b border-[color:var(--line-strong)] transition-transform duration-300"
+              style={{ transform: isScrollingDown ? 'translateY(-100%)' : 'translateY(0)' }}
+            >
               <div className="h-full flex items-center gap-3">
                 <button
                   type="button"

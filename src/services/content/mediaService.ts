@@ -24,31 +24,25 @@ export interface MediaPlaylistApi {
 const API_BASE_URL = getApiBaseUrl();
 
 export const getMediaPlaylists = async (): Promise<MediaPlaylistApi[]> => {
-  return withCachedResult(
-    "media_playlists_v1",
-    async () => {
-      const response = await fetch(`${API_BASE_URL}/api/media/playlists/`);
-      if (!response.ok) {
-        throw new Error("Imeshindikana kupata orodha za video.");
-      }
-      const payload = (await response.json()) as MediaPlaylistApi[];
-      if (!Array.isArray(payload)) {
-        return [];
-      }
-      return payload.map((playlist) => ({
-        ...playlist,
-        thumbnail: resolveApiAssetUrl(playlist.thumbnail, API_BASE_URL),
-        videos: Array.isArray(playlist.videos)
-          ? playlist.videos.map((video) => ({
-              ...video,
-              thumbnail: resolveApiAssetUrl(video.thumbnail, API_BASE_URL),
-              embed_url: resolveApiAssetUrl(video.embed_url, API_BASE_URL),
-            }))
-          : [],
-      }));
-    },
-    { ttlMs: 10 * 60 * 1000, persist: true },
-  );
+  const response = await fetch(`${API_BASE_URL}/api/media/playlists/`);
+  if (!response.ok) {
+    throw new Error("Imeshindikana kupata orodha za video.");
+  }
+  const payload = (await response.json()) as MediaPlaylistApi[];
+  if (!Array.isArray(payload)) {
+    return [];
+  }
+  return payload.map((playlist) => ({
+    ...playlist,
+    thumbnail: resolveApiAssetUrl(playlist.thumbnail, API_BASE_URL),
+    videos: Array.isArray(playlist.videos)
+      ? playlist.videos.map((video) => ({
+          ...video,
+          thumbnail: resolveApiAssetUrl(video.thumbnail, API_BASE_URL),
+          embed_url: resolveApiAssetUrl(video.embed_url, API_BASE_URL),
+        }))
+      : [],
+  }));
 };
 
 

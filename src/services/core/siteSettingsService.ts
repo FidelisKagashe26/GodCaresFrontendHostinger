@@ -109,9 +109,13 @@ const normalizeSettings = (input: Partial<SiteSettings>): SiteSettings => ({
   prophecy_hero_image_2: resolveApiAssetUrl((input.prophecy_hero_image_2 || "").trim(), API_BASE_URL),
 });
 
-export const getSiteSettings = async (): Promise<SiteSettings> => {
+interface SiteSettingsRequestOptions {
+  forceRefresh?: boolean;
+}
+
+export const getSiteSettings = async (options: SiteSettingsRequestOptions = {}): Promise<SiteSettings> => {
   return withCachedResult(
-    "site_settings_v1",
+    "site_settings_v3",
     async () => {
       const response = await fetch(`${API_BASE_URL}/api/site-settings/`);
       if (!response.ok) {
@@ -120,7 +124,7 @@ export const getSiteSettings = async (): Promise<SiteSettings> => {
       const data = (await response.json()) as Partial<SiteSettings>;
       return normalizeSettings(data);
     },
-    { ttlMs: 10 * 60 * 1000, persist: true },
+    { ttlMs: 60 * 1000, persist: true, forceRefresh: options.forceRefresh === true },
   );
 };
 
