@@ -60,22 +60,33 @@ jobs:
             exit 1
           fi
 
-          # Add host key to known_hosts with retry (avoid random network flake).
-          # This VPS's SSH port has shown transient reachability blips that can
-          # outlast a few quick retries, so allow a more generous total budget
-          # (~2.5 min worst case) before giving up.
-          SSH_SCAN_OK=0
-          for i in 1 2 3 4 5 6; do
-            if ssh-keyscan -T 15 -H "$VPS_HOST" >> ~/.ssh/known_hosts 2>/tmp/ssh-keyscan.err; then
-              SSH_SCAN_OK=1
-              break
-            fi
-            echo "ssh-keyscan attempt $i failed, retrying in 5s..."
-            sleep 5
-          done
-          if [ "$SSH_SCAN_OK" -ne 1 ]; then
-            echo "ERROR: ssh-keyscan failed for host: $VPS_HOST"
-            cat /tmp/ssh-keyscan.err || true
+          # Pin the host key instead of running ssh-keyscan on every deploy.
+          #
+          # ssh-keyscan opens several extra probe connections before the deploy
+          # even starts, and this VPS's port 22 has shown transient reachability
+          # blips - so the whole run failed at the probe stage while the actual
+          # deploy would have been fine. It was also self-defeating security-wise:
+          # blindly trusting whatever key the server offers on every run makes the
+          # StrictHostKeyChecking=yes used below meaningless.
+          #
+          # Host public keys are not secret. Set the VPS_SSH_KNOWN_HOSTS secret to
+          # override this (needed if the server is ever rebuilt and its key changes);
+          # otherwise the pinned key below is used.
+          KNOWN_HOSTS_SECRET="${{ secrets.VPS_SSH_KNOWN_HOSTS }}"
+          if [ -n "$KNOWN_HOSTS_SECRET" ]; then
+            printf '%s\n' "$KNOWN_HOSTS_SECRET" > ~/.ssh/known_hosts
+          else
+            HOST_KEY='ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMCFnEI5hK0dVWgRtccsaOY/DU2c+S3wzs9ZJ1C0Llaf'
+            # Write the entry under whatever VPS_HOST is set to, plus the raw IP,
+            # so this works whether the secret holds a hostname or the address
+            # (ssh checks the resolved IP too, via CheckHostIP).
+            {
+              printf '%s %s\n' "$VPS_HOST" "$HOST_KEY"
+              printf '72.61.16.156 %s\n' "$HOST_KEY"
+            } > ~/.ssh/known_hosts
+          fi
+          if [ ! -s ~/.ssh/known_hosts ]; then
+            echo "ERROR: known_hosts is empty."
             exit 1
           fi
           chmod 600 ~/.ssh/known_hosts
