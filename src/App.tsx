@@ -109,6 +109,8 @@ const MAX_PROFILE_PIC_STORAGE_LENGTH = 350_000;
 type StageNavigationOptions = {
   replace?: boolean;
   scrollBehavior?: ScrollBehavior;
+  /** Optional query string (e.g. "?video=12") appended to the stage path. */
+  search?: string;
 };
 
 interface NotificationStorageState {
@@ -296,7 +298,7 @@ const App: React.FC = () => {
     id: StageId,
     options: StageNavigationOptions = {},
   ) => {
-    const { replace = false, scrollBehavior = 'smooth' } = options;
+    const { replace = false, scrollBehavior = 'smooth', search = '' } = options;
     const targetPath = normalizePath(getStagePath(id));
 
     // Allow navigation if a session token exists even before the async auth
@@ -313,7 +315,10 @@ const App: React.FC = () => {
     setIsAccountMenuOpen(false);
     setIsMenuOpen(false);
 
-    if (currentPath === targetPath) {
+    // Already here with nothing new to pass: just scroll back to the top.
+    // With a search string we still navigate, so e.g. picking another video
+    // from the same page actually switches to it.
+    if (currentPath === targetPath && !search) {
       if (mainContentRef.current) {
         mainContentRef.current.scrollTo({ top: 0, behavior: scrollBehavior });
       }
@@ -321,11 +326,11 @@ const App: React.FC = () => {
     }
 
     startRouteLoading();
-    navigate(targetPath, { replace });
+    navigate(`${targetPath}${search}`, { replace });
   };
 
-  const handleStageChange = (id: StageId) => {
-    navigateToStage(id, { replace: false, scrollBehavior: 'smooth' });
+  const handleStageChange = (id: StageId, search?: string) => {
+    navigateToStage(id, { replace: false, scrollBehavior: 'smooth', search });
   };
 
   const handleLogin = (userData: AuthUser) => {

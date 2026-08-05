@@ -9,7 +9,8 @@ import {
 } from 'lucide-react';
 
 interface HomeProps {
-  onNavigate: (id: StageId) => void;
+  /** `search` is an optional query string, e.g. "?video=12" to open a video directly. */
+  onNavigate: (id: StageId, search?: string) => void;
   siteSettings?: SiteSettings;
 }
 
@@ -195,9 +196,9 @@ export const Home: React.FC<HomeProps> = ({ onNavigate, siteSettings }) => {
           </ScrollReveal>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {latestVideos.map((video: any, idx: number) => (
+            {latestVideos.slice(0, 6).map((video: any, idx: number) => (
               <ScrollReveal key={video.id || idx} threshold={0.2} className="group cursor-pointer">
-                <div onClick={() => onNavigate(StageId.MEDIA)} className="flex flex-col h-full bg-[color:var(--surface-2)] rounded-3xl border border-[color:var(--line-strong)] hover:border-[color:var(--accent)] hover:shadow-2xl transition-all duration-300 overflow-hidden">
+                <div onClick={() => onNavigate(StageId.MEDIA, `?video=${encodeURIComponent(video.id)}`)} className="flex flex-col h-full bg-[color:var(--surface-2)] rounded-3xl border border-[color:var(--line-strong)] hover:border-[color:var(--accent)] hover:shadow-2xl transition-all duration-300 overflow-hidden">
                   <div className="relative aspect-video overflow-hidden bg-slate-900">
                     <img src={video.thumbnail || "https://images.unsplash.com/photo-1493612276216-ee3925520721?q=80&w=800&auto=format&fit=crop"} alt={video.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
                     <div className="absolute inset-0 bg-black/10 group-hover:bg-black/0 transition-colors" />

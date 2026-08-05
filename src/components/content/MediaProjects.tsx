@@ -1,5 +1,6 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { 
   Play, Globe, Users, ArrowRight, Film, Mic2, Tv, 
   Clock, Star, PlayCircle, MoreVertical, Share2, 
@@ -86,6 +87,15 @@ export const MediaProjects: React.FC = () => {
   const [playlists, setPlaylists] = useState<Playlist[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const requestedVideoId = searchParams.get('video');
+
+  const clearRequestedVideo = () => {
+    if (!requestedVideoId) return;
+    const next = new URLSearchParams(searchParams);
+    next.delete('video');
+    setSearchParams(next, { replace: true });
+  };
 
   const categories = useMemo(() => {
     const unique = new Set(playlists.map((playlist) => playlist.category).filter(Boolean));
@@ -126,13 +136,30 @@ export const MediaProjects: React.FC = () => {
     loadPlaylists();
   }, []);
 
+  // Deep link support: "/media-hub?video=12" (used by the homepage's latest-videos
+  // cards) opens that video's playlist and starts it playing straight away,
+  // instead of dropping the visitor on the playlist grid.
+  useEffect(() => {
+    if (!requestedVideoId || playlists.length === 0) {
+      return;
+    }
+    for (const playlist of playlists) {
+      const match = playlist.videos.find((video) => video.id === String(requestedVideoId));
+      if (match) {
+        setSelectedPlaylist(playlist);
+        setPlayingVideo(match);
+        return;
+      }
+    }
+  }, [requestedVideoId, playlists]);
+
   const filteredPlaylists = playlists.filter(p => activeCategory === 'Zote' || p.category === activeCategory);
 
   if (selectedPlaylist) {
     return (
       <div className="bg-slate-50 dark:bg-[#020617] min-h-screen text-slate-900 dark:text-white pb-20 animate-fade-in transition-colors duration-500">
         <div className="bg-white dark:bg-slate-950 border-b border-slate-200 dark:border-white/5 sticky top-0 z-40 px-4 md:px-8 py-4 flex items-center gap-4 transition-colors">
-           <button onClick={() => { setSelectedPlaylist(null); setPlayingVideo(null); }} className="p-2 hover:bg-slate-100 dark:hover:bg-white/10 rounded-full transition-colors text-slate-600 dark:text-slate-200"><ChevronLeft size={24} /></button>
+           <button onClick={() => { setSelectedPlaylist(null); setPlayingVideo(null); clearRequestedVideo(); }} className="p-2 hover:bg-slate-100 dark:hover:bg-white/10 rounded-full transition-colors text-slate-600 dark:text-slate-200"><ChevronLeft size={24} /></button>
            <div>
              <h2 className="text-xl font-black text-slate-900 dark:text-white">{selectedPlaylist.title}</h2>
               <p className="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest">Video {selectedPlaylist.videoCount}</p>
