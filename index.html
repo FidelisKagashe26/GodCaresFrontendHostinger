@@ -434,6 +434,30 @@
         border: 1px solid var(--border-subtle);
         box-shadow: var(--shadow-soft);
       }
+      /* Brand loader: logo still, a thin arc tracing the ring around it. */
+      .gc-brand-loader-ring {
+        animation: gc-brand-loader-spin 1.15s linear infinite;
+      }
+      .gc-brand-loader-track {
+        stroke: var(--border-subtle);
+      }
+      .gc-brand-loader-arc {
+        stroke: var(--accent);
+      }
+      .gc-brand-loader-logo {
+        animation: gc-brand-loader-pulse 1.9s ease-in-out infinite;
+      }
+      @keyframes gc-brand-loader-spin {
+        to { transform: rotate(360deg); }
+      }
+      @keyframes gc-brand-loader-pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.72; }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .gc-brand-loader-ring { animation-duration: 2.6s; }
+        .gc-brand-loader-logo { animation: none; }
+      }
       .gc-content-scroll {
         scrollbar-width: thin;
         scrollbar-color: var(--scrollbar-thumb) transparent;

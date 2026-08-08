@@ -5,6 +5,7 @@ import { Home } from './components/layout/Home';
 import { StageId, ToastNotification, LanguageCode, ThemePreference } from './types';
 import { ToastContainer } from './components/ui/Toast';
 import { ErrorBoundary } from './components/system/ErrorBoundary';
+import { BrandLoader } from './components/system/BrandLoader';
 import { Sun, Moon, Menu, Bell, User, Monitor, ChevronDown, ChevronUp, LogOut, ArrowLeft, ChevronRight, Plus, X } from 'lucide-react';
 import { AuthUser, clearTokens, getCurrentUser } from './services/core/authService';
 import { getSystemMessages } from './services/core/systemMessageService';
@@ -91,14 +92,6 @@ const EvidenceTool = lazyNamed(() => import('./components/tools/EvidenceTool'), 
 const NotificationCenter = lazyNamed(() => import('./components/system/NotificationCenter'), 'NotificationCenter');
 const LanguageCenter = lazyNamed(() => import('./components/system/LanguageCenter'), 'LanguageCenter');
 
-const stageLoader = (
-  <div className="flex min-h-[40vh] items-center justify-center px-6">
-    <div className="rounded-2xl border border-[color:var(--line-strong)] bg-[color:var(--surface-2)] px-5 py-4 text-center shadow-sm">
-      <p className="text-[11px] font-black uppercase tracking-[0.28em] text-[color:var(--accent)]">Inapakia</p>
-      <p className="mt-2 text-sm text-[color:var(--text-muted)]">Tafadhali subiri kidogo.</p>
-    </div>
-  </div>
-);
 
 const NOTIFICATION_STATE_KEY = 'gc365_center_notification_state_v1';
 const RESET_PASSWORD_PATH = '/reset-password';
@@ -639,16 +632,10 @@ const App: React.FC = () => {
       <ToastContainer notifications={notifications} onDismiss={(id) => setNotifications((prev) => prev.filter((n) => n.id !== id))} />
       {isRouteLoading && (
         <div className="fixed inset-0 z-[950] pointer-events-none">
-          <div className="absolute inset-0 bg-[color:var(--page-bg)]/18 backdrop-blur-[1px]" />
           <div className="absolute top-0 left-0 right-0 h-1 bg-transparent">
             <div className="h-full w-2/5 rounded-r-full bg-gradient-to-r from-emerald-600 via-gold-500 to-emerald-600 animate-pulse" />
           </div>
-          <div className="absolute top-3 left-1/2 -translate-x-1/2 rounded-full border border-[color:var(--line-strong)] bg-[color:var(--surface-2)] px-3 py-1.5 shadow-lg">
-            <div className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.16em] text-[color:var(--text-primary)]">
-              <span className="inline-block h-3 w-3 rounded-full border-2 border-[color:var(--accent)] border-t-transparent animate-spin" />
-              Inapakia
-            </div>
-          </div>
+          <BrandLoader fullscreen logoSrc={logoSrc} />
         </div>
       )}
 
@@ -947,12 +934,15 @@ const App: React.FC = () => {
             </div>
           )}
 
+          {/* Bottom padding only where there is no footer: it keeps content clear
+              of the floating tools button, but under the footer it would just
+              show as dead page background. */}
           <div
             ref={mainContentRef}
-            className={`gc-content-scroll flex-1 overflow-y-auto scroll-smooth pb-16 ${isImmersive ? 'pt-16' : showStageBreadcrumb ? 'pt-28' : 'pt-16'}`}
+            className={`gc-content-scroll flex-1 overflow-y-auto scroll-smooth ${isImmersive ? 'pt-16 pb-16' : showStageBreadcrumb ? 'pt-28' : 'pt-16'}`}
           >
             <ErrorBoundary resetKey={currentPath}>
-              <Suspense fallback={stageLoader}>
+              <Suspense fallback={<BrandLoader logoSrc={logoSrc} />}>
                 <Routes>
                   {STAGE_ROUTE_ENTRIES.map(([stage, path]) => (
                     <Route

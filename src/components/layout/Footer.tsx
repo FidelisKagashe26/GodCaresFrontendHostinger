@@ -44,7 +44,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, siteSettings }) => {
   ].filter((item) => Boolean(item.link && item.link.trim()));
 
   return (
-    <footer className="bg-slate-950 border-t border-white/5 py-16 w-full">
+    <footer className="bg-slate-950 border-t border-white/5 pt-16 pb-8 w-full">
       <div className="container mx-auto px-6 flex flex-col items-center justify-center space-y-12">
 
         {/* Brand on the left, link columns filling the space on the right */}
