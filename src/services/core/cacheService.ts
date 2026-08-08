@@ -163,3 +163,35 @@ export const invalidateCachedResult = (key: string) => {
   removeStoredRecord(key);
 };
 
+/**
+ * Clears every cached entry whose key starts with `prefix`. Needed for
+ * paginated caches, where one logical list is spread over several keys
+ * (e.g. blog_posts_v3_<client>_p1, _p2, ...).
+ */
+export const invalidateCachedResultsByPrefix = (prefix: string) => {
+  Array.from(MEMORY_CACHE.keys())
+    .filter((key) => key.startsWith(prefix))
+    .forEach((key) => MEMORY_CACHE.delete(key));
+
+  Array.from(IN_FLIGHT.keys())
+    .filter((key) => key.startsWith(prefix))
+    .forEach((key) => IN_FLIGHT.delete(key));
+
+  if (!canUseStorage()) {
+    return;
+  }
+  try {
+    const storagePrefix = getStorageKey(prefix);
+    const doomed: string[] = [];
+    for (let index = 0; index < window.localStorage.length; index += 1) {
+      const storedKey = window.localStorage.key(index);
+      if (storedKey && storedKey.startsWith(storagePrefix)) {
+        doomed.push(storedKey);
+      }
+    }
+    doomed.forEach((storedKey) => window.localStorage.removeItem(storedKey));
+  } catch {
+    // Ignore storage errors.
+  }
+};
+

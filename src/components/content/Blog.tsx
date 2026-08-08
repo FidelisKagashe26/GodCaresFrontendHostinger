@@ -157,6 +157,11 @@ export const Blog: React.FC<BlogProps> = ({ user, onRequireLogin }) => {
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [appliedQuery, setAppliedQuery] = useState('');
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalPosts, setTotalPosts] = useState(0);
   const [detail, setDetail] = useState<string | null>(null);
 
   const [likeBusyByPost, setLikeBusyByPost] = useState<Record<number, boolean>>({});
@@ -262,23 +267,43 @@ export const Blog: React.FC<BlogProps> = ({ user, onRequireLogin }) => {
     }
   }, []);
 
+  // Debounce typing so a search doesn't fire a request per keystroke.
   useEffect(() => {
+    const timer = window.setTimeout(() => {
+      setAppliedQuery(searchTerm.trim());
+      setPage(1);
+    }, 350);
+    return () => window.clearTimeout(timer);
+  }, [searchTerm]);
+
+  useEffect(() => {
+    let cancelled = false;
+
     const loadPosts = async () => {
       setLoading(true);
       setErrorMessage('');
       try {
-        const data = await getBlogPosts();
-        setPosts(data.map(mapPost));
+        const data = await getBlogPosts({ page, query: appliedQuery });
+        if (cancelled) return;
+        setPosts(data.posts.map(mapPost));
+        setTotalPages(data.numPages);
+        setTotalPosts(data.count);
       } catch {
+        if (cancelled) return;
         setErrorMessage('Imeshindikana kupakua makala.');
         setPosts([]);
+        setTotalPages(1);
+        setTotalPosts(0);
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     };
 
     loadPosts();
-  }, []);
+    return () => {
+      cancelled = true;
+    };
+  }, [page, appliedQuery]);
 
   useEffect(() => {
     let cancelled = false;
@@ -747,14 +772,17 @@ export const Blog: React.FC<BlogProps> = ({ user, onRequireLogin }) => {
 
   return (
     <div className="bg-white dark:bg-slate-950 min-h-screen pb-20 max-w-6xl mx-auto">
-      <div className="p-4 sm:p-6 md:p-12 border-b border-slate-100 dark:border-slate-800 flex flex-col md:flex-row justify-between items-center gap-6">
-        <h1 className="text-4xl font-black text-slate-900 dark:text-slate-100 tracking-tight">God Cares <span className="text-gold-500">Makala</span></h1>
-        <div className="relative w-full md:w-64">
+      <div className="px-4 py-5 sm:px-6 md:px-10 md:py-6 border-b border-slate-100 dark:border-slate-800 flex flex-col md:flex-row justify-between items-center gap-4">
+        <h1 className="text-3xl md:text-4xl font-black text-slate-900 dark:text-slate-100 tracking-tight shrink-0">God Cares <span className="text-gold-500">Makala</span></h1>
+        <div className="relative w-full md:max-w-xl md:flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" size={18} />
           <input
-            type="text"
+            type="search"
+            value={searchTerm}
+            onChange={(event) => setSearchTerm(event.target.value)}
             placeholder="Tafuta makala..."
-            className="w-full pl-10 pr-4 py-2 bg-slate-50 dark:bg-slate-900 border border-transparent dark:border-slate-800 rounded-full text-sm text-slate-800 dark:text-slate-100 outline-none focus:ring-1 focus:ring-slate-300 dark:focus:ring-slate-600"
+            aria-label="Tafuta makala"
+            className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-transparent dark:border-slate-800 rounded-full text-sm text-slate-800 dark:text-slate-100 outline-none focus:ring-1 focus:ring-slate-300 dark:focus:ring-slate-600"
           />
         </div>
       </div>
@@ -776,7 +804,7 @@ export const Blog: React.FC<BlogProps> = ({ user, onRequireLogin }) => {
           )}
           {!loading && posts.length === 0 && (
             <div className="bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 text-[10px] font-bold uppercase tracking-widest px-4 py-3 rounded-lg">
-              Hakuna taarifa za makala kwa sasa.
+              {appliedQuery ? `Hakuna makala yanayolingana na "${appliedQuery}".` : 'Hakuna taarifa za makala kwa sasa.'}
             </div>
           )}
 
@@ -866,6 +894,32 @@ export const Blog: React.FC<BlogProps> = ({ user, onRequireLogin }) => {
               </div>
             </article>
           ))}
+
+          {totalPages > 1 && (
+            <nav className="flex flex-wrap items-center justify-between gap-3 pt-2" aria-label="Kurasa za makala">
+              <span className="text-[11px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">
+                Ukurasa {page} / {totalPages} &middot; Makala {totalPosts}
+              </span>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setPage((current) => Math.max(1, current - 1))}
+                  disabled={page <= 1 || loading}
+                  className="rounded-full border border-slate-300 dark:border-slate-700 px-4 py-2 text-[11px] font-black uppercase tracking-widest text-slate-700 dark:text-slate-200 transition-colors hover:border-gold-400 hover:text-gold-600 disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  Iliyopita
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPage((current) => Math.min(totalPages, current + 1))}
+                  disabled={page >= totalPages || loading}
+                  className="rounded-full border border-slate-300 dark:border-slate-700 px-4 py-2 text-[11px] font-black uppercase tracking-widest text-slate-700 dark:text-slate-200 transition-colors hover:border-gold-400 hover:text-gold-600 disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  Inayofuata
+                </button>
+              </div>
+            </nav>
+          )}
         </div>
 
         <div className="space-y-8 border-l border-slate-100 dark:border-slate-800 pl-8 hidden md:block">

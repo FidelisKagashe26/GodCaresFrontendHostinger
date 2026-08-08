@@ -1,4 +1,4 @@
-import { invalidateCachedResult, withCachedResult } from "../core/cacheService";
+import { invalidateCachedResult, invalidateCachedResultsByPrefix, withCachedResult } from "../core/cacheService";
 import { getApiBaseUrl, resolveApiAssetUrl } from "../core/urlService";
 
 export interface BlogPostApi {
@@ -75,24 +75,64 @@ const normalizePost = (item: BlogPostApi): BlogPostApi => ({
   liked: !!item.liked,
 });
 
-export const getBlogPosts = async (): Promise<BlogPostApi[]> => {
+export interface BlogPostPage {
+  posts: BlogPostApi[];
+  count: number;
+  page: number;
+  numPages: number;
+}
+
+export const BLOG_PAGE_SIZE = 10;
+
+/**
+ * Fetches one page of posts. Searching and paging happen on the server, so the
+ * browser never has to hold the whole archive to filter it.
+ * Only unsearched pages are cached; search results would pollute the cache.
+ */
+export const getBlogPosts = async (
+  options: { page?: number; query?: string } = {},
+): Promise<BlogPostPage> => {
   const clientId = getClientId();
-  return withCachedResult(
-    `blog_posts_v2_${clientId}`,
-    async () => {
-      const response = await fetch(`${API_BASE_URL}/api/blog/?client_id=${encodeURIComponent(clientId)}`, {
-        headers: {
-          "X-Client-Id": clientId,
-        },
-      });
-      if (!response.ok) {
-        throw new Error("Imeshindikana kupata makala.");
-      }
-      const payload = (await response.json()) as BlogPostApi[];
-      return payload.map(normalizePost);
-    },
-    { ttlMs: 5 * 60 * 1000, persist: true },
-  );
+  const page = Math.max(1, options.page || 1);
+  const query = (options.query || "").trim();
+
+  const load = async (): Promise<BlogPostPage> => {
+    const params = new URLSearchParams({
+      client_id: clientId,
+      page: String(page),
+      page_size: String(BLOG_PAGE_SIZE),
+    });
+    if (query) {
+      params.set("q", query);
+    }
+    const response = await fetch(`${API_BASE_URL}/api/blog/?${params.toString()}`, {
+      headers: { "X-Client-Id": clientId },
+    });
+    if (!response.ok) {
+      throw new Error("Imeshindikana kupata makala.");
+    }
+    const payload = (await response.json()) as {
+      results?: BlogPostApi[];
+      count?: number;
+      page?: number;
+      num_pages?: number;
+    };
+    const results = Array.isArray(payload.results) ? payload.results : [];
+    return {
+      posts: results.map(normalizePost),
+      count: payload.count ?? results.length,
+      page: payload.page ?? page,
+      numPages: payload.num_pages ?? 1,
+    };
+  };
+
+  if (query) {
+    return load();
+  }
+  return withCachedResult(`blog_posts_v3_${clientId}_p${page}`, load, {
+    ttlMs: 5 * 60 * 1000,
+    persist: true,
+  });
 };
 
 export const getBlogPost = async (id: number): Promise<BlogPostApi> => {
@@ -128,7 +168,7 @@ export const toggleBlogLike = async (postId: number): Promise<BlogLikeApi> => {
   if (!response.ok) {
     throw new Error("Imeshindikana kusasisha kupenda.");
   }
-  invalidateCachedResult(`blog_posts_v2_${clientId}`);
+  invalidateCachedResultsByPrefix(`blog_posts_v3_${clientId}`);
   invalidateCachedResult(`blog_post_${postId}_v2_${clientId}`);
   return (await response.json()) as BlogLikeApi;
 };
@@ -175,7 +215,7 @@ export const createBlogComment = async (
     throw new Error(message);
   }
 
-  invalidateCachedResult(`blog_posts_v2_${clientId}`);
+  invalidateCachedResultsByPrefix(`blog_posts_v3_${clientId}`);
   invalidateCachedResult(`blog_post_${postId}_v2_${clientId}`);
   return (await response.json()) as BlogCommentApi;
 };

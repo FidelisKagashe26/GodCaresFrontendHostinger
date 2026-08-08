@@ -46,22 +46,21 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, siteSettings }) => {
   return (
     <footer className="bg-slate-950 border-t border-white/5 py-16 w-full">
       <div className="container mx-auto px-6 flex flex-col items-center justify-center space-y-12">
-        
-        {/* Brand & Logo */}
-        <div 
-          onClick={() => onNavigate?.(StageId.HOME)}
-          className="flex flex-col items-center gap-4 cursor-pointer group"
-        >
-          <div className="w-16 h-16 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform overflow-hidden">
-             <img src={logoSrc} alt={siteName} className="h-12 w-auto object-contain" />
+
+        {/* Brand on the left, link columns filling the space on the right */}
+        <div className="w-full flex flex-col lg:flex-row lg:items-center gap-10 lg:gap-16">
+          <div
+            onClick={() => onNavigate?.(StageId.HOME)}
+            className="shrink-0 flex flex-col items-center lg:items-start gap-3 cursor-pointer group"
+          >
+            <img src={logoSrc} alt={siteName} className="h-28 xl:h-32 w-auto object-contain group-hover:scale-105 transition-transform" />
+            <h2 className="text-xl xl:text-2xl font-black text-white tracking-[0.2em] uppercase text-center lg:text-left">
+              {siteName}
+            </h2>
           </div>
-          <h2 className="text-2xl font-black text-white tracking-[0.2em] uppercase">
-            {siteName}
-          </h2>
-        </div>
 
         {/* Navigation Grid in Swahili */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-16 text-center">
+        <div className="grid flex-1 grid-cols-2 md:grid-cols-4 gap-8 md:gap-10 text-center lg:text-left">
            <div>
               <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-4">Misingi</h4>
               <ul className="space-y-2">
@@ -95,6 +94,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, siteSettings }) => {
                  <li onClick={() => onNavigate?.(StageId.LIBRARY)} className="text-xs font-bold text-slate-400 hover:text-gold-400 cursor-pointer transition-colors">Maktaba ya Bure</li>
               </ul>
            </div>
+        </div>
         </div>
 
         {/* Contact & Support Section */}
