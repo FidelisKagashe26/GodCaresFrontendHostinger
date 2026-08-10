@@ -132,25 +132,25 @@ export const Home: React.FC<HomeProps> = ({ onNavigate, siteSettings }) => {
                 )}
                 
                 {/* Gradient to fade the bottom of the image smoothly into the background */}
-                <div className="absolute inset-x-0 bottom-0 h-[60%] bg-gradient-to-t from-[color:var(--page-bg)] to-transparent lg:hidden z-10" />
+                <div className="absolute inset-x-0 bottom-0 h-[60%] bg-gradient-to-t from-green-950 to-transparent lg:hidden z-10" />
               </div>
               
               {/* Text container */}
-              <div className="relative z-20 flex-1 flex flex-col items-center justify-start lg:justify-center px-4 md:px-10 -mt-10 md:-mt-16 lg:mt-0 lg:absolute lg:inset-0 pb-20 lg:pb-0">
-                <div className="text-center max-w-5xl space-y-5 md:space-y-8 flex flex-col items-center pt-2 lg:pt-0">
+              <div className="relative z-20 flex-1 flex flex-col items-center justify-start lg:justify-center px-4 md:px-10 pt-8 pb-20 lg:py-0 bg-green-950 lg:bg-transparent lg:absolute lg:inset-0">
+                <div className="text-center max-w-5xl space-y-5 md:space-y-8 flex flex-col items-center">
                   
                   <div className={`overflow-hidden transition-all duration-1000 delay-100 ${isActive ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
-                    <span className="inline-flex items-center gap-3 md:gap-4 text-[color:var(--text-primary)] lg:text-white font-bold text-xs md:text-base uppercase tracking-[0.25em]">
+                    <span className="inline-flex items-center gap-3 md:gap-4 text-white font-bold text-xs md:text-base uppercase tracking-[0.25em]">
                       <span className="w-2.5 h-2.5 md:w-4 md:h-4 rounded-full bg-[color:var(--accent)] animate-pulse"></span>
                       {slide.tag}
                     </span>
                   </div>
 
-                  <h1 className={`max-w-full text-3xl sm:text-5xl md:text-7xl lg:text-8xl font-black text-[color:var(--text-primary)] lg:text-white uppercase tracking-normal leading-[1.05] drop-shadow-sm lg:drop-shadow-2xl break-words [overflow-wrap:anywhere] transition-all duration-1000 delay-300 ${isActive ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}>
+                  <h1 className={`max-w-full text-3xl sm:text-5xl md:text-7xl lg:text-8xl font-black text-white uppercase tracking-normal leading-[1.05] drop-shadow-2xl break-words [overflow-wrap:anywhere] transition-all duration-1000 delay-300 ${isActive ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}>
                     {slide.title}
                   </h1>
 
-                  <p className={`text-base sm:text-lg md:text-2xl text-[color:var(--text-primary)] lg:text-white font-semibold max-w-3xl mx-auto drop-shadow-sm lg:drop-shadow-lg leading-relaxed transition-all duration-1000 delay-500 ${isActive ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+                  <p className={`text-base sm:text-lg md:text-2xl text-white font-semibold max-w-3xl mx-auto drop-shadow-lg leading-relaxed transition-all duration-1000 delay-500 ${isActive ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
                     {slide.subtitle}
                   </p>
 
@@ -175,7 +175,7 @@ export const Home: React.FC<HomeProps> = ({ onNavigate, siteSettings }) => {
         </div>
 
         {/* Modern Floating Indicators */}
-        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-30 flex gap-2 px-5 py-3 bg-black/40 backdrop-blur-xl border border-white/10 rounded-full shadow-2xl">
+        <div className="absolute bottom-4 md:bottom-10 left-1/2 -translate-x-1/2 z-30 flex gap-2 px-5 py-3 bg-black/40 backdrop-blur-xl border border-white/10 rounded-full shadow-2xl">
           {HERO_SLIDES.map((_, index) => (
             <button 
               key={index} 
