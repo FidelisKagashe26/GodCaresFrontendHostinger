@@ -140,17 +140,17 @@ export const Home: React.FC<HomeProps> = ({ onNavigate, siteSettings }) => {
                 <div className="text-center max-w-5xl space-y-5 md:space-y-8 flex flex-col items-center pt-2 lg:pt-0">
                   
                   <div className={`overflow-hidden transition-all duration-1000 delay-100 ${isActive ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
-                    <span className="inline-flex items-center gap-3 md:gap-4 text-white font-bold text-xs md:text-base uppercase tracking-[0.25em]">
+                    <span className="inline-flex items-center gap-3 md:gap-4 text-[color:var(--text-primary)] lg:text-white font-bold text-xs md:text-base uppercase tracking-[0.25em]">
                       <span className="w-2.5 h-2.5 md:w-4 md:h-4 rounded-full bg-[color:var(--accent)] animate-pulse"></span>
                       {slide.tag}
                     </span>
                   </div>
 
-                  <h1 className={`max-w-full text-3xl sm:text-5xl md:text-7xl lg:text-8xl font-black text-white uppercase tracking-normal leading-[1.05] drop-shadow-2xl break-words [overflow-wrap:anywhere] transition-all duration-1000 delay-300 ${isActive ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}>
+                  <h1 className={`max-w-full text-3xl sm:text-5xl md:text-7xl lg:text-8xl font-black text-[color:var(--text-primary)] lg:text-white uppercase tracking-normal leading-[1.05] drop-shadow-sm lg:drop-shadow-2xl break-words [overflow-wrap:anywhere] transition-all duration-1000 delay-300 ${isActive ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}>
                     {slide.title}
                   </h1>
 
-                  <p className={`text-base sm:text-lg md:text-2xl text-white font-semibold max-w-3xl mx-auto drop-shadow-lg leading-relaxed transition-all duration-1000 delay-500 ${isActive ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+                  <p className={`text-base sm:text-lg md:text-2xl text-[color:var(--text-primary)] lg:text-white font-semibold max-w-3xl mx-auto drop-shadow-sm lg:drop-shadow-lg leading-relaxed transition-all duration-1000 delay-500 ${isActive ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
                     {slide.subtitle}
                   </p>
 
