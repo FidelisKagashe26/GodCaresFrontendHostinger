@@ -113,11 +113,18 @@ export const Home: React.FC<HomeProps> = ({ onNavigate, siteSettings }) => {
       {/* --- DYNAMIC CAROUSEL HERO --- */}
       <section className="relative w-full min-h-[100dvh] lg:h-screen lg:min-h-[600px] lg:overflow-hidden group bg-green-950 lg:bg-[color:var(--page-bg)] flex flex-col">
         
-        {/* Mobile Top Progress Bar */}
+        <style>{`
+          @keyframes slideProgress {
+            from { width: 0%; }
+            to { width: 100%; }
+          }
+        `}</style>
+        {/* Mobile Top Progress Timer */}
         <div className="absolute top-0 left-0 right-0 h-1 bg-white/10 z-[40] md:hidden">
           <div 
-            className="h-full bg-[color:var(--accent)] transition-all duration-700 ease-in-out"
-            style={{ width: `${((currentSlide + 1) / HERO_SLIDES.length) * 100}%` }}
+            key={currentSlide}
+            className="h-full bg-[color:var(--accent)]"
+            style={{ animation: 'slideProgress 8s linear forwards' }}
           />
         </div>
 
