@@ -132,7 +132,7 @@ export const Home: React.FC<HomeProps> = ({ onNavigate, siteSettings }) => {
                 )}
                 
                 {/* Gradient to fade the bottom of the image smoothly into the background */}
-                <div className="absolute inset-x-0 bottom-0 h-[60%] bg-gradient-to-t from-[color:var(--page-bg)] to-transparent lg:inset-0 lg:h-full lg:from-[color:var(--page-bg)]/85 lg:via-[color:var(--page-bg)]/35 lg:to-[color:var(--page-bg)]/20 z-10" />
+                <div className="absolute inset-x-0 bottom-0 h-[60%] bg-gradient-to-t from-[color:var(--page-bg)] to-transparent lg:hidden z-10" />
               </div>
               
               {/* Text container */}
