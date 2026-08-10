@@ -632,6 +632,8 @@ const App: React.FC = () => {
     }
   };
 
+  const isCompactHeader = isScrolled || currentStage !== StageId.HOME;
+
   return (
     <div className="relative min-h-screen bg-[color:var(--page-bg)] text-[color:var(--text-primary)] font-sans transition-colors duration-500 overflow-hidden">
       <ToastContainer notifications={notifications} onDismiss={(id) => setNotifications((prev) => prev.filter((n) => n.id !== id))} />
@@ -786,20 +788,20 @@ const App: React.FC = () => {
       <div className="relative z-10 flex h-screen overflow-hidden">
         <main className="flex-1 flex flex-col relative w-full h-full bg-[color:var(--page-surface)] backdrop-blur-md">
           {!isImmersive && (
-            <header className={`fixed top-0 left-0 right-0 px-3 sm:px-5 md:px-10 flex items-center justify-between z-[50] transition-all duration-300 ${isScrolled ? 'h-16 gc-header' : 'h-28 md:h-36 bg-transparent'}`}>
+            <header className={`fixed top-0 left-0 right-0 px-3 sm:px-5 md:px-10 flex items-center justify-between z-[50] transition-all duration-300 ${isCompactHeader ? 'h-16 gc-header' : 'h-28 md:h-36 bg-transparent'}`}>
               <div className="flex items-center gap-2 md:gap-4 shrink-0 h-full">
                 <button
                   onClick={() => setIsMenuOpen(true)}
-                  className={`gc-icon-button p-2.5 md:p-3.5 rounded-full group lg:hidden ${!isScrolled ? 'self-start mt-3 sm:mt-5' : ''}`}
+                  className={`gc-icon-button p-2.5 md:p-3.5 rounded-full group lg:hidden ${!isCompactHeader ? 'self-start mt-3 sm:mt-5' : ''}`}
                   aria-label="Fungua menyu"
                 >
                   <Menu size={20} className="group-hover:text-[color:var(--accent)] transition-colors" />
                 </button>
-                <div onClick={() => handleStageChange(StageId.HOME)} className={`flex items-center gap-3 md:gap-5 cursor-pointer group ${!isScrolled ? 'self-start -mt-2 sm:-mt-1 h-auto lg:self-auto lg:mt-0 lg:h-full' : 'h-full'}`}>
-                  <img src={logoSrc} alt={siteSettings.site_name} className={`${isScrolled ? 'h-12 md:h-14' : 'h-24 md:h-36'} w-auto transition-all duration-300 object-contain drop-shadow-xl`} />
-                  <div className={`hidden sm:flex flex-col leading-tight justify-center transition-all duration-300 ${!isScrolled ? 'drop-shadow-lg' : ''}`}>
-                    <span className={`font-display tracking-[0.2em] transition-all duration-300 ${isScrolled ? 'text-sm' : 'text-lg md:text-2xl font-bold'} ${!isScrolled && currentStage === StageId.HOME ? 'text-white' : 'text-[color:var(--text-primary)]'}`}>{siteSettings.site_name}</span>
-                    <span className={`uppercase transition-all duration-300 ${isScrolled ? 'text-[10px] tracking-[0.32em]' : 'text-xs md:text-sm tracking-[0.4em]'} ${!isScrolled && currentStage === StageId.HOME ? 'text-white/80' : 'text-[color:var(--text-muted)]'}`}>{siteSettings.site_tagline}</span>
+                <div onClick={() => handleStageChange(StageId.HOME)} className={`flex items-center gap-3 md:gap-5 cursor-pointer group ${!isCompactHeader ? 'self-start -mt-2 sm:-mt-1 h-auto lg:self-auto lg:mt-0 lg:h-full' : 'h-full'}`}>
+                  <img src={logoSrc} alt={siteSettings.site_name} className={`${isCompactHeader ? 'h-12 md:h-14' : 'h-24 md:h-36'} w-auto transition-all duration-300 object-contain drop-shadow-xl`} />
+                  <div className={`hidden sm:flex flex-col leading-tight justify-center transition-all duration-300 ${!isCompactHeader ? 'drop-shadow-lg' : ''}`}>
+                    <span className={`font-display tracking-[0.2em] transition-all duration-300 ${isCompactHeader ? 'text-sm' : 'text-lg md:text-2xl font-bold'} ${!isCompactHeader && currentStage === StageId.HOME ? 'text-white' : 'text-[color:var(--text-primary)]'}`}>{siteSettings.site_name}</span>
+                    <span className={`uppercase transition-all duration-300 ${isCompactHeader ? 'text-[10px] tracking-[0.32em]' : 'text-xs md:text-sm tracking-[0.4em]'} ${!isCompactHeader && currentStage === StageId.HOME ? 'text-white/80' : 'text-[color:var(--text-muted)]'}`}>{siteSettings.site_tagline}</span>
                   </div>
                 </div>
               </div>
@@ -811,13 +813,13 @@ const App: React.FC = () => {
                 <div className="hidden lg:flex flex-1 min-w-0 h-full">
                   <AutoOverflowNav 
                     currentStage={currentStage} 
-                    isScrolled={isScrolled} 
+                    isScrolled={isCompactHeader} 
                     onNavigate={handleStageChange} 
                   />
                 </div>
 
               {/* Action Icons (Visible on all devices) */}
-              <div className={`flex items-center gap-1.5 md:gap-3 shrink-0 transition-all duration-300 ${!isScrolled ? 'self-start mt-3 sm:mt-5 h-auto lg:self-auto lg:mt-0 lg:h-full' : 'h-full'}`}>
+              <div className={`flex items-center gap-1.5 md:gap-3 shrink-0 transition-all duration-300 ${!isCompactHeader ? 'self-start mt-3 sm:mt-5 h-auto lg:self-auto lg:mt-0 lg:h-full' : 'h-full'}`}>
                   <button
                     onClick={() => setIsThemeOpen(!isThemeOpen)}
                     className="gc-icon-button h-10 w-10 md:h-11 md:w-11 rounded-full flex items-center justify-center"
