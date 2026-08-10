@@ -111,7 +111,7 @@ export const Home: React.FC<HomeProps> = ({ onNavigate, siteSettings }) => {
     <div className="w-full min-h-screen bg-[color:var(--page-bg)] text-[color:var(--text-primary)] font-sans overflow-x-hidden">
       
       {/* --- DYNAMIC CAROUSEL HERO --- */}
-      <section className="relative w-full h-[65vh] md:h-[70vh] lg:h-screen lg:min-h-[600px] overflow-hidden group bg-[color:var(--page-bg)]">
+      <section className="relative w-full min-h-[100dvh] lg:h-screen lg:min-h-[600px] lg:overflow-hidden group bg-green-950 lg:bg-[color:var(--page-bg)] flex flex-col">
         {HERO_SLIDES.map((slide, index) => {
           const isActive = currentSlide === index;
           return (
@@ -136,7 +136,7 @@ export const Home: React.FC<HomeProps> = ({ onNavigate, siteSettings }) => {
               </div>
               
               {/* Text container */}
-              <div className="relative z-20 flex-1 flex flex-col items-center justify-start lg:justify-center px-4 md:px-10 pt-8 pb-20 lg:py-0 bg-green-950 lg:bg-transparent lg:absolute lg:inset-0">
+              <div className="relative z-20 flex-1 flex flex-col items-center justify-start lg:justify-center px-4 md:px-10 pt-8 pb-10 lg:py-0 bg-green-950 lg:bg-transparent lg:absolute lg:inset-0">
                 <div className="text-center max-w-5xl space-y-5 md:space-y-8 flex flex-col items-center">
                   
                   <div className={`overflow-hidden transition-all duration-1000 delay-100 ${isActive ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
@@ -175,7 +175,7 @@ export const Home: React.FC<HomeProps> = ({ onNavigate, siteSettings }) => {
         </div>
 
         {/* Modern Floating Indicators */}
-        <div className="absolute bottom-4 md:bottom-10 left-1/2 -translate-x-1/2 z-30 flex gap-2 px-5 py-3 bg-black/40 backdrop-blur-xl border border-white/10 rounded-full shadow-2xl">
+        <div className="hidden md:flex absolute bottom-4 md:bottom-10 left-1/2 -translate-x-1/2 z-30 gap-2 px-5 py-3 bg-black/40 backdrop-blur-xl border border-white/10 rounded-full shadow-2xl">
           {HERO_SLIDES.map((_, index) => (
             <button 
               key={index} 
