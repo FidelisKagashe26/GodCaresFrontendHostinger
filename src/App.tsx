@@ -20,6 +20,7 @@ import {
   isRestrictedStage,
   normalizePath,
 } from './routes/stageRoutes';
+import { AutoOverflowNav } from './components/layout/AutoOverflowNav';
 
 const CHUNK_RELOAD_FLAG = 'gc365_chunk_reload';
 
@@ -185,6 +186,7 @@ const App: React.FC = () => {
 
   const mainContentRef = useRef<HTMLDivElement>(null);
   const accountMenuRef = useRef<HTMLDivElement>(null);
+  const moreNavRef = useRef<HTMLDivElement>(null);
   const routeHistoryRef = useRef<string[]>([]);
 
   const [centerNotifications, setCenterNotifications] = useState<ToastNotification[]>([]);
@@ -199,6 +201,7 @@ const App: React.FC = () => {
   const routeLoadingTimerRef = useRef<number | null>(null);
 
   const [isScrollingDown, setIsScrollingDown] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
   const lastScrollYRef = useRef(0);
 
   useEffect(() => {
@@ -208,6 +211,8 @@ const App: React.FC = () => {
     const handleScroll = () => {
       const currentScrollY = el.scrollTop;
       
+      setIsScrolled(currentScrollY > 20);
+
       if (currentScrollY > lastScrollYRef.current + 15) {
         setIsScrollingDown(true);
         lastScrollYRef.current = currentScrollY;
@@ -781,127 +786,130 @@ const App: React.FC = () => {
       <div className="relative z-10 flex h-screen overflow-hidden">
         <main className="flex-1 flex flex-col relative w-full h-full bg-[color:var(--page-surface)] backdrop-blur-md">
           {!isImmersive && (
-            <header className="fixed top-0 left-0 right-0 h-16 px-3 sm:px-5 md:px-10 flex items-center justify-between z-[50] gc-header">
-              <div className="flex items-center gap-2 md:gap-4">
+            <header className={`fixed top-0 left-0 right-0 px-3 sm:px-5 md:px-10 flex items-center justify-between z-[50] transition-all duration-300 ${isScrolled ? 'h-16 gc-header' : 'h-28 md:h-36 bg-transparent'}`}>
+              <div className="flex items-center gap-2 md:gap-4 shrink-0 h-full">
                 <button
                   onClick={() => setIsMenuOpen(true)}
-                  className="gc-icon-button p-2.5 md:p-3.5 rounded-full group lg:hidden"
+                  className={`gc-icon-button p-2.5 md:p-3.5 rounded-full group lg:hidden ${!isScrolled ? 'self-start mt-3 sm:mt-5' : ''}`}
                   aria-label="Fungua menyu"
                 >
                   <Menu size={20} className="group-hover:text-[color:var(--accent)] transition-colors" />
                 </button>
-                <div onClick={() => handleStageChange(StageId.HOME)} className="flex items-center gap-3 cursor-pointer group">
-                  <img src={logoSrc} alt={siteSettings.site_name} className="h-10 md:h-12 w-auto" />
-                  <div className="hidden sm:flex flex-col leading-tight">
-                    <span className="text-sm font-display tracking-[0.2em] text-[color:var(--text-primary)]">{siteSettings.site_name}</span>
-                    <span className="text-[10px] uppercase tracking-[0.32em] text-[color:var(--text-muted)]">{siteSettings.site_tagline}</span>
+                <div onClick={() => handleStageChange(StageId.HOME)} className={`flex items-center gap-3 md:gap-5 cursor-pointer group ${!isScrolled ? 'self-start -mt-2 sm:-mt-1 h-auto lg:self-auto lg:mt-0 lg:h-full' : 'h-full'}`}>
+                  <img src={logoSrc} alt={siteSettings.site_name} className={`${isScrolled ? 'h-12 md:h-14' : 'h-24 md:h-36'} w-auto transition-all duration-300 object-contain drop-shadow-xl`} />
+                  <div className={`hidden sm:flex flex-col leading-tight justify-center transition-all duration-300 ${!isScrolled ? 'drop-shadow-lg' : ''}`}>
+                    <span className={`font-display tracking-[0.2em] transition-all duration-300 ${isScrolled ? 'text-sm' : 'text-lg md:text-2xl font-bold'} ${!isScrolled && currentStage === StageId.HOME ? 'text-white' : 'text-[color:var(--text-primary)]'}`}>{siteSettings.site_name}</span>
+                    <span className={`uppercase transition-all duration-300 ${isScrolled ? 'text-[10px] tracking-[0.32em]' : 'text-xs md:text-sm tracking-[0.4em]'} ${!isScrolled && currentStage === StageId.HOME ? 'text-white/80' : 'text-[color:var(--text-muted)]'}`}>{siteSettings.site_tagline}</span>
                   </div>
                 </div>
               </div>
 
-              {/* Main Navigation - Desktop Only */}
-              <nav className="hidden lg:flex items-center gap-5 xl:gap-8 ml-auto mr-6">
-                <button onClick={() => handleStageChange(StageId.HOME)} className={`text-[11px] xl:text-[12px] font-black uppercase tracking-widest hover:text-[color:var(--accent)] transition-colors ${currentStage === StageId.HOME ? 'text-[color:var(--accent)]' : 'text-[color:var(--text-primary)]'}`}>Mwanzo</button>
-                <button onClick={() => handleStageChange(StageId.MEDIA)} className={`text-[11px] xl:text-[12px] font-black uppercase tracking-widest hover:text-[color:var(--accent)] transition-colors ${currentStage === StageId.MEDIA ? 'text-[color:var(--accent)]' : 'text-[color:var(--text-primary)]'}`}>Tazama</button>
-                <button onClick={() => handleStageChange(StageId.BIBLE_STUDY)} className={`text-[11px] xl:text-[12px] font-black uppercase tracking-widest hover:text-[color:var(--accent)] transition-colors ${currentStage === StageId.BIBLE_STUDY ? 'text-[color:var(--accent)]' : 'text-[color:var(--text-primary)]'}`}>Jifunze</button>
-                <button onClick={() => handleStageChange(StageId.BLOG)} className={`text-[11px] xl:text-[12px] font-black uppercase tracking-widest hover:text-[color:var(--accent)] transition-colors ${currentStage === StageId.BLOG ? 'text-[color:var(--accent)]' : 'text-[color:var(--text-primary)]'}`}>Makala</button>
-                <button onClick={() => handleStageChange(StageId.ABOUT)} className={`text-[11px] xl:text-[12px] font-black uppercase tracking-widest hover:text-[color:var(--accent)] transition-colors ${currentStage === StageId.ABOUT ? 'text-[color:var(--accent)]' : 'text-[color:var(--text-primary)]'}`}>Kuhusu Sisi</button>
-                <button onClick={() => handleStageChange(StageId.SHOP)} className={`text-[11px] xl:text-[12px] font-black uppercase tracking-widest hover:text-[color:var(--accent)] transition-colors ${currentStage === StageId.SHOP ? 'text-[color:var(--accent)]' : 'text-[color:var(--text-primary)]'}`}>Duka</button>
-                <button onClick={() => handleStageChange(StageId.DONATE)} className={`px-4 py-2 bg-[color:var(--accent)] text-[color:var(--accent-ink)] rounded-full text-[11px] xl:text-[12px] font-black uppercase tracking-widest hover:bg-[color:var(--accent-strong)] hover:shadow-md transition-all`}>Changia</button>
-              </nav>
+              {/* Right Side Container (Desktop Nav + Mobile/Desktop Icons) */}
+              <div className="flex flex-1 min-w-0 justify-end items-center h-full gap-4 xl:gap-6 ml-4 transition-all duration-300">
+                
+                {/* Auto Overflow Responsive Nav */}
+                <div className="hidden lg:flex flex-1 min-w-0 h-full">
+                  <AutoOverflowNav 
+                    currentStage={currentStage} 
+                    isScrolled={isScrolled} 
+                    onNavigate={handleStageChange} 
+                  />
+                </div>
 
-              <div className="flex items-center gap-1.5 md:gap-3">
-                <button
-                  onClick={() => setIsThemeOpen(!isThemeOpen)}
-                  className="gc-icon-button h-10 w-10 md:h-11 md:w-11 rounded-full flex items-center justify-center"
-                  aria-label="Mandhari"
-                >
-                  {theme === 'light' ? <Sun size={16} /> : theme === 'dark' ? <Moon size={16} /> : <Monitor size={16} />}
-                </button>
-                <button
-                  onClick={() => setIsNotificationOpen(!isNotificationOpen)}
-                  className={`relative gc-icon-button h-10 w-10 md:h-11 md:w-11 rounded-full flex items-center justify-center ${isNotificationOpen ? 'is-active' : ''}`}
-                  aria-label="Arifa"
-                >
-                  <Bell size={16} />
-                  {unreadCount > 0 && (
-                    <span className="absolute top-2.5 right-2.5 md:top-3 md:right-3 w-2 h-2 bg-[color:var(--accent)] rounded-full"></span>
-                  )}
-                </button>
-                <div ref={accountMenuRef} className="relative">
+              {/* Action Icons (Visible on all devices) */}
+              <div className={`flex items-center gap-1.5 md:gap-3 shrink-0 transition-all duration-300 ${!isScrolled ? 'self-start mt-3 sm:mt-5 h-auto lg:self-auto lg:mt-0 lg:h-full' : 'h-full'}`}>
                   <button
-                    onClick={() => {
-                      setIsAccountMenuOpen((prev) => !prev);
-                    }}
-                    className={`gc-icon-button rounded-full h-10 md:h-11 pl-1 md:pl-1.5 pr-2 flex items-center gap-2 ${isAccountMenuOpen ? 'is-active' : ''}`}
-                    aria-label={user ? 'Akaunti yako' : 'Menyu ya akaunti'}
-                    aria-expanded={isAccountMenuOpen}
+                    onClick={() => setIsThemeOpen(!isThemeOpen)}
+                    className="gc-icon-button h-10 w-10 md:h-11 md:w-11 rounded-full flex items-center justify-center"
+                    aria-label="Mandhari"
                   >
-                    <span className="w-8 h-8 md:w-9 md:h-9 rounded-full bg-gradient-to-tr from-gold-500 to-gold-700 text-[#020617] flex items-center justify-center overflow-hidden shadow-sm">
-                      {user ? (
-                        <img
-                          src={readSafeProfilePic() || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=eab308&color=020617&bold=true`}
-                          alt="Akaunti"
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <User size={18} />
-                      )}
-                    </span>
-                    <div className="hidden md:flex flex-col items-start leading-none pr-1">
-                      <span className="text-[10px] font-black uppercase tracking-[0.16em] text-[color:var(--text-primary)]">
-                        {user ? user.name.split(' ')[0] : 'Mgeni'}
-                      </span>
-                      <span className="text-[8px] font-bold uppercase tracking-[0.24em] text-[color:var(--text-muted)]">
-                        {user ? 'Akaunti' : 'Ingia/Jisajili'}
-                      </span>
-                    </div>
-                    {isAccountMenuOpen ? <ChevronUp size={14} className="text-[color:var(--text-muted)]" /> : <ChevronDown size={14} className="text-[color:var(--text-muted)]" />}
+                    {theme === 'light' ? <Sun size={16} /> : theme === 'dark' ? <Moon size={16} /> : <Monitor size={16} />}
                   </button>
-
-                  {isAccountMenuOpen && (
-                    <div className="absolute right-0 mt-2 w-48 rounded-2xl border border-[color:var(--line-strong)] bg-[color:var(--surface-2)] shadow-2xl overflow-hidden z-[80]">
-                      {user ? (
-                        <>
-                          <button
-                            onClick={() => {
-                              setShowProfileModal(true);
-                              setIsAccountMenuOpen(false);
-                            }}
-                            className="w-full text-left px-4 py-3 text-xs font-black uppercase tracking-[0.2em] text-[color:var(--text-primary)] hover:bg-[color:var(--surface-3)] transition-colors"
-                          >
-                            Akaunti Yangu
-                          </button>
-                          <button
-                            onClick={handleLogout}
-                            className="w-full text-left px-4 py-3 text-xs font-black uppercase tracking-[0.2em] text-red-500 hover:bg-[color:var(--surface-3)] transition-colors inline-flex items-center gap-2"
-                          >
-                            <LogOut size={14} />
-                            Ondoka
-                          </button>
-                        </>
-                      ) : (
-                        <>
-                          <button
-                            onClick={() => openAuthModal('login')}
-                            className="w-full text-left px-4 py-3 text-xs font-black uppercase tracking-[0.2em] text-[color:var(--text-primary)] hover:bg-[color:var(--surface-3)] transition-colors"
-                          >
-                            Ingia
-                          </button>
-                          <button
-                            onClick={() => openAuthModal('register')}
-                            className="w-full text-left px-4 py-3 text-xs font-black uppercase tracking-[0.2em] text-[color:var(--accent)] hover:bg-[color:var(--surface-3)] transition-colors"
-                          >
-                            Jisajili
-                          </button>
-                        </>
-                      )}
-                    </div>
-                  )}
+                  <button
+                    onClick={() => setIsNotificationOpen(!isNotificationOpen)}
+                    className={`relative gc-icon-button h-10 w-10 md:h-11 md:w-11 rounded-full flex items-center justify-center ${isNotificationOpen ? 'is-active' : ''}`}
+                    aria-label="Arifa"
+                  >
+                    <Bell size={16} />
+                    {unreadCount > 0 && (
+                      <span className="absolute top-2.5 right-2.5 md:top-3 md:right-3 w-2 h-2 bg-[color:var(--accent)] rounded-full"></span>
+                    )}
+                  </button>
+                  <div ref={accountMenuRef} className="relative">
+                    <button
+                      onClick={() => {
+                        setIsAccountMenuOpen((prev) => !prev);
+                      }}
+                      className={`gc-icon-button rounded-full h-10 md:h-11 pl-1 md:pl-1.5 pr-2 flex items-center gap-2 ${isAccountMenuOpen ? 'is-active' : ''}`}
+                      aria-label={user ? 'Akaunti yako' : 'Menyu ya akaunti'}
+                      aria-expanded={isAccountMenuOpen}
+                    >
+                      <span className="w-8 h-8 md:w-9 md:h-9 rounded-full bg-gradient-to-tr from-gold-500 to-gold-700 text-[#020617] flex items-center justify-center overflow-hidden shadow-sm">
+                        {user ? (
+                          <img
+                            src={readSafeProfilePic() || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=eab308&color=020617&bold=true`}
+                            alt="Akaunti"
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <User size={18} />
+                        )}
+                      </span>
+                      <div className="hidden md:flex flex-col items-start leading-none pr-1">
+                        <span className="text-[10px] font-black uppercase tracking-[0.16em] text-[color:var(--text-primary)]">
+                          {user ? user.name.split(' ')[0] : 'Mgeni'}
+                        </span>
+                        <span className="text-[8px] font-bold uppercase tracking-[0.24em] text-[color:var(--text-muted)]">
+                          {user ? 'Akaunti' : 'Ingia/Jisajili'}
+                        </span>
+                      </div>
+                      {isAccountMenuOpen ? <ChevronUp size={14} className="text-[color:var(--text-muted)]" /> : <ChevronDown size={14} className="text-[color:var(--text-muted)]" />}
+                    </button>
+  
+                    {isAccountMenuOpen && (
+                      <div className="absolute right-0 mt-2 w-48 rounded-2xl border border-[color:var(--line-strong)] bg-[color:var(--surface-2)] shadow-2xl overflow-hidden z-[80]">
+                        {user ? (
+                          <>
+                            <button
+                              onClick={() => {
+                                setShowProfileModal(true);
+                                setIsAccountMenuOpen(false);
+                              }}
+                              className="w-full text-left px-4 py-3 text-xs font-black uppercase tracking-[0.2em] text-[color:var(--text-primary)] hover:bg-[color:var(--surface-3)] transition-colors"
+                            >
+                              Akaunti Yangu
+                            </button>
+                            <button
+                              onClick={handleLogout}
+                              className="w-full text-left px-4 py-3 text-xs font-black uppercase tracking-[0.2em] text-red-500 hover:bg-[color:var(--surface-3)] transition-colors inline-flex items-center gap-2"
+                            >
+                              <LogOut size={14} />
+                              Ondoka
+                            </button>
+                          </>
+                        ) : (
+                          <>
+                            <button
+                              onClick={() => openAuthModal('login')}
+                              className="w-full text-left px-4 py-3 text-xs font-black uppercase tracking-[0.2em] text-[color:var(--text-primary)] hover:bg-[color:var(--surface-3)] transition-colors"
+                            >
+                              Ingia
+                            </button>
+                            <button
+                              onClick={() => openAuthModal('register')}
+                              className="w-full text-left px-4 py-3 text-xs font-black uppercase tracking-[0.2em] text-[color:var(--accent)] hover:bg-[color:var(--surface-3)] transition-colors"
+                            >
+                              Jisajili
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             </header>
-          )}
+        )}
 
           {showStageBreadcrumb && (
             <div 
@@ -939,7 +947,7 @@ const App: React.FC = () => {
               show as dead page background. */}
           <div
             ref={mainContentRef}
-            className={`gc-content-scroll flex-1 overflow-y-auto scroll-smooth ${isImmersive ? 'pt-16 pb-16' : showStageBreadcrumb ? 'pt-28' : 'pt-16'}`}
+            className={`gc-content-scroll flex-1 overflow-y-auto scroll-smooth ${isImmersive ? 'pt-16 pb-16' : showStageBreadcrumb ? 'pt-28' : currentStage === StageId.HOME ? 'pt-0' : 'pt-16'}`}
           >
             <ErrorBoundary resetKey={currentPath}>
               <Suspense fallback={<BrandLoader logoSrc={logoSrc} />}>

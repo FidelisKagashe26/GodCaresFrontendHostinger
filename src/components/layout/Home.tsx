@@ -111,36 +111,42 @@ export const Home: React.FC<HomeProps> = ({ onNavigate, siteSettings }) => {
     <div className="w-full min-h-screen bg-[color:var(--page-bg)] text-[color:var(--text-primary)] font-sans overflow-x-hidden">
       
       {/* --- DYNAMIC CAROUSEL HERO --- */}
-      <section className="relative w-full h-[85vh] md:h-[95vh] min-h-[600px] overflow-hidden group bg-slate-950">
+      <section className="relative w-full h-[65vh] md:h-[70vh] lg:h-screen lg:min-h-[600px] overflow-hidden group bg-[color:var(--page-bg)]">
         {HERO_SLIDES.map((slide, index) => {
           const isActive = currentSlide === index;
           return (
             <div 
               key={index} 
-              className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${isActive ? 'opacity-100 z-10 pointer-events-auto' : 'opacity-0 z-0 pointer-events-none'}`}
+              className={`absolute inset-0 flex flex-col lg:block transition-opacity duration-1000 ease-in-out ${isActive ? 'opacity-100 z-10 pointer-events-auto' : 'opacity-0 z-0 pointer-events-none'}`}
             >
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-950/35 to-slate-950/20 z-10" />
-              {slide.image ? (
-                <img 
-                  src={slide.image} 
-                  alt={slide.title} 
-                  className={`absolute inset-0 w-full h-full object-cover brightness-[0.82] transition-opacity duration-1000 ease-out ${isActive ? 'opacity-100' : 'opacity-80'}`} 
-                />
-              ) : (
-                <div className="absolute inset-0 w-full h-full bg-slate-900" />
-              )}
+              {/* IMAGE WRAPPER */}
+              <div className="relative w-full shrink-0 lg:absolute lg:inset-0">
+                {slide.image ? (
+                  <img 
+                    src={slide.image} 
+                    alt={slide.title} 
+                    className={`w-full h-auto lg:absolute lg:inset-0 lg:w-full lg:h-full lg:object-cover lg:object-center brightness-[0.82] transition-opacity duration-1000 ease-out ${isActive ? 'opacity-100' : 'opacity-80'}`} 
+                  />
+                ) : (
+                  <div className="w-full aspect-video lg:absolute lg:inset-0 lg:h-full bg-slate-900" />
+                )}
+                
+                {/* Gradient to fade the bottom of the image smoothly into the background */}
+                <div className="absolute inset-x-0 bottom-0 h-[60%] bg-gradient-to-t from-[color:var(--page-bg)] to-transparent lg:inset-0 lg:h-full lg:from-[color:var(--page-bg)]/85 lg:via-[color:var(--page-bg)]/35 lg:to-[color:var(--page-bg)]/20 z-10" />
+              </div>
               
-              <div className="absolute inset-0 flex items-center justify-center z-20 px-4 md:px-10">
-                <div className="text-center max-w-5xl space-y-6 md:space-y-8 flex flex-col items-center mt-10">
+              {/* Text container */}
+              <div className="relative z-20 flex-1 flex flex-col items-center justify-start lg:justify-center px-4 md:px-10 -mt-10 md:-mt-16 lg:mt-0 lg:absolute lg:inset-0 pb-20 lg:pb-0">
+                <div className="text-center max-w-5xl space-y-5 md:space-y-8 flex flex-col items-center pt-2 lg:pt-0">
                   
                   <div className={`overflow-hidden transition-all duration-1000 delay-100 ${isActive ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
-                    <span className="inline-flex items-center gap-4 text-white font-bold text-sm md:text-base uppercase tracking-[0.25em]">
-                      <span className="w-3 h-3 md:w-4 md:h-4 rounded-full bg-[color:var(--accent)] animate-pulse"></span>
+                    <span className="inline-flex items-center gap-3 md:gap-4 text-white font-bold text-xs md:text-base uppercase tracking-[0.25em]">
+                      <span className="w-2.5 h-2.5 md:w-4 md:h-4 rounded-full bg-[color:var(--accent)] animate-pulse"></span>
                       {slide.tag}
                     </span>
                   </div>
 
-                  <h1 className={`max-w-full text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-black text-white uppercase tracking-normal leading-[1.05] drop-shadow-2xl break-words [overflow-wrap:anywhere] transition-all duration-1000 delay-300 ${isActive ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}>
+                  <h1 className={`max-w-full text-3xl sm:text-5xl md:text-7xl lg:text-8xl font-black text-white uppercase tracking-normal leading-[1.05] drop-shadow-2xl break-words [overflow-wrap:anywhere] transition-all duration-1000 delay-300 ${isActive ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}>
                     {slide.title}
                   </h1>
 
