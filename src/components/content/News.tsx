@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Calendar, Clock, Newspaper, ArrowRight, X, Share2, Eye, User } from 'lucide-react';
 import { NewsItemApi, getNewsItems, registerNewsView } from '../../services/content/newsService';
 import { subscribeNewsletter } from '../../services/content/newsletterService';
+import { useDetailCrumbs } from '../system/Breadcrumbs';
 
 interface NewsItem {
   id: number;
@@ -92,6 +93,7 @@ const getNewsIdFromHash = (): number | null => {
 export const News: React.FC = () => {
   const [activeCategory, setActiveCategory] = useState('all');
   const [selectedNews, setSelectedNews] = useState<NewsItem | null>(null);
+  useDetailCrumbs(selectedNews ? [{ label: selectedNews.title }] : []);
   const [items, setItems] = useState<NewsItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');

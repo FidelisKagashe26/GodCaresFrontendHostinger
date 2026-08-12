@@ -139,11 +139,142 @@ const CountdownTimer: React.FC<{ targetDate: Date }> = ({ targetDate }) => {
   );
 };
 
-export const Events: React.FC = () => {
+import { AuthUser } from '../../services/core/authService';
+import { useDetailCrumbs } from '../system/Breadcrumbs';
+
+interface EventRegistrationModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  event: Event | null;
+  user: AuthUser | null | undefined;
+  onRequireLogin?: () => void;
+  onSubmit: (data: { name: string; email: string; phone?: string }) => void;
+  isSubmitting: boolean;
+}
+
+const EventRegistrationModal: React.FC<EventRegistrationModalProps> = ({
+  isOpen,
+  onClose,
+  event,
+  user,
+  onRequireLogin,
+  onSubmit,
+  isSubmitting
+}) => {
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
+
+  useEffect(() => {
+    if (isOpen) {
+      setName(user?.name || '');
+      setEmail(user?.email || '');
+      // If user object has phone, we would use it here. We'll leave it empty otherwise.
+      setPhone(''); 
+    }
+  }, [isOpen, user]);
+
+  if (!isOpen || !event) return null;
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!name.trim() || !email.trim()) {
+      alert('Tafadhali jaza jina na barua pepe.');
+      return;
+    }
+    onSubmit({ name: name.trim(), email: email.trim(), phone: phone.trim() });
+  };
+
+  return (
+    <div className="fixed inset-0 z-[600] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in" onClick={onClose}>
+      <div className="bg-slate-900 border border-white/10 rounded-xl shadow-2xl w-full max-w-md overflow-hidden relative" onClick={e => e.stopPropagation()}>
+        <button 
+          onClick={onClose}
+          className="absolute top-4 right-4 text-slate-400 hover:text-white transition-colors"
+        >
+          <X size={20} />
+        </button>
+
+        <div className="p-6 border-b border-white/5">
+          <h3 className="text-xl font-black text-white uppercase">Usajili wa Tukio</h3>
+          <p className="text-gold-500 text-sm font-bold mt-1 truncate">{event.title}</p>
+        </div>
+
+        <div className="p-6 space-y-6">
+          {!user && (
+            <div className="bg-gold-500/10 border border-gold-500/30 p-4 rounded-lg flex flex-col items-center text-center gap-3">
+              <User size={32} className="text-gold-500" />
+              <p className="text-sm text-slate-300">
+                Je, unayo akaunti? Ingia ili kurahisisha usajili wako.
+              </p>
+              <button 
+                onClick={() => { onClose(); onRequireLogin?.(); }}
+                className="px-6 py-2 bg-gold-500 text-slate-900 font-black text-xs uppercase tracking-widest rounded-sm hover:bg-gold-400 transition-colors"
+              >
+                Ingia / Jisajili
+              </button>
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Jina Kamili *</label>
+              <input 
+                type="text" 
+                value={name}
+                onChange={e => setName(e.target.value)}
+                required
+                className="w-full bg-slate-950 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-gold-500 focus:outline-none transition-colors"
+                placeholder="Weka jina lako"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Barua Pepe *</label>
+              <input 
+                type="email" 
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                required
+                className="w-full bg-slate-950 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-gold-500 focus:outline-none transition-colors"
+                placeholder="Weka barua pepe yako"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Namba ya Simu</label>
+              <input 
+                type="tel" 
+                value={phone}
+                onChange={e => setPhone(e.target.value)}
+                className="w-full bg-slate-950 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-gold-500 focus:outline-none transition-colors"
+                placeholder="Hiari (Mf: 0712...)"
+              />
+            </div>
+            <button 
+              type="submit"
+              disabled={isSubmitting}
+              className="w-full mt-4 py-4 bg-primary-950 text-gold-500 border border-gold-500/30 hover:bg-gold-500 hover:text-slate-900 font-black text-sm uppercase tracking-widest rounded-lg transition-all disabled:opacity-50"
+            >
+              {isSubmitting ? 'Inasajili...' : 'Kamilisha Usajili'}
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export interface EventsProps {
+  user?: AuthUser | null;
+  onRequireLogin?: () => void;
+}
+
+export const Events: React.FC<EventsProps> = ({ user, onRequireLogin }) => {
+  const [modalEventId, setModalEventId] = useState<string | null>(null);
   const [registeredIds, setRegisteredIds] = useState<string[]>([]);
   const [registeringId, setRegisteringId] = useState<string | null>(null);
   const [filter, setFilter] = useState<'All' | 'Virtual' | 'Physical'>('All');
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
+  useDetailCrumbs(selectedEvent ? [{ label: selectedEvent.title }] : []);
   const [events, setEvents] = useState<Event[]>(INITIAL_EVENTS);
   const [eventsError, setEventsError] = useState('');
   const [loadingEvents, setLoadingEvents] = useState(false);
@@ -180,34 +311,7 @@ export const Events: React.FC = () => {
 
   const isValidEmail = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 
-  const resolveRegistrant = (): { name: string; email: string } | null => {
-    try {
-      const raw = localStorage.getItem('gc365_user');
-      const parsed = raw ? JSON.parse(raw) : null;
-      const name = (parsed?.name || '').toString().trim();
-      const email = (parsed?.email || '').toString().trim();
-      if (name && email && isValidEmail(email)) {
-        return { name, email };
-      }
-    } catch {
-      // Fall back to prompt.
-    }
-
-    const name = window.prompt('Weka jina lako kamili kwa usajili wa tukio:');
-    if (!name || !name.trim()) {
-      return null;
-    }
-
-    const email = window.prompt('Weka barua pepe yako:');
-    if (!email || !isValidEmail(email.trim())) {
-      alert('Barua pepe uliyoingiza si sahihi.');
-      return null;
-    }
-
-    return { name: name.trim(), email: email.trim() };
-  };
-
-  const handleRegister = async (e: React.MouseEvent, id: string) => {
+  const handleRegisterClick = (e: React.MouseEvent, id: string) => {
     e.stopPropagation();
     if (registeredIds.includes(id) || registeringId === id) return;
 
@@ -217,24 +321,29 @@ export const Events: React.FC = () => {
       alert('Nafasi za tukio hili zimejaa.');
       return;
     }
+    
+    setModalEventId(id);
+  };
 
-    const registrant = resolveRegistrant();
-    if (!registrant) return;
-
-    setRegisteringId(id);
+  const submitRegistration = async (data: { name: string; email: string; phone?: string }) => {
+    if (!modalEventId) return;
+    
+    setRegisteringId(modalEventId);
+    const ev = events.find(event => event.id === modalEventId);
     try {
-      const response = await registerForEvent(Number(id), registrant);
-      setRegisteredIds((prev) => prev.includes(id) ? prev : [...prev, id]);
+      const response = await registerForEvent(Number(modalEventId), data);
+      setRegisteredIds((prev) => prev.includes(modalEventId) ? prev : [...prev, modalEventId]);
 
       if (response.event) {
         const mappedEvent = mapEventFromApi(response.event);
-        setEvents((prev) => prev.map((eventItem) => (eventItem.id === id ? mappedEvent : eventItem)));
-        setSelectedEvent((prev) => (prev && prev.id === id ? mappedEvent : prev));
+        setEvents((prev) => prev.map((eventItem) => (eventItem.id === modalEventId ? mappedEvent : eventItem)));
+        setSelectedEvent((prev) => (prev && prev.id === modalEventId ? mappedEvent : prev));
       } else {
         void loadEvents();
       }
 
-      alert(response.detail || `Usajili umekamilika kwa "${ev.title}". Utaarifiwa kabla ya tukio.`);
+      alert(response.detail || `Usajili umekamilika kwa "${ev?.title}". Utaarifiwa kabla ya tukio.`);
+      setModalEventId(null);
     } catch (error: any) {
       alert(error?.message || 'Imeshindikana kusajili.');
     } finally {
@@ -243,7 +352,7 @@ export const Events: React.FC = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto space-y-12 animate-fade-in pb-32">
+    <div className="max-w-7xl mx-auto space-y-6 animate-fade-in pb-32">
       {eventsError && (
         <div className="bg-red-500/10 border border-red-500/20 text-red-500 text-[10px] font-bold uppercase tracking-widest px-4 py-2 rounded-lg">
           {eventsError}
@@ -277,7 +386,7 @@ export const Events: React.FC = () => {
            <div className="bg-white/5 backdrop-blur-md p-6 rounded-sm border border-white/10 space-y-4">
               <p className="text-[9px] font-black text-slate-500 uppercase tracking-[0.3em] text-center">Muda Uliosalia</p>
                 <CountdownTimer targetDate={upcomingEvent.date} />
-              <button className="w-full py-3 bg-white text-primary-950 rounded-sm font-black text-[10px] uppercase tracking-widest hover:bg-gold-500 transition-all shadow-lg">Maelezo Kamili</button>
+              <button className="w-full py-3 bg-gold-500 text-slate-900 rounded-sm font-black text-[10px] uppercase tracking-widest hover:bg-gold-400 transition-all shadow-lg">Maelezo Kamili</button>
            </div>
         </div>
           </section>
@@ -372,11 +481,11 @@ export const Events: React.FC = () => {
                     <span className="text-[10px] font-bold truncate max-w-[120px] uppercase">{event.location}</span>
                   </div>
                   <button 
-                    onClick={(e) => handleRegister(e, event.id)}
-                    disabled={registeringId === event.id || (full && !registered)}
+                    onClick={(e) => handleRegisterClick(e, event.id)}
+                    disabled={registeringId === event.id || (full && !registered) || registered}
                     className={`px-6 py-2.5 rounded-sm text-[10px] font-black uppercase tracking-widest transition-all disabled:opacity-60 disabled:cursor-not-allowed ${registered ? 'bg-green-600 text-white' : full ? 'bg-slate-300 dark:bg-slate-700 text-slate-600 dark:text-slate-300' : 'bg-primary-950 text-gold-400 hover:bg-gold-500 hover:text-primary-950'}`}
                   >
-                    {registered ? 'Umesajiliwa' : full ? 'Nafasi Zimejaa' : registeringId === event.id ? 'Inasajili...' : 'Jiunge Sasa'}
+                    {registered ? 'Umesajiliwa Tayari' : full ? 'Nafasi Zimejaa' : registeringId === event.id ? 'Inasajili...' : 'Jiunge Sasa'}
                   </button>
                </div>
             </div>
@@ -392,14 +501,23 @@ export const Events: React.FC = () => {
 
       {/* EVENT DETAIL OVERLAY - Minimum Bevel Modal */}
       {selectedEvent && (
-        <div className="fixed inset-0 z-[500] bg-black/95 backdrop-blur-xl flex items-center justify-center p-4 md:p-12 animate-fade-in">
+        <div className="fixed inset-0 z-40 bg-black/95 backdrop-blur-xl flex items-center justify-center p-4 md:p-12 animate-fade-in">
            <div className="bg-white dark:bg-slate-950 w-full max-w-5xl h-full md:h-[90vh] rounded-sm overflow-hidden flex flex-col shadow-2xl border border-white/10 relative">
-              <button 
-                onClick={() => setSelectedEvent(null)}
-                className="absolute top-6 right-6 z-50 p-4 bg-black/40 hover:bg-red-600 text-white transition-all rounded-sm"
-              >
-                <X size={24} />
-              </button>
+              <div className="absolute top-6 right-6 z-50 flex gap-2">
+                 <button 
+                   onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(window.location.href); alert('Link imenakiliwa!'); }}
+                   className="p-4 bg-black/40 hover:bg-gold-500 text-white hover:text-slate-900 transition-all rounded-sm"
+                   title="Shiriki Tukio Hili"
+                 >
+                   <Share2 size={24} />
+                 </button>
+                 <button 
+                   onClick={() => setSelectedEvent(null)}
+                   className="p-4 bg-black/40 hover:bg-red-600 text-white transition-all rounded-sm"
+                 >
+                   <X size={24} />
+                 </button>
+              </div>
 
               <div className="flex-1 overflow-y-auto scrollbar-hide">
                  <div className="relative h-[300px] md:h-[400px] overflow-hidden">
@@ -536,8 +654,8 @@ export const Events: React.FC = () => {
                           </div>
 
                           <button 
-                            onClick={(e) => handleRegister(e, selectedEvent.id)}
-                            disabled={registeringId === selectedEvent.id || (isEventFull(selectedEvent) && !registeredIds.includes(selectedEvent.id))}
+                            onClick={(e) => handleRegisterClick(e, selectedEvent.id)}
+                            disabled={registeringId === selectedEvent.id || (isEventFull(selectedEvent) && !registeredIds.includes(selectedEvent.id)) || registeredIds.includes(selectedEvent.id)}
                             className={`w-full py-5 rounded-sm font-black text-xs uppercase tracking-[0.2em] transition-all shadow-md disabled:opacity-60 disabled:cursor-not-allowed ${registeredIds.includes(selectedEvent.id) ? 'bg-green-600 text-white' : isEventFull(selectedEvent) ? 'bg-slate-300 dark:bg-slate-700 text-slate-600 dark:text-slate-300' : 'bg-primary-950 text-gold-400 hover:bg-gold-500 hover:text-primary-950'}`}
                           >
                              {registeredIds.includes(selectedEvent.id) ? 'Umesajiliwa Tayari' : isEventFull(selectedEvent) ? 'Nafasi Zimejaa' : registeringId === selectedEvent.id ? 'Inasajili...' : 'Hifadhi Nafasi Yangu'}
@@ -553,20 +671,19 @@ export const Events: React.FC = () => {
                  </div>
               </div>
 
-              <div className="p-10 border-t border-slate-100 dark:border-white/5 flex flex-col md:flex-row justify-between items-center gap-6 bg-slate-50/50 dark:bg-black/20">
-                 <div className="flex items-center gap-3">
-                    <Share2 size={20} className="text-slate-400" />
-                    <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest tracking-[0.2em]">Shiriki Tukio Hili</span>
-                 </div>
-                 <div className="flex gap-4">
-                    <button onClick={() => setSelectedEvent(null)} className="px-10 py-3 bg-slate-900 text-white text-[10px] font-black uppercase tracking-widest rounded-sm shadow-lg">Funga</button>
-                 </div>
-              </div>
            </div>
         </div>
       )}
+
+      <EventRegistrationModal 
+        isOpen={!!modalEventId}
+        onClose={() => setModalEventId(null)}
+        event={events.find(e => e.id === modalEventId) || null}
+        user={user}
+        onRequireLogin={onRequireLogin}
+        onSubmit={submitRegistration}
+        isSubmitting={!!registeringId}
+      />
     </div>
   );
 };
-
-

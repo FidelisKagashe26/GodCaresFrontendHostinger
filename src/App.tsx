@@ -6,6 +6,7 @@ import { StageId, ToastNotification, LanguageCode, ThemePreference } from './typ
 import { ToastContainer } from './components/ui/Toast';
 import { ErrorBoundary } from './components/system/ErrorBoundary';
 import { BrandLoader } from './components/system/BrandLoader';
+import { BreadcrumbProvider, Crumb, toSentenceCase, useBreadcrumbs } from './components/system/Breadcrumbs';
 import { Sun, Moon, Menu, Bell, User, Monitor, ChevronDown, ChevronUp, LogOut, ArrowLeft, ChevronRight, Plus, X } from 'lucide-react';
 import { AuthUser, clearTokens, getCurrentUser } from './services/core/authService';
 import { getSystemMessages } from './services/core/systemMessageService';
@@ -21,6 +22,7 @@ import {
   normalizePath,
 } from './routes/stageRoutes';
 import { AutoOverflowNav } from './components/layout/AutoOverflowNav';
+import { useSEO } from './hooks/useSEO';
 
 const CHUNK_RELOAD_FLAG = 'gc365_chunk_reload';
 
@@ -161,6 +163,7 @@ const App: React.FC = () => {
   const currentPath = normalizePath(location.pathname);
   const matchedStage = getStageFromPath(currentPath);
   const currentStage = matchedStage || StageId.HOME;
+  const { detailCrumbs } = useBreadcrumbs();
 
   const [user, setUser] = useState<AuthUser | null>(null);
   const [isAuthBootstrapComplete, setIsAuthBootstrapComplete] = useState(false);
@@ -187,7 +190,7 @@ const App: React.FC = () => {
   const mainContentRef = useRef<HTMLDivElement>(null);
   const accountMenuRef = useRef<HTMLDivElement>(null);
   const moreNavRef = useRef<HTMLDivElement>(null);
-  const routeHistoryRef = useRef<string[]>([]);
+  const historyDepthRef = useRef(0);
 
   const [centerNotifications, setCenterNotifications] = useState<ToastNotification[]>([]);
   const [canGoBack, setCanGoBack] = useState(false);
@@ -353,7 +356,7 @@ const App: React.FC = () => {
     setUser(null);
     localStorage.removeItem('gc365_user');
     clearTokens();
-    routeHistoryRef.current = [getStagePath(StageId.HOME)];
+    historyDepthRef.current = 0;
     setCanGoBack(false);
     setIsMenuOpen(false);
     setShowProfileModal(false);
@@ -553,25 +556,20 @@ const App: React.FC = () => {
     };
   }, []);
 
+  // Track how deep we are in this session's history so Back can simply step
+  // back one entry. The old trail only recorded pathnames, so navigations that
+  // changed just the query string (opening a video, sharing an article) were
+  // invisible to it: Back then thought there was nowhere to go and jumped Home
+  // instead of actually going back. Keying on location.key counts every entry
+  // the browser really has, matching what navigate(-1) will do.
   useEffect(() => {
-    const historyTrail = routeHistoryRef.current;
-    if (historyTrail.length === 0) {
-      routeHistoryRef.current = [currentPath];
-      setCanGoBack(false);
-      return;
+    if (navigationType === 'PUSH') {
+      historyDepthRef.current += 1;
+    } else if (navigationType === 'POP') {
+      historyDepthRef.current = Math.max(0, historyDepthRef.current - 1);
     }
-
-    const lastPath = historyTrail[historyTrail.length - 1];
-    if (lastPath !== currentPath) {
-      if (navigationType === 'POP' && historyTrail.length > 1 && historyTrail[historyTrail.length - 2] === currentPath) {
-        routeHistoryRef.current = historyTrail.slice(0, -1);
-      } else {
-        routeHistoryRef.current = [...historyTrail, currentPath];
-      }
-    }
-
-    setCanGoBack(routeHistoryRef.current.length > 1);
-  }, [currentPath, navigationType]);
+    setCanGoBack(historyDepthRef.current > 0);
+  }, [location.key, navigationType]);
 
   useEffect(() => {
     setIsMenuOpen(false);
@@ -603,7 +601,7 @@ const App: React.FC = () => {
       case StageId.TESTIMONIES: return <Testimonies />;
       case StageId.SHOP: return <Shop />;
       case StageId.LIBRARY: return <Library />;
-      case StageId.EVENTS: return <Events />;
+      case StageId.EVENTS: return <Events user={user} onRequireLogin={() => openAuthModal('login')} />;
       case StageId.NEWS: return <News />;
       case StageId.PRAYERS: return <Prayers aiLanguage={aiLanguage} siteSettings={siteSettings} />;
       case StageId.DONATE: return <Donations />;
@@ -619,6 +617,22 @@ const App: React.FC = () => {
     () => STAGES.find((stage) => stage.id === currentStage)?.title || 'Nyumbani',
     [currentStage],
   );
+
+  // Home > <stage> > ...whatever the page adds (playlist, video, article...).
+  const breadcrumbTrail = useMemo<Crumb[]>(() => {
+    const trail: Crumb[] = [
+      { label: 'Nyumbani', onClick: () => handleStageChange(StageId.HOME) },
+    ];
+    if (currentStage !== StageId.HOME) {
+      trail.push({
+        label: currentStageLabel,
+        onClick: detailCrumbs.length ? () => handleStageChange(currentStage) : undefined,
+      });
+    }
+    return [...trail, ...detailCrumbs];
+  }, [currentStage, currentStageLabel, detailCrumbs]);
+
+  useSEO(currentStage);
 
   const handleGlobalBack = () => {
     if (canGoBack) {
@@ -929,17 +943,36 @@ const App: React.FC = () => {
                   <ArrowLeft size={16} />
                 </button>
 
-                <div className="min-w-0 inline-flex items-center gap-1.5 text-xs md:text-sm font-black uppercase tracking-[0.08em] text-[color:var(--text-muted)]">
-                  <button
-                    type="button"
-                    onClick={() => handleStageChange(StageId.HOME)}
-                    className="hover:text-[color:var(--accent)] transition-colors"
-                  >
-                    Nyumbani
-                  </button>
-                  <ChevronRight size={12} />
-                  <span className="text-[color:var(--text-primary)] truncate">{currentStageLabel}</span>
-                </div>
+                <nav aria-label="Ulipo" className="min-w-0 flex-1">
+                  <ol className="flex min-w-0 items-center gap-1 overflow-hidden text-xs md:text-sm font-semibold tracking-[0.01em] text-[color:var(--text-muted)]">
+                    {breadcrumbTrail.map((crumb, index) => {
+                      const isLast = index === breadcrumbTrail.length - 1;
+                      return (
+                        <li key={`${crumb.label}-${index}`} className="flex min-w-0 items-center gap-1">
+                          {index > 0 && (
+                            <ChevronRight size={13} className="shrink-0 opacity-50" aria-hidden="true" />
+                          )}
+                          {isLast || !crumb.onClick ? (
+                            <span
+                              className={`truncate ${isLast ? 'text-[color:var(--text-primary)] font-bold' : ''}`}
+                              aria-current={isLast ? 'page' : undefined}
+                            >
+                              {toSentenceCase(crumb.label)}
+                            </span>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={crumb.onClick}
+                              className="shrink-0 rounded-md px-1 py-0.5 transition-colors hover:bg-[color:var(--surface-3)] hover:text-[color:var(--accent)]"
+                            >
+                              {toSentenceCase(crumb.label)}
+                            </button>
+                          )}
+                        </li>
+                      );
+                    })}
+                  </ol>
+                </nav>
               </div>
             </div>
           )}
@@ -978,4 +1011,12 @@ const App: React.FC = () => {
   );
 };
 
-export default App;
+// Breadcrumb state lives above App so any page can contribute its own crumbs
+// (playlist, video, article...) via useDetailCrumbs.
+const AppWithProviders: React.FC = () => (
+  <BreadcrumbProvider>
+    <App />
+  </BreadcrumbProvider>
+);
+
+export default AppWithProviders;

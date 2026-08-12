@@ -8,6 +8,7 @@ import {
   ListVideo, ChevronLeft, Layout
 } from 'lucide-react';
 import { getMediaPlaylists } from '../../services/content/mediaService';
+import { useDetailCrumbs } from '../system/Breadcrumbs';
 
 interface Video {
   id: string;
@@ -152,6 +153,19 @@ export const MediaProjects: React.FC = () => {
       }
     }
   }, [requestedVideoId, playlists]);
+
+  // Breadcrumb: Media hub > playlist > video
+  useDetailCrumbs(
+    selectedPlaylist
+      ? [
+          {
+            label: selectedPlaylist.title,
+            onClick: playingVideo ? () => setPlayingVideo(null) : undefined,
+          },
+          ...(playingVideo ? [{ label: playingVideo.title }] : []),
+        ]
+      : [],
+  );
 
   const filteredPlaylists = playlists.filter(p => activeCategory === 'Zote' || p.category === activeCategory);
 

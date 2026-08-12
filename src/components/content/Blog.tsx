@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { ThumbsUp, MessageCircle, Share2, User, Bookmark, Search, ArrowRight } from 'lucide-react';
 import { useSearchParams } from 'react-router-dom';
+import { useDetailCrumbs } from '../system/Breadcrumbs';
 import {
   createBlogComment,
   getBlogComments,
@@ -275,6 +276,10 @@ export const Blog: React.FC<BlogProps> = ({ user, onRequireLogin }) => {
     }, 350);
     return () => window.clearTimeout(timer);
   }, [searchTerm]);
+
+  // Breadcrumb: Makala > <article title>
+  const openedPost = posts.find((item) => item.id === activePost);
+  useDetailCrumbs(openedPost ? [{ label: openedPost.title }] : []);
 
   useEffect(() => {
     let cancelled = false;
