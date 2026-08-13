@@ -8,6 +8,8 @@ import {
   Globe, Users, Star, Gift, Book
 } from 'lucide-react';
 
+import { WhatsNewSection } from './WhatsNewSection';
+
 interface HomeProps {
   /** `search` is an optional query string, e.g. "?video=12" to open a video directly. */
   onNavigate: (id: StageId, search?: string) => void;
@@ -249,6 +251,9 @@ export const Home: React.FC<HomeProps> = ({ onNavigate, siteSettings }) => {
           </div>
         </div>
       </section>
+
+      {/* --- WHATS NEW / EVENTS --- */}
+      <WhatsNewSection onNavigate={onNavigate} />
 
       {/* --- QUICK ACCESS / WAYS TO GROW --- */}
       <section className="py-12 md:py-20 px-4 md:px-10 bg-[color:var(--surface-1)]">

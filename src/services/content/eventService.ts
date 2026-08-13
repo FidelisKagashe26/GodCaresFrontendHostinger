@@ -51,11 +51,12 @@ const normalizeEventPayload = (item: EventApi): EventApi => ({
   })),
 });
 
-export const getEvents = async (): Promise<EventApi[]> => {
+export const getEvents = async (search?: string): Promise<EventApi[]> => {
+  const query = search ? `?search=${encodeURIComponent(search)}` : "";
   return withCachedResult(
-    "events_list_v1",
+    `events_list_v1_${search || 'all'}`,
     async () => {
-      const response = await fetch(`${API_BASE_URL}/api/events/`);
+      const response = await fetch(`${API_BASE_URL}/api/events/${query}`);
       if (!response.ok) {
         throw new Error("Imeshindikana kupata matukio.");
       }
@@ -68,7 +69,7 @@ export const getEvents = async (): Promise<EventApi[]> => {
 
 export const registerForEvent = async (
   eventId: number,
-  payload: { name: string; email: string },
+  payload: { name: string; email: string; phone?: string },
 ): Promise<EventRegisterResponse> => {
   const response = await fetch(`${API_BASE_URL}/api/events/${eventId}/register/`, {
     method: "POST",

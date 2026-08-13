@@ -930,7 +930,7 @@ const App: React.FC = () => {
           {showStageBreadcrumb && (
             <div 
               className="fixed top-16 left-0 right-0 h-12 px-4 md:px-10 z-[45] bg-[color:var(--page-surface)]/90 backdrop-blur-md border-b border-[color:var(--line-strong)] transition-transform duration-300"
-              style={{ transform: isScrollingDown ? 'translateY(-100%)' : 'translateY(0)' }}
+              style={{ transform: (isScrollingDown && detailCrumbs.length === 0) ? 'translateY(-100%)' : 'translateY(0)' }}
             >
               <div className="h-full flex items-center gap-3">
                 <button

@@ -2,7 +2,7 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { 
   Calendar, MapPin, CheckCircle, Clock, 
-  Users, Filter, Sparkles, ChevronRight, 
+  Users, Filter, Sparkles, ChevronRight, Search,
   X, Download, Bell, Share2, AlertCircle,
   FileText, Play, User, ArrowRight, Info, Star
 } from 'lucide-react';
@@ -87,8 +87,34 @@ const mapEventFromApi = (item: EventApi): Event => ({
   resources: Array.isArray(item.resources) ? item.resources : [],
 });
 
+const isValidEmail = (value: string): boolean => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+
 const isEventFull = (event: Event): boolean =>
   event.maxAttendees > 0 && event.attendees >= event.maxAttendees;
+
+/** An event is over once its end time (or start, when there is no end) has passed. */
+const isEventPast = (event: Event): boolean =>
+  (event.endDate || event.date).getTime() < Date.now();
+
+const REGISTERED_EVENTS_KEY = 'gc365_registered_events';
+
+const readRegisteredIds = (): string[] => {
+  try {
+    const raw = localStorage.getItem(REGISTERED_EVENTS_KEY);
+    const parsed = raw ? JSON.parse(raw) : [];
+    return Array.isArray(parsed) ? parsed.map(String) : [];
+  } catch {
+    return [];
+  }
+};
+
+const persistRegisteredIds = (ids: string[]) => {
+  try {
+    localStorage.setItem(REGISTERED_EVENTS_KEY, JSON.stringify(ids));
+  } catch {
+    // Ignore storage errors.
+  }
+};
 
 const SpeakerAvatar: React.FC<{ speaker: Speaker; className?: string; iconSize?: number }> = ({
   speaker,
@@ -108,17 +134,24 @@ const CountdownTimer: React.FC<{ targetDate: Date }> = ({ targetDate }) => {
   const [timeLeft, setTimeLeft] = useState({ d: 0, h: 0, m: 0, s: 0 });
 
   useEffect(() => {
-    const timer = setInterval(() => {
+    // Compute immediately as well, so the first second isn't shown as 00:00:00,
+    // and clamp to zero once the date passes instead of freezing on the last value.
+    const tick = () => {
       const diff = +targetDate - +new Date();
-      if (diff > 0) {
-        setTimeLeft({
-          d: Math.floor(diff / (1000 * 60 * 60 * 24)),
-          h: Math.floor((diff / (1000 * 60 * 60)) % 24),
-          m: Math.floor((diff / 1000 / 60) % 60),
-          s: Math.floor((diff / 1000) % 60),
-        });
+      if (diff <= 0) {
+        setTimeLeft({ d: 0, h: 0, m: 0, s: 0 });
+        return;
       }
-    }, 1000);
+      setTimeLeft({
+        d: Math.floor(diff / (1000 * 60 * 60 * 24)),
+        h: Math.floor((diff / (1000 * 60 * 60)) % 24),
+        m: Math.floor((diff / 1000 / 60) % 60),
+        s: Math.floor((diff / 1000) % 60),
+      });
+    };
+
+    tick();
+    const timer = setInterval(tick, 1000);
     return () => clearInterval(timer);
   }, [targetDate]);
 
@@ -164,13 +197,15 @@ const EventRegistrationModal: React.FC<EventRegistrationModalProps> = ({
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
+  const [formError, setFormError] = useState('');
 
   useEffect(() => {
     if (isOpen) {
       setName(user?.name || '');
       setEmail(user?.email || '');
       // If user object has phone, we would use it here. We'll leave it empty otherwise.
-      setPhone(''); 
+      setPhone('');
+      setFormError('');
     }
   }, [isOpen, user]);
 
@@ -178,10 +213,15 @@ const EventRegistrationModal: React.FC<EventRegistrationModalProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim() || !email.trim()) {
-      alert('Tafadhali jaza jina na barua pepe.');
+    if (!name.trim()) {
+      setFormError('Tafadhali weka jina lako.');
       return;
     }
+    if (!isValidEmail(email.trim())) {
+      setFormError('Weka barua pepe sahihi, mfano jina@mfano.com');
+      return;
+    }
+    setFormError('');
     onSubmit({ name: name.trim(), email: email.trim(), phone: phone.trim() });
   };
 
@@ -213,6 +253,12 @@ const EventRegistrationModal: React.FC<EventRegistrationModalProps> = ({
               >
                 Ingia / Jisajili
               </button>
+            </div>
+          )}
+
+          {formError && (
+            <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-2 text-xs font-semibold text-red-400">
+              {formError}
             </div>
           )}
 
@@ -263,6 +309,13 @@ const EventRegistrationModal: React.FC<EventRegistrationModalProps> = ({
   );
 };
 
+const TIME_FILTER_LABELS = {
+  All: 'Wakati Wote',
+  Ongoing: 'Yanayoendelea',
+  Upcoming: 'Yajayo',
+  Past: 'Yaliyopita'
+};
+
 export interface EventsProps {
   user?: AuthUser | null;
   onRequireLogin?: () => void;
@@ -270,20 +323,26 @@ export interface EventsProps {
 
 export const Events: React.FC<EventsProps> = ({ user, onRequireLogin }) => {
   const [modalEventId, setModalEventId] = useState<string | null>(null);
-  const [registeredIds, setRegisteredIds] = useState<string[]>([]);
+  // Remembered across reloads, otherwise the page forgets you already joined.
+  const [registeredIds, setRegisteredIds] = useState<string[]>(() => readRegisteredIds());
+  const [statusMessage, setStatusMessage] = useState<{ kind: 'ok' | 'error'; text: string } | null>(null);
   const [registeringId, setRegisteringId] = useState<string | null>(null);
   const [filter, setFilter] = useState<'All' | 'Virtual' | 'Physical'>('All');
+  const [timeFilter, setTimeFilter] = useState<'All' | 'Ongoing' | 'Upcoming' | 'Past'>('All');
+  const [isTimeFilterOpen, setIsTimeFilterOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   useDetailCrumbs(selectedEvent ? [{ label: selectedEvent.title }] : []);
   const [events, setEvents] = useState<Event[]>(INITIAL_EVENTS);
   const [eventsError, setEventsError] = useState('');
   const [loadingEvents, setLoadingEvents] = useState(false);
 
-  const loadEvents = async () => {
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const loadEvents = async (query?: string) => {
     setLoadingEvents(true);
     setEventsError('');
     try {
-      const data = await getEvents();
+      const data = await getEvents(query);
       setEvents(data.map(mapEventFromApi));
     } catch {
       setEventsError('Imeshindikana kupata matukio.');
@@ -291,6 +350,11 @@ export const Events: React.FC<EventsProps> = ({ user, onRequireLogin }) => {
     } finally {
       setLoadingEvents(false);
     }
+  };
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    void loadEvents(searchQuery);
   };
 
   useEffect(() => {
@@ -307,9 +371,29 @@ export const Events: React.FC<EventsProps> = ({ user, onRequireLogin }) => {
     , futureEvents[0]);
   }, [events]);
 
-  const filtered = events.filter(e => filter === 'All' || e.type === filter);
+  // Upcoming first (soonest at the top), then past ones newest-first. The API
+  // returns every active event sorted by start date ascending, so without this
+  // the page led with events that finished long ago.
+  const filtered = useMemo(() => {
+    let byType = events.filter((e) => filter === 'All' || e.type === filter);
+    const now = Date.now();
 
-  const isValidEmail = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+    if (timeFilter === 'Ongoing') {
+      byType = byType.filter(e => e.date.getTime() <= now && (!e.endDate || e.endDate.getTime() >= now));
+    } else if (timeFilter === 'Upcoming') {
+      byType = byType.filter(e => e.date.getTime() > now);
+    } else if (timeFilter === 'Past') {
+      byType = byType.filter(e => isEventPast(e));
+    }
+
+    const upcoming = byType
+      .filter((e) => !isEventPast(e))
+      .sort((a, b) => a.date.getTime() - b.date.getTime());
+    const past = byType
+      .filter((e) => isEventPast(e))
+      .sort((a, b) => b.date.getTime() - a.date.getTime());
+    return [...upcoming, ...past];
+  }, [events, filter, timeFilter]);
 
   const handleRegisterClick = (e: React.MouseEvent, id: string) => {
     e.stopPropagation();
@@ -317,11 +401,16 @@ export const Events: React.FC<EventsProps> = ({ user, onRequireLogin }) => {
 
     const ev = events.find(event => event.id === id);
     if (!ev) return;
-    if (isEventFull(ev)) {
-      alert('Nafasi za tukio hili zimejaa.');
+    if (isEventPast(ev)) {
+      setStatusMessage({ kind: 'error', text: 'Tukio hili limeshapita.' });
       return;
     }
-    
+    if (isEventFull(ev)) {
+      setStatusMessage({ kind: 'error', text: 'Nafasi za tukio hili zimejaa.' });
+      return;
+    }
+
+    setStatusMessage(null);
     setModalEventId(id);
   };
 
@@ -332,7 +421,11 @@ export const Events: React.FC<EventsProps> = ({ user, onRequireLogin }) => {
     const ev = events.find(event => event.id === modalEventId);
     try {
       const response = await registerForEvent(Number(modalEventId), data);
-      setRegisteredIds((prev) => prev.includes(modalEventId) ? prev : [...prev, modalEventId]);
+      setRegisteredIds((prev) => {
+        const next = prev.includes(modalEventId) ? prev : [...prev, modalEventId];
+        persistRegisteredIds(next);
+        return next;
+      });
 
       if (response.event) {
         const mappedEvent = mapEventFromApi(response.event);
@@ -342,20 +435,48 @@ export const Events: React.FC<EventsProps> = ({ user, onRequireLogin }) => {
         void loadEvents();
       }
 
-      alert(response.detail || `Usajili umekamilika kwa "${ev?.title}". Utaarifiwa kabla ya tukio.`);
+      setStatusMessage({
+        kind: 'ok',
+        text: response.detail || `Usajili umekamilika kwa "${ev?.title}". Utaarifiwa kabla ya tukio.`,
+      });
       setModalEventId(null);
     } catch (error: any) {
-      alert(error?.message || 'Imeshindikana kusajili.');
+      setStatusMessage({ kind: 'error', text: error?.message || 'Imeshindikana kusajili.' });
     } finally {
       setRegisteringId(null);
     }
   };
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6 animate-fade-in pb-32">
-      {eventsError && (
-        <div className="bg-red-500/10 border border-red-500/20 text-red-500 text-[10px] font-bold uppercase tracking-widest px-4 py-2 rounded-lg">
-          {eventsError}
+    <div className="animate-fade-in pb-32">
+      {(eventsError || statusMessage) && (
+        <div className="max-w-7xl mx-auto px-4 md:px-8 space-y-4 mb-6 mt-6">
+        {eventsError && (
+          <div className="bg-red-500/10 border border-red-500/20 text-red-500 text-[10px] font-bold uppercase tracking-widest px-4 py-2 rounded-lg">
+            {eventsError}
+          </div>
+        )}
+
+        {statusMessage && (
+          <div
+            role="status"
+            className={`flex items-start justify-between gap-3 rounded-lg border px-4 py-3 text-xs font-semibold ${
+              statusMessage.kind === 'ok'
+                ? 'border-green-500/30 bg-green-500/10 text-green-600 dark:text-green-400'
+                : 'border-red-500/30 bg-red-500/10 text-red-600 dark:text-red-400'
+            }`}
+          >
+            <span>{statusMessage.text}</span>
+            <button
+              type="button"
+              onClick={() => setStatusMessage(null)}
+              className="shrink-0 opacity-60 transition-opacity hover:opacity-100"
+              aria-label="Funga ujumbe"
+            >
+              <X size={14} />
+            </button>
+          </div>
+        )}
         </div>
       )}
       
@@ -363,14 +484,14 @@ export const Events: React.FC<EventsProps> = ({ user, onRequireLogin }) => {
       {upcomingEvent && (
         <section 
           onClick={() => setSelectedEvent(upcomingEvent)}
-          className="relative bg-slate-900 rounded-sm p-8 md:p-12 text-white overflow-hidden border border-white/5 cursor-pointer group hover:border-gold-500/30 transition-all shadow-xl"
+          className="relative bg-slate-900 w-full text-white overflow-hidden cursor-pointer group mb-12"
         >
         <div className="absolute top-0 right-0 w-full h-full">
-           <img src={upcomingEvent.image} className="w-full h-full object-cover opacity-20 grayscale group-hover:grayscale-0 transition-all duration-1000" alt="" />
+           <img src={upcomingEvent.image} className="w-full h-full object-cover opacity-40 transition-all duration-1000" alt="" />
            <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/60 to-transparent"></div>
         </div>
         
-        <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
+        <div className="relative z-10 max-w-7xl mx-auto px-4 md:px-8 py-12 md:py-20 flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
            <div className="space-y-4 max-w-xl">
               <div className="inline-flex items-center gap-2 px-3 py-1 bg-gold-500 text-primary-950 rounded-sm text-[9px] font-black uppercase tracking-widest">
                  <Star size={12} fill="currentColor" /> TUKIO LIJALO
@@ -383,7 +504,7 @@ export const Events: React.FC<EventsProps> = ({ user, onRequireLogin }) => {
               </div>
            </div>
            
-           <div className="bg-white/5 backdrop-blur-md p-6 rounded-sm border border-white/10 space-y-4">
+           <div className="bg-white/5 backdrop-blur-sm p-6 rounded-sm border border-white/10 space-y-4">
               <p className="text-[9px] font-black text-slate-500 uppercase tracking-[0.3em] text-center">Muda Uliosalia</p>
                 <CountdownTimer targetDate={upcomingEvent.date} />
               <button className="w-full py-3 bg-gold-500 text-slate-900 rounded-sm font-black text-[10px] uppercase tracking-widest hover:bg-gold-400 transition-all shadow-lg">Maelezo Kamili</button>
@@ -392,27 +513,65 @@ export const Events: React.FC<EventsProps> = ({ user, onRequireLogin }) => {
           </section>
           )}
 
-      {/* 2. FILTERS */}
-      <div className="flex items-center justify-between border-b border-slate-200 dark:border-white/5 pb-4">
-        <div className="flex gap-2">
+      <div className="max-w-7xl mx-auto px-4 md:px-8 space-y-6">
+      {/* 2. FILTERS & SEARCH */}
+      <div className="flex flex-col md:flex-row items-center justify-between border-b border-slate-200 dark:border-white/5 pb-4 gap-4">
+        <div className="flex gap-2 w-full md:w-auto overflow-x-auto scrollbar-hide">
            {(['All', 'Virtual', 'Physical'] as const).map((f) => (
              <button 
                 key={f}
                 onClick={() => setFilter(f as any)}
-                className={`px-6 py-2 rounded-sm text-[10px] font-black uppercase tracking-widest transition-all ${filter === f ? 'bg-primary-950 text-gold-400' : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'}`}
+                className={`px-4 md:px-6 py-2 rounded-sm text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${filter === f ? 'bg-primary-950 text-gold-400' : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'}`}
               >
                 {FILTER_LABELS[f]}
               </button>
             ))}
         </div>
-        <button className="flex items-center gap-2 text-slate-400 hover:text-primary-900 transition-colors">
-          <Filter size={18} />
-          <span className="text-[10px] font-black uppercase tracking-widest">Chuja</span>
-        </button>
+        
+        <form onSubmit={handleSearch} className="flex items-center gap-2 w-full md:w-auto">
+          <div className="relative w-full md:w-96">
+            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <input 
+              type="text" 
+              placeholder="Tafuta tukio..." 
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-sm pl-9 pr-4 py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-gold-500 transition-colors"
+            />
+          </div>
+          <button type="submit" className="px-4 py-2 bg-primary-950 text-gold-400 hover:bg-gold-500 hover:text-primary-950 rounded-sm text-[10px] font-black uppercase tracking-widest transition-colors shrink-0">
+            Tafuta
+          </button>
+          
+          <div className="relative">
+            <button 
+              type="button" 
+              onClick={() => setIsTimeFilterOpen(!isTimeFilterOpen)}
+              className="flex items-center gap-2 text-slate-400 hover:text-primary-900 transition-colors ml-2 shrink-0 h-full py-2"
+            >
+              <Filter size={18} />
+              <span className="text-[10px] font-black uppercase tracking-widest hidden md:inline">{timeFilter === 'All' ? 'Chuja' : TIME_FILTER_LABELS[timeFilter]}</span>
+            </button>
+            {isTimeFilterOpen && (
+              <div className="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-slate-900 rounded-sm shadow-xl border border-slate-100 dark:border-white/5 z-50 overflow-hidden">
+                {(['All', 'Ongoing', 'Upcoming', 'Past'] as const).map(tf => (
+                  <button
+                    key={tf}
+                    type="button"
+                    onClick={() => { setTimeFilter(tf); setIsTimeFilterOpen(false); }}
+                    className={`block w-full text-left px-4 py-3 text-[10px] font-black uppercase tracking-widest transition-colors ${timeFilter === tf ? 'bg-slate-50 dark:bg-white/5 text-gold-500' : 'text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-white/5'}`}
+                  >
+                    {TIME_FILTER_LABELS[tf]}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </form>
       </div>
 
       {/* 3. EVENTS GRID - Minimum Bevel */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
         {loadingEvents && (
           <div className="col-span-full bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-50 dark:border-white/5 text-slate-400 text-xs uppercase tracking-widest font-black">Inapakia matukio...</div>
         )}
@@ -420,6 +579,7 @@ export const Events: React.FC<EventsProps> = ({ user, onRequireLogin }) => {
           const daysLeft = getDaysLeft(event.date);
           const full = isEventFull(event);
           const registered = registeredIds.includes(event.id);
+          const past = isEventPast(event);
 
           return (
           <div
@@ -482,10 +642,10 @@ export const Events: React.FC<EventsProps> = ({ user, onRequireLogin }) => {
                   </div>
                   <button 
                     onClick={(e) => handleRegisterClick(e, event.id)}
-                    disabled={registeringId === event.id || (full && !registered) || registered}
-                    className={`px-6 py-2.5 rounded-sm text-[10px] font-black uppercase tracking-widest transition-all disabled:opacity-60 disabled:cursor-not-allowed ${registered ? 'bg-green-600 text-white' : full ? 'bg-slate-300 dark:bg-slate-700 text-slate-600 dark:text-slate-300' : 'bg-primary-950 text-gold-400 hover:bg-gold-500 hover:text-primary-950'}`}
+                    disabled={registeringId === event.id || past || (full && !registered) || registered}
+                    className={`px-6 py-2.5 rounded-sm text-[10px] font-black uppercase tracking-widest transition-all disabled:opacity-60 disabled:cursor-not-allowed ${registered ? 'bg-green-600 text-white' : past || full ? 'bg-slate-300 dark:bg-slate-700 text-slate-600 dark:text-slate-300' : 'bg-primary-950 text-gold-400 hover:bg-gold-500 hover:text-primary-950'}`}
                   >
-                    {registered ? 'Umesajiliwa Tayari' : full ? 'Nafasi Zimejaa' : registeringId === event.id ? 'Inasajili...' : 'Jiunge Sasa'}
+                    {registered ? 'Umesajiliwa Tayari' : past ? 'Limepita' : full ? 'Nafasi Zimejaa' : registeringId === event.id ? 'Inasajili...' : 'Jiunge Sasa'}
                   </button>
                </div>
             </div>
@@ -499,13 +659,20 @@ export const Events: React.FC<EventsProps> = ({ user, onRequireLogin }) => {
         )}
       </div>
 
+      </div>
+      
       {/* EVENT DETAIL OVERLAY - Minimum Bevel Modal */}
       {selectedEvent && (
-        <div className="fixed inset-0 z-40 bg-black/95 backdrop-blur-xl flex items-center justify-center p-4 md:p-12 animate-fade-in">
-           <div className="bg-white dark:bg-slate-950 w-full max-w-5xl h-full md:h-[90vh] rounded-sm overflow-hidden flex flex-col shadow-2xl border border-white/10 relative">
+        <div className="fixed inset-0 z-40 bg-black/95 backdrop-blur-xl flex items-start justify-center px-4 md:px-12 pt-28 pb-0 animate-fade-in">
+           <div className="bg-white dark:bg-slate-950 w-full max-w-5xl h-full rounded-sm overflow-hidden flex flex-col shadow-2xl border border-white/10 relative">
               <div className="absolute top-6 right-6 z-50 flex gap-2">
                  <button 
-                   onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(window.location.href); alert('Link imenakiliwa!'); }}
+                   onClick={(e) => {
+                     e.stopPropagation();
+                     navigator.clipboard.writeText(window.location.href)
+                       .then(() => setStatusMessage({ kind: 'ok', text: 'Link imenakiliwa!' }))
+                       .catch(() => setStatusMessage({ kind: 'error', text: 'Imeshindikana kunakili link.' }));
+                   }}
                    className="p-4 bg-black/40 hover:bg-gold-500 text-white hover:text-slate-900 transition-all rounded-sm"
                    title="Shiriki Tukio Hili"
                  >
@@ -655,10 +822,10 @@ export const Events: React.FC<EventsProps> = ({ user, onRequireLogin }) => {
 
                           <button 
                             onClick={(e) => handleRegisterClick(e, selectedEvent.id)}
-                            disabled={registeringId === selectedEvent.id || (isEventFull(selectedEvent) && !registeredIds.includes(selectedEvent.id)) || registeredIds.includes(selectedEvent.id)}
+                            disabled={registeringId === selectedEvent.id || isEventPast(selectedEvent) || (isEventFull(selectedEvent) && !registeredIds.includes(selectedEvent.id)) || registeredIds.includes(selectedEvent.id)}
                             className={`w-full py-5 rounded-sm font-black text-xs uppercase tracking-[0.2em] transition-all shadow-md disabled:opacity-60 disabled:cursor-not-allowed ${registeredIds.includes(selectedEvent.id) ? 'bg-green-600 text-white' : isEventFull(selectedEvent) ? 'bg-slate-300 dark:bg-slate-700 text-slate-600 dark:text-slate-300' : 'bg-primary-950 text-gold-400 hover:bg-gold-500 hover:text-primary-950'}`}
                           >
-                             {registeredIds.includes(selectedEvent.id) ? 'Umesajiliwa Tayari' : isEventFull(selectedEvent) ? 'Nafasi Zimejaa' : registeringId === selectedEvent.id ? 'Inasajili...' : 'Hifadhi Nafasi Yangu'}
+                             {registeredIds.includes(selectedEvent.id) ? 'Umesajiliwa Tayari' : isEventPast(selectedEvent) ? 'Tukio Limepita' : isEventFull(selectedEvent) ? 'Nafasi Zimejaa' : registeringId === selectedEvent.id ? 'Inasajili...' : 'Hifadhi Nafasi Yangu'}
                           </button>
                        </div>
 
